@@ -7,7 +7,7 @@ sidebar:
 
 Far-field polar response and diffusion coefficient predicted from a diffuser design.
 
-Where [`phonometry.materials.diffusers.scattering_diffusion`](/phonometry/reference/api/materials/scattering-diffusion/) evaluates the *measured*
+Where [`phonometry.materials.diffusers.scattering_diffusion`](/reference/api/materials/scattering-diffusion/) evaluates the *measured*
 directional diffusion coefficient of ISO 17497-2 from a set of reflected
 sound-pressure levels, this module *predicts* those levels from the physical
 design of a Schroeder phase-grating diffuser (well-depth sequence and well
@@ -37,9 +37,9 @@ and Diffusers* (3rd ed., CRC Press, 2017):
 
 The polar levels $L_i = 20 \log_{10}|p(\theta_i)|$ are then passed to the
 ISO 17497-2 autocorrelation diffusion coefficient of
-[`directional_diffusion_coefficient`](/phonometry/reference/api/materials/scattering-diffusion/#directional_diffusion_coefficient),
+[`directional_diffusion_coefficient`](/reference/api/materials/scattering-diffusion/#directional_diffusion_coefficient),
 and normalised against the same-footprint flat reference with
-[`normalized_diffusion_coefficient`](/phonometry/reference/api/materials/scattering-diffusion/#normalized_diffusion_coefficient)
+[`normalized_diffusion_coefficient`](/reference/api/materials/scattering-diffusion/#normalized_diffusion_coefficient)
 (Formula (7)), exactly as a measurement would be reduced.
 
 For a quadratic residue diffuser the depth sequence follows from the prime
@@ -176,7 +176,7 @@ Draw the well profile of a quadratic-residue diffuser, to scale.
 
 Wells open upward; the profile repeats `n_repetitions` times with thin fins
 between wells. Pairs with
-[`qrd_well_depths`](/phonometry/reference/api/materials/design/#qrd_well_depths), which supplies the depth
+[`qrd_well_depths`](/reference/api/materials/design/#qrd_well_depths), which supplies the depth
 sequence.
 
 **Parameters**
@@ -247,14 +247,14 @@ exactly one.
 | `frequency` | Frequency of the prediction `f`, in hertz. |
 | `depths` | Well depths `d_n` of one period, in metres (1-D, at least two wells); mutually exclusive with `reflection`. |
 | `reflection` | Explicit per-well complex pressure reflection coefficient of one period (1-D, at least two wells); mutually exclusive with `depths`. |
-| `angles_deg` | Receiver reflection angles `theta`, in degrees; defaults to the ISO 17497-2 semicircle [`DEFAULT_POLAR_ANGLES_DEG`](/phonometry/reference/api/materials/design/#default_polar_angles_deg). |
+| `angles_deg` | Receiver reflection angles `theta`, in degrees; defaults to the ISO 17497-2 semicircle [`DEFAULT_POLAR_ANGLES_DEG`](/reference/api/materials/design/#default_polar_angles_deg). |
 | `source_angle_deg` | Angle of incidence `psi` of the source, in degrees (0 = normal incidence). |
 | `n_repetitions` | Number of repetitions `N_p` of the single period; the grating lobes that define a Schroeder diffuser require `periods >= 2`. |
 | `speed_of_sound` | Speed of sound `c`, in metres per second. |
 | `include_aperture` | Include the single-well aperture directivity $\operatorname{sinc}(kw(\sin\psi + \sin\theta)/2)$ of Eq. (9.32); defaults to `True`. |
 | `include_obliquity` | Include the Kirchhoff obliquity factor $(\cos\theta + \cos\psi)/2$, the oblique-source generalisation of the normal-incidence $(1 + \cos\theta)/2$ of Eq. (9.32); defaults to `True`. |
 
-**Returns:** A [`DiffuserPolarResponse`](/phonometry/reference/api/materials/design/#diffuserpolarresponse) with the per-angle levels, the directional diffusion coefficient and `.plot()`.
+**Returns:** A [`DiffuserPolarResponse`](/reference/api/materials/design/#diffuserpolarresponse) with the per-angle levels, the directional diffusion coefficient and `.plot()`.
 
 **Raises**
 
@@ -285,18 +285,18 @@ predicted_diffusion_spectrum(
 Predicted diffusion-coefficient spectrum `d(f)` of a diffuser design.
 
 Predicts the far-field polar response at each frequency with
-[`predict_diffuser_polar_response`](/phonometry/reference/api/materials/design/#predict_diffuser_polar_response), forms the ISO 17497-2 directional
+[`predict_diffuser_polar_response`](/reference/api/materials/design/#predict_diffuser_polar_response), forms the ISO 17497-2 directional
 diffusion coefficient band by band, and (by default) normalises it against a
 same-footprint flat reference surface (all wells of zero depth) with
-[`normalized_diffusion_coefficient`](/phonometry/reference/api/materials/scattering-diffusion/#normalized_diffusion_coefficient)
+[`normalized_diffusion_coefficient`](/reference/api/materials/scattering-diffusion/#normalized_diffusion_coefficient)
 (Formula (7)). The result reuses
-[`DiffusionSpectrum`](/phonometry/reference/api/materials/scattering-diffusion/#diffusionspectrum), so it
+[`DiffusionSpectrum`](/reference/api/materials/scattering-diffusion/#diffusionspectrum), so it
 plots and reports like a measured spectrum.
 
 Only the rigid-bottom well `depths` path supports the automatic flat
 reference; an explicit frequency-dependent reflection model is out of scope
 for this helper (build the spectrum yourself from
-[`predict_diffuser_polar_response`](/phonometry/reference/api/materials/design/#predict_diffuser_polar_response) in that case).
+[`predict_diffuser_polar_response`](/reference/api/materials/design/#predict_diffuser_polar_response) in that case).
 
 **Parameters**
 
@@ -306,7 +306,7 @@ for this helper (build the spectrum yourself from
 | `frequencies` | Frequencies of the spectrum, in hertz (1-D). |
 | `depths` | Well depths `d_n` of one period, in metres (1-D, at least two wells). |
 | `reflection_of` | Reserved for future frequency-dependent reflection models; must be `None`. |
-| `angles_deg` | Receiver reflection angles `theta`, in degrees; defaults to [`DEFAULT_POLAR_ANGLES_DEG`](/phonometry/reference/api/materials/design/#default_polar_angles_deg). |
+| `angles_deg` | Receiver reflection angles `theta`, in degrees; defaults to [`DEFAULT_POLAR_ANGLES_DEG`](/reference/api/materials/design/#default_polar_angles_deg). |
 | `source_angle_deg` | Angle of incidence `psi`, in degrees. |
 | `n_repetitions` | Number of repetitions `N_p` of the single period. |
 | `speed_of_sound` | Speed of sound `c`, in metres per second. |
@@ -314,7 +314,7 @@ for this helper (build the spectrum yourself from
 | `include_obliquity` | Include the Kirchhoff obliquity factor. |
 | `normalize` | If `True` (default), also compute the normalised coefficient `d_n` against the flat reference. |
 
-**Returns:** A [`DiffusionSpectrum`](/phonometry/reference/api/materials/scattering-diffusion/#diffusionspectrum) carrying the raw diffusion `d(f)` and, when `normalize` is `True`, the normalised `d_n(f)`.
+**Returns:** A [`DiffusionSpectrum`](/reference/api/materials/scattering-diffusion/#diffusionspectrum) carrying the raw diffusion `d(f)` and, when `normalize` is `True`, the normalised `d_n(f)`.
 
 **Raises**
 
@@ -337,7 +337,7 @@ qrd_well_depths(
 Well depths of a quadratic residue diffuser (Cox and D'Antonio, Eq. (10.3)).
 
 $d_n = s_n \lambda_0 / (2N)$ with the quadratic residue sequence
-`s_n` of [`quadratic_residue_sequence`](/phonometry/reference/api/materials/design/#quadratic_residue_sequence) and the design wavelength
+`s_n` of [`quadratic_residue_sequence`](/reference/api/materials/design/#quadratic_residue_sequence) and the design wavelength
 $\lambda_0 = c / f_0$. The depths span 0 to roughly
 $\lambda_0 / 2$.
 

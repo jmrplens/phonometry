@@ -22,7 +22,7 @@ import ScopeClaim from '../../../../../components/ScopeClaim.astro';
 import SeeAlso from '../../../../../components/SeeAlso.astro';
 import ThemeImage from '../../../../../components/ThemeImage.astro';
 
-La [DIN 45672-1](/phonometry/es/vibration/immission/railway-vibration/) mide
+La [DIN 45672-1](/es/vibration/immission/railway-vibration/) mide
 junto a una línea y la parte 2 reduce lo medido. La parte 3, que solo ha
 existido como el borrador de febrero de 2023, contesta la pregunta que viene
 antes de las dos: se proyecta una línea, o un edificio junto a una, y alguien
@@ -30,7 +30,7 @@ tiene que decir cuánto se moverán los forjados antes de que haya nada que
 medir. La respuesta es un espectro de velocidad en tercios de octava sobre un
 forjado, construido sumando lo que se sabe de la fuente, del terreno y del
 edificio, y a partir de él los dos números que juzga la
-[DIN 4150-2](/phonometry/es/vibration/immission/people-in-buildings/).
+[DIN 4150-2](/es/vibration/immission/people-in-buildings/).
 
 ## 1. Un espectro es una suma de lo que se sabe
 
@@ -195,7 +195,7 @@ reducción y entra con el signo cambiado.
 ## 3. Del espectro a los números que juzga la DIN 4150-2
 
 El apartado 7 convierte el espectro en las magnitudes de valoración. La
-ponderación KB de la [DIN 45669-1](/phonometry/es/vibration/immission/vibration-meter/)
+ponderación KB de la [DIN 45669-1](/es/vibration/immission/vibration-meter/)
 está impresa como una tabla de correcciones por tercio de octava, la tabla 2,
 de 4 Hz a 80 Hz, y se suma a cada banda (fórmula (8)); las bandas ponderadas se
 suman; y el nivel suma da el eficaz de los máximos por intervalo del tipo de
@@ -204,7 +204,7 @@ espectros Max Hold y `v₀` = 5·10⁻⁵ mm/s, la referencia del nivel. El valo
 la propia magnitud KB, porque KB es la velocidad en milímetros por segundo.
 Luego 1,5 veces eso es $KB_\mathrm{Fmax,Zug}$ (fórmula (10)) y 3 veces eso la velocidad
 de pico que quiere una comparación con la
-[DIN 4150-3](/phonometry/es/vibration/structural/structural-damage/)
+[DIN 4150-3](/es/vibration/structural/structural-damage/)
 (fórmula (12)).
 
 ```python
@@ -226,7 +226,7 @@ print(f"v_max = {prediction.peak_velocity_mm_s:.2f} mm/s")  # 1.73 mm/s
 ```
 
 La intensidad de valoración sobre el horario de un día es la fórmula (11), la
-suma de la fórmula (6) del [borrador de la DIN 4150-2](/phonometry/es/vibration/immission/railway-categories/)
+suma de la fórmula (6) del [borrador de la DIN 4150-2](/es/vibration/immission/railway-categories/)
 con los mismos factores de ponderación, 0,7 para un tranvía en superficie,
 impresa sin la frase de esa fórmula que cuenta como cero una categoría igual
 o inferior a 0,1; la biblioteca aplica la frase, ya que la valoración es la
@@ -306,7 +306,7 @@ superado el $A_\mathrm{r}$ de 0,1, la fórmula lo encuentra cumplido. Y su colum
 transferencia del forjado no sale de ninguna tabla del anexo A, y cita para
 ella la figura 3 cuando el forjado de hormigón es la figura 4. Las filas de
 conformidad sujetan la cadena desde los 78,1 dB impresos y la fórmula para los
-datos impresos, y la [página de erratas](/phonometry/es/reference/errata/)
+datos impresos, y la [página de erratas](/es/reference/errata/)
 tiene las lecturas, junto con una tabla de forjados de madera cuya desviación
 inferior está impresa por encima de su media, tres leyendas de figura que
 nombran la tabla o la magnitud equivocada, la frase sobre una categoría igual
@@ -362,16 +362,16 @@ ninguno. El espectro lo pone el usuario.
 
 ## Véase también
 
-- [Vibración ferroviaria por categorías (E DIN 4150-2)](/phonometry/es/vibration/immission/railway-categories/):
+- [Vibración ferroviaria por categorías (E DIN 4150-2)](/es/vibration/immission/railway-categories/):
   la valoración que alimenta esta predicción, con la misma fórmula (11) y los
   mismos factores.
-- [Vibración junto a una vía férrea (DIN 45672)](/phonometry/es/vibration/immission/railway-vibration/):
+- [Vibración junto a una vía férrea (DIN 45672)](/es/vibration/immission/railway-vibration/):
   la medida de la que salen los espectros de emisión y el decaimiento del
   terreno.
-- [Predecir la vibración antes de medir (DIN 4150-1)](/phonometry/es/vibration/immission/vibration-prediction/):
+- [Predecir la vibración antes de medir (DIN 4150-1)](/es/vibration/immission/vibration-prediction/):
   la ley general de decaimiento de la que la fórmula (5) de este método es un
   caso.
 - Referencia de API:
-  [`vibration.immission.railway_prediction`](/phonometry/es/reference/api/vibration/railway-prediction/).
+  [`vibration.immission.railway_prediction`](/es/reference/api/vibration/railway-prediction/).
 
 </SeeAlso>

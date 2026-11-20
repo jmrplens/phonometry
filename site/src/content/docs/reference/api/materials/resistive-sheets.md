@@ -17,7 +17,7 @@ flow resistance.
 
 Not the flow resistivity, which is the other catalogue
 ------------------------------------------------------
-[`PUBLISHED_POROUS_MATERIALS`](/phonometry/reference/api/materials/catalogue/#published_porous_materials) holds a flow
+[`PUBLISHED_POROUS_MATERIALS`](/reference/api/materials/catalogue/#published_porous_materials) holds a flow
 **resistivity**, `sigma`, in Pa s/m2: a property of a bulk material, per
 metre of it, which has to be multiplied by a thickness before it means
 anything. This catalogue holds a flow **resistance**, `R_s`, in Pa s/m: a
@@ -26,7 +26,7 @@ thickness it has, and there is no thickness to multiply by. The two are one
 letter apart in most books and a factor of the thickness apart in every
 calculation, so they are held under two field names that cannot be confused:
 `flow_resistivity_pa_s_m2` there and
-[`specific_flow_resistance_pa_s_m`](/phonometry/reference/api/materials/resistive-sheets/#resistivesheet) here. A mesh of
+[`specific_flow_resistance_pa_s_m`](/reference/api/materials/resistive-sheets/#resistivesheet) here. A mesh of
 24.6 Pa s/m is not a material of 24.6 Pa s/m2.
 
 The unit has three spellings in the literature and they are all the same
@@ -53,7 +53,7 @@ found: the finest wire mesh of TABLE 8.5 is printed as 0.31 kg/m2 beside
 cell is one place too far right, and the entry in `docs/ERRATA.md` argues it.
 The row keeps the kilogramme cell, which the column above it and the weave of
 the mesh both support, and its
-[`note`](/phonometry/reference/api/io/io/#cataloguerow) records the pound
+[`note`](/reference/api/io/io/#cataloguerow) records the pound
 cell. The note and not a hedge, because the defective cell is the restatement:
 this catalogue holds no customary column, so there is no cell here to refuse.
 
@@ -62,7 +62,7 @@ surface density twice, and its weave and its flow resistance once each and in
 one unit. The two surface densities disagree by about eleven per cent on all
 thirteen rows, one wrong factor rather than thirteen slips, and the page does
 not say which of the two columns carries it: the row holds the gramme per
-square metre the page prints, in [`surface_density_g_m2`](/phonometry/reference/api/materials/resistive-sheets/#resistivesheet),
+square metre the page prints, in [`surface_density_g_m2`](/reference/api/materials/resistive-sheets/#resistivesheet),
 and its note gives the ounce per square yard beside it, with the entry in
 `docs/ERRATA.md` that argues the pair. Thirteen of the twenty-nine flow
 resistances published here therefore have no second printing to check them at
@@ -76,7 +76,7 @@ In `absorbers/data/`, one file per printed table:
 reader in `phonometry._internal`, the same as every other catalogue here.
 One file per published table is what makes a key mean something: a row of the
 glass cloth table is keyed `"ver-beranek-2006-table-8-6/glass_cloth_120"`,
-and its [`source`](/phonometry/reference/api/io/io/#cataloguerow) names that
+and its [`source`](/reference/api/io/io/#cataloguerow) names that
 table, that PDF page and that printed folio and nothing else.
 
 What it is not
@@ -131,7 +131,7 @@ other.
 | Name | Description |
 | :--- | :--- |
 | `name` | The label as its page prints it: `"80"`, `"1584"`, `"FM 122"`. |
-| `catalogue` | The rows to search in place of [`PUBLISHED_RESISTIVE_SHEETS`](/phonometry/reference/api/materials/resistive-sheets/#published_resistive_sheets): a catalogue of your own that [`phonometry.io.read_catalogue`](/phonometry/reference/api/io/io/#read_catalogue) returns, `PUBLISHED_RESISTIVE_SHEETS \| mine` to search both at once, or any mapping of key to row (Default: `None`, which searches [`PUBLISHED_RESISTIVE_SHEETS`](/phonometry/reference/api/materials/resistive-sheets/#published_resistive_sheets)). |
+| `catalogue` | The rows to search in place of [`PUBLISHED_RESISTIVE_SHEETS`](/reference/api/materials/resistive-sheets/#published_resistive_sheets): a catalogue of your own that [`phonometry.io.read_catalogue`](/reference/api/io/io/#read_catalogue) returns, `PUBLISHED_RESISTIVE_SHEETS \| mine` to search both at once, or any mapping of key to row (Default: `None`, which searches [`PUBLISHED_RESISTIVE_SHEETS`](/reference/api/materials/resistive-sheets/#published_resistive_sheets)). |
 
 **Returns:** The matching rows, in catalogue order. Empty when none match.
 
@@ -139,7 +139,7 @@ other.
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | for a *catalogue* that is not a mapping, or that holds a row that is not a [`ResistiveSheet`](/phonometry/reference/api/materials/resistive-sheets/#resistivesheet), naming its key. |
+| TypeError | for a *catalogue* that is not a mapping, or that holds a row that is not a [`ResistiveSheet`](/reference/api/materials/resistive-sheets/#resistivesheet), naming its key. |
 
 ## ResistiveSheet
 
@@ -193,7 +193,7 @@ is optional.
 
 | Name | Description |
 | :--- | :--- |
-| `specific_flow_resistance_pa_s_m` | The resistance of unit area of the facing, `R_s`, in pascal seconds per metre, which is the N s/m3 the three tables print and the mks rayls TABLE 8.6 also heads its column with. Per unit **area**, so unlike the flow resistivity of [`PUBLISHED_POROUS_MATERIALS`](/phonometry/reference/api/materials/catalogue/#published_porous_materials) it is not multiplied by a thickness. |
+| `specific_flow_resistance_pa_s_m` | The resistance of unit area of the facing, `R_s`, in pascal seconds per metre, which is the N s/m3 the three tables print and the mks rayls TABLE 8.6 also heads its column with. Per unit **area**, so unlike the flow resistivity of [`PUBLISHED_POROUS_MATERIALS`](/reference/api/materials/catalogue/#published_porous_materials) it is not multiplied by a thickness. |
 | `normalized_flow_resistance` | The same resistance divided by the characteristic impedance of air, dimensionless, as two of the tables print it in a column of their own. Kept rather than recomputed because the two tables do not normalize by the same impedance: `reference_impedance_pa_s_m` recovers the one each row was divided by. |
 | `wires_per_cm` | Wires per centimetre of the woven mesh, as TABLE 8.5 heads the column and prints it again as wires per inch beside it. One count and not two: the page says nothing about the two directions of the weave, where the glass cloth table prints a count for each. |
 | `wire_diameter_um` | Diameter of the wire, in micrometres. |
@@ -206,7 +206,7 @@ is optional.
 | `variant` | Which specimen or condition this row is, when the page prints several under one name: `"chemically pure"`, `"direction x"`, `"0.68 mm diameter"`. Empty when the page prints one. |
 | `source` | Document, table, PDF page and printed folio. |
 | `table` | The data file this row was read from, without the extension, which is also the first half of its key in the catalogue that holds it. |
-| `basis` | What the source says a value is: a field name, or `"row"` for the whole row, to one of [`CATALOGUE_BASES`](/phonometry/reference/api/io/io/#catalogue_bases). Hopkins marks most of his Poisson ratios "Estimate", and those cells hold `"estimated"`; a datasheet that declares a class under a product standard would hold `"declared"`. A field with no entry takes the row's, and a row with neither is one whose source does not say, which is a different answer from any of the five. `basis_of` reads it. Independent of `derived`: this is what the source claims for a cell, that is what this library computed. |
+| `basis` | What the source says a value is: a field name, or `"row"` for the whole row, to one of [`CATALOGUE_BASES`](/reference/api/io/io/#catalogue_bases). Hopkins marks most of his Poisson ratios "Estimate", and those cells hold `"estimated"`; a datasheet that declares a class under a product standard would hold `"declared"`. A field with no entry takes the row's, and a row with neither is one whose source does not say, which is a different answer from any of the five. `basis_of` reads it. Independent of `derived`: this is what the source claims for a cell, that is what this library computed. |
 | `approximate` | Fields the page prints with a `~`. Not an estimate and not an interval: a number the author rounded on purpose. |
 | `derived` | Field to how it was computed, for the ones this library worked out from the cells the page did print. A derived value is never stored as if it had been read, and on every row the library builds it follows again from the row's own cells: `from_printed` writes it, and nothing else in the library does. One a caller passes to the literal constructor is the caller's word, which the row keeps and `printed_fields` leaves out with its value, as it leaves out every derived one. When the printed cells a value rests on do not all have one `basis`, the text names the basis of each, so a modulus worked out from a plate speed and a Poisson ratio Hopkins marks as an estimate says it rests on that estimate. A value converted from the unit the page prints is not derived (`converted` holds it), and neither is one the page gives by reference to another of its rows (`carried` does). |
 | `converted` | Field to `(figure, unit)`, the page's figure and the unit it is in, for a value this row holds in a unit the page does not use. Ver and Beranek print their damping materials in degrees Fahrenheit and pounds per square inch, and the row holds degrees Celsius and pascals, so `("3e5", "psi")` sits beside a modulus in pascals. The figure is kept as the page writes it, so the cell can always be read back in the page's own terms. The unit is the one the page prints with the figure or over its column. Long prints the figures of his musician bare, and the sabins recorded for them are a reading of the table, which is set in inches and pounds and names sabins on the next row; that row's note says so. A figure written in another unit of the same kind as the field's (`thickness_m` for `thickness_mm`, `flow_resistivity_kpa_s_m2` for `flow_resistivity_pa_s_m2`) is converted by `from_printed` and recorded here, whether it is a value, the end of a range or one of several readings; for a range the figure is the printed end of a bound, or both ends as `"5 to 10"`, and for readings the list as the page gives it. A packaged table transcribed in the base unit with only its SI prefix changed, such as the megapascals of Rossing Table 15.5, holds no entry here, and the table's `about` says so. |
@@ -230,7 +230,7 @@ is optional.
 ResistiveSheet.basis_of(field_name: str) -> str
 ```
 
-What the source says this field is, one of [`CATALOGUE_BASES`](/phonometry/reference/api/io/io/#catalogue_bases).
+What the source says this field is, one of [`CATALOGUE_BASES`](/reference/api/io/io/#catalogue_bases).
 
 The five are `measured`, `declared`, `calculated`, `estimated`
 and `extended`.
@@ -260,7 +260,7 @@ unit of the same kind as its field (`thickness_m` for
 `thickness_mm`, `flow_resistivity_kpa_s_m2` for
 `flow_resistivity_pa_s_m2`), or in a unit the class takes as an
 alias of its own (an
-[`AbsorptionAreaSpectrum`](/phonometry/reference/api/materials/measured/#absorptionareaspectrum) takes
+[`AbsorptionAreaSpectrum`](/reference/api/materials/measured/#absorptionareaspectrum) takes
 `absorption_area_125_ft2` for `absorption_area_125_m2`), is
 converted on its digits with an exact factor and rounded once,
 whether it is a value or stands as the key of a hedge (the ends of a

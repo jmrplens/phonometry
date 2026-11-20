@@ -1,6 +1,6 @@
 <!-- Written by `make llms` from site/src/content/docs/vibration/human/multiple-shock-vibration.mdx: edit that page and its Spanish twin, then run `make llms`. -->
 
-← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/vibration/human/multiple-shock-vibration/
+← [Documentation index](../../README.md) · Published at https://phonometry.dev/vibration/human/multiple-shock-vibration/
 
 # Multiple-shock whole-body vibration (ISO 2631-5)
 
@@ -493,7 +493,7 @@ Whole-body multiple-shock health-risk fiche (MultipleShockResult.report), the IS
 ## See also
 
 - [Human Vibration](human-vibration.md): the ISO 2631-1 chain this page hands back to for the horizontal axes, and the crest factor and clause 6.3.3 ratios that decide whether a record belongs here at all.
-- API reference: [`vibration.human.multiple_shock`](https://docs.jmrp.io/phonometry/reference/api/vibration/multiple-shock/).
+- API reference: [`vibration.human.multiple_shock`](https://phonometry.dev/reference/api/vibration/multiple-shock/).
 - Theory: [Multiple shocks (ISO 2631-5)](../../reference/theory/vibration.md#multiple-shocks-iso-2631-5): the ISO 2631-5 response model, the acceleration dose and the Weibull risk law.
 
 ## References

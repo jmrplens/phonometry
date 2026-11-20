@@ -53,7 +53,7 @@ has the tables needs them in the same breath:
   more is roughly $f_i \approx 10/n$ with $n$ the storey count
   (6.4), which is the estimate that tells you whether the topmost floor plane
   will be excited at all. DIN 4150-1 prints it as Formula (4) and ISO 4866 in
-  D.2, and [`story_fundamental_frequency`](/phonometry/reference/api/vibration/building-damage/#story_fundamental_frequency) is the one function for all
+  D.2, and [`story_fundamental_frequency`](/reference/api/vibration/building-damage/#story_fundamental_frequency) is the one function for all
   three.
 
 Clause 6.2 turns a measured velocity into a bending stress for a beam or a
@@ -90,20 +90,20 @@ Compare one measured peak velocity with its guideline value.
 
 | Name | Description |
 | :--- | :--- |
-| `velocity_mm_s` | The measured peak velocity, in millimetres per second; see [`DamageAssessment`](/phonometry/reference/api/vibration/building-damage/#damageassessment) for which component it is. Zero is accepted and keeps to every guideline value. |
-| `building_class` | One of [`BUILDING_CLASSES`](/phonometry/reference/api/vibration/building-damage/#building_classes). One of `"commercial"`, `"residential"` or `"sensitive"`. |
+| `velocity_mm_s` | The measured peak velocity, in millimetres per second; see [`DamageAssessment`](/reference/api/vibration/building-damage/#damageassessment) for which component it is. Zero is accepted and keeps to every guideline value. |
+| `building_class` | One of [`BUILDING_CLASSES`](/reference/api/vibration/building-damage/#building_classes). One of `"commercial"`, `"residential"` or `"sensitive"`. |
 | `frequency_hz` | Frequency of the dominant component, in hertz. Required for the short-term foundation case. |
 | `location` | `"foundation"` (default) or `"top_floor"`. |
 | `duration` | `"short_term"` (default) or `"long_term"`. |
-| `massive_structure` | See [`guideline_velocity`](/phonometry/reference/api/vibration/building-damage/#guideline_velocity). |
+| `massive_structure` | See [`guideline_velocity`](/reference/api/vibration/building-damage/#guideline_velocity). |
 
-**Returns:** The comparison, as a [`DamageAssessment`](/phonometry/reference/api/vibration/building-damage/#damageassessment).
+**Returns:** The comparison, as a [`DamageAssessment`](/reference/api/vibration/building-damage/#damageassessment).
 
 **Raises**
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | If the velocity is negative or not finite, or for any reason [`guideline_velocity`](/phonometry/reference/api/vibration/building-damage/#guideline_velocity) raises. |
+| ValueError | If the velocity is negative or not finite, or for any reason [`guideline_velocity`](/reference/api/vibration/building-damage/#guideline_velocity) raises. |
 | TypeError | if `velocity_mm_s` is not a single number, or `building_class`, `duration` or `location` is not a text. `frequency_hz` is refused the same way when it is not one real number. |
 
 ## bending_stress
@@ -191,8 +191,8 @@ BUILDING_CLASSES = ('commercial', 'residential', 'sensitive')
 
 A DIN 4150-3 rule is used outside the range the standard offers it for.
 
-Raised by [`story_fundamental_frequency`](/phonometry/reference/api/vibration/building-damage/#story_fundamental_frequency) below
-[`STORY_FREQUENCY_MIN_STORIES`](/phonometry/reference/api/vibration/building-damage/#story_frequency_min_stories). The estimate is still returned:
+Raised by [`story_fundamental_frequency`](/reference/api/vibration/building-damage/#story_fundamental_frequency) below
+[`STORY_FREQUENCY_MIN_STORIES`](/reference/api/vibration/building-damage/#story_frequency_min_stories). The estimate is still returned:
 DIN 4150-3 6.4 offers `10 / n` from about five storeys up, DIN 4150-1
 Formula (4) for five and more, ISO 4866 D.2 for tall buildings, and below
 five none of them says anything, so the number is an extrapolation
@@ -223,7 +223,7 @@ One measured velocity against the guideline value it is judged by.
 | `location` | Where the velocity was measured. One of `"foundation"` or `"top_floor"`. |
 | `duration` | Which clause the guideline came from. One of `"short_term"` or `"long_term"`. |
 | `frequency_hz` | The frequency the guideline was read at, or `None` where the guideline does not depend on frequency. |
-| `massive_structure` | Whether the row 1 values were raised by [`MASSIVE_STRUCTURE_FACTOR`](/phonometry/reference/api/vibration/building-damage/#massive_structure_factor), the allowance 5.1 leaves to the assessor for a massive engineering structure. |
+| `massive_structure` | Whether the row 1 values were raised by [`MASSIVE_STRUCTURE_FACTOR`](/reference/api/vibration/building-damage/#massive_structure_factor), the allowance 5.1 leaves to the assessor for a massive engineering structure. |
 
 The guideline value (`guideline_mm_s`) is read from Table 1 or
 Table 3 with those, so an assessment cannot be built against another
@@ -315,10 +315,10 @@ draws; pass *frequency* to sample the same polyline elsewhere.
 
 | Name | Description |
 | :--- | :--- |
-| `building_class` | One of [`BUILDING_CLASSES`](/phonometry/reference/api/vibration/building-damage/#building_classes). One of `"commercial"`, `"residential"` or `"sensitive"`. |
+| `building_class` | One of [`BUILDING_CLASSES`](/reference/api/vibration/building-damage/#building_classes). One of `"commercial"`, `"residential"` or `"sensitive"`. |
 | `frequency` | Frequency or frequencies to sample at, in hertz, or `None` for the four corners of Table 1. |
 
-**Returns:** The frequencies and the guideline velocities, as a [`GuidelineCurve`](/phonometry/reference/api/vibration/building-damage/#guidelinecurve).
+**Returns:** The frequencies and the guideline velocities, as a [`GuidelineCurve`](/reference/api/vibration/building-damage/#guidelinecurve).
 
 **Raises**
 
@@ -371,11 +371,11 @@ number for all frequencies, and *frequency* is then not needed.
 
 | Name | Description |
 | :--- | :--- |
-| `building_class` | One of [`BUILDING_CLASSES`](/phonometry/reference/api/vibration/building-damage/#building_classes). One of `"commercial"`, `"residential"` or `"sensitive"`. |
+| `building_class` | One of [`BUILDING_CLASSES`](/reference/api/vibration/building-damage/#building_classes). One of `"commercial"`, `"residential"` or `"sensitive"`. |
 | `frequency` | Frequency of the dominant component, in hertz (scalar or array). Required for the short-term foundation case, and refused for every other one, where the printed value is the same at every frequency and a frequency would govern nothing. |
 | `location` | `"foundation"` (default) or `"top_floor"`. |
 | `duration` | `"short_term"` (Table 1, default) or `"long_term"` (Table 3). |
-| `massive_structure` | Raise the row 1 values by [`MASSIVE_STRUCTURE_FACTOR`](/phonometry/reference/api/vibration/building-damage/#massive_structure_factor), which is the most 5.1 allows a massive engineering structure. The allowance is written for row 1 of Table 1 alone, so it applies to the commercial class and to short-term vibration, and is refused anywhere else. |
+| `massive_structure` | Raise the row 1 values by [`MASSIVE_STRUCTURE_FACTOR`](/reference/api/vibration/building-damage/#massive_structure_factor), which is the most 5.1 allows a massive engineering structure. The allowance is written for row 1 of Table 1 alone, so it applies to the commercial class and to short-term vibration, and is refused anywhere else. |
 
 **Returns:** The guideline peak velocity, in millimetres per second: a `float` without a frequency or for a number; an array for a sequence or an array, a zero-dimensional one included.
 
@@ -397,7 +397,7 @@ GuidelineCurve(
 
 A guideline velocity polyline of DIN 4150-3 Bild 1, sampled.
 
-What [`foundation_guideline_curve`](/phonometry/reference/api/vibration/building-damage/#foundation_guideline_curve) returns: the frequencies and the
+What [`foundation_guideline_curve`](/reference/api/vibration/building-damage/#foundation_guideline_curve) returns: the frequencies and the
 guideline velocities, named, where a `(frequency_hz, guideline_mm_s)`
 tuple used to be unpacked by position.
 
@@ -444,7 +444,7 @@ halves the table, which is what 6.3 allows without further evidence.
 
 | Name | Description |
 | :--- | :--- |
-| `material` | One of [`PIPELINE_MATERIALS`](/phonometry/reference/api/vibration/building-damage/#pipeline_materials). One of `"welded_steel"`, `"concrete_or_flanged_metal"` or `"masonry_or_plastic"`. |
+| `material` | One of [`PIPELINE_MATERIALS`](/reference/api/vibration/building-damage/#pipeline_materials). One of `"welded_steel"`, `"concrete_or_flanged_metal"` or `"masonry_or_plastic"`. |
 | `duration` | `"short_term"` (default) or `"long_term"`. |
 
 **Returns:** The guideline peak velocity, in millimetres per second.
@@ -548,4 +548,4 @@ at which the topmost floor plane will answer.
 
 | Warning | When |
 | :--- | :--- |
-| BuildingDamageWarning | Below [`STORY_FREQUENCY_MIN_STORIES`](/phonometry/reference/api/vibration/building-damage/#story_frequency_min_stories), where the estimate is an extrapolation of a rule the standard offers for taller buildings. |
+| BuildingDamageWarning | Below [`STORY_FREQUENCY_MIN_STORIES`](/reference/api/vibration/building-damage/#story_frequency_min_stories), where the estimate is an extrapolation of a rule the standard offers for taller buildings. |

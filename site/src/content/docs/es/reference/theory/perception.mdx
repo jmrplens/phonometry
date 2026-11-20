@@ -156,7 +156,7 @@ sidebar:
 import ThemeImage from '../../../../../components/ThemeImage.astro';
 import Video from '../../../../../components/Video.astro';
 
-Esta página reúne la teoría de la audición y la psicoacústica: las líneas isofónicas, los modelos de sonoridad de Zwicker, Moore-Glasberg y Sottek, las métricas de calidad sonora (tonalidad, aspereza y agudeza), la prominencia tonal, las métricas del habla STI y SII, y la estadística de los umbrales de audición y de la pérdida auditiva. Forma parte de la [referencia de teoría](/phonometry/es/reference/theory/).
+Esta página reúne la teoría de la audición y la psicoacústica: las líneas isofónicas, los modelos de sonoridad de Zwicker, Moore-Glasberg y Sottek, las métricas de calidad sonora (tonalidad, aspereza y agudeza), la prominencia tonal, las métricas del habla STI y SII, y la estadística de los umbrales de audición y de la pérdida auditiva. Forma parte de la [referencia de teoría](/es/reference/theory/).
 
 Cada sección conserva la notación de la norma que describe, y cinco letras se
 reutilizan entre ellas. Donde dos chocan, la sección dice cuál se quiere decir,
@@ -203,7 +203,7 @@ Los tres parámetros provienen de la Tabla 1 (p. 4), tabulados en las 29 frecuen
 
 La norma **no especifica interpolación** entre las frecuencias tabuladas. La Fórmula (1) está especificada para **20 fonios a 90 fonios** entre 20 Hz y 4 kHz, y solo hasta **80 fonios entre 5 kHz y 12,5 kHz**; por encima de 80 fonios la línea isofónica se detiene, por tanto, en 4 kHz. Los valores fuera de estos límites obtenidos con la Fórmula (2) son extrapolaciones que la norma califica de meramente informativas.
 
-Consulta la [guía de sonoridad](/phonometry/es/perception/psychoacoustics/loudness/) para su uso.
+Consulta la [guía de sonoridad](/es/perception/psychoacoustics/loudness/) para su uso.
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/equal_loudness_contours.svg" alt="Líneas isofónicas normales de ISO 226:2023 de 20 a 90 fonios con la curva del umbral de audición" width="80%" />
 
@@ -244,13 +244,13 @@ $$
 
 por debajo de 1 sonio el programa de referencia usa $L_\mathrm{N} = 40 (N + 0{,}0005)^{0{,}35}$, con suelo en 3 fonios.
 
-Consulta la [guía de sonoridad](/phonometry/es/perception/psychoacoustics/loudness/) para su uso.
+Consulta la [guía de sonoridad](/es/perception/psychoacoustics/loudness/) para su uso.
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/loudness_pattern.svg" alt="Patrones de sonoridad específica sobre la escala Bark para un sonido de banda estrecha de 1 kHz y un sonido de banda ancha con el mismo nivel de banda" width="80%" />
 
 *Sonoridad específica N′(z) sobre el eje de Bark: la energía repartida entre muchas bandas críticas suma más sonios que el mismo nivel de banda concentrado en una sola.*
 
-Esa figura está dibujada a un solo nivel, y la etapa 5 es la que depende del nivel. El clip de la [guía de sonoridad](/phonometry/es/perception/psychoacoustics/loudness/) sube el nivel de banda del mismo sonido de banda estrecha de 1 kHz de 45 a 85 dB:
+Esa figura está dibujada a un solo nivel, y la etapa 5 es la que depende del nivel. El clip de la [guía de sonoridad](/es/perception/psychoacoustics/loudness/) sube el nivel de banda del mismo sonido de banda estrecha de 1 kHz de 45 a 85 dB:
 
 <Video
   name="anim_specific_loudness"
@@ -322,7 +322,7 @@ $$
 usando una constante de tiempo rápida en el ataque y una más lenta en la relajación. Esto produce la **sonoridad de corto plazo** $S'(t)$ (ataque/relajación en torno a 20–30 ms) y la **sonoridad de largo plazo** $S''(t)$ (en torno a 0,1–0,75 s); la sonoridad de largo plazo de pico $N_{\max} = \max_t S''(t)$ predice la sonoridad de sonidos de hasta unos 5 s.
 
 Consulta la [guía de sonoridad
-avanzada](/phonometry/es/perception/psychoacoustics/advanced-loudness/) para su
+avanzada](/es/perception/psychoacoustics/advanced-loudness/) para su
 uso y la tabla de elección de modelo.
 
 ### Modelo de Sottek (ECMA-418-2:2025)
@@ -418,7 +418,7 @@ Diferencias del orden del 10 % en cualquiera de los tres andan cerca de lo
 mínimo que un oyente distingue de forma fiable, así que citar más precisión que
 esa invita a sobreinterpretar.
 
-Consulta la [guía de métricas de calidad sonora](/phonometry/es/perception/psychoacoustics/sound-quality/) para su uso.
+Consulta la [guía de métricas de calidad sonora](/es/perception/psychoacoustics/sound-quality/) para su uso.
 
 ## Prominencia tonal: TNR y PR (ECMA-418-1)
 
@@ -491,7 +491,7 @@ cada frecuencia: el tono del ejemplo supera en 2,1 dB su umbral de 13,0 dB a
 250 Hz, mientras que un tono de 10 dB sería prominente en cualquier punto por
 encima de 1 kHz y no lo sería aquí.*
 
-Consulta la [guía de tonos discretos prominentes](/phonometry/es/perception/psychoacoustics/tone-prominence/) para su uso.
+Consulta la [guía de tonos discretos prominentes](/es/perception/psychoacoustics/tone-prominence/) para su uso.
 
 <span id="transferencia-de-modulacion-y-sti-iec-60268-16"></span>
 
@@ -523,7 +523,7 @@ $$
 
 truncado a 1,0.
 
-El clip de la [guía de transmisión del habla](/phonometry/es/perception/speech/speech-transmission/) pone las dos degradaciones sobre una misma envolvente: una sonda de 4 Hz con modulación plena, recibida a través de la banda de octava de 1 kHz y dibujada con la media recibida constante. Primero el tiempo de reverberación barre de 0,30 a 2,50 s sin ruido: actúa sobre la propia $m$, a través de la integral de arriba, y la profundidad a 4 Hz cae de 0,90 a 0,26 y el STI de 0,84 a 0,40. Después, con 1,00 s fijo, la relación señal-ruido baja de 25 a 0 dB: actúa a través del factor $1/(1 + 10^{-\mathrm{SNR}/10})$, que vale un medio a 0 dB, y la profundidad termina en 0,28 y el STI en 0,36.
+El clip de la [guía de transmisión del habla](/es/perception/speech/speech-transmission/) pone las dos degradaciones sobre una misma envolvente: una sonda de 4 Hz con modulación plena, recibida a través de la banda de octava de 1 kHz y dibujada con la media recibida constante. Primero el tiempo de reverberación barre de 0,30 a 2,50 s sin ruido: actúa sobre la propia $m$, a través de la integral de arriba, y la profundidad a 4 Hz cae de 0,90 a 0,26 y el STI de 0,84 a 0,40. Después, con 1,00 s fijo, la relación señal-ruido baja de 25 a 0 dB: actúa a través del factor $1/(1 + 10^{-\mathrm{SNR}/10})$, que vale un medio a 0 dB, y la profundidad termina en 0,28 y el STI en 0,36.
 
 <Video
   name="anim_modulation_transfer"
@@ -582,7 +582,7 @@ menos de unos 0,02 de un borde puede calificarse legítimamente a un lado o al
 otro; el STI se cita junto a la letra y se promedia sobre varias posiciones en
 lugar de fiarlo a una sola.
 
-Consulta la [guía del índice de transmisión del habla](/phonometry/es/perception/speech/speech-transmission/) para su uso, la tabla de usos típicos del Anexo G y la regla de promediado entre posiciones.
+Consulta la [guía del índice de transmisión del habla](/es/perception/speech/speech-transmission/) para su uso, la tabla de usos típicos del Anexo G y la regla de promediado entre posiciones.
 
 <span id="indice-de-inteligibilidad-del-habla-ansi-s35"></span>
 
@@ -663,7 +663,7 @@ la única de las dos que toma como entrada un audiograma y un esfuerzo vocal; el
 **STI** responde preguntas sobre una *sala o un sistema*, porque toma una
 respuesta al impulso y un espectro de fondo y no dice nada sobre quién escucha.
 
-Consulta la [guía de inteligibilidad del habla](/phonometry/es/perception/speech/speech-intelligibility/) para su uso.
+Consulta la [guía de inteligibilidad del habla](/es/perception/speech/speech-intelligibility/) para su uso.
 
 <span id="umbrales-de-audicion-y-presbiacusia-iso-389-7-iso-7029"></span>
 
@@ -701,7 +701,7 @@ $$
 
 y cualquier fractil sigue un modelo gaussiano bilateral (apartado 4.4), $\Delta H_Q = \Delta H_\mathrm{md} + z(Q)\ s$, usando la dispersión superior $s_\mathrm{u}$ para $z \ge 0$ (peor que la mediana) y la inferior $s_\mathrm{l}$ en caso contrario, cada una un polinomio de grado 5 en $Y - 18$ por sexo y frecuencia (apartado 4.3, Tablas 2–5). A los 18 años toda desviación es cero por construcción. Las fórmulas están establecidas hasta los 80 años a 2 kHz y por debajo, y hasta los 70 años por encima; más allá la evaluación es una extrapolación. Valores de referencia: a los 60 años las medianas evalúan a 7,85 dB (hombre, 1 kHz), 20,21 dB (hombre, 4 kHz) y 15,32 dB (mujer, 4 kHz), reproduciendo la fórmula de la Tabla 1 a $10^{-3}$.
 
-Consulta la [guía de umbral de audición](/phonometry/es/perception/hearing/hearing-threshold/) para su uso.
+Consulta la [guía de umbral de audición](/es/perception/hearing/hearing-threshold/) para su uso.
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/hearing_threshold.svg" alt="Dos paneles. Izquierda: la desviación mediana del umbral de audición de ISO 7029 para hombres a los 20, 40, 60 y 80 años en un eje de audiograma invertido, con la banda del 10 al 90 por ciento en torno a la curva de 70 años; la pérdida se acentúa hacia las altas frecuencias y con la edad. Derecha: el umbral de referencia de campo libre y campo difuso de ISO 389-7, que coinciden por debajo de 1 kHz y divergen por encima, con un mínimo cerca de 3 a 4 kHz" width="96%" />
 
@@ -738,4 +738,4 @@ biblioteca, el décimo más susceptible, al que ISO 1999 y los encabezados de
 columna de su Anexo D llaman $Q = 10\ \%$. A 4 kHz este caso da 19,5 / 26,0 /
 36,0 dB para `fractile` 0,10 / 0,50 / 0,90.*
 
-Consulta la [guía de pérdida auditiva inducida por ruido](/phonometry/es/perception/hearing/noise-induced-hearing-loss/) para su uso.
+Consulta la [guía de pérdida auditiva inducida por ruido](/es/perception/hearing/noise-induced-hearing-loss/) para su uso.

@@ -8,7 +8,7 @@ corrects:
 
 <!-- Generated from docs/ERRATA.md by scripts/generate_site_reports.py (`make site-reports`). Edit the source document, never this page. -->
 
-These are the 5 entries of the [errata registry](/phonometry/reference/errata/) on ECAC Doc 29, in the order the registry lists them. The registry's introduction says how each claim is checked against the printed page and what the status of an entry means.
+These are the 5 entries of the [errata registry](/reference/errata/) on ECAC Doc 29, in the order the registry lists them. The registry's introduction says how each claim is checked against the printed page and what the status of an entry means.
 
 ## ECAC Doc 29, 5th ed., Volume 2, Appendix B, Eq. (B-41) (descent deceleration)
 

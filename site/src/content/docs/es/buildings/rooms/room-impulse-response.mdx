@@ -42,10 +42,10 @@ micrófono tiraron. Esta guía cubre la propia adquisición, según ISO 18233:
 el barrido sinusoidal exponencial y su deconvolución, el método de
 correlación con MLS, y dónde colocar fuentes y micrófonos para que el
 resultado promediado signifique algo. Convertir la RI medida en parámetros
-de sala vive en [Acústica de salas](/phonometry/es/buildings/rooms/room-acoustics/);
+de sala vive en [Acústica de salas](/es/buildings/rooms/room-acoustics/);
 la misma RI medida a ambos lados de un cerramiento se convierte en
 aislamiento acústico en
-[Medición del aislamiento en campo (ISO 16283)](/phonometry/es/buildings/insulation/insulation-field/).
+[Medición del aislamiento en campo (ISO 16283)](/es/buildings/insulation/insulation-field/).
 
 ## Dos excitaciones deterministas (ISO 18233)
 
@@ -350,7 +350,7 @@ Dos excitaciones más de la literatura de medición de funciones de
 transferencia (los pares complementarios de Golay, cuya deconvolución es exacta
 y libre de ruido, y los barridos conformados a un espectro objetivo
 arbitrario) viven en la
-[guía de medición de sistemas](/phonometry/es/signals/spectra/system-measurement/) y
+[guía de medición de sistemas](/es/signals/spectra/system-measurement/) y
 devuelven los mismos tipos de resultado.
 
 **Las dos excitaciones.** El barrido exponencial desplaza su energía hacia
@@ -397,7 +397,7 @@ cola difusa que decae. Su `.plot()` muestra la forma de onda arriba y la
 envolvente log-magnitud con la curva de decaimiento de energía de Schroeder
 abajo: el decaimiento recto cuya pendiente se convierte en el tiempo de
 reverberación en la
-[guía de acústica de salas](/phonometry/es/buildings/rooms/room-acoustics/).
+[guía de acústica de salas](/es/buildings/rooms/room-acoustics/).
 
 <Video
   name="anim_sweep_deconvolution"
@@ -534,7 +534,7 @@ torno a 1 m») de la superficie reflectante más cercana, **incluido el suelo**.
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_room_measurement_section.svg" alt="Sección de una sala de 10 por 6 por 3,5 metros: un dodecaedro sobre un soporte con su centro acústico acotado a 1,5 metros sobre el suelo y su círculo de exclusión d_min de 2,0 metros recortado por la sala, dos micrófonos sobre soportes a 1,2 metros con la separación mínima de 2 metros y las holguras de 1 metro al techo, al suelo y a la pared del fondo, y bajo la sección las tolerancias de omnidireccionalidad de la Tabla 1 de ISO 3382-1 de más menos 1, 1, 1, 3, 5 y 6 decibelios de 125 Hz a 4 kHz junto con los requisitos de nivel y de cadena de recepción" width="94%" />
 
 Esos mismos 45 dB son lo que comprueba aguas abajo la marca de validez de T30: la
-[guía de acústica de salas](/phonometry/es/buildings/rooms/room-acoustics/) rechaza
+[guía de acústica de salas](/es/buildings/rooms/room-acoustics/) rechaza
 una banda cuyo rango de decaimiento no supere la ventana de evaluación en 15 dB, y
 ese rechazo suele ser un problema de nivel de fuente, no de procesado.
 
@@ -591,7 +591,7 @@ Cuatro errores de colocación sesgan la propia media:
   estimación del tiempo de reverberación esperado (2,0 m para la sala de
   10 × 6 × 3,5 m de los dibujos de arriba, V = 210 m³, con 0,6 s esperados).
 - **La lotería de baja frecuencia.** Por debajo de la frecuencia de
-  Schroeder (véase la [guía de acústica de salas](/phonometry/es/buildings/rooms/room-acoustics/)) cada banda contiene solo un puñado de modos propios, y un
+  Schroeder (véase la [guía de acústica de salas](/es/buildings/rooms/room-acoustics/)) cada banda contiene solo un puñado de modos propios, y un
   micrófono sobre un nodo de uno de ellos ve un decaimiento distinto que
   otro sobre un antinodo. La dispersión de las bandas de 63-125 Hz entre
   posiciones es estructuralmente mayor; el remedio son más posiciones, no
@@ -708,7 +708,7 @@ preferiblemente representadas sobre esa planta junto con sus alturas; los aparat
 de medida y los micrófonos; el método de evaluación de las curvas de decaimiento;
 cómo se promedió el resultado en cada posición y entre posiciones; la tabla de
 resultados; y la fecha y la organización que midió. La ficha de la
-[guía de acústica de salas](/phonometry/es/buildings/rooms/room-acoustics/) lleva
+[guía de acústica de salas](/es/buildings/rooms/room-acoustics/) lleva
 la mayoría de ellos como campos de `ReportMetadata`, pero la planta acotada con
 las posiciones encima hay que aportarla aparte.
 
@@ -717,16 +717,16 @@ las posiciones encima hay que aportarla aparte.
 La RI sale de esta página en varias direcciones. Filtrada en bandas y
 sometida a integración inversa de Schroeder se convierte en la curva de decaimiento cuya pendiente
 es el tiempo de reverberación: la
-[guía de acústica de salas](/phonometry/es/buildings/rooms/room-acoustics/) arranca
+[guía de acústica de salas](/es/buildings/rooms/room-acoustics/) arranca
 exactamente ahí, y su hermana de oficinas diáfanas recorre la
-[línea de puestos de trabajo de ISO 3382-3](/phonometry/es/buildings/rooms/open-plan-acoustics/).
+[línea de puestos de trabajo de ISO 3382-3](/es/buildings/rooms/open-plan-acoustics/).
 Medidos a ambos lados de un cerramiento, los mismos barridos alimentan las
 diferencias de nivel del
-[aislamiento acústico en campo](/phonometry/es/buildings/insulation/insulation-field/). Y
+[aislamiento acústico en campo](/es/buildings/insulation/insulation-field/). Y
 la distorsión armónica que el barrido exponencial empuja a tiempos de
 llegada negativos no siempre se descarta: leída a propósito, se convierte en
 el análisis de THD de la
-[guía de distorsión por barrido sinusoidal](/phonometry/es/devices/electroacoustics/swept-sine-distortion/).
+[guía de distorsión por barrido sinusoidal](/es/devices/electroacoustics/swept-sine-distortion/).
 
 ## Qué cubre esta guía
 
@@ -756,7 +756,7 @@ diagnósticos de varianza temporal y de distorsión de ISO 18233 no están
 implementados: la guía explica cómo el barrido separa la distorsión, pero
 ninguna función auxiliar la cuantifica (esa lectura vive en la [guía de
 distorsión por barrido
-sinusoidal](/phonometry/es/devices/electroacoustics/swept-sine-distortion/)).
+sinusoidal](/es/devices/electroacoustics/swept-sine-distortion/)).
 Las reglas de posiciones son prosa de orientación: nada comprueba cuántas
 posiciones se midieron ni dónde.
 </ScopeClaim>
@@ -766,28 +766,28 @@ posiciones se midieron ni dónde.
 
 ## Véase también
 
-- [Acústica de salas](/phonometry/es/buildings/rooms/room-acoustics/): el análisis
+- [Acústica de salas](/es/buildings/rooms/room-acoustics/): el análisis
   del decaimiento y los parámetros ISO 3382 calculados a partir de la RI que
   esta página adquiere.
-- [Acústica de oficinas diáfanas (ISO 3382-3)](/phonometry/es/buildings/rooms/open-plan-acoustics/):
+- [Acústica de oficinas diáfanas (ISO 3382-3)](/es/buildings/rooms/open-plan-acoustics/):
   la línea de privacidad del habla medida con la misma adquisición.
-- [Medición de sistemas](/phonometry/es/signals/spectra/system-measurement/): pares
+- [Medición de sistemas](/es/signals/spectra/system-measurement/): pares
   de Golay complementarios y barridos con espectro conformado, que devuelven
   los mismos tipos de resultado.
-- [Distorsión y fase con barrido sinusoidal](/phonometry/es/devices/electroacoustics/swept-sine-distortion/):
+- [Distorsión y fase con barrido sinusoidal](/es/devices/electroacoustics/swept-sine-distortion/):
   la lectura de Farina de la distorsión que el barrido separa.
-- [Medición del aislamiento en campo (ISO 16283)](/phonometry/es/buildings/insulation/insulation-field/):
+- [Medición del aislamiento en campo (ISO 16283)](/es/buildings/insulation/insulation-field/):
   la misma medición a ambos lados de un cerramiento.
-- [Fuentes imagen y campo estacionario](/phonometry/es/buildings/rooms/room-image-sources/):
+- [Fuentes imagen y campo estacionario](/es/buildings/rooms/room-image-sources/):
   respuestas al impulso simuladas sobre las que ensayar la cadena de
   procesamiento.
-- [Teoría](/phonometry/es/reference/theory/rooms-buildings/): la integración
+- [Teoría](/es/reference/theory/rooms-buildings/): la integración
   de Schroeder que el análisis del decaimiento aplica a esta RI.
-- [Informe de conformidad](/phonometry/es/reference/conformance/):
+- [Informe de conformidad](/es/reference/conformance/):
   la comprobación en forma cerrada de la deconvolución con la que se valida esta
   adquisición, un barrido que recupera una respuesta conocida.
-- Referencia de la API: [`room`: impulse response](/phonometry/es/reference/api/rooms/impulse-response/).
-- Teoría: [Respuesta al impulso y parámetros de acústica de salas](/phonometry/es/reference/theory/rooms-buildings/#respuesta-al-impulso-y-parametros-de-acustica-de-salas-iso-18233-iso-3382-1-2-3): la integración inversa de Schroeder y la deconvolución en la que se apoya el método del barrido.
+- Referencia de la API: [`room`: impulse response](/es/reference/api/rooms/impulse-response/).
+- Teoría: [Respuesta al impulso y parámetros de acústica de salas](/es/reference/theory/rooms-buildings/#respuesta-al-impulso-y-parametros-de-acustica-de-salas-iso-18233-iso-3382-1-2-3): la integración inversa de Schroeder y la deconvolución en la que se apoya el método del barrido.
 
 </SeeAlso>
 

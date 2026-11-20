@@ -346,7 +346,7 @@ are sliced directly, and a noiseless periodic signal is recovered to machine
 precision (`interpolated` is `False`). When $f_\mathrm{s} T$ is not an integer the
 boundaries fall between samples; each block is then aligned to a common
 integer grid by the band-limited fractional delay of
-[`fractional_delay`](/phonometry/signals/spectra/test-signals/), and the waveform is
+[`fractional_delay`](/signals/spectra/test-signals/), and the waveform is
 recovered within that interpolation error (`interpolated` is `True`):
 
 ```python
@@ -366,7 +366,7 @@ spans.
 
 The band-limited alignment shares its kernel with the sub-sample
 impulse-response alignment of the
-[test-signals page](/phonometry/signals/spectra/test-signals/), and the recovered
+[test-signals page](/signals/spectra/test-signals/), and the recovered
 waveform, being exactly one period, can be tiled to reconstruct the
 synchronous part of the signal for subtraction or for order analysis.
 
@@ -378,11 +378,11 @@ about a rotating machine, and they compose rather than compete:
 - **TSA** needs the period (a tacho pulse or a trusted shaft speed) and
   returns *the waveform itself*, one revolution of it: the tool when you
   want to see what a specific shaft or gear does per turn, tooth by tooth.
-- **The [cepstrum](/phonometry/signals/spectra/cepstrum-echoes/)** needs no
+- **The [cepstrum](/signals/spectra/cepstrum-echoes/)** needs no
   reference and detects *any* periodic family in the spectrum (harmonics,
   sidebands): the tool when the period is unknown or several families
   overlap and must be separated.
-- **The [envelope spectrum](/phonometry/signals/spectra/cepstrum-echoes/#5-the-envelope-spectrum-modulations-as-lines)**
+- **The [envelope spectrum](/signals/spectra/cepstrum-echoes/#5-the-envelope-spectrum-modulations-as-lines)**
   finds periodicities of the *amplitude*: the tool for bearing-style
   faults, whose repetition rate modulates a high-frequency resonance
   instead of appearing as a low-frequency tone.
@@ -398,7 +398,7 @@ the machine (ball-pass frequency outer and inner race, ball spin, cage,
 gear-mesh frequency and its shaft-rate sidebands, blade passing, motor slip and
 pole pass) are computed from the geometry and the shaft speed and drawn onto
 the measured envelope spectrum at
-[machine fault frequencies](/phonometry/vibration/machinery/machine-diagnostics/).
+[machine fault frequencies](/vibration/machinery/machine-diagnostics/).
 Because those families are expressed in *orders of the shaft*, the same tacho
 signal that fixes the averaging period fixes the family frequencies too: a speed
 error corrupts the averaging and the identification together.
@@ -421,10 +421,10 @@ not an integer.
 <ScopeClaim status="not-covered" label="Not covered">
 TSA needs a known period; finding that period, or detecting periodic families
 without one, is the job of the
-[cepstrum](/phonometry/signals/spectra/cepstrum-echoes/), not of this page.
+[cepstrum](/signals/spectra/cepstrum-echoes/), not of this page.
 Locating amplitude-modulation periodicities, such as bearing faults, is the
 [envelope
-spectrum](/phonometry/signals/spectra/cepstrum-echoes/#5-the-envelope-spectrum-modulations-as-lines),
+spectrum](/signals/spectra/cepstrum-echoes/#5-the-envelope-spectrum-modulations-as-lines),
 also outside this page. McFadden's paper is not a certification standard, so
 there is no compliance clause to check the implementation against.
 </ScopeClaim>
@@ -434,10 +434,10 @@ there is no compliance clause to check the implementation against.
 
 ## See also
 
-- [Cepstrum and echoes](/phonometry/signals/spectra/cepstrum-echoes/): reference-free detection of harmonic and sideband families, and the envelope spectrum.
-- [Correlation and delay](/phonometry/signals/spectra/correlation-delay/): the Hilbert envelope behind envelope analysis.
-- [Test signals](/phonometry/signals/spectra/test-signals/): the fractional-delay kernel the non-integer period alignment uses.
-- [Machine fault frequencies](/phonometry/vibration/machinery/machine-diagnostics/): the bearing and gear families the residual's envelope spectrum is read against.
-- API reference: [`signals.synchronous_average`](/phonometry/reference/api/signals/synchronous-average/).
+- [Cepstrum and echoes](/signals/spectra/cepstrum-echoes/): reference-free detection of harmonic and sideband families, and the envelope spectrum.
+- [Correlation and delay](/signals/spectra/correlation-delay/): the Hilbert envelope behind envelope analysis.
+- [Test signals](/signals/spectra/test-signals/): the fractional-delay kernel the non-integer period alignment uses.
+- [Machine fault frequencies](/vibration/machinery/machine-diagnostics/): the bearing and gear families the residual's envelope spectrum is read against.
+- API reference: [`signals.synchronous_average`](/reference/api/signals/synchronous-average/).
 
 </SeeAlso>

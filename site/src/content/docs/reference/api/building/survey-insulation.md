@@ -10,7 +10,7 @@ Field survey method for sound insulation and service-equipment noise
 
 This is the **survey (control) method**: a fast, octave-band field procedure
 for dwellings and rooms of comparable size (up to 150 m³). It trades the
-resolution of the ISO 16283 engineering method ([`phonometry.building.measurement.insulation`](/phonometry/reference/api/building/insulation/))
+resolution of the ISO 16283 engineering method ([`phonometry.building.measurement.insulation`](/reference/api/building/insulation/))
 for speed: a single hand-held integrating sound level meter swept through the
 room. It measures airborne and impact sound insulation between rooms, façade
 sound insulation, and the sound pressure level from building service equipment.
@@ -23,9 +23,9 @@ carried by a single quantity, the reverberation index
 $k = 10 \log_{10}(T/T_0)$ dB
 with the reference reverberation time $T_0 = 0.5$ s. It may be
 **measured** (pass
-the reverberation time `T` per band to [`reverberation_index`](/phonometry/reference/api/building/survey-insulation/#reverberation_index)) or,
+the reverberation time `T` per band to [`reverberation_index`](/reference/api/building/survey-insulation/#reverberation_index)) or,
 in a control survey, **estimated** from the room type and volume with
-[`estimate_reverberation_index`](/phonometry/reference/api/building/survey-insulation/#estimate_reverberation_index) (Clause 6.5, Tables 3 and 4).
+[`estimate_reverberation_index`](/reference/api/building/survey-insulation/#estimate_reverberation_index) (Clause 6.5, Tables 3 and 4).
 
 **Airborne between rooms (Clauses 3.2-3.6).** From the source- and
 receiving-room levels `L1` and `L2` the level difference
@@ -65,8 +65,8 @@ normalized form $L_{XY,\mathrm{n}} = L_{XY} - k - 10 \log_{10}(A_0 T_0 / (0.16\,
 **Frequency range (Clause 6.4).** Airborne and tapping-machine impact
 quantities are measured in octave bands 125 Hz to 2000 Hz (5 bands); the
 heavy/soft impact source uses 63 Hz to 500 Hz. The single-number weighted
-ratings reuse the verified [`phonometry.building.weighted_rating`](/phonometry/reference/api/building/ratings/#weighted_rating) (ISO
-717-1) and [`phonometry.building.weighted_impact_rating`](/phonometry/reference/api/building/ratings/#weighted_impact_rating) (ISO 717-2)
+ratings reuse the verified [`phonometry.building.weighted_rating`](/reference/api/building/ratings/#weighted_rating) (ISO
+717-1) and [`phonometry.building.weighted_impact_rating`](/reference/api/building/ratings/#weighted_impact_rating) (ISO 717-2)
 engines, formed only when exactly 5 octave (or 16 one-third-octave) values are
 supplied. No background correction is applied (Clause 6.2).
 
@@ -201,7 +201,7 @@ $R' = D + k + 10 \log_{10}(S T_0 / (0.16\,V))$ (Clause 3.6) is formed,
 using
 $V/7.5$ for `S` where that exceeds the given area (Clause 3.6).
 The
-reverberation index `k` comes from [`reverberation_index`](/phonometry/reference/api/building/survey-insulation/#reverberation_index) (measured
+reverberation index `k` comes from [`reverberation_index`](/reference/api/building/survey-insulation/#reverberation_index) (measured
 `T`) or a Clause 6.5 estimate.
 
 `l1` and `l2` may be one value per band or a two-dimensional
@@ -217,7 +217,7 @@ reverberation index `k` comes from [`reverberation_index`](/phonometry/reference
 | `volume` | Receiving-room volume `V`, in m³ (required for `Dn` and `R'`). |
 | `area` | Common-partition area `S`, in m² (with `volume`, gives `R'`). |
 
-**Returns:** [`SurveyAirborneResult`](/phonometry/reference/api/building/survey-insulation/#surveyairborneresult).
+**Returns:** [`SurveyAirborneResult`](/reference/api/building/survey-insulation/#surveyairborneresult).
 
 **Raises**
 
@@ -258,7 +258,7 @@ $D_{2\mathrm{m,n}} = D_{2\mathrm{m}} + k + 10 \log_{10}(A_0 T_0 / (0.16\,V))$
 | `reverberation_index` | Reverberation index `k` per band, in dB. |
 | `volume` | Receiving-room volume `V`, in m³ (required for `D2m,n`). |
 
-**Returns:** [`SurveyFacadeResult`](/phonometry/reference/api/building/survey-insulation/#surveyfacaderesult).
+**Returns:** [`SurveyFacadeResult`](/reference/api/building/survey-insulation/#surveyfacaderesult).
 
 **Raises**
 
@@ -298,7 +298,7 @@ positions, Clause 3.7).
 | `reverberation_index` | Reverberation index `k` per band, in dB. |
 | `volume` | Receiving-room volume `V`, in m³ (required for `L'n`). |
 
-**Returns:** [`SurveyImpactResult`](/phonometry/reference/api/building/survey-insulation/#surveyimpactresult).
+**Returns:** [`SurveyImpactResult`](/reference/api/building/survey-insulation/#surveyimpactresult).
 
 **Raises**
 
@@ -339,7 +339,7 @@ $L_{XY,\mathrm{n}} = L_{XY} - k - 10 \log_{10}(A_0 T_0 / (0.16\,V))$
 | `reverberation_index` | Reverberation index `k`, in dB; a scalar for a weighted level, or one value per band; for a global weighted level `k` is taken from the mean of the 500/1000/2000 Hz octave reverberation times (Clause 3.17). |
 | `volume` | Receiving-room volume `V`, in m³ (required for `LXY,n`). |
 
-**Returns:** [`SurveyServiceEquipmentResult`](/phonometry/reference/api/building/survey-insulation/#surveyserviceequipmentresult).
+**Returns:** [`SurveyServiceEquipmentResult`](/reference/api/building/survey-insulation/#surveyserviceequipmentresult).
 
 **Raises**
 
@@ -428,7 +428,7 @@ requirement) and a footer with the identity block and disclaimer.
 | :--- | :--- |
 | `path` | Destination path of the PDF file. |
 | `quantity` | The reported quantity: `"dnt"` (default, the standardized level difference `DnT`) or `"r_prime"` (the apparent sound reduction index `R'`; requires the result to carry `r_prime`, built with the `area` and `volume` arguments). |
-| `metadata` | Optional [`ReportMetadata`](/phonometry/reference/api/building/insulation/#reportmetadata); `None` produces a lightweight fiche (body, rating and disclaimer only). |
+| `metadata` | Optional [`ReportMetadata`](/reference/api/building/insulation/#reportmetadata); `None` produces a lightweight fiche (body, rating and disclaimer only). |
 | `engine` | Rendering back end; only `"reportlab"` is supported. |
 | `verbose` | When `True`, the table shows the ISO 717 evaluation per band instead of the two-column `f \| value` form. |
 | `language` | Fiche language: `"en"` (default, English) or `"es"` (Spanish, with a comma decimal separator). |
@@ -512,7 +512,7 @@ requirement) and a footer with the identity block and disclaimer.
 | Name | Description |
 | :--- | :--- |
 | `path` | Destination path of the PDF file. |
-| `metadata` | Optional [`ReportMetadata`](/phonometry/reference/api/building/insulation/#reportmetadata); `None` produces a lightweight fiche (body, rating and disclaimer only). |
+| `metadata` | Optional [`ReportMetadata`](/reference/api/building/insulation/#reportmetadata); `None` produces a lightweight fiche (body, rating and disclaimer only). |
 | `engine` | Rendering back end; only `"reportlab"` is supported. |
 | `verbose` | When `True`, the table shows the ISO 717 evaluation per band instead of the two-column `f \| value` form. |
 | `language` | Fiche language: `"en"` (default, English) or `"es"` (Spanish, with a comma decimal separator). |
@@ -595,7 +595,7 @@ a footer with the identity block and disclaimer.
 | Name | Description |
 | :--- | :--- |
 | `path` | Destination path of the PDF file. |
-| `metadata` | Optional [`ReportMetadata`](/phonometry/reference/api/building/insulation/#reportmetadata); `None` produces a lightweight fiche (body, rating and disclaimer only). |
+| `metadata` | Optional [`ReportMetadata`](/reference/api/building/insulation/#reportmetadata); `None` produces a lightweight fiche (body, rating and disclaimer only). |
 | `engine` | Rendering back end; only `"reportlab"` is supported. |
 | `verbose` | When `True`, the table shows the ISO 717 evaluation per band instead of the two-column `f \| value` form. |
 | `language` | Fiche language: `"en"` (default, English) or `"es"` (Spanish, with a comma decimal separator). |

@@ -1,6 +1,6 @@
 <!-- Written by `make llms` from site/src/content/docs/aircraft/airport-noise.mdx: edit that page and its Spanish twin, then run `make llms`. -->
 
-← [Documentation index](../README.md) · Published at https://docs.jmrp.io/phonometry/aircraft/airport-noise/
+← [Documentation index](../README.md) · Published at https://phonometry.dev/aircraft/airport-noise/
 
 # Airport Noise (ECAC Doc 29)
 
@@ -512,7 +512,7 @@ reference workbook are reproduced end-to-end in the test suite.
   $L_\mathrm{den}$-style long-term indices that a full airport study accumulates
   from single events.
 - API reference:
-  [`aircraft.airport_noise`](https://docs.jmrp.io/phonometry/reference/api/aeroacoustics/airport-noise/).
+  [`aircraft.airport_noise`](https://phonometry.dev/reference/api/aeroacoustics/airport-noise/).
 
 ## References
 

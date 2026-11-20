@@ -1,6 +1,6 @@
 <!-- Written by `make llms` from site/src/content/docs/buildings/design/impact-improvement.mdx: edit that page and its Spanish twin, then run `make llms`. -->
 
-← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/buildings/design/impact-improvement/
+← [Documentation index](../../README.md) · Published at https://phonometry.dev/buildings/design/impact-improvement/
 
 # Floor-Covering Impact Improvement (ISO 16251-1)
 
@@ -393,7 +393,7 @@ this page, or the full ISO 10140-3 floor, is the reference, and the
   the reference-curve engine behind the weighted improvement.
 - [Theory](../../reference/theory/rooms-buildings.md): the
   reference-curve derivation behind the weighted single numbers.
-- API reference: [`building.measurement.floor_covering_improvement`](https://docs.jmrp.io/phonometry/reference/api/building/floor-covering-improvement/).
+- API reference: [`building.measurement.floor_covering_improvement`](https://phonometry.dev/reference/api/building/floor-covering-improvement/).
 
 ## References
 

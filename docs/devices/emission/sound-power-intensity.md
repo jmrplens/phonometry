@@ -1,6 +1,6 @@
 <!-- Written by `make llms` from site/src/content/docs/devices/emission/sound-power-intensity.mdx: edit that page and its Spanish twin, then run `make llms`. -->
 
-← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/devices/emission/sound-power-intensity/
+← [Documentation index](../../README.md) · Published at https://phonometry.dev/devices/emission/sound-power-intensity/
 
 # Sound Power by Intensity Scanning
 
@@ -695,7 +695,7 @@ Precision sound power by intensity fiche (PrecisionIntensityResult.report), an I
   the precision diffuse-field route in a qualified laboratory room.
 - [Theory](../../reference/theory/environment-transport.md): the
   field-indicator derivations.
-- API reference: [`emission`: sound power by intensity scanning](https://docs.jmrp.io/phonometry/reference/api/power/sound-power-intensity/).
+- API reference: [`emission`: sound power by intensity scanning](https://phonometry.dev/reference/api/power/sound-power-intensity/).
 - Theory: [Sound power determination](../../reference/theory/environment-transport.md#sound-power-determination-iso-374437453746-iso-3741-iso-9614-123): the ISO 9614 scanning derivation and the field indicators that qualify it.
 
 ## References

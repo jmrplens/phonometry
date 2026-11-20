@@ -1,6 +1,6 @@
 <!-- Written by `make llms` from site/src/content/docs/perception/psychoacoustics/advanced-loudness.mdx: edit that page and its Spanish twin, then run `make llms`. -->
 
-← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/perception/psychoacoustics/advanced-loudness/
+← [Documentation index](../../README.md) · Published at https://phonometry.dev/perception/psychoacoustics/advanced-loudness/
 
 # Advanced Loudness (ISO 532-2/-3, ECMA-418-2)
 
@@ -431,7 +431,7 @@ restricted to same-block-size neighbours 0.996, and with the full
 cross-group recomputation the standard requires 0.9845. The calibration
 constant $c_\mathrm{N}$ is kept at its verbatim tabulated value rather than retuned,
 which is why the deviation is visible at all; the
-[`psychoacoustics.loudness.ecma` API reference](https://docs.jmrp.io/phonometry/reference/api/psychoacoustics/ecma/)
+[`psychoacoustics.loudness.ecma` API reference](https://phonometry.dev/reference/api/psychoacoustics/ecma/)
 carries the full account.
 
 ```python
@@ -568,7 +568,7 @@ print(audible.any())   # True: above the criterion in a block, the library's rea
 - [Sound Quality Metrics](sound-quality.md): the tonality,
   roughness and fluctuation strength built on the same ECMA-418-2 front-end.
 - [Theory](../../reference/theory/perception.md): the equations behind the loudness models.
-- API reference: [`psychoacoustics.loudness.moore_glasberg`](https://docs.jmrp.io/phonometry/reference/api/psychoacoustics/moore-glasberg/), [`psychoacoustics.loudness.moore_glasberg_time`](https://docs.jmrp.io/phonometry/reference/api/psychoacoustics/moore-glasberg-time/) and [`psychoacoustics.loudness.ecma`](https://docs.jmrp.io/phonometry/reference/api/psychoacoustics/ecma/).
+- API reference: [`psychoacoustics.loudness.moore_glasberg`](https://phonometry.dev/reference/api/psychoacoustics/moore-glasberg/), [`psychoacoustics.loudness.moore_glasberg_time`](https://phonometry.dev/reference/api/psychoacoustics/moore-glasberg-time/) and [`psychoacoustics.loudness.ecma`](https://phonometry.dev/reference/api/psychoacoustics/ecma/).
 - Theory: [Advanced loudness models and sound quality](../../reference/theory/perception.md#advanced-loudness-models--sound-quality): what the Moore-Glasberg and Sottek models change relative to Zwicker, and why the three disagree where they do.
 
 ## Quick answers

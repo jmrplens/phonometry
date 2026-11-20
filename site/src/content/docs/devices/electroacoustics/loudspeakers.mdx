@@ -63,9 +63,9 @@ loop rather than a datasheet, so the guide closes on Long's
 open-loop and feedback-loop gains, the 10 dB stability margin and the
 number-of-open-microphones correction. The distortion and frequency-response
 measurements that
-feed it live in [Electroacoustics](/phonometry/devices/electroacoustics/electroacoustics/);
+feed it live in [Electroacoustics](/devices/electroacoustics/electroacoustics/);
 the microphone counterpart has
-[its own guide](/phonometry/devices/electroacoustics/microphones/).
+[its own guide](/devices/electroacoustics/microphones/).
 
 ## 1. Sensitivity conventions (IEC 60268-5)
 
@@ -74,7 +74,7 @@ Distortion and response figures only compare across devices when the
 the one that trips people: a power-and-distance normalization with two
 independent traps in a single sentence of clause 20.3. (The microphone trap is
 the *reference value*, and it has
-[its own section](/phonometry/devices/electroacoustics/microphones/#1-sensitivity-and-its-references-iec-60268-4-clause-11).)
+[its own section](/devices/electroacoustics/microphones/#1-sensitivity-and-its-references-iec-60268-4-clause-11).)
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_loudspeaker_freefield.svg" alt="Free-field loudspeaker sensitivity measurement per IEC 60268-5: a loudspeaker on a stand in an anechoic room, driven by an amplifier at 2.83 V, with a measurement microphone at the reference distance r = 1 m on the reference axis, and the governing relations: characteristic sensitivity as Lp at 1 m for 1 W into the rated impedance, the Up = sqrt(R times 1 W) drive voltage, the inverse-distance referral Lp(1 m) = Lp(r) + 20 lg(r / 1 m), and the IEC 60268-4 microphone sensitivity in mV/Pa or dB re 1 V/Pa" width="92%" />
 
@@ -144,7 +144,7 @@ any of this: a simulated programme signal at the rated noise voltage for at
 least 1 h, then at least 1 h disconnected. The signal is the one of
 IEC 60268-1 Clause 7, which `electroacoustics.simulated_program_signal`
 generates; the
-[Headphones and Earphones (IEC 60268-7)](/phonometry/devices/electroacoustics/headphones/)
+[Headphones and Earphones (IEC 60268-7)](/devices/electroacoustics/headphones/)
 guide builds it from its table and its filter.
 
 **The excitation, which is not a sine.** A characteristic sensitivity is
@@ -177,7 +177,7 @@ over a hard floor gives) is useless below roughly 200 Hz, and the low end has
 to come from a near-field or half-space measurement spliced in. That is also
 why a gated curve and an anechoic curve disagree below a few hundred hertz. The
 windowing machinery is the same as in
-[Room impulse response](/phonometry/buildings/rooms/room-impulse-response/).
+[Room impulse response](/buildings/rooms/room-impulse-response/).
 
 ## 2. Radiating piston: radiation impedance and directivity
 
@@ -253,7 +253,7 @@ pattern (when `angles_rad` are given) and `.plot()`. The building blocks
 `piston_resistance`, `piston_reactance`, `piston_directivity` and
 `plot_piston_geometry` are also callable directly, the last of them without a
 result object at all. The piston is the companion radiator model of the
-[reactive silencers](/phonometry/devices/noise-control/silencers/).
+[reactive silencers](/devices/noise-control/silencers/).
 
 :::note[Where the model stops]
 Every word of "rigid circular piston in an infinite baffle" is an assumption a
@@ -449,7 +449,7 @@ to 25 dB), and the polar directivity on the IEC 60263 25 dB reference circle.
 The impedance modulus (with the 80 %-of-rated line), the total-harmonic-distortion
 curve and the directivity feed the secondary panels, reusing the
 [radiating piston](#2-radiating-piston-radiation-impedance-and-directivity)
-directivity of section 2 and a [swept-sine THD](/phonometry/devices/electroacoustics/swept-sine-distortion/)
+directivity of section 2 and a [swept-sine THD](/devices/electroacoustics/swept-sine-distortion/)
 result for the distortion curve.
 
 The rated characteristics are also available interactively through `.plot()`,
@@ -756,7 +756,7 @@ measurements rather than assumptions. Take them in this order.
    design talker distance; that fixes $Z_\mathrm{S} = L_{\mathrm{H}\text{-}\mathrm{L}} - L_{\mathrm{T}\text{-}\mathrm{M}}$.
 5. **Read $D_\mathrm{M}(\theta)$** off the microphone's own polar data at the bearing of
    the loudspeaker *relative to* the talker (see the
-   [pattern family](/phonometry/devices/electroacoustics/microphones/#2-directional-pattern-and-the-directivity-index-clause-13))
+   [pattern family](/devices/electroacoustics/microphones/#2-directional-pattern-and-the-directivity-index-clause-13))
    rather than assuming it. It is zero for an omnidirectional capsule no
    matter where it points.
 
@@ -777,7 +777,7 @@ $+D_\mathrm{M}(\theta)$ on the right-hand side where Eqs. (18.20) to (18.22) req
 $-D_\mathrm{M}(\theta)$, which would turn the benefit of a directional microphone into
 a penalty. `feedback_stability` implements the sign of Eq. (18.20), so that
 $N_\mathrm{m} = 1$ reproduces Long's own special cases exactly. The defect is recorded
-in the [errata registry](/phonometry/reference/errata/).
+in the [errata registry](/reference/errata/).
 :::
 
 ### `feedback_stability()` parameters
@@ -832,7 +832,7 @@ input voltage, clause 17) are stated by the manufacturer, not computed here.
 Thiele-Small parameter extraction from the impedance curve is not implemented:
 the impedance panel reports the measured modulus against the rated-impedance
 lines. The distortion curve itself comes from a measurement, for instance the
-[swept-sine THD](/phonometry/devices/electroacoustics/swept-sine-distortion/)
+[swept-sine THD](/devices/electroacoustics/swept-sine-distortion/)
 chain. The feedback criterion is a level bookkeeping exercise, not an acoustic
 model: it consumes the two direct-field levels the loudspeaker produces and
 does not compute them from a coverage pattern, nor does it predict the ring
@@ -847,22 +847,22 @@ enters the design separately.
 
 ## See also
 
-- [Electroacoustics](/phonometry/devices/electroacoustics/electroacoustics/): the IEC 60268-3
+- [Electroacoustics](/devices/electroacoustics/electroacoustics/): the IEC 60268-3
   distortion set, THD+N and SINAD, intermodulation and the $H_1$/$H_2$
   frequency-response estimators that produce the curves this guide reports.
-- [Microphone Characterisation (IEC 60268-4)](/phonometry/devices/electroacoustics/microphones/):
+- [Microphone Characterisation (IEC 60268-4)](/devices/electroacoustics/microphones/):
   the companion rated-characteristics report for the measuring side of the
   chain.
-- [Swept-sine distortion](/phonometry/devices/electroacoustics/swept-sine-distortion/): the
+- [Swept-sine distortion](/devices/electroacoustics/swept-sine-distortion/): the
   Farina/Novak harmonic separation whose THD(f) feeds the distortion panel.
-- [Sound Power](/phonometry/devices/emission/sound-power/): the radiated-power
+- [Sound Power](/devices/emission/sound-power/): the radiated-power
   descriptor, for when the question is how much acoustic power the source
   emits rather than how it responds on axis.
-- [Conformance report](/phonometry/reference/conformance/):
+- [Conformance report](/reference/conformance/):
   the exact analytic results the piston is checked against (the radiation
   resistance and reactance, their low-frequency limit, the radiation mass, the
   first directivity null and the 3.01 dB half-space directivity index), and
   Long's two special cases of the feedback criterion.
-- API reference: [`electroacoustics.piston`](/phonometry/reference/api/electroacoustics/piston/), [`electroacoustics.loudspeaker`](/phonometry/reference/api/electroacoustics/loudspeaker/) and [`electroacoustics.sound_reinforcement`](/phonometry/reference/api/electroacoustics/sound-reinforcement/).
+- API reference: [`electroacoustics.piston`](/reference/api/electroacoustics/piston/), [`electroacoustics.loudspeaker`](/reference/api/electroacoustics/loudspeaker/) and [`electroacoustics.sound_reinforcement`](/reference/api/electroacoustics/sound-reinforcement/).
 
 </SeeAlso>

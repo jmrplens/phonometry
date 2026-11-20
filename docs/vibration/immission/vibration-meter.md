@@ -1,6 +1,6 @@
 <!-- Written by `make llms` from site/src/content/docs/vibration/immission/vibration-meter.mdx: edit that page and its Spanish twin, then run `make llms`. -->
 
-← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/vibration/immission/vibration-meter/
+← [Documentation index](../../README.md) · Published at https://phonometry.dev/vibration/immission/vibration-meter/
 
 # Measuring vibration immission (DIN 45669-1)
 
@@ -461,8 +461,8 @@ planned by.
   people side of the same measurement, weighted differently and judged by
   other documents.
 - API reference:
-  [`vibration.immission.vibration_meter`](https://docs.jmrp.io/phonometry/reference/api/vibration/vibration-meter/)
-  and [`vibration.immission.coupling`](https://docs.jmrp.io/phonometry/reference/api/vibration/coupling/).
+  [`vibration.immission.vibration_meter`](https://phonometry.dev/reference/api/vibration/vibration-meter/)
+  and [`vibration.immission.coupling`](https://phonometry.dev/reference/api/vibration/coupling/).
 
 ## References
 

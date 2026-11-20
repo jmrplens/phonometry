@@ -31,13 +31,13 @@ A stationary spectrum hides everything that happens *in time*: a passing
 siren, an impact, a machine running up. This page covers the two
 time-frequency estimators of `phonometry.signals`, both with the
 calibration discipline of the
-[spectral-analysis page](/phonometry/signals/spectra/spectral-analysis/): the
+[spectral-analysis page](/signals/spectra/spectral-analysis/): the
 **calibrated spectrogram** (the short-time Fourier transform view of
 Bendat & Piersol Section 12.6.4.2, in absolute units - dB SPL for a signal
 in pascals) and the **zoom FFT** (Section 11.5.4), which computes the
 spectrum of a narrow band on an arbitrarily fine grid to separate tones
 closer than a practical full-band FFT bin. Where the
-[levels page](/phonometry/signals/levels/levels/) offers the fractional-octave-band
+[levels page](/signals/levels/levels/) offers the fractional-octave-band
 spectrogram of a sound level meter, this one is its fine-band,
 constant-bandwidth counterpart.
 
@@ -88,7 +88,7 @@ of time resolution against $B_\mathrm{e} = \mathrm{ENBW}/T_B$ of frequency resol
 so their product $T_B B_\mathrm{e}$ is fixed by the taper alone: 1 for a rectangular
 window, **1.5 for the Hann default used here** (Section 12.6.4.2, and the
 window figures of merit on the
-[spectral-analysis page](/phonometry/signals/spectra/spectral-analysis/#6-choosing-the-window)).
+[spectral-analysis page](/signals/spectra/spectral-analysis/#6-choosing-the-window)).
 The tiling diagram above draws the untapered case, where that product is exactly
 one. Halving the segment length buys twice the time resolution and costs exactly
 half the frequency resolution; nothing buys both.
@@ -98,7 +98,7 @@ short segments do the opposite. And because each cell is a single
 error of 1 (Eq. 8.158 with $n_\mathrm{d} = 1$; Bendat & Piersol quote
 $\sqrt{2}/1.25 \approx 1.13$ for the magnitude display) - the spectrogram is a tool for
 deterministic structure (tones, sweeps, transients), while the averaged
-[Welch estimate](/phonometry/signals/spectra/spectral-analysis/) is the low-variance
+[Welch estimate](/signals/spectra/spectral-analysis/) is the low-variance
 tool for the stationary background.
 
 Put a number on that. A single periodogram cell of random data is chi-square
@@ -111,7 +111,7 @@ independent while structure is not, so the eye is doing the averaging the
 estimator refused to do. Both remedies cost something: averaging adjacent
 columns trades time resolution for variance and converges toward the Welch
 estimate, and smoothing across frequency with the fractional-octave kernel of
-the [spectral analysis page](/phonometry/signals/spectra/spectral-analysis/)
+the [spectral analysis page](/signals/spectra/spectral-analysis/)
 trades frequency resolution for the same thing. Which is exactly why a noise
 floor should be *quantified* from a PSD and only *displayed* on a spectrogram.
 
@@ -158,7 +158,7 @@ impact's level either: a transient shorter than the segment spreads its energy
 over the whole column, so that reading depends on `nperseg`. The colour bar is an
 absolute scale for tonal structure and a bandwidth-dependent one for everything
 else; when absolute band levels over time are the goal, the band spectrogram of
-[Levels](/phonometry/signals/levels/levels/) is the right tool.*
+[Levels](/signals/levels/levels/) is the right tool.*
 
 <details>
 <summary>Show the code for this figure</summary>
@@ -259,7 +259,7 @@ the `window` argument (default `"hann"`): pass `window="blackman"`, or a Kaiser
 with a high beta, to trade main-lobe width for sidelobe rejection, remembering
 that the wider main lobe raises $B_\mathrm{e}$ and therefore the closest spacing you can
 separate, so the two goals pull against each other. The
-[window figures of merit](/phonometry/signals/spectra/spectral-analysis/#6-choosing-the-window)
+[window figures of merit](/signals/spectra/spectral-analysis/#6-choosing-the-window)
 put numbers on that trade. When even the best taper is not enough, pre-filter or
 notch the dominant component before zooming: no window substitutes for removing
 the energy.
@@ -327,13 +327,13 @@ plt.show()
 ## Relation to the rest of the library
 
 The spectrogram shares its taper, segmentation and scaling with
-[`power_spectral_density`](/phonometry/signals/spectra/spectral-analysis/), so the
+[`power_spectral_density`](/signals/spectra/spectral-analysis/), so the
 two are mutually consistent bin by bin; the
-[octave-band spectrogram](/phonometry/signals/levels/levels/) of
+[octave-band spectrogram](/signals/levels/levels/) of
 `OctaveFilterBank.spectrogram` is the constant-percentage-bandwidth
 counterpart with sound-level-meter ballistics; and for tracking a single
 component's frequency in time, the
-[Hilbert instantaneous frequency](/phonometry/signals/spectra/correlation-delay/) of
+[Hilbert instantaneous frequency](/signals/spectra/correlation-delay/) of
 `envelope` complements the STFT ridge.
 
 ## What this guide covers
@@ -354,10 +354,10 @@ taper.
 This is the constant-bandwidth, STFT-based family only. The
 constant-percentage-bandwidth, sound-level-meter counterpart is
 `OctaveFilterBank.spectrogram` on the
-[Levels](/phonometry/signals/levels/levels/) page. Tracking a single
+[Levels](/signals/levels/levels/) page. Tracking a single
 component's instantaneous frequency over time is the Hilbert envelope of
 `envelope`, on the [Correlation and
-delay](/phonometry/signals/spectra/correlation-delay/) page, not this one. As
+delay](/signals/spectra/correlation-delay/) page, not this one. As
 with the spectral-analysis page, this implements Bendat & Piersol's
 estimators, not a certification standard.
 </ScopeClaim>
@@ -367,10 +367,10 @@ estimators, not a certification standard.
 
 ## See also
 
-- [Spectral analysis](/phonometry/signals/spectra/spectral-analysis/): the averaged Welch estimate for the stationary background, and the window figures of merit behind the segment taper.
-- [Levels](/phonometry/signals/levels/levels/): the fractional-octave-band spectrogram with sound-level-meter ballistics.
-- [Correlation and delay](/phonometry/signals/spectra/correlation-delay/): the Hilbert instantaneous frequency for tracking one component.
-- API reference: [`signals.time_frequency`](/phonometry/reference/api/signals/time-frequency/).
-- Theory: [Frequency Resolution vs FFT Bin Spacing](/phonometry/reference/theory/signal-analysis/#frequency-resolution-vs-fft-bin-spacing): the bin spacing against the effective resolution, which is the trade this page spends its whole length on.
+- [Spectral analysis](/signals/spectra/spectral-analysis/): the averaged Welch estimate for the stationary background, and the window figures of merit behind the segment taper.
+- [Levels](/signals/levels/levels/): the fractional-octave-band spectrogram with sound-level-meter ballistics.
+- [Correlation and delay](/signals/spectra/correlation-delay/): the Hilbert instantaneous frequency for tracking one component.
+- API reference: [`signals.time_frequency`](/reference/api/signals/time-frequency/).
+- Theory: [Frequency Resolution vs FFT Bin Spacing](/reference/theory/signal-analysis/#frequency-resolution-vs-fft-bin-spacing): the bin spacing against the effective resolution, which is the trade this page spends its whole length on.
 
 </SeeAlso>

@@ -1,6 +1,6 @@
 <!-- Written by `make llms` from site/src/content/docs/buildings/rooms/stage-and-uncertainty.mdx: edit that page and its Spanish twin, then run `make llms`. -->
 
-← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/buildings/rooms/stage-and-uncertainty/
+← [Documentation index](../../README.md) · Published at https://phonometry.dev/buildings/rooms/stage-and-uncertainty/
 
 # Stage support and uncertainty (ISO 3382-1)
 
@@ -227,8 +227,8 @@ time-reversed, which is what
 - [Conformance report](../../CONFORMANCE.md):
   the closed-form window geometries and the printed coefficients the stage
   support and the Clause 7 uncertainty are validated against.
-- API reference: [`room.auditorium`](https://docs.jmrp.io/phonometry/reference/api/rooms/auditorium/)
-  and [`room.acoustics`](https://docs.jmrp.io/phonometry/reference/api/rooms/acoustics/).
+- API reference: [`room.auditorium`](https://phonometry.dev/reference/api/rooms/auditorium/)
+  and [`room.acoustics`](https://phonometry.dev/reference/api/rooms/acoustics/).
 
 ## References
 

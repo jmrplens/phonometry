@@ -1,6 +1,6 @@
 <!-- Written by `make llms` from site/src/content/docs/signals/metrology/reciprocity-calibration.mdx: edit that page and its Spanish twin, then run `make llms`. -->
 
-← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/signals/metrology/reciprocity-calibration/
+← [Documentation index](../../README.md) · Published at https://phonometry.dev/signals/metrology/reciprocity-calibration/
 
 # Microphone Calibration by Reciprocity (IEC 61094-2/-3)
 
@@ -505,9 +505,9 @@ plt.show()
   ISO 9613-1, which Table B.1 of IEC 61094-3 is computed by.
 - [Measurement uncertainty](gum-uncertainty.md):
   the GUM the budgets are combined by.
-- API reference: [`metrology.reciprocity_calibration`](https://docs.jmrp.io/phonometry/reference/api/metrology/reciprocity-calibration/),
-  [`metrology.reciprocity_coupler`](https://docs.jmrp.io/phonometry/reference/api/metrology/reciprocity-coupler/),
-  [`metrology.reciprocity_free_field`](https://docs.jmrp.io/phonometry/reference/api/metrology/reciprocity-free-field/).
+- API reference: [`metrology.reciprocity_calibration`](https://phonometry.dev/reference/api/metrology/reciprocity-calibration/),
+  [`metrology.reciprocity_coupler`](https://phonometry.dev/reference/api/metrology/reciprocity-coupler/),
+  [`metrology.reciprocity_free_field`](https://phonometry.dev/reference/api/metrology/reciprocity-free-field/).
 
 ## References
 

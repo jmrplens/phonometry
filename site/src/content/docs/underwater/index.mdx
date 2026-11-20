@@ -27,7 +27,7 @@ reference appears here at all is for the two in-air carnivore hearing groups on
 the exposure page.
 
 The **source** stage, in
-[Underwater acoustics: radiated noise and pile driving](/phonometry/underwater/underwater-acoustics/),
+[Underwater acoustics: radiated noise and pile driving](/underwater/underwater-acoustics/),
 sets up the ISO 18405 terminology (SPL, SEL and peak levels and their
 references) and applies it to two regulated measurement cases: ships, with
 the radiated noise level of ISO 17208-1 and the equivalent monopole source
@@ -36,7 +36,7 @@ percussive pile driving, with the single-strike, peak and cumulative sound
 exposure of ISO 18406.
 
 The **path** stage spans two pages.
-[Underwater sound propagation](/phonometry/underwater/underwater-propagation/)
+[Underwater sound propagation](/underwater/underwater-propagation/)
 predicts what the sea does to that sound in closed form: geometrical
 spreading plus volume absorption (Francois-Garrison, Ainslie-McColm or
 Thorp), Weston's four shallow-water regimes with their transition ranges, the
@@ -44,14 +44,14 @@ speed of sound in sea water by four formulations, the passive and active sonar
 equation with its detection-range inversion, Rayleigh seabed reflection loss,
 and the Wenz ambient-noise spectrum with JOMOPANS-ECHO ship traffic. When refraction and
 boundaries decide the answer,
-[Underwater propagation solvers](/phonometry/underwater/underwater-solvers/)
+[Underwater propagation solvers](/underwater/underwater-solvers/)
 computes the field instead: the normal-mode expansion, ray tracing, the
 Gaussian beam sum built on those same rays and the split-step Fourier
 parabolic equation, with the guidance for choosing between them and the
 closed forms.
 
 A **receiver** stage closes the loop.
-[Marine-mammal noise exposure](/phonometry/underwater/marine-mammal-exposure/)
+[Marine-mammal noise exposure](/underwater/marine-mammal-exposure/)
 takes the level a source and a path produce and asks what it does to the
 animals that hear it: the group audiograms of Southall et al., the regulatory
 auditory weighting functions of the NMFS guidance, the TTS and injury onset
@@ -65,17 +65,17 @@ lives inline with the guides rather than in the theory reference.
 
 ## Pages in this section
 
-- [Underwater acoustics: radiated noise and pile driving](/phonometry/underwater/underwater-acoustics/):
+- [Underwater acoustics: radiated noise and pile driving](/underwater/underwater-acoustics/):
   ISO 18405 reference levels, ISO 17208 ship radiated noise and monopole
   source level, and ISO 18406 pile-driving sound exposure.
-- [Underwater sound propagation](/phonometry/underwater/underwater-propagation/):
+- [Underwater sound propagation](/underwater/underwater-propagation/):
   propagation loss, sound speed, the sonar equation, seabed reflection and
   ocean ambient noise, in closed form.
-- [Underwater propagation solvers](/phonometry/underwater/underwater-solvers/):
+- [Underwater propagation solvers](/underwater/underwater-solvers/):
   the normal-mode, ray-tracing, Gaussian-beam and parabolic-equation solvers
   of the stratified waveguide, each validated against an exact closed form,
   and how to choose a propagation model.
-- [Marine-mammal noise exposure](/phonometry/underwater/marine-mammal-exposure/):
+- [Marine-mammal noise exposure](/underwater/marine-mammal-exposure/):
   group audiograms, the regulatory auditory weighting functions with the
   guidance version selectable, the TTS and injury onset criteria, and a worked
   pile-driving assessment.
@@ -114,7 +114,7 @@ deep still belongs to `normal_modes`; and the geometric-beam variant with its
 KMAH index and its minimum-width floor is not implemented. The parabolic equation is the standard
 small-angle Tappert form rather than a wide-angle Padé variant. For the
 elastic seabed physics these fluid solvers leave out, the [elastic wave
-solver](/phonometry/simulation/elastic-waves/) is the nearest thing the
+solver](/simulation/elastic-waves/) is the nearest thing the
 library has.
 </ScopeClaim>
 
@@ -141,13 +141,13 @@ monostatic only.
 
 Every level here is a level re 1 µPa computed from a hydrophone record, so the
 calibration, weighting and spectral estimation behind it are in [Signal
-analysis](/phonometry/signals/), and [Build a sound level
-meter](/phonometry/signals/sound-level-meter/) runs that chain end to end on
+analysis](/signals/), and [Build a sound level
+meter](/signals/sound-level-meter/) runs that chain end to end on
 one runnable page, in air but with the same functions. The underwater theory is
 deliberately not in the theory reference: it lives inline with the four guides
 above, where the quantity system of ISO 18405 is introduced with them.
 
 If you arrived here from a search and want the shape of the whole library,
-[What do you need to measure?](/phonometry/start/tasks/) indexes it by the job
-and [All guides](/phonometry/start/guides/) lists every page with a line on
+[What do you need to measure?](/start/tasks/) indexes it by the job
+and [All guides](/start/guides/) lists every page with a line on
 each.

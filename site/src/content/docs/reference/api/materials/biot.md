@@ -10,7 +10,7 @@ Biot poroelastic layers: the three waves and the 6x6 transfer matrix.
 An equivalent fluid replaces a porous material by a single wave travelling in
 the pores while the skeleton stands still (rigid frame) or is merely dragged
 along by the pore fluid (limp frame, see
-[`limp_frame`](/phonometry/reference/api/materials/porous/#limp_frame)). Neither can carry a
+[`limp_frame`](/reference/api/materials/porous/#limp_frame)). Neither can carry a
 wave in the skeleton itself, so neither can produce a frame resonance. The Biot
 theory can: it treats the frame as an elastic solid coupled to the pore fluid
 through a potential coupling coefficient and an inertial coupling coefficient,
@@ -35,7 +35,7 @@ of the rest of the package, exactly as printed:
   through the identity $\rho_{22} = \phi^2 \rho_{\mathrm{eq}}$ stated
   on printed p. 253, so a
   Biot layer and a rigid-frame layer built from the same
-  [`PorousMediumResult`](/phonometry/reference/api/materials/porous/#porousmediumresult) share one
+  [`PorousMediumResult`](/reference/api/materials/porous/#porousmediumresult) share one
   visco-thermal description by construction.
 * **The two compressional waves** as the eigenvalues of Eq. (6.65)
   (Eqs. (6.67)-(6.69), printed p. 121), the **shear wave** of Eq. (6.83), and
@@ -43,19 +43,19 @@ of the rest of the package, exactly as printed:
   (Eq. (6.84)).
 * **The closed-form surface impedance** of a hard-backed layer at normal
   incidence, Eqs. (6.107)-(6.108) printed p. 128, in
-  [`biot_surface_impedance`](/phonometry/reference/api/materials/biot/#biot_surface_impedance), and the $\lambda/4$ frame resonance it
+  [`biot_surface_impedance`](/reference/api/materials/biot/#biot_surface_impedance), and the $\lambda/4$ frame resonance it
   develops, Eq. (6.110) printed p. 129, in
-  [`frame_quarter_wave_resonance`](/phonometry/reference/api/materials/biot/#frame_quarter_wave_resonance).
+  [`frame_quarter_wave_resonance`](/reference/api/materials/biot/#frame_quarter_wave_resonance).
 * **The 6x6 layer matrix** of chapter 11: the field vector
   $[v_1^s, v_3^s, v_3^f, s_{33}^s, s_{13}^s, s_{33}^f]$ (Eq. (11.26))
   expressed through the wave-amplitude matrix $[\Gamma(x_3)]$ of
   Table 11.1 (printed p. 252), from which
-  [`poroelastic_transfer_matrix`](/phonometry/reference/api/materials/biot/#poroelastic_transfer_matrix) returns
+  [`poroelastic_transfer_matrix`](/reference/api/materials/biot/#poroelastic_transfer_matrix) returns
   $[T] = [\Gamma(-h)][\Gamma(0)]^{-1}$ (Eq. (11.34)).
 
 The layer is used through
-[`PoroelasticLayer`](/phonometry/reference/api/materials/layered/#poroelasticlayer) inside
-[`layered_absorber`](/phonometry/reference/api/materials/layered/#layered_absorber), which switches
+[`PoroelasticLayer`](/reference/api/materials/layered/#poroelasticlayer) inside
+[`layered_absorber`](/reference/api/materials/layered/#layered_absorber), which switches
 to the global-matrix assembly of Sect. 11.5 as soon as a poroelastic layer is
 present, with the coupling matrices of Sect. 11.4 ($[I_{pf}]$ /
 $[J_{pf}]$ Eq. (11.73), $[I_{pp}]$ Eq. (11.67)) and the hard-wall
@@ -65,7 +65,7 @@ conditions $[Y]$ of Eq. (11.81).
 impedances, so the model is anchored on closed forms and on exact limits: the
 rigid-frame limit reproduces the already-anchored Johnson-Champoux-Allard
 equivalent fluid, the limp limit reproduces
-[`limp_frame`](/phonometry/reference/api/materials/porous/#limp_frame), and the chapter 11
+[`limp_frame`](/reference/api/materials/porous/#limp_frame), and the chapter 11
 assembly reproduces the chapter 6 closed form Eq. (6.107) to machine precision.
 The book does print four *output* numbers for the fully specified glass wool of
 Table 6.1, and all four are reproduced: the airborne branch changes from
@@ -112,7 +112,7 @@ $Z_i^s = (P + Q \mu_i) \delta_i / \omega$.
 
 This is an independent derivation of the same physics as the chapter 11
 transfer-matrix assembly reached through
-[`PoroelasticLayer`](/phonometry/reference/api/materials/layered/#poroelasticlayer); the two
+[`PoroelasticLayer`](/reference/api/materials/layered/#poroelasticlayer); the two
 agree to machine precision, which is one of the anchors of this module.
 Unlike the transfer matrix, it is restricted to normal incidence, to a
 single layer and to a glued rigid backing.
@@ -121,7 +121,7 @@ single layer and to a glued rigid backing.
 
 | Name | Description |
 | :--- | :--- |
-| `waves` | The [`BiotWavesResult`](/phonometry/reference/api/materials/biot/#biotwavesresult) of the material. |
+| `waves` | The [`BiotWavesResult`](/reference/api/materials/biot/#biotwavesresult) of the material. |
 | `thickness_m` | Layer thickness `l`, in metres (> 0). |
 
 **Returns:** The complex surface impedance `Z`, in Pa s/m.
@@ -154,8 +154,8 @@ the two identities of Allard & Atalla printed p. 253,
 $\rho_{22} = \phi^2 \rho_{\mathrm{eq}}$ and
 $R = \phi^2 K_{\mathrm{eq}}$, where `rho_eq` and
 `K_eq` are the surface-normalised effective density and bulk modulus that
-every model in [`porous`](/phonometry/reference/api/materials/porous/) returns. Pass
-the rigid-frame [`johnson_champoux_allard`](/phonometry/reference/api/materials/porous/#johnson_champoux_allard)
+every model in [`porous`](/reference/api/materials/porous/) returns. Pass
+the rigid-frame [`johnson_champoux_allard`](/reference/api/materials/porous/#johnson_champoux_allard)
 result: the frame motion is the Biot model's business, not the equivalent
 fluid's, so the *rigid-frame* effective density is the correct input (a
 limp-corrected one would count the frame inertia twice).
@@ -179,14 +179,14 @@ $\rho_a = \phi \rho_0 (\alpha_\infty - 1)$ (Eq. (6.44)):
 
 | Name | Description |
 | :--- | :--- |
-| `medium` | Rigid-frame [`PorousMediumResult`](/phonometry/reference/api/materials/porous/#porousmediumresult) for the pore fluid, evaluated on the frequency vector of interest. |
+| `medium` | Rigid-frame [`PorousMediumResult`](/reference/api/materials/porous/#porousmediumresult) for the pore fluid, evaluated on the frequency vector of interest. |
 | `porosity` | Open porosity `phi` (0 \< phi \<= 1). |
 | `tortuosity` | High-frequency tortuosity `a_inf` (>= 1). |
 | `frame_density` | Bulk density of the frame `rho1`, in kg/m3 (> 0). |
 | `shear_modulus` | Complex shear modulus `N` of the frame, in Pa ($\operatorname{Im}(N) \ge 0$; a structural loss factor `eta` gives $N = N'(1 + j \eta)$). |
 | `poisson_ratio` | Poisson coefficient `nu` of the frame (Default: 0, the value Allard & Atalla use for their glass wool). |
 
-**Returns:** A [`BiotWavesResult`](/phonometry/reference/api/materials/biot/#biotwavesresult).
+**Returns:** A [`BiotWavesResult`](/reference/api/materials/biot/#biotwavesresult).
 
 **Raises**
 
@@ -331,7 +331,7 @@ $K_\mathrm{b} = 2 N (\nu + 1) / (3 (1 - 2 \nu))$ (Allard & Atalla 2e,
 Eq. (6.29), printed p. 116). `Kb` is the quantity the jacketed
 "gedanken experiment" of Eq. (6.7) measures, and the one the limp-frame
 rules of thumb of
-[`check_limp_frame`](/phonometry/reference/api/materials/porous/#check_limp_frame) compare
+[`check_limp_frame`](/reference/api/materials/porous/#check_limp_frame) compare
 with the bulk modulus of the pore fluid.
 
 **Parameters**
@@ -368,7 +368,7 @@ $$
 (Allard & Atalla 2e, Eqs. (1.76) and (6.111), printed pp. 12 and 130).
 A compressional wave in the frame *in vacuum* travels at
 $\sqrt{K_c / \rho_1}$, which is what sets the $\lambda/4$
-frame resonance of [`frame_quarter_wave_resonance`](/phonometry/reference/api/materials/biot/#frame_quarter_wave_resonance).
+frame resonance of [`frame_quarter_wave_resonance`](/reference/api/materials/biot/#frame_quarter_wave_resonance).
 
 **Parameters**
 
@@ -383,7 +383,7 @@ frame resonance of [`frame_quarter_wave_resonance`](/phonometry/reference/api/ma
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | as [`frame_bulk_modulus`](/phonometry/reference/api/materials/biot/#frame_bulk_modulus). |
+| ValueError | as [`frame_bulk_modulus`](/reference/api/materials/biot/#frame_bulk_modulus). |
 | TypeError | if `poisson_ratio` is not a single number. `shear_modulus` is refused the same way when it is not one number. |
 
 ## frame_quarter_wave_resonance
@@ -413,7 +413,7 @@ $$
 
 This is the frequency at which the peak that no
 equivalent-fluid model can produce appears in the surface impedance of
-[`biot_surface_impedance`](/phonometry/reference/api/materials/biot/#biot_surface_impedance); Eq. (6.110) is an approximation to it
+[`biot_surface_impedance`](/reference/api/materials/biot/#biot_surface_impedance); Eq. (6.110) is an approximation to it
 (`delta_b` is not exactly the in-vacuum wavenumber), so the peak lands a
 few per cent above `fr`.
 
@@ -457,7 +457,7 @@ $V(M) = [T^p] V(M')$. The wave-amplitude matrix $[\Gamma]$ of
 Table 11.1 behind it is built by `_gamma`.
 
 The layer solver of
-[`layered_absorber`](/phonometry/reference/api/materials/layered/#layered_absorber) does *not*
+[`layered_absorber`](/reference/api/materials/layered/#layered_absorber) does *not*
 use this matrix: it assembles the wave amplitudes directly, which avoids
 inverting $[\Gamma(0)]$ and is far better conditioned for a very
 soft or a
@@ -468,7 +468,7 @@ is written around and the one an external multilayer chain expects.
 
 | Name | Description |
 | :--- | :--- |
-| `waves` | The [`BiotWavesResult`](/phonometry/reference/api/materials/biot/#biotwavesresult) of the material. |
+| `waves` | The [`BiotWavesResult`](/reference/api/materials/biot/#biotwavesresult) of the material. |
 | `thickness_m` | Layer thickness `h`, in metres (> 0). |
 | `transverse_wavenumber` | In-plane wavenumber $k_\mathrm{t} = k \sin(\theta)$, in rad/m (Default: 0, normal incidence). Scalar or one value per frequency. |
 

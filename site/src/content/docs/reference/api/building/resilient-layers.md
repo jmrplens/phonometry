@@ -9,8 +9,8 @@ Prediction of resilient-layer performance: tapping force, floor coverings,
 floating floors.
 
 The measurement modules of this domain report what a resilient layer *achieved*
-([`phonometry.building.measurement.floor_covering_improvement`](/phonometry/reference/api/building/floor-covering-improvement/) for the ISO 16251-1
-mock-up, [`phonometry.materials.resilient.dynamic_stiffness`](/phonometry/reference/api/materials/dynamic-stiffness/) for the EN 29052-1
+([`phonometry.building.measurement.floor_covering_improvement`](/reference/api/building/floor-covering-improvement/) for the ISO 16251-1
+mock-up, [`phonometry.materials.resilient.dynamic_stiffness`](/reference/api/materials/dynamic-stiffness/) for the EN 29052-1
 dynamic stiffness). This module is their **prediction** counterpart: it walks
 the physical chain from the material data to the improvement spectrum, so a
 covering or a floating floor can be sized before anything is built.
@@ -24,10 +24,10 @@ peak force per Fourier line is $|F_n| = 2 m v_0/T_\mathrm{i}$ (Eq. 3.90), giving
 the band mean-square force $F_\mathrm{rms}^{2} = 3.9 B$ (Eq. 3.92). Real floors
 are not that simple: the hammer, the contact stiffness `K` it deforms and the
 floor's driving-point impedance `Zdp` form a mass-spring-dashpot (Fig. 3.28)
-whose force pulse ([`force_pulse`](/phonometry/reference/api/building/resilient-layers/#force_pulse), Eqs. 3.95/3.96) is **over-critical**
+whose force pulse ([`force_pulse`](/reference/api/building/resilient-layers/#force_pulse), Eqs. 3.95/3.96) is **over-critical**
 when $K m \ge 4 Z_\mathrm{dp}^{2}$ (a single positive pulse, no rebound) and
 **under-critical** otherwise (a rebound; only the first positive lobe is
-transformed). Its spectrum ([`tapping_force_spectrum`](/phonometry/reference/api/building/resilient-layers/#tapping_force_spectrum)) is flat up to the
+transformed). Its spectrum ([`tapping_force_spectrum`](/reference/api/building/resilient-layers/#tapping_force_spectrum)) is flat up to the
 cut-off `fco` (Eqs. 3.101/3.102) and falls above it, and it asymptotes at low
 frequency between $|F_n|_{\text{lower}} = m v_0/T_\mathrm{i}$ and
 $|F_n|_{\text{upper}} = 2 m v_0/T_\mathrm{i}$, 6 dB apart in mean square
@@ -40,26 +40,26 @@ ratio $\Delta L = 20 \log_{10}(|F_n|_{\text{without}}/|F_n|_{\text{with}})$
 (Eq. 3.98) sets its cut-off, against the bare plate's
 $K = 2 r E/(1 - \nu^{2})$ (Eq. 3.97), which is why a two-line estimate,
 $\Delta L \approx 0$ below `fco` and 12 dB/octave above it, captures
-the whole design question ([`covering_improvement`](/phonometry/reference/api/building/resilient-layers/#covering_improvement)).
+the whole design question ([`covering_improvement`](/reference/api/building/resilient-layers/#covering_improvement)).
 
 **3. Floating floors (Hopkins 4.4.4, ISO 12354-2 Annex C, Vigran 8.4).** Above
 the mass-spring resonance $f_\mathrm{o} = 160 \sqrt{s'/m'}$ (Formula C.2) the
 improvement follows one of three laws
-([`floating_floor_improvement_spectrum`](/phonometry/reference/api/building/resilient-layers/#floating_floor_improvement_spectrum)): the infinite-plate result of
+([`floating_floor_improvement_spectrum`](/reference/api/building/resilient-layers/#floating_floor_improvement_spectrum)): the infinite-plate result of
 Cremer, $\Delta L = 40 \log_{10}(f/f_\mathrm{o})$ (Eq. 4.119, Vigran Eq. 8.40), the
 empirical $\Delta L = 30 \log_{10}(f/f_\mathrm{o})$ that EN 12354-2 adopted for
 sand-cement screeds (Formula C.1, Eq. 4.124), and the same 40 lg law with the
 hammer-impedance term $10 \log_{10}[1 + (f/f_\mathrm{limit})^{2}]$ that a lightweight
 walking surface needs (Eq. 4.123, Vigran Eq. 8.48). A floating floor on
 discrete mounts instead of a continuous layer is a two-subsystem SEA problem
-([`resilient_mount_improvement`](/phonometry/reference/api/building/resilient-layers/#resilient_mount_improvement), Vér's model as Hopkins Eq. 4.118 and
+([`resilient_mount_improvement`](/reference/api/building/resilient-layers/#resilient_mount_improvement), Vér's model as Hopkins Eq. 4.118 and
 Vigran Eq. 8.45) and rises at 30 dB/decade, not 40. Two floating floors stacked
-give two resonances ([`double_floating_floor_resonances`](/phonometry/reference/api/building/resilient-layers/#double_floating_floor_resonances), Eq. 4.125), and
+give two resonances ([`double_floating_floor_resonances`](/reference/api/building/resilient-layers/#double_floating_floor_resonances), Eq. 4.125), and
 the weighted single number follows from `m'` and `s'` directly
-([`weighted_floating_floor_improvement`](/phonometry/reference/api/building/resilient-layers/#weighted_floating_floor_improvement), Formulae C.4/C.5).
+([`weighted_floating_floor_improvement`](/reference/api/building/resilient-layers/#weighted_floating_floor_improvement), Formulae C.4/C.5).
 
 The wall and ceiling linings of ISO 12354-1 Annex D, which used to close this
-file, are in [`phonometry.building.prediction.linings`](/phonometry/reference/api/building/linings/): they are added to a
+file, are in [`phonometry.building.prediction.linings`](/reference/api/building/linings/): they are added to a
 wall rather than laid on a floor, and the annex rates them from a resonance
 frequency instead of from the tapping machine's force.
 
@@ -162,7 +162,7 @@ mass, bending stiffness and total loss factor of the slab, so it alters
 only the force the hammer injects. The improvement is then the ratio of
 the two force spectra,
 $\Delta L = 20 \log_{10}(|F_n|_{\text{without}}/|F_n|_{\text{with}})$,
-computed here from [`tapping_force_spectrum`](/phonometry/reference/api/building/resilient-layers/#tapping_force_spectrum) with the covering's
+computed here from [`tapping_force_spectrum`](/reference/api/building/resilient-layers/#tapping_force_spectrum) with the covering's
 contact stiffness (Eq. 3.98) and with the plate's (Eq. 3.97).
 
 The tapping machine excites a **line** spectrum, at multiples of the 10 Hz
@@ -190,14 +190,14 @@ model identifies the general features rather than replacing a measurement.
 | Name | Description |
 | :--- | :--- |
 | `frequencies` | Band centre frequencies `f`, in Hz. |
-| `covering_stiffness` | Contact stiffness `K` of the covering, in N/m ([`covering_contact_stiffness`](/phonometry/reference/api/building/resilient-layers/#covering_contact_stiffness)). |
-| `plate_stiffness` | Contact stiffness `K` of the bare plate, in N/m ([`plate_contact_stiffness`](/phonometry/reference/api/building/resilient-layers/#plate_contact_stiffness)). |
+| `covering_stiffness` | Contact stiffness `K` of the covering, in N/m ([`covering_contact_stiffness`](/reference/api/building/resilient-layers/#covering_contact_stiffness)). |
+| `plate_stiffness` | Contact stiffness `K` of the bare plate, in N/m ([`plate_contact_stiffness`](/reference/api/building/resilient-layers/#plate_contact_stiffness)). |
 | `impedance` | Driving-point impedance `Zdp` of the base floor, in N.s/m; unchanged by the covering. |
 | `mass` | Hammer mass `m`, in kg (Default: 0.5). |
 | `impact_rate` | Impact repetition rate `fi`, in Hz (Default: 10); it sets the spacing of the Fourier lines the bands average over. |
 | `fraction` | The band set, 3 for one-third octaves or 1 for octaves. One of `1` or `3`. |
 
-**Returns:** A [`CoveringImprovementResult`](/phonometry/reference/api/building/resilient-layers/#coveringimprovementresult).
+**Returns:** A [`CoveringImprovementResult`](/reference/api/building/resilient-layers/#coveringimprovementresult).
 
 **Raises**
 
@@ -236,8 +236,8 @@ Predicted improvement `ΔL` of a soft floor covering
 | `bare_cut_off_frequency` | Cut-off frequency of the bare plate, in Hz. |
 | `lines` | Fourier line frequencies $n f_\mathrm{i}$ of the tapping machine, in Hz, covering every band in `frequencies`. |
 | `line_improvement` | The per-line ratio $\Delta L = 20 \log_{10}(\lvert F_n \rvert_{\text{without}}/\lvert F_n \rvert_{\text{with}})$ of Eq. (4.114) at `lines`, in dB. It carries the deep troughs at odd multiples of `fco` that Hopkins notes below Fig. 4.64, which are an artefact of the undamped model and disappear from `improvement`. |
-| `bare` | The bare-plate [`TappingForceResult`](/phonometry/reference/api/building/resilient-layers/#tappingforceresult), at `lines`. |
-| `covered` | The [`TappingForceResult`](/phonometry/reference/api/building/resilient-layers/#tappingforceresult) with the covering, at `lines`. |
+| `bare` | The bare-plate [`TappingForceResult`](/reference/api/building/resilient-layers/#tappingforceresult), at `lines`. |
+| `covered` | The [`TappingForceResult`](/reference/api/building/resilient-layers/#tappingforceresult) with the covering, at `lines`. |
 
 ### CoveringImprovementResult.plot()
 
@@ -347,7 +347,7 @@ floating_floor_improvement_spectrum(
 Improvement `ΔL(f)` of a floating floor on a heavyweight base floor.
 
 Three laws share the same anchor, the mass-spring resonance `fo` of the
-walking surface on the resilient layer ([`floating_floor_resonance_frequency`](/phonometry/reference/api/building/resilient-layers/#floating_floor_resonance_frequency)),
+walking surface on the resilient layer ([`floating_floor_resonance_frequency`](/reference/api/building/resilient-layers/#floating_floor_resonance_frequency)),
 and all give $\Delta L = 0$ at and below it (in the band containing
 `fo`, `ΔL` is in practice between −5 dB and 0 dB):
 
@@ -379,11 +379,11 @@ reported to hold in $f_\mathrm{o} < f < 4 f_\mathrm{o}$.
 | `frequencies` | Band centre frequencies `f`, in Hz. |
 | `resonance_frequency` | Mass-spring resonance `fo`, in Hz. |
 | `model` | `"en12354"`, `"cremer"` or `"cremer_hammer"`. |
-| `limiting_frequency` | Limiting frequency `flimit`, in Hz; required by `"cremer_hammer"` and ignored otherwise ([`hammer_limiting_frequency`](/phonometry/reference/api/building/resilient-layers/#hammer_limiting_frequency)). |
+| `limiting_frequency` | Limiting frequency `flimit`, in Hz; required by `"cremer_hammer"` and ignored otherwise ([`hammer_limiting_frequency`](/reference/api/building/resilient-layers/#hammer_limiting_frequency)). |
 | `mass_per_area` | Optional `m'` of the floating floor, in kg/m². |
 | `dynamic_stiffness` | Optional `s'` of the resilient layer, in N/m³; supplied together with `mass_per_area` it adds `ΔLw` to the result, from Formula (C.4) for `"en12354"` (screeds) and Formula (C.5) for the other two models (asphalt and dry floating floors). |
 
-**Returns:** A [`FloatingFloorImprovementResult`](/phonometry/reference/api/building/resilient-layers/#floatingfloorimprovementresult).
+**Returns:** A [`FloatingFloorImprovementResult`](/reference/api/building/resilient-layers/#floatingfloorimprovementresult).
 
 **Raises**
 
@@ -409,7 +409,7 @@ stiffness per unit area of the resilient layer measured without pre-load
 and `m'` the mass per unit area of the floating floor. The printed
 constant 160 rounds the exact mass-spring value
 $1000/(2 \pi) = 159.15$ that
-[`phonometry.materials.natural_frequency`](/phonometry/reference/api/materials/dynamic-stiffness/#natural_frequency) applies, so the two differ
+[`phonometry.materials.natural_frequency`](/reference/api/materials/dynamic-stiffness/#natural_frequency) applies, so the two differ
 by 0.5 %; this function reproduces the standard, whose own Annex G
 example prints $f_\mathrm{o} = 52.8$ Hz for $s' = 8$ MN/m³,
 $m' = 73.5$ kg/m².
@@ -526,7 +526,7 @@ due to the oscillations set to zero before taking the Fourier transform",
 the hammer having rebounded from the plate. That truncation is applied
 here, so the under-critical pulse is returned as zero beyond its
 first zero crossing at $t = \pi/\beta$; it is the same truncation
-[`tapping_force_spectrum`](/phonometry/reference/api/building/resilient-layers/#tapping_force_spectrum) transforms, so integrating this pulse over
+[`tapping_force_spectrum`](/reference/api/building/resilient-layers/#tapping_force_spectrum) transforms, so integrating this pulse over
 $0 \le t \le \pi/\beta$ reproduces that spectrum.
 
 The over-critical pulse has no such cut and decays for all `t`; it is
@@ -541,7 +541,7 @@ impacts rather than one that overflows partway through it.
 | `contact_stiffness` | Contact stiffness `K`, in N/m. |
 | `impedance` | Driving-point impedance `Zdp`, in N.s/m. |
 | `mass` | Hammer mass `m`, in kg (Default: 0.5). |
-| `impact_velocity` | Impact velocity `vo`, in m/s (Default: [`hammer_impact_velocity`](/phonometry/reference/api/building/resilient-layers/#hammer_impact_velocity)). |
+| `impact_velocity` | Impact velocity `vo`, in m/s (Default: [`hammer_impact_velocity`](/reference/api/building/resilient-layers/#hammer_impact_velocity)). |
 
 **Returns:** The force `F1(t)`, in N, with the same shape as `time`; never negative. A `float` for a number, an array for a sequence or an array, a zero-dimensional one included.
 
@@ -632,7 +632,7 @@ $K = 2 r E/(1 - \nu^{2})$ (Eq. 3.97).
 
 The stiffness the hammer deforms when it lands on the bare walking surface
 (Timoshenko and Goodier's Hertzian contact for a flat circular punch), as
-opposed to [`covering_contact_stiffness`](/phonometry/reference/api/building/resilient-layers/#covering_contact_stiffness) for a soft covering laid on
+opposed to [`covering_contact_stiffness`](/reference/api/building/resilient-layers/#covering_contact_stiffness) for a soft covering laid on
 top of it.
 
 **Parameters**
@@ -824,8 +824,8 @@ $[K/(2 Z_\mathrm{dp}) - \sqrt{(K/(2 Z_\mathrm{dp}))^{2} - K/m}]/(2 \pi)$
 
 | Name | Description |
 | :--- | :--- |
-| `contact_stiffness` | Contact stiffness `K`, in N/m (see [`plate_contact_stiffness`](/phonometry/reference/api/building/resilient-layers/#plate_contact_stiffness) / [`covering_contact_stiffness`](/phonometry/reference/api/building/resilient-layers/#covering_contact_stiffness)). |
-| `impedance` | Driving-point impedance `Zdp` of the floor, in N.s/m (for a homogeneous plate, [`phonometry.vibration.infinite_plate_impedance`](/phonometry/reference/api/vibration/point-mobility/#infinite_plate_impedance)). |
+| `contact_stiffness` | Contact stiffness `K`, in N/m (see [`plate_contact_stiffness`](/reference/api/building/resilient-layers/#plate_contact_stiffness) / [`covering_contact_stiffness`](/reference/api/building/resilient-layers/#covering_contact_stiffness)). |
+| `impedance` | Driving-point impedance `Zdp` of the floor, in N.s/m (for a homogeneous plate, [`phonometry.vibration.infinite_plate_impedance`](/reference/api/vibration/point-mobility/#infinite_plate_impedance)). |
 | `mass` | Hammer mass `m`, in kg (Default: 0.5). |
 
 **Returns:** The cut-off frequency `fco`, in Hz.
@@ -863,7 +863,7 @@ tapping_force_spectrum(
 Force spectrum of the ISO tapping machine on a floor (Hopkins 3.6.3.1).
 
 The Fourier transform of the single-impact force pulse
-([`force_pulse`](/phonometry/reference/api/building/resilient-layers/#force_pulse)), scaled by the impact repetition rate. Writing
+([`force_pulse`](/reference/api/building/resilient-layers/#force_pulse)), scaled by the impact repetition rate. Writing
 $a = K/(2 Z_\mathrm{dp})$ and $\omega_0^{2} = K/m$, the transform of
 Eqs. (3.95)/(3.96) is the same rational function in both critical cases,
 $\hat{F}(\omega) = v_0 K/(\omega_0^{2} - \omega^{2} + 2 i a \omega)$,
@@ -889,10 +889,10 @@ rebound), the two limits of Eqs. (3.99)/(3.100).
 | `impedance` | Driving-point impedance `Zdp` of the floor, in N.s/m. |
 | `mass` | Hammer mass `m`, in kg (Default: 0.5). |
 | `impact_rate` | Impact repetition rate `fi`, in Hz (Default: 10). |
-| `impact_velocity` | Impact velocity `vo`, in m/s (Default: [`hammer_impact_velocity`](/phonometry/reference/api/building/resilient-layers/#hammer_impact_velocity)). |
+| `impact_velocity` | Impact velocity `vo`, in m/s (Default: [`hammer_impact_velocity`](/reference/api/building/resilient-layers/#hammer_impact_velocity)). |
 | `fraction` | The band set of Eq. (3.91), 3 for one-third octaves or 1 for octaves. One of `1` or `3`. |
 
-**Returns:** A [`TappingForceResult`](/phonometry/reference/api/building/resilient-layers/#tappingforceresult).
+**Returns:** A [`TappingForceResult`](/reference/api/building/resilient-layers/#tappingforceresult).
 
 **Raises**
 
@@ -1021,7 +1021,7 @@ weighted_floating_floor_improvement(
 Weighted improvement `ΔLw` of a floating floor (Formulae C.4/C.5).
 
 The single number that feeds the simplified prediction
-([`phonometry.building.predicted_impact_insulation`](/phonometry/reference/api/building/simplified-model/#predicted_impact_insulation)), read directly
+([`phonometry.building.predicted_impact_insulation`](/reference/api/building/simplified-model/#predicted_impact_insulation)), read directly
 from the floating floor's mass per unit area and the resilient layer's
 dynamic stiffness. ISO 12354-2:2017 gives it as the two nomograms of
 Figures C.1 and C.2 and prints the fits:

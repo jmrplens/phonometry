@@ -1,6 +1,6 @@
 <!-- Written by `make llms` from site/src/content/docs/vibration/structural/structural-damage.mdx: edit that page and its Spanish twin, then run `make llms`. -->
 
-← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/vibration/structural/structural-damage/
+← [Documentation index](../../README.md) · Published at https://phonometry.dev/vibration/structural/structural-damage/
 
 # Vibration damage to structures
 
@@ -163,7 +163,7 @@ A floor or ceiling gets its own sentence rather than a table. Clause 5.2: if
 the vertical velocity at the point of largest vibration, in general mid-span,
 stays at or below 20 mm/s, no reduction in the serviceability of the floor is
 expected. The value is published as
-[`FLOOR_VERTICAL_MM_S`](https://docs.jmrp.io/phonometry/reference/api/vibration/building-damage/),
+[`FLOOR_VERTICAL_MM_S`](https://phonometry.dev/reference/api/vibration/building-damage/),
 and for a building in row 3 of Table 1 the standard notes that even that may
 have to be reduced.
 

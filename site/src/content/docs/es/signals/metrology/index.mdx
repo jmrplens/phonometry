@@ -16,7 +16,7 @@ que respalda los números: qué afirma una **clase** de prestaciones, los
 verificadores que califican una cadena, y el informe de conformidad
 publicado.
 
-[Calibración y dBFS](/phonometry/es/signals/metrology/calibration/) se ocupa del
+[Calibración y dBFS](/es/signals/metrology/calibration/) se ocupa del
 significado físico. phonometry trabaja en dos marcos de referencia: los
 **dB SPL** físicos, establecidos a partir de un tono de calibrador grabado (el
 ritual de campo de IEC 60942), y los **dBFS** digitales, niveles relativos al
@@ -26,7 +26,7 @@ modo y, no menos importante, qué magnitudes tienen sentido en cada marco, y
 califica el propio calibrador frente a IEC 60942:2017 a partir de lo que un
 laboratorio midió en él.
 
-[Incertidumbre de medida (GUM y Monte Carlo)](/phonometry/es/signals/metrology/gum-uncertainty/)
+[Incertidumbre de medida (GUM y Monte Carlo)](/es/signals/metrology/gum-uncertainty/)
 se ocupa de la segunda, implementando la *Guía para la expresión de la
 incertidumbre de medida* (**ISO/IEC Guide 98-3:2008**) y su **Suplemento 1**
 de Monte Carlo. La ruta GUM propaga las incertidumbres típicas
@@ -38,7 +38,7 @@ que siguen siendo honestos cuando el modelo es no lineal o las entradas
 distan de ser gaussianas. La página muestra ambas sobre los mismos modelos,
 incluyendo dónde divergen y por qué.
 
-[Conformidad y verificación](/phonometry/es/signals/metrology/compliance-verification/)
+[Conformidad y verificación](/es/signals/metrology/compliance-verification/)
 lleva el relato de la evidencia: qué afirma de verdad una clase de
 prestaciones en IEC 61672-1 e IEC 61260-1 (mismos objetivos de diseño,
 distintos límites de aceptación), qué verificador público califica cada
@@ -53,7 +53,7 @@ los ensayos periódicos de un sonómetro, `filters.verify_filter_periodic` para
 los de un filtro de bandas) y calcular sobre un diseño los ensayos que no
 necesitan una muestra.
 
-[Cualificación de datos](/phonometry/es/signals/metrology/data-qualification/) guarda la
+[Cualificación de datos](/es/signals/metrology/data-qualification/) guarda la
 puerta delante de ambas: todo promedio - un Leq, una PSD de Welch, toda
 entrada promediada de un balance de incertidumbre - supone que el
 registro es estacionario, y los
@@ -64,14 +64,14 @@ Rice de cruces por nivel y de picos - frecuencia aparente, tasas de picos,
 el factor de irregularidad - que caracterizan un registro gaussiano
 cualificado y criban el que no lo es.
 
-[Incidencia aleatoria y campo difuso](/phonometry/es/signals/metrology/random-incidence/)
+[Incidencia aleatoria y campo difuso](/es/signals/metrology/random-incidence/)
 lleva la calibración del propio sonómetro más allá de su dirección de
 referencia: el factor de directividad de IEC 61183 a partir de lecturas en
 una cámara anecoica, el nivel de sensibilidad en incidencia aleatoria que
 resulta de él, y el nivel en campo difuso por comparación con un sonómetro de
 referencia en una cámara reverberante.
 
-[Las correcciones de campo libre](/phonometry/es/signals/metrology/free-field-corrections/)
+[Las correcciones de campo libre](/es/signals/metrology/free-field-corrections/)
 devuelven al campo libre para el que está especificado un sonómetro ensayado
 con un calibrador acústico, un acoplador de comparación o un actuador
 electrostático: el valor de ajuste de IEC 62585 a la frecuencia de
@@ -79,14 +79,14 @@ comprobación de la calibración, la corrección a cada frecuencia, el
 balance de incertidumbre que la acompaña y el máximo que permite cada
 apartado.
 
-[Los ensayos periódicos de un sonómetro](/phonometry/es/signals/metrology/sound-level-meter-periodic-tests/)
+[Los ensayos periódicos de un sonómetro](/es/signals/metrology/sound-level-meter-periodic-tests/)
 juzgan lo que un laboratorio midió en un sonómetro en servicio según la
 IEC 61672-3: cada apartado, de las ponderaciones frecuenciales a la
 estabilidad a niveles elevados, frente a los límites de aceptación de la
 IEC 61672-1 y los máximos de su Tabla B.1, lo que contiene un ensayo completo
 y la declaración que el apartado 22 prescribe para el resultado.
 
-[La calibración por comparación](/phonometry/es/signals/metrology/comparison-calibration/)
+[La calibración por comparación](/es/signals/metrology/comparison-calibration/)
 sube un escalón en la cadena, hasta el propio micrófono: un micrófono patrón
 de trabajo toma la sensibilidad de una referencia a través del cociente de sus
 tensiones de salida, en un acoplador según la IEC 61094-5 o en campo libre
@@ -94,14 +94,14 @@ según la IEC 61094-8, con las correcciones ambiental, del soporte y de campo
 libre que pide cada parte y el balance de incertidumbre de la Tabla D.1 o
 de la Tabla 2.
 
-[La calibración por reciprocidad](/phonometry/es/signals/metrology/reciprocity-calibration/)
+[La calibración por reciprocidad](/es/signals/metrology/reciprocity-calibration/)
 es la cima de esa cadena: la propia referencia, un micrófono patrón de
 laboratorio, calibrada sin otro micrófono con que compararla, a partir de tres
 medidas por pares y de la impedancia de transferencia acústica de un
 acoplador según la IEC 61094-2 o de un campo libre según la IEC 61094-3.
 
 La misma disciplina se extiende al dominio de la frecuencia: las páginas de
-[Señales y espectros](/phonometry/es/signals/spectra/)
+[Señales y espectros](/es/signals/spectra/)
 aplican el análisis de error de Bendat y Piersol a las estimaciones
 espectrales de Welch, de modo que cada PSD lleva su número efectivo de
 promedios, su error aleatorio normalizado y un intervalo de confianza
@@ -115,42 +115,42 @@ la maquinaria GUM descrita aquí.
 
 ## Páginas de esta sección
 
-- [Calibración y dBFS](/phonometry/es/signals/metrology/calibration/): calibración SPL
+- [Calibración y dBFS](/es/signals/metrology/calibration/): calibración SPL
   física desde un tono de calibrador, la comprobación de estabilidad que
   aplica a esa grabación, el veredicto de IEC 60942:2017 sobre el propio
   calibrador, y el modo digital de fondo de escala.
-- [Conformidad y verificación](/phonometry/es/signals/metrology/compliance-verification/):
+- [Conformidad y verificación](/es/signals/metrology/compliance-verification/):
   qué afirma una clase de prestaciones, los verificadores que califican
   ponderaciones, bancos de filtros y espectros de intensidad frente a sus
   tablas de tolerancias, la regla de conformidad del IEC TC 29, el informe de
   conformidad, y el alcance de IEC 61672-2/-3 e IEC 61260-2/-3.
-- [Incertidumbre de medida (GUM y Monte Carlo)](/phonometry/es/signals/metrology/gum-uncertainty/):
+- [Incertidumbre de medida (GUM y Monte Carlo)](/es/signals/metrology/gum-uncertainty/):
   la ley de propagación de la incertidumbre y el método de Monte Carlo,
   incertidumbre expandida e intervalos de cobertura.
-- [Cualificación de datos](/phonometry/es/signals/metrology/data-qualification/): los
+- [Cualificación de datos](/es/signals/metrology/data-qualification/): los
   tests de estacionariedad por inversiones de orden y por rachas sobre
   estadísticas de segmento, y las estadísticas de Rice de cruces por nivel y
   de picos con el factor de irregularidad.
-- [Incidencia aleatoria y campo difuso (IEC 61183)](/phonometry/es/signals/metrology/random-incidence/):
+- [Incidencia aleatoria y campo difuso (IEC 61183)](/es/signals/metrology/random-incidence/):
   el factor de directividad de un sonómetro a partir de lecturas en dos
   planos, en uno o en 38 elementos de igual área, sus niveles de sensibilidad
   en incidencia aleatoria y en campo difuso, y la Tabla B.1 del micrófono de
   referencia.
-- [Correcciones de campo libre de un sonómetro (IEC 62585)](/phonometry/es/signals/metrology/free-field-corrections/):
+- [Correcciones de campo libre de un sonómetro (IEC 62585)](/es/signals/metrology/free-field-corrections/):
   el valor de ajuste, las correcciones para un calibrador, un acoplador y un
   actuador, el balance del Anexo I y el dictamen de los apartados 9 a 14.
-- [Ensayos periódicos de un sonómetro (IEC 61672-3)](/phonometry/es/signals/metrology/sound-level-meter-periodic-tests/):
+- [Ensayos periódicos de un sonómetro (IEC 61672-3)](/es/signals/metrology/sound-level-meter-periodic-tests/):
   el dictamen sobre los resultados de un laboratorio, apartado por apartado,
   con las Tablas 4, 5 y B.1 de la IEC 61672-1, y la declaración del
   apartado 22.
-- [Calibrar un micrófono por comparación (IEC 61094-5/-8)](/phonometry/es/signals/metrology/comparison-calibration/):
+- [Calibrar un micrófono por comparación (IEC 61094-5/-8)](/es/signals/metrology/comparison-calibration/):
   la comparación simultánea con el intercambio del Anexo C, la secuencial
   frente a un micrófono monitor, en nivel y en fase, las correcciones
   ambiental, del soporte del WS3, de distinto diámetro y de impedancia
   acústica con el aire entre dos micrófonos, la validación de un soporte o un
   acoplador, los balances de la Tabla D.1 y de la Tabla 2 con k = 2, y el
   procesado con ventana temporal del Anexo B de la IEC 61094-8.
-- [Calibración por reciprocidad (IEC 61094-2/-3)](/phonometry/es/signals/metrology/reciprocity-calibration/):
+- [Calibración por reciprocidad (IEC 61094-2/-3)](/es/signals/metrology/reciprocity-calibration/):
   tres micrófonos calibrados por pares, la impedancia de transferencia de un
   acoplador de onda plana o de gran volumen con la conducción térmica del
   Anexo A y los tubos capilares del Anexo B, el campo libre con la atenuación
@@ -167,7 +167,7 @@ pistófono LS/M o 1/M sale de su manual, así que pasa un `target_spl` ya
 corregido cuando el manual lo pida; tampoco se ejecutan los ensayos
 periódicos de IEC 61672-3, y `verify_sound_level_meter_periodic` califica los
 resultados que devuelve un laboratorio; [Conformidad y
-verificación](/phonometry/es/signals/metrology/compliance-verification/) traza
+verificación](/es/signals/metrology/compliance-verification/) traza
 esa frontera con precisión, parte por parte. La parte de dBFS de la página de
 calibración queda fuera de cualquier norma y no hace ninguna afirmación
 física: es un marco de referencia, no una medición. La cualificación de datos
@@ -178,8 +178,8 @@ libro. Y un balance de incertidumbre es un modelo de *tu* medición: la
 biblioteca propaga lo que declares y nunca inventa los términos. Donde una
 norma publica su propio balance, las guías lo dicen, como hace ISO 9612
 para la [exposición
-laboral](/phonometry/es/perception/hearing/occupational-exposure/) e ISO
-12999-1 para el [aislamiento acústico](/phonometry/es/buildings/insulation/).
+laboral](/es/perception/hearing/occupational-exposure/) e ISO
+12999-1 para el [aislamiento acústico](/es/buildings/insulation/).
 </ScopeClaim>
 </Scope>
 

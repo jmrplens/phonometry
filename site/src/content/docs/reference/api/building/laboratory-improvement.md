@@ -22,11 +22,11 @@ band (G.1). On one of the standard basic elements of ISO 10140-5:2021 Annex B
 (the heavy wall of about 350 kg/m², the heavy concrete floor, the lightweight
 wall of about 70 kg/m²), the single numbers are `ΔRw`, `Δ(Rw + C)` and
 `Δ(Rw + Ctr)` of ISO 717-1:2020 Annex D, read on the element's reference curve
-(G.5 c), [`weighted_reduction_improvement`](/phonometry/reference/api/building/ratings/#weighted_reduction_improvement)). On any
+(G.5 c), [`weighted_reduction_improvement`](/reference/api/building/ratings/#weighted_reduction_improvement)). On any
 other basic element they are the direct differences `ΔRw,direct`,
 `Δ(Rw + C)direct` and `Δ(Rw + Ctr)direct` of Formula (D.2), which describe
 the lining only on that element. G.4 adds one numeric condition, on the curing
-of the basic element ([`check_lining_curing`](/phonometry/reference/api/building/laboratory-improvement/#check_lining_curing)).
+of the basic element ([`check_lining_curing`](/reference/api/building/laboratory-improvement/#check_lining_curing)).
 
 **Floor coverings, Annex H.** The improvement of impact sound insulation is
 $\Delta L = L_\mathrm{n0} - L_\mathrm{n}$ per band (Formula (H.1)), on the
@@ -36,7 +36,7 @@ Formula (H.2),
 $\Delta L_\mathrm{oct} = -10 \log_{10}[(1/3) \sum 10^{-\Delta L_j/10}]$,
 and the single numbers `ΔLw` (heavyweight) or `ΔLt,1,w`, `ΔLt,2,w`,
 `ΔLt,3,w` (lightweight) with their adaptation terms from ISO 717-2:2020
-Clauses 5 and 6 ([`weighted_impact_improvement`](/phonometry/reference/api/building/ratings/#weighted_impact_improvement)),
+Clauses 5 and 6 ([`weighted_impact_improvement`](/reference/api/building/ratings/#weighted_impact_improvement)),
 on the reference curves of its Table 4. H.6.1 adds the improvement for the
 heavy/soft (rubber ball) source, $\Delta L_\mathrm{r} = L_\mathrm{i,Fmax,0} - L_\mathrm{i,Fmax}$ (Formula (H.3)).
 
@@ -83,7 +83,7 @@ judged here.
 | `time_lag_days` | Days between the two measurements (zero or more). |
 | `required_curing_days` | The curing period that settles the element without further condition, in days (default 14). |
 
-**Returns:** A [`LiningCuringCheck`](/phonometry/reference/api/building/laboratory-improvement/#liningcuringcheck).
+**Returns:** A [`LiningCuringCheck`](/reference/api/building/laboratory-improvement/#liningcuringcheck).
 
 **Raises**
 
@@ -113,7 +113,7 @@ is $\Delta L_\mathrm{r} = L_\mathrm{i,Fmax,0} - L_\mathrm{i,Fmax}$
 in each band (Formula (H.3)). The source is characterised in octave
 bands from 31.5 Hz to 500 Hz, and the levels are usually taken in the
 octaves 63 Hz to 500 Hz or the matching one-third octaves
-([`heavy_impact_octave_levels`](/phonometry/reference/api/building/heavy-impact/#heavy_impact_octave_levels)).
+([`heavy_impact_octave_levels`](/reference/api/building/heavy-impact/#heavy_impact_octave_levels)).
 
 **Parameters**
 
@@ -123,7 +123,7 @@ octaves 63 Hz to 500 Hz or the matching one-third octaves
 | `l_i_fmax` | `Li,Fmax` per band, in dB. |
 | `frequencies` | Band centre frequencies, in Hz. |
 
-**Returns:** A [`HeavyImpactImprovementResult`](/phonometry/reference/api/building/laboratory-improvement/#heavyimpactimprovementresult).
+**Returns:** A [`HeavyImpactImprovementResult`](/reference/api/building/laboratory-improvement/#heavyimpactimprovementresult).
 
 **Raises**
 
@@ -219,7 +219,7 @@ is the one of the `reference_floor` the caller names.
 | `frequencies` | Band centre frequencies, in Hz; the ratings are formed on the 16 bands 100 Hz to 3 150 Hz when all are present. |
 | `reference_floor` | `"heavyweight"` (default), `"lightweight_1"`, `"lightweight_2"` or `"lightweight_3"`. |
 
-**Returns:** A [`LaboratoryFloorCoveringImprovementResult`](/phonometry/reference/api/building/laboratory-improvement/#laboratoryfloorcoveringimprovementresult).
+**Returns:** A [`LaboratoryFloorCoveringImprovementResult`](/reference/api/building/laboratory-improvement/#laboratoryfloorcoveringimprovementresult).
 
 **Raises**
 
@@ -277,7 +277,7 @@ read off the numbers, so neither is refused here.
 | `frequencies` | Band centre frequencies, in Hz. |
 | `basic_element` | `"heavy_wall"` (default), `"heavy_floor"`, `"lightweight_wall"` or `None` for a basic element that is not one of the three standard ones. |
 
-**Returns:** A [`LaboratoryLiningImprovementResult`](/phonometry/reference/api/building/laboratory-improvement/#laboratoryliningimprovementresult).
+**Returns:** A [`LaboratoryLiningImprovementResult`](/reference/api/building/laboratory-improvement/#laboratoryliningimprovementresult).
 
 **Raises**
 
@@ -398,7 +398,7 @@ its place.
 | Name | Description |
 | :--- | :--- |
 | `path` | Destination path of the PDF file. |
-| `metadata` | Optional [`ReportMetadata`](/phonometry/reference/api/building/insulation/#reportmetadata); its `product` and `curing_time_hours` fill the product identification and curing time rows, `source_temperature_c` and `source_relative_humidity_percent` (or the single `temperature_c` and `relative_humidity_percent`) the climate of the source room, and `requirement` a verdict on the weighted reduction (passing at or above it). |
+| `metadata` | Optional [`ReportMetadata`](/reference/api/building/insulation/#reportmetadata); its `product` and `curing_time_hours` fill the product identification and curing time rows, `source_temperature_c` and `source_relative_humidity_percent` (or the single `temperature_c` and `relative_humidity_percent`) the climate of the source room, and `requirement` a verdict on the weighted reduction (passing at or above it). |
 | `engine` | Rendering back end; only `"reportlab"` is supported. |
 | `verbose` | When `True`, the table also shows $L_\mathrm{n}$ with the covering. |
 | `language` | `"en"` (default) or `"es"`. |

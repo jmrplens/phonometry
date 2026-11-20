@@ -17,7 +17,7 @@ how useful it is.
 The annex offers four empirical predictors and is candid about all of them.
 The simplest is the storey count, $f = 10/n$ hertz, the same rule
 DIN 4150-3 prints in its 6.4 and this library already publishes as
-[`story_fundamental_frequency`](/phonometry/reference/api/vibration/building-damage/#story_fundamental_frequency).
+[`story_fundamental_frequency`](/reference/api/vibration/building-damage/#story_fundamental_frequency).
 The other three are the forms the period $T$ takes in national codes,
 each with a coefficient the codes disagree about:
 
@@ -71,7 +71,7 @@ One predicted fundamental frequency, with the error it carries.
 | :--- | :--- |
 | `frequency_hz` | The predicted fundamental frequency. |
 | `period_s` | The same prediction as a period. |
-| `model` | Which of [`PERIOD_MODELS`](/phonometry/reference/api/vibration/building-response/#period_models) produced it. One of `"stories"`, `"height"`, `"height_width"` or `"slenderness"`. |
+| `model` | Which of [`PERIOD_MODELS`](/reference/api/vibration/building-response/#period_models) produced it. One of `"stories"`, `"height"`, `"height_width"` or `"slenderness"`. |
 | `coefficient` | The code coefficient used, or `None` for the storey model, which has none. |
 | `height_m` | The height it was computed from, where the model uses one. |
 
@@ -172,19 +172,19 @@ One prediction, bundled with the coefficient and the error band.
 
 | Name | Description |
 | :--- | :--- |
-| `model` | One of [`PERIOD_MODELS`](/phonometry/reference/api/vibration/building-response/#period_models). One of `"stories"`, `"height"`, `"height_width"` or `"slenderness"`. |
+| `model` | One of [`PERIOD_MODELS`](/reference/api/vibration/building-response/#period_models). One of `"stories"`, `"height"`, `"height_width"` or `"slenderness"`. |
 | `n_stories` | Number of storeys `n`, for the storey model. |
 | `height_m` | Height `h` above the base, in metres. |
 | `width_m` | Width `b` parallel to the force, in metres. |
 | `coefficient` | The code coefficient, or `None` for the midpoint. |
 
-**Returns:** The prediction, as a [`BuildingFrequencyEstimate`](/phonometry/reference/api/vibration/building-response/#buildingfrequencyestimate).
+**Returns:** The prediction, as a [`BuildingFrequencyEstimate`](/reference/api/vibration/building-response/#buildingfrequencyestimate).
 
 **Raises**
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | For anything [`fundamental_period`](/phonometry/reference/api/vibration/building-response/#fundamental_period) refuses. |
+| ValueError | For anything [`fundamental_period`](/reference/api/vibration/building-response/#fundamental_period) refuses. |
 | TypeError | if `coefficient` is not a single number, or `model` is not a text. `height_m` is refused the same way when it is not one real number. |
 
 ## fundamental_frequency
@@ -200,7 +200,7 @@ fundamental_frequency(
 ) -> float
 ```
 
-The reciprocal of [`fundamental_period`](/phonometry/reference/api/vibration/building-response/#fundamental_period), in hertz.
+The reciprocal of [`fundamental_period`](/reference/api/vibration/building-response/#fundamental_period), in hertz.
 
 Arguments and errors are that function's; this exists because the annex
 states two of its four predictors as frequencies and two as periods, and a
@@ -210,7 +210,7 @@ reader should not have to remember which.
 
 | Name | Description |
 | :--- | :--- |
-| `model` | One of [`PERIOD_MODELS`](/phonometry/reference/api/vibration/building-response/#period_models). One of `"stories"`, `"height"`, `"height_width"` or `"slenderness"`. |
+| `model` | One of [`PERIOD_MODELS`](/reference/api/vibration/building-response/#period_models). One of `"stories"`, `"height"`, `"height_width"` or `"slenderness"`. |
 | `n_stories` | Number of storeys `n`, for the storey model. |
 | `height_m` | Height `h` above the base, in metres. |
 | `width_m` | Width `b` parallel to the force, in metres. |
@@ -255,11 +255,11 @@ form, since the annex gives a range and no way to choose inside it; state
 
 | Name | Description |
 | :--- | :--- |
-| `model` | One of [`PERIOD_MODELS`](/phonometry/reference/api/vibration/building-response/#period_models). One of `"stories"`, `"height"`, `"height_width"` or `"slenderness"`. |
+| `model` | One of [`PERIOD_MODELS`](/reference/api/vibration/building-response/#period_models). One of `"stories"`, `"height"`, `"height_width"` or `"slenderness"`. |
 | `n_stories` | Number of storeys `n`, for the storey model. |
 | `height_m` | Height `h` above the base, in metres. |
 | `width_m` | Width `b` parallel to the force, in metres. |
-| `coefficient` | The code coefficient, or `None` for the midpoint of [`PERIOD_COEFFICIENT_RANGES`](/phonometry/reference/api/vibration/building-response/#period_coefficient_ranges). Not accepted by the storey model, which has no coefficient to choose. |
+| `coefficient` | The code coefficient, or `None` for the midpoint of [`PERIOD_COEFFICIENT_RANGES`](/reference/api/vibration/building-response/#period_coefficient_ranges). Not accepted by the storey model, which has no coefficient to choose. |
 
 **Returns:** The fundamental period, in seconds.
 

@@ -1,6 +1,6 @@
 <!-- Written by `make llms` from site/src/content/docs/signals/metrology/index.mdx: edit that page and its Spanish twin, then run `make llms`. -->
 
-← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/signals/metrology/
+← [Documentation index](../../README.md) · Published at https://phonometry.dev/signals/metrology/
 
 # Calibration and uncertainty
 

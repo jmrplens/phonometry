@@ -10,7 +10,7 @@ Thomson multitaper spectral estimation (Percival & Walden 1993, Ch. 7).
 Thomson's multitaper estimator (Thomson 1982), as developed in Percival &
 Walden, *Spectral Analysis for Physical Applications* (1993, Chapter 7),
 is the whole-record alternative to the Welch segment averaging of
-[`phonometry.signals.spectra`](/phonometry/reference/api/signals/spectra/): `K` orthogonal discrete prolate
+[`phonometry.signals.spectra`](/reference/api/signals/spectra/): `K` orthogonal discrete prolate
 spheroidal (Slepian) tapers of time-half-bandwidth `NW` produce `K`
 nearly uncorrelated eigenspectra whose (adaptively weighted) average
 carries about $2K$ chi-square degrees of freedom *without*
@@ -25,7 +25,7 @@ downweight leakage-prone tapers wherever the spectrum is locally weak
 and that costs degrees of freedom there (P&W Eq. 370b). Calibration
 (no detrending, one-sided `'density'` scaling integrating to the signal
 power, `'spectrum'` scaling reading $A^2/2$ at a tone's peak)
-matches [`phonometry.signals.spectra`](/phonometry/reference/api/signals/spectra/) exactly, so the two estimators
+matches [`phonometry.signals.spectra`](/reference/api/signals/spectra/) exactly, so the two estimators
 of the same record are directly comparable.
 
 > Auto-generated from the source docstrings by `scripts/generate_api_docs.py` (`make api-docs`). Do not edit by hand.
@@ -59,7 +59,7 @@ average has about $2K$ chi-square degrees of freedom and
 $1/K$ of
 the periodogram's variance *without* segmenting the record: the
 estimator of choice for short records, where Welch's method
-([`power_spectral_density`](/phonometry/reference/api/signals/spectra/#power_spectral_density)) would
+([`power_spectral_density`](/reference/api/signals/spectra/#power_spectral_density)) would
 leave too few segments.
 
 With `adaptive=True` (default) the eigenspectra are combined with
@@ -76,7 +76,7 @@ With `adaptive=False` the eigenvalue-weighted average of P&W
 Eq. 369a is returned.
 
 Calibration matches the Welch estimators of
-[`phonometry.signals.spectra`](/phonometry/reference/api/signals/spectra/) exactly: no
+[`phonometry.signals.spectra`](/reference/api/signals/spectra/) exactly: no
 detrending, `'density'` scaling integrates to the signal power
 (units²/Hz, one-sided) and `'spectrum'` scaling reads
 $A^2/2$ at
@@ -90,15 +90,15 @@ the resolution bandwidth $2W$).
 
 | Name | Description |
 | :--- | :--- |
-| `x` | Signal, 1-D (used whole; no segmentation). Accepts a [`phonometry.io.Signal`](/phonometry/reference/api/io/io/#signal), whose calibration is applied to the samples, so the density and its confidence interval come out in Pa²/Hz, or Pa² for `scaling='spectrum'`. |
-| `fs` | Sample rate, in Hz. Required for a bare array; a [`Signal`](/phonometry/reference/api/io/io/#signal) brings its own, and an explicit value that disagrees with it raises instead of silently winning. |
+| `x` | Signal, 1-D (used whole; no segmentation). Accepts a [`phonometry.io.Signal`](/reference/api/io/io/#signal), whose calibration is applied to the samples, so the density and its confidence interval come out in Pa²/Hz, or Pa² for `scaling='spectrum'`. |
+| `fs` | Sample rate, in Hz. Required for a bare array; a [`Signal`](/reference/api/io/io/#signal) brings its own, and an explicit value that disagrees with it raises instead of silently winning. |
 | `time_half_bandwidth` | Duration x half-bandwidth product `NW` (dimensionless; default 4, P&W's worked choice). The design half-bandwidth is $W = NW f_\mathrm{s} / N$ Hz; larger `NW` admits more tapers (lower variance) at the cost of resolution $2W$. |
 | `n_tapers` | Number of tapers `K`; `None` picks $2 NW - 1$ (all tapers with near-unity concentration, P&W Section 7.1). At most the Shannon number $2 NW$. |
 | `adaptive` | Use Thomson's adaptive weights (default) or the eigenvalue-weighted average. |
 | `scaling` | `'density'` (units²/Hz) or `'spectrum'` (units², sinusoid-peak reading). |
 | `confidence` | Confidence level for the chi-square interval. |
 
-**Returns:** A [`MultitaperSpectralDensityResult`](/phonometry/reference/api/signals/multitaper/#multitaperspectraldensityresult).
+**Returns:** A [`MultitaperSpectralDensityResult`](/reference/api/signals/multitaper/#multitaperspectraldensityresult).
 
 **Raises**
 
@@ -136,7 +136,7 @@ the `K` eigenspectra are nearly uncorrelated, so their weighted
 average trades the two chi-square degrees of freedom of a periodogram
 for about $2K$, without segmenting the record as Welch's
 method does. The chi-square machinery mirrors
-[`SpectralDensityResult`](/phonometry/reference/api/signals/spectra/#spectraldensityresult), but here
+[`SpectralDensityResult`](/reference/api/signals/spectra/#spectraldensityresult), but here
 the degrees of freedom are
 per-frequency: Thomson's adaptive weights (P&W Eq. 368a) downweight
 leakage-prone tapers wherever the spectrum is locally weak, which

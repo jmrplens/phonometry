@@ -15,29 +15,29 @@ spreading, atmospheric absorption and the ground effect of a point source over
 an impedance plane; the NORAH2 guidance extends that last term to real terrain,
 where a fitted mean ground plane replaces the flat ground and a blocked line of
 sight becomes diffraction. Every function here takes a geometry and a spectrum;
-[`rotorcraft_noise`](/phonometry/reference/api/aeroacoustics/rotorcraft-noise/) holds the hemisphere source and the
+[`rotorcraft_noise`](/reference/api/aeroacoustics/rotorcraft-noise/) holds the hemisphere source and the
 event chain that call them.
 
 This module provides the propagation primitives of the method (clean-room, from
 the NORAH2 guidance SC01.D1.5d, the basis of ECAC Doc 32):
 
-* [`spherical_spreading_adjustment`](/phonometry/reference/api/aeroacoustics/rotorcraft-propagation/#spherical_spreading_adjustment):
+* [`spherical_spreading_adjustment`](/reference/api/aeroacoustics/rotorcraft-propagation/#spherical_spreading_adjustment):
   $\Delta L_\mathrm{s} = -20 \cdot \log_{10}(r/60)$ (Eq. 24).
-* [`atmospheric_adjustment`](/phonometry/reference/api/aeroacoustics/rotorcraft-propagation/#atmospheric_adjustment):
+* [`atmospheric_adjustment`](/reference/api/aeroacoustics/rotorcraft-propagation/#atmospheric_adjustment):
   $\Delta L_\mathrm{a} = -\alpha(f) \cdot (r - 60)$ with the ISO 9613-1
   pure-tone coefficient (Eq. 26/27), reusing
-  [`air_attenuation`](/phonometry/reference/api/environment/air-absorption/#air_attenuation).
-* [`ground_effect_adjustment`](/phonometry/reference/api/aeroacoustics/rotorcraft-propagation/#ground_effect_adjustment): `ΔLg` for a point source over an impedance
+  [`air_attenuation`](/reference/api/environment/air-absorption/#air_attenuation).
+* [`ground_effect_adjustment`](/reference/api/aeroacoustics/rotorcraft-propagation/#ground_effect_adjustment): `ΔLg` for a point source over an impedance
   plane (Chien-Soroka, Eq. 28-35) with the Delany-Bazley one-parameter impedance
   and the CNOSSOS flow-resistivity classes.
-* [`mean_ground_plane`](/phonometry/reference/api/aeroacoustics/rotorcraft-propagation/#mean_ground_plane): the least-squares plane through a terrain section
+* [`mean_ground_plane`](/reference/api/aeroacoustics/rotorcraft-propagation/#mean_ground_plane): the least-squares plane through a terrain section
   (Eq. 36-40), whose equivalent orthogonal heights carry a varying profile into
   the flat-ground equations.
-* [`mean_flow_resistivity`](/phonometry/reference/api/aeroacoustics/rotorcraft-propagation/#mean_flow_resistivity): the log-mean flow resistivity of a path that
+* [`mean_flow_resistivity`](/reference/api/aeroacoustics/rotorcraft-propagation/#mean_flow_resistivity): the log-mean flow resistivity of a path that
   crosses several ground types (Eq. 41).
-* [`diffraction_attenuation`](/phonometry/reference/api/aeroacoustics/rotorcraft-propagation/#diffraction_attenuation): the pure diffraction attenuation `ΔLd` of
+* [`diffraction_attenuation`](/reference/api/aeroacoustics/rotorcraft-propagation/#diffraction_attenuation): the pure diffraction attenuation `ΔLd` of
   a path difference (Eq. 42-44).
-* [`terrain_screening_adjustment`](/phonometry/reference/api/aeroacoustics/rotorcraft-propagation/#terrain_screening_adjustment): the combined ground-and-screening
+* [`terrain_screening_adjustment`](/reference/api/aeroacoustics/rotorcraft-propagation/#terrain_screening_adjustment): the combined ground-and-screening
   adjustment over a vertical section (§A.4.4-A.4.5, Eq. 45-47): the
   mean-ground-plane ground effect while the line of sight is clear, the
   rubber-band diffraction over the terrain once it is blocked.
@@ -101,7 +101,7 @@ default). This matches the guidance Eq. 27 to 0.02 dB/km and the NORAH2
 reference implementation. The guidance's alternative per-band mapping (SAE
 method by Rickley et al., its Table 4) coincides below 3.15 kHz and deviates
 by up to 2.2 dB/km at 8-10 kHz; for a path-dependent band mapping use
-[`band_attenuation_arp5534`](/phonometry/reference/api/aeroacoustics/atmospheric-absorption/#band_attenuation_arp5534).
+[`band_attenuation_arp5534`](/reference/api/aeroacoustics/atmospheric-absorption/#band_attenuation_arp5534).
 
 :::note
 The printed guidance Eq. 27 pairs the coefficient `6.6928e-6` with
@@ -129,7 +129,7 @@ advisory warning propagates, since `α` is large and extrapolated.
 | `temperature_c` | Air temperature, in °C (default 25 °C, ICAO reference). |
 | `relative_humidity_percent` | Relative humidity, in % (default 70 %). |
 | `static_pressure_kpa` | Ambient pressure, in kPa (default 101.325). |
-| `reference_distance_m` | Hemisphere reference distance `rh`, in metres (default 60). Pass [`RotorcraftHemisphere.distance_m`](/phonometry/reference/api/aeroacoustics/rotorcraft-noise/#rotorcrafthemisphere) when the data uses a non-standard polar distance. |
+| `reference_distance_m` | Hemisphere reference distance `rh`, in metres (default 60). Pass [`RotorcraftHemisphere.distance_m`](/reference/api/aeroacoustics/rotorcraft-noise/#rotorcrafthemisphere) when the data uses a non-standard polar distance. |
 
 **Returns:** The adjustment `ΔLa` per band, in dB (added to the level, $\le 0$ for $r \ge r_\mathrm{h}$). A `float` for a number, an array for a sequence or an array, a zero-dimensional one included.
 
@@ -326,7 +326,7 @@ Eq. 37/38 with the segment integrals `A` and `B` of Eq. 39/40.
 | `distances_m` | Section distances `d`, in metres, strictly increasing, shape `(M,)` with $M \ge 2$ (arbitrary spacing). |
 | `heights_m` | Terrain heights `z(d)`, in metres, shape `(M,)`. |
 
-**Returns:** A [`MeanGroundPlaneResult`](/phonometry/reference/api/aeroacoustics/rotorcraft-propagation/#meangroundplaneresult).
+**Returns:** A [`MeanGroundPlaneResult`](/reference/api/aeroacoustics/rotorcraft-propagation/#meangroundplaneresult).
 
 **Raises**
 
@@ -458,7 +458,7 @@ adjustment is $\Delta L_\mathrm{s} = -20 \cdot \log_{10}(r/r_\mathrm{h})$.
 | Name | Description |
 | :--- | :--- |
 | `distance_m` | Slant distance `r` from the rotorcraft to the observer, in metres (`> 0`). |
-| `reference_distance_m` | Hemisphere reference distance `rh`, in metres (default 60). Pass [`RotorcraftHemisphere.distance_m`](/phonometry/reference/api/aeroacoustics/rotorcraft-noise/#rotorcrafthemisphere) when the data uses a non-standard polar distance (e.g. 70 m hover rings). |
+| `reference_distance_m` | Hemisphere reference distance `rh`, in metres (default 60). Pass [`RotorcraftHemisphere.distance_m`](/reference/api/aeroacoustics/rotorcraft-noise/#rotorcrafthemisphere) when the data uses a non-standard polar distance (e.g. 70 m hover rings). |
 
 **Returns:** The spreading adjustment `ΔLs`, in dB (added to the level).
 
@@ -524,7 +524,7 @@ whose diffraction equations follow CNOSSOS-EU.
 | `heights_m` | Terrain heights `z(d)`, in metres. |
 | `flow_resistivity` | Ground flow resistivity: a value in Pa·s/m², a CNOSSOS class letter, or one value per profile segment (shape `(M−1,)`) averaged per sub-path by Eq. 41. One of `"A"`, `"B"`, `"C"`, `"D"`, `"E"`, `"F"`, `"G"` or `"H"`. |
 
-**Returns:** A [`TerrainScreeningResult`](/phonometry/reference/api/aeroacoustics/rotorcraft-propagation/#terrainscreeningresult).
+**Returns:** A [`TerrainScreeningResult`](/reference/api/aeroacoustics/rotorcraft-propagation/#terrainscreeningresult).
 
 **Raises**
 

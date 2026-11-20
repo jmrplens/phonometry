@@ -1,6 +1,6 @@
 <!-- Written by `make llms` from site/src/content/docs/signals/metrology/gum-uncertainty.mdx: edit that page and its Spanish twin, then run `make llms`. -->
 
-← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/signals/metrology/gum-uncertainty/
+← [Documentation index](../../README.md) · Published at https://phonometry.dev/signals/metrology/gum-uncertainty/
 
 # Measurement uncertainty (GUM and Monte Carlo)
 
@@ -437,7 +437,7 @@ those standardized cases:
 
 - [Data qualification](data-qualification.md): the stationarity checks every averaged input silently assumes.
 - [Calibration](calibration.md): the tolerance and drift inputs of every calibrated chain.
-- API reference: [`metrology.uncertainty`](https://docs.jmrp.io/phonometry/reference/api/metrology/uncertainty/).
+- API reference: [`metrology.uncertainty`](https://phonometry.dev/reference/api/metrology/uncertainty/).
 - Theory: [Measurement uncertainty (GUM)](../../reference/theory/signal-analysis.md#measurement-uncertainty-isoiec-guide-98-3-gum-and-supplement-1): the law of propagation of uncertainty, the coverage factor and where the Monte Carlo supplement takes over.
 
 ## References

@@ -50,7 +50,7 @@ and every shipped table records the instrument it comes from:
   `C_bridge` of 2015;
 * the vertical directivity of source A is the 2021 form, with no absolute-value
   bars and identically zero for $\psi \le 0$. The superseded 2015 form is
-  available through [`DirectivityEdition`](/phonometry/reference/api/environment/cnossos-rail/#directivityedition) for comparison with pre-2021
+  available through [`DirectivityEdition`](/reference/api/environment/cnossos-rail/#directivityedition) for comparison with pre-2021
   studies, because the two differ over the whole lower half space.
 
 What is verified against digits and what is not
@@ -62,7 +62,7 @@ with the Commission's CNOSSOS-EU source module, which was computed with the
 transcriptions, and the equations that combine them are verified end to end
 against an independent implementation. Two points are interpretation, not
 transcription, and are documented as such:
-[`RoughnessInterpolation`](/phonometry/reference/api/environment/cnossos-rail/#roughnessinterpolation) (the Directive describes the wavelength-to-
+[`RoughnessInterpolation`](/reference/api/environment/cnossos-rail/#roughnessinterpolation) (the Directive describes the wavelength-to-
 frequency resampling in prose only) and the horizontal directivity of traction
 noise (2.3.15 enumerates rolling, impact, squeal, braking, fans and aerodynamic
 effects; the reference module applies the dipole to every source, which is what
@@ -73,7 +73,7 @@ Scope
 This is the **emission** stage only. Splitting a source line into equivalent
 point sources is explicitly outside the scope of the method (2.5.3), and the
 CNOSSOS propagation model is not ISO 9613-2, so the hand-off to
-[`outdoor_propagation`](/phonometry/reference/api/environment/outdoor-propagation/) mixes two methods and is a
+[`outdoor_propagation`](/reference/api/environment/outdoor-propagation/) mixes two methods and is a
 convenience, not a normative chain.
 
 > Auto-generated from the source docstrings by `scripts/generate_api_docs.py` (`make api-docs`). Do not edit by hand.
@@ -108,16 +108,16 @@ At the reference speed the result is Table G-6 verbatim.
 | Name | Description |
 | :--- | :--- |
 | `speed_kmh` | Train speed `v`, in km/h. |
-| `reference` | The reference spectra at `v_0` of the two source heights, as a [`RailSourceSpectra`](/phonometry/reference/api/environment/cnossos-rail/#railsourcespectra), or `None` (the default) for Table G-6. |
+| `reference` | The reference spectra at `v_0` of the two source heights, as a [`RailSourceSpectra`](/reference/api/environment/cnossos-rail/#railsourcespectra), or `None` (the default) for Table G-6. |
 | `alpha` | Speed exponent `alpha_h,i`; Table G-6 gives 50 in every band. |
 
-**Returns:** The 24 band levels at source height A and at source height B, as a [`RailSourceSpectra`](/phonometry/reference/api/environment/cnossos-rail/#railsourcespectra).
+**Returns:** The 24 band levels at source height A and at source height B, as a [`RailSourceSpectra`](/reference/api/environment/cnossos-rail/#railsourcespectra).
 
 **Raises**
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | If `reference` is not a [`RailSourceSpectra`](/phonometry/reference/api/environment/cnossos-rail/#railsourcespectra), or `speed_kmh` or `alpha` is not one number. |
+| TypeError | If `reference` is not a [`RailSourceSpectra`](/reference/api/environment/cnossos-rail/#railsourcespectra), or `speed_kmh` or `alpha` is not one number. |
 | ValueError | If the speed is not positive. |
 
 ## AERODYNAMIC_THRESHOLD_SPEED_KMH
@@ -150,7 +150,7 @@ Bridge transfer function `L_H,bridge,i` of Table G-7, in dB per axle.
 
 | Name | Description |
 | :--- | :--- |
-| `bridge` | A [`BridgeType`](/phonometry/reference/api/environment/cnossos-rail/#bridgetype) member or its column label. One of `"+10 dB(A)"` or `"+15 dB(A)"`. |
+| `bridge` | A [`BridgeType`](/reference/api/environment/cnossos-rail/#bridgetype) member or its column label. One of `"+10 dB(A)"` or `"+15 dB(A)"`. |
 
 **Returns:** The 24 1/3-octave values, in dB.
 
@@ -183,9 +183,9 @@ Contact filter `A_3` of Table G-2.
 
 | Name | Description |
 | :--- | :--- |
-| `filter_` | A [`ContactFilter`](/phonometry/reference/api/environment/cnossos-rail/#contactfilter) member or the `(wheel load in kN, wheel diameter in mm)` pair that labels the column. |
+| `filter_` | A [`ContactFilter`](/reference/api/environment/cnossos-rail/#contactfilter) member or the `(wheel load in kN, wheel diameter in mm)` pair that labels the column. |
 
-**Returns:** The wavelengths in mm and the levels in dB, as a [`WavelengthSpectrum`](/phonometry/reference/api/environment/cnossos-rail/#wavelengthspectrum).
+**Returns:** The wavelengths in mm and the levels in dB, as a [`WavelengthSpectrum`](/reference/api/environment/cnossos-rail/#wavelengthspectrum).
 
 **Raises**
 
@@ -329,7 +329,7 @@ The table is given for a joint density $n_l = 0.01$ m^-1, that is one
 switch, joint or crossing per 100 m, which is also the default the
 Directive prescribes for jointed track.
 
-**Returns:** The wavelengths in mm and the levels in dB, as a [`WavelengthSpectrum`](/phonometry/reference/api/environment/cnossos-rail/#wavelengthspectrum).
+**Returns:** The wavelengths in mm and the levels in dB, as a [`WavelengthSpectrum`](/reference/api/environment/cnossos-rail/#wavelengthspectrum).
 
 ## octave_bands_from_third_octaves
 
@@ -379,9 +379,9 @@ to be supplied by the Member State.
 
 | Name | Description |
 | :--- | :--- |
-| `roughness` | The [`RailRoughnessClass`](/phonometry/reference/api/environment/cnossos-rail/#railroughnessclass) of digit 2 of the track descriptor, one of the two Table G-1b tabulates: `RailRoughnessClass.WELL_MAINTAINED` or `RailRoughnessClass.NORMAL`, or its letter, `"E"` or `"M"`. The not well maintained and bad classes, `"N"` and `"B"` (`RailRoughnessClass.NOT_WELL_MAINTAINED` and `RailRoughnessClass.BAD`), are not offered: Appendix G tabulates no spectrum for them, and the Member State supplies a national one. |
+| `roughness` | The [`RailRoughnessClass`](/reference/api/environment/cnossos-rail/#railroughnessclass) of digit 2 of the track descriptor, one of the two Table G-1b tabulates: `RailRoughnessClass.WELL_MAINTAINED` or `RailRoughnessClass.NORMAL`, or its letter, `"E"` or `"M"`. The not well maintained and bad classes, `"N"` and `"B"` (`RailRoughnessClass.NOT_WELL_MAINTAINED` and `RailRoughnessClass.BAD`), are not offered: Appendix G tabulates no spectrum for them, and the Member State supplies a national one. |
 
-**Returns:** The wavelengths in mm and the levels in dB, as a [`WavelengthSpectrum`](/phonometry/reference/api/environment/cnossos-rail/#wavelengthspectrum).
+**Returns:** The wavelengths in mm and the levels in dB, as a [`WavelengthSpectrum`](/reference/api/environment/cnossos-rail/#wavelengthspectrum).
 
 **Raises**
 
@@ -426,9 +426,9 @@ RailSourceSpectra(*, source_a: NumericArrayLike, source_b: NumericArrayLike)
 
 The sound power spectra of the two source heights of a railway source.
 
-What [`traction_sound_power`](/phonometry/reference/api/environment/cnossos-rail/#traction_sound_power) and [`aerodynamic_sound_power`](/phonometry/reference/api/environment/cnossos-rail/#aerodynamic_sound_power)
+What [`traction_sound_power`](/reference/api/environment/cnossos-rail/#traction_sound_power) and [`aerodynamic_sound_power`](/reference/api/environment/cnossos-rail/#aerodynamic_sound_power)
 return: the spectrum at source height A and at source height B (2.3.1,
-Figure [2.3.a], [`RAILWAY_SOURCE_HEIGHTS_M`](/phonometry/reference/api/environment/cnossos-rail/#railway_source_heights_m)), named, where a
+Figure [2.3.a], [`RAILWAY_SOURCE_HEIGHTS_M`](/reference/api/environment/cnossos-rail/#railway_source_heights_m)), named, where a
 `(source A, source B)` tuple used to be unpacked by position.
 
 **Attributes**
@@ -496,16 +496,16 @@ below the minimum speed nor while idling.
 
 | Name | Description |
 | :--- | :--- |
-| `traffic` | One [`RailwayVehicle`](/phonometry/reference/api/environment/cnossos-rail/#railwayvehicle) or a sequence of them. |
-| `track` | The [`RailwayTrack`](/phonometry/reference/api/environment/cnossos-rail/#railwaytrack) of the section. |
+| `traffic` | One [`RailwayVehicle`](/reference/api/environment/cnossos-rail/#railwayvehicle) or a sequence of them. |
+| `track` | The [`RailwayTrack`](/reference/api/environment/cnossos-rail/#railwaytrack) of the section. |
 | `psi` | Vertical angle `psi` to the receiver, in degrees. |
 | `phi` | Horizontal angle `phi` to the receiver, in degrees; the default 90 deg is broadside, where the dipole correction is 0 dB. |
 | `reference_time` | Reference period `T_ref` of (2.3.4), in the same unit as `idling_time`. |
 | `min_speed_kmh` | Speed floor used to determine the total effective roughness, in km/h; `None` (the default) selects 50 km/h, or 30 km/h for a tram. Pass `0` to switch the floor off, which also switches off the exclusion of impact noise below it. |
-| `interpolation` | The [`RoughnessInterpolation`](/phonometry/reference/api/environment/cnossos-rail/#roughnessinterpolation) rule. |
+| `interpolation` | The [`RoughnessInterpolation`](/reference/api/environment/cnossos-rail/#roughnessinterpolation) rule. |
 | `directivity_edition` | Which text of (2.3.16) to evaluate. |
 
-**Returns:** A [`RailwayEmissionResult`](/phonometry/reference/api/environment/cnossos-rail/#railwayemissionresult).
+**Returns:** A [`RailwayEmissionResult`](/reference/api/environment/cnossos-rail/#railwayemissionresult).
 
 **Raises**
 
@@ -590,12 +590,12 @@ The Appendix G data of one track section.
 
 | Name | Description |
 | :--- | :--- |
-| `rail_roughness` | The [`WavelengthSpectrum`](/phonometry/reference/api/environment/cnossos-rail/#wavelengthspectrum) of Table G-1b. |
+| `rail_roughness` | The [`WavelengthSpectrum`](/reference/api/environment/cnossos-rail/#wavelengthspectrum) of Table G-1b. |
 | `track_transfer` | `L_H,TR,i` of Table G-3a, 24 values in dB. |
-| `impact_roughness` | The [`WavelengthSpectrum`](/phonometry/reference/api/environment/cnossos-rail/#wavelengthspectrum) of Table G-4, or `None` where there is no joint, switch or crossing. |
+| `impact_roughness` | The [`WavelengthSpectrum`](/reference/api/environment/cnossos-rail/#wavelengthspectrum) of Table G-4, or `None` where there is no joint, switch or crossing. |
 | `joint_density` | Joint density `n_l`, in m^-1. |
 | `bridge_transfer` | `L_H,bridge,i` of Table G-7 where the section is on a bridge, or `None`. |
-| `squeal_excess` | Curve-squeal excess in dB, from [`curve_squeal_excess`](/phonometry/reference/api/environment/cnossos-rail/#curve_squeal_excess). |
+| `squeal_excess` | Curve-squeal excess in dB, from [`curve_squeal_excess`](/reference/api/environment/cnossos-rail/#curve_squeal_excess). |
 | `length` | Length `L` of the track section, in m; used only by the idling flow term (2.3.4). |
 
 ## RailwayVehicle
@@ -617,10 +617,10 @@ One vehicle of the traffic on a track section.
 
 | Name | Description |
 | :--- | :--- |
-| `stock` | The [`RollingStock`](/phonometry/reference/api/environment/cnossos-rail/#rollingstock) data of the vehicle type. |
+| `stock` | The [`RollingStock`](/reference/api/environment/cnossos-rail/#rollingstock) data of the vehicle type. |
 | `flow_rate` | Average number of vehicles per hour `Q`. |
 | `speed_kmh` | Their speed `v` on the track section, in km/h. |
-| `condition` | The [`RunningCondition`](/phonometry/reference/api/environment/cnossos-rail/#runningcondition) `c`. |
+| `condition` | The [`RunningCondition`](/reference/api/environment/cnossos-rail/#runningcondition) `c`. |
 | `idling_time` | Total idling time `T_idle` within `T_ref`, in the same unit as `T_ref`; used only when `condition` is idling. |
 
 ## REFERENCE_JOINT_DENSITY_PER_M
@@ -686,19 +686,19 @@ The Appendix G data of one vehicle type, on its own wavelength grids.
 
 Every field is the spectrum the method needs, so a Member State substitutes
 its own database simply by building this object from its own tables rather
-than from the [`cnossos_rail`](/phonometry/reference/api/environment/cnossos-rail/) look-ups.
+than from the [`cnossos_rail`](/reference/api/environment/cnossos-rail/) look-ups.
 
 **Attributes**
 
 | Name | Description |
 | :--- | :--- |
 | `n_axles` | Number of axles per vehicle `N_a`. |
-| `wheel_roughness` | The [`WavelengthSpectrum`](/phonometry/reference/api/environment/cnossos-rail/#wavelengthspectrum) of Table G-1a. |
-| `contact_filter` | The [`WavelengthSpectrum`](/phonometry/reference/api/environment/cnossos-rail/#wavelengthspectrum) of Table G-2. |
+| `wheel_roughness` | The [`WavelengthSpectrum`](/reference/api/environment/cnossos-rail/#wavelengthspectrum) of Table G-1a. |
+| `contact_filter` | The [`WavelengthSpectrum`](/reference/api/environment/cnossos-rail/#wavelengthspectrum) of Table G-2. |
 | `wheel_transfer` | `L_H,VEH,i` of Table G-3b, 24 values in dB. |
 | `superstructure_transfer` | `L_H,VEH,SUP,i` of Table G-3c for a freight wagon, or `None` for any other vehicle type. |
-| `traction` | The [`RailSourceSpectra`](/phonometry/reference/api/environment/cnossos-rail/#railsourcespectra) of Table G-5, or `None` for an unpowered vehicle. |
-| `aerodynamic` | The [`RailSourceSpectra`](/phonometry/reference/api/environment/cnossos-rail/#railsourcespectra) of Table G-6 at `v_0`, or `None` to leave aerodynamic noise out. |
+| `traction` | The [`RailSourceSpectra`](/reference/api/environment/cnossos-rail/#railsourcespectra) of Table G-5, or `None` for an unpowered vehicle. |
+| `aerodynamic` | The [`RailSourceSpectra`](/reference/api/environment/cnossos-rail/#railsourcespectra) of Table G-6 at `v_0`, or `None` to leave aerodynamic noise out. |
 | `aerodynamic_alpha` | Speed exponent of (2.3.13) and (2.3.14). |
 | `tram` | `True` for a tram or light metro, which uses the lower minimum speed and the tram squeal rule. |
 
@@ -733,7 +733,7 @@ is held.
 | `wavelengths_mm` | Wavelengths of the table, in mm, in any monotonic order. |
 | `speed_kmh` | Train speed `v`, in km/h. |
 | `frequencies` | Target midband frequencies, in Hz. |
-| `interpolation` | The [`RoughnessInterpolation`](/phonometry/reference/api/environment/cnossos-rail/#roughnessinterpolation) rule. |
+| `interpolation` | The [`RoughnessInterpolation`](/reference/api/environment/cnossos-rail/#roughnessinterpolation) rule. |
 
 **Returns:** The spectrum on the target frequency grid, in dB.
 
@@ -798,7 +798,7 @@ Total effective roughness `L_R,TOT,i` of (2.3.7), in dB.
 
 $L_{\mathrm{R,TOT},i} = 10 \log_{10}(10^{L_{\mathrm{r,TR},i}/10} + 10^{L_{\mathrm{r,VEH},i}/10}) + A_{3,i}$. All
 three spectra must already be on the frequency grid, that is resampled with
-[`roughness_to_frequency`](/phonometry/reference/api/environment/cnossos-rail/#roughness_to_frequency) at the speed of interest.
+[`roughness_to_frequency`](/reference/api/environment/cnossos-rail/#roughness_to_frequency) at the speed of interest.
 
 **Parameters**
 
@@ -831,7 +831,7 @@ Track transfer function `L_H,TR,i` of Table G-3a, in dB per axle.
 
 | Name | Description |
 | :--- | :--- |
-| `track` | A [`TrackTransferClass`](/phonometry/reference/api/environment/cnossos-rail/#tracktransferclass) member or its column code. One of `"M/S"`, `"M/M"`, `"M/H"`, `"B/S"`, `"B/M"`, `"B/H"`, `"W"` or `"D"`. |
+| `track` | A [`TrackTransferClass`](/reference/api/environment/cnossos-rail/#tracktransferclass) member or its column code. One of `"M/S"`, `"M/M"`, `"M/H"`, `"B/S"`, `"B/M"`, `"B/H"`, `"W"` or `"D"`. |
 
 **Returns:** The 24 1/3-octave values, in dB.
 
@@ -877,12 +877,12 @@ The six-digit track descriptor of Table [2.3.b].
 
 | Name | Description |
 | :--- | :--- |
-| `base` | Digit 1, the [`TrackBase`](/phonometry/reference/api/environment/cnossos-rail/#trackbase). |
-| `roughness` | Digit 2, the [`RailRoughnessClass`](/phonometry/reference/api/environment/cnossos-rail/#railroughnessclass). |
-| `pad` | Digit 3, the [`RailPad`](/phonometry/reference/api/environment/cnossos-rail/#railpad) dynamic stiffness. |
-| `measure` | Digit 4, the [`TrackMeasure`](/phonometry/reference/api/environment/cnossos-rail/#trackmeasure). |
-| `joints` | Digit 5, the [`RailJoints`](/phonometry/reference/api/environment/cnossos-rail/#railjoints). |
-| `curvature` | Digit 6, the [`TrackCurvature`](/phonometry/reference/api/environment/cnossos-rail/#trackcurvature). |
+| `base` | Digit 1, the [`TrackBase`](/reference/api/environment/cnossos-rail/#trackbase). |
+| `roughness` | Digit 2, the [`RailRoughnessClass`](/reference/api/environment/cnossos-rail/#railroughnessclass). |
+| `pad` | Digit 3, the [`RailPad`](/reference/api/environment/cnossos-rail/#railpad) dynamic stiffness. |
+| `measure` | Digit 4, the [`TrackMeasure`](/reference/api/environment/cnossos-rail/#trackmeasure). |
+| `joints` | Digit 5, the [`RailJoints`](/reference/api/environment/cnossos-rail/#railjoints). |
+| `curvature` | Digit 6, the [`TrackCurvature`](/reference/api/environment/cnossos-rail/#trackcurvature). |
 
 ### TrackDescriptor.code
 
@@ -906,7 +906,7 @@ Parse a descriptor such as `"BMSNNN"`.
 | :--- | :--- |
 | `code` | The six-character descriptor. |
 
-**Returns:** The parsed [`TrackDescriptor`](/phonometry/reference/api/environment/cnossos-rail/#trackdescriptor).
+**Returns:** The parsed [`TrackDescriptor`](/reference/api/environment/cnossos-rail/#trackdescriptor).
 
 **Raises**
 
@@ -949,9 +949,9 @@ one table serves both running conditions.
 
 | Name | Description |
 | :--- | :--- |
-| `vehicle` | A [`TractionVehicle`](/phonometry/reference/api/environment/cnossos-rail/#tractionvehicle) member or its description. One of `"diesel locomotive, c. 800 kW"`, `"diesel locomotive, c. 2 200 kW"`, `"diesel multiple unit"`, `"electric locomotive"` or `"electric multiple unit"`. |
+| `vehicle` | A [`TractionVehicle`](/reference/api/environment/cnossos-rail/#tractionvehicle) member or its description. One of `"diesel locomotive, c. 800 kW"`, `"diesel locomotive, c. 2 200 kW"`, `"diesel multiple unit"`, `"electric locomotive"` or `"electric multiple unit"`. |
 
-**Returns:** The 24 band levels at source height A and at source height B, as a [`RailSourceSpectra`](/phonometry/reference/api/environment/cnossos-rail/#railsourcespectra).
+**Returns:** The 24 band levels at source height A and at source height B, as a [`RailSourceSpectra`](/reference/api/environment/cnossos-rail/#railsourcespectra).
 
 **Raises**
 
@@ -993,10 +993,10 @@ The four-digit vehicle descriptor of Table [2.3.a].
 
 | Name | Description |
 | :--- | :--- |
-| `vehicle_type` | Digit 1, the [`VehicleType`](/phonometry/reference/api/environment/cnossos-rail/#vehicletype). |
+| `vehicle_type` | Digit 1, the [`VehicleType`](/reference/api/environment/cnossos-rail/#vehicletype). |
 | `n_axles` | Digit 2, the number of axles per vehicle. |
-| `brake` | Digit 3, the [`BrakeType`](/phonometry/reference/api/environment/cnossos-rail/#braketype). |
-| `measure` | Digit 4, the [`WheelMeasure`](/phonometry/reference/api/environment/cnossos-rail/#wheelmeasure). |
+| `brake` | Digit 3, the [`BrakeType`](/reference/api/environment/cnossos-rail/#braketype). |
+| `measure` | Digit 4, the [`WheelMeasure`](/reference/api/environment/cnossos-rail/#wheelmeasure). |
 
 ### VehicleDescriptor.code
 
@@ -1023,7 +1023,7 @@ than one character.
 | :--- | :--- |
 | `code` | The descriptor, first digit to last. |
 
-**Returns:** The parsed [`VehicleDescriptor`](/phonometry/reference/api/environment/cnossos-rail/#vehicledescriptor).
+**Returns:** The parsed [`VehicleDescriptor`](/reference/api/environment/cnossos-rail/#vehicledescriptor).
 
 **Raises**
 
@@ -1093,8 +1093,8 @@ WavelengthSpectrum(
 
 A roughness or contact-filter spectrum over wavelength (Appendix G).
 
-What [`wheel_roughness`](/phonometry/reference/api/environment/cnossos-rail/#wheel_roughness), [`rail_roughness`](/phonometry/reference/api/environment/cnossos-rail/#rail_roughness),
-[`contact_filter`](/phonometry/reference/api/environment/cnossos-rail/#contact_filter) and [`impact_roughness_single`](/phonometry/reference/api/environment/cnossos-rail/#impact_roughness_single) return: the
+What [`wheel_roughness`](/reference/api/environment/cnossos-rail/#wheel_roughness), [`rail_roughness`](/reference/api/environment/cnossos-rail/#rail_roughness),
+[`contact_filter`](/reference/api/environment/cnossos-rail/#contact_filter) and [`impact_roughness_single`](/reference/api/environment/cnossos-rail/#impact_roughness_single) return: the
 wavelengths and the levels, named, where a `(wavelengths, levels)` tuple
 used to be unpacked by position.
 
@@ -1142,9 +1142,9 @@ Wheel roughness `L_r,VEH` of Table G-1a.
 
 | Name | Description |
 | :--- | :--- |
-| `brake` | The [`BrakeType`](/phonometry/reference/api/environment/cnossos-rail/#braketype) of digit 3 of the vehicle descriptor. One of `"c"`, `"k"` or `"n"`. |
+| `brake` | The [`BrakeType`](/reference/api/environment/cnossos-rail/#braketype) of digit 3 of the vehicle descriptor. One of `"c"`, `"k"` or `"n"`. |
 
-**Returns:** The wavelengths in mm and the levels in dB, as a [`WavelengthSpectrum`](/phonometry/reference/api/environment/cnossos-rail/#wavelengthspectrum).
+**Returns:** The wavelengths in mm and the levels in dB, as a [`WavelengthSpectrum`](/reference/api/environment/cnossos-rail/#wavelengthspectrum).
 
 **Raises**
 
@@ -1165,7 +1165,7 @@ Wheel transfer function `L_H,VEH,i` of Table G-3b, in dB per axle.
 
 | Name | Description |
 | :--- | :--- |
-| `diameter_mm` | A [`WheelDiameter`](/phonometry/reference/api/environment/cnossos-rail/#wheeldiameter) member or the diameter in mm. |
+| `diameter_mm` | A [`WheelDiameter`](/reference/api/environment/cnossos-rail/#wheeldiameter) member or the diameter in mm. |
 
 **Returns:** The 24 1/3-octave values, in dB.
 

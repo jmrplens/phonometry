@@ -156,7 +156,7 @@ shear_strain_amplitude(
 
 The shear strain amplitude $\hat\gamma = \hat{\mathrm{v}} / \mathrm{v}_\mathrm{s}$, Formula (4).
 
-Compare it with [`SHEAR_STRAIN_LINEAR_LIMIT`](/phonometry/reference/api/vibration/ground/#shear_strain_linear_limit) to know whether the
+Compare it with [`SHEAR_STRAIN_LINEAR_LIMIT`](/reference/api/vibration/ground/#shear_strain_linear_limit) to know whether the
 small-strain modulus still applies.
 
 **Parameters**
@@ -215,4 +215,4 @@ factor of 3.8.
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | As [`poisson_ratio_from_wave_speeds`](/phonometry/reference/api/vibration/ground/#poisson_ratio_from_wave_speeds), or for a non-positive density. |
+| ValueError | As [`poisson_ratio_from_wave_speeds`](/reference/api/vibration/ground/#poisson_ratio_from_wave_speeds), or for a non-positive density. |

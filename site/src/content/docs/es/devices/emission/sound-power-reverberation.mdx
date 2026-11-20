@@ -39,7 +39,7 @@ cualificación, la ficha de ensayo de estilo acreditado y, en la sección 4, el
 nivel de energía acústica $L_J$ que los mismos dos métodos dan a un suceso
 aislado. Qué vía encaja con
 qué trabajo, y las alternativas de presión e intensidad, se sopesan en
-[Potencia acústica](/phonometry/es/devices/emission/sound-power/).
+[Potencia acústica](/es/devices/emission/sound-power/).
 
 ## 1. Cámara reverberante, grado de precisión (ISO 3741)
 
@@ -397,7 +397,7 @@ de la fuente de referencia y su potencia conocida.
 | Parámetro | Tipo | Unidades | Rango / defecto | Notas |
 | :--- | :--- | :--- | :--- | :--- |
 | `reference_levels` | array 1D o 2D | dB | coincide con `levels` | SPL medio de cámara con la fuente de referencia (RSS) en marcha |
-| `reference_sound_power_levels` | array 1D o `ReferenceSourceCalibration` | dB | por banda | Potencia acústica conocida $L_W(\text{RSS})$ de la fuente de referencia, de su calibración ISO 6926; una [`ReferenceSourceCalibration`](/phonometry/es/devices/emission/free-field-qualification/) se lee en las bandas de tercio de octava de `frequencies` |
+| `reference_sound_power_levels` | array 1D o `ReferenceSourceCalibration` | dB | por banda | Potencia acústica conocida $L_W(\text{RSS})$ de la fuente de referencia, de su calibración ISO 6926; una [`ReferenceSourceCalibration`](/es/devices/emission/free-field-qualification/) se lee en las bandas de tercio de octava de `frequencies` |
 | `background_levels` | array 1D o 2D | dB | coincide con `levels` | Ruido de fondo de la fuente de ensayo; $K_1$ por banda sobre $L_p(\text{ST})$ |
 | `reference_background_levels` | array 1D o 2D | dB | coincide con `reference_levels` | Ruido de fondo de la fuente de **referencia**; $K_1$ por banda sobre $L_p(\text{RSS})$ |
 
@@ -412,7 +412,7 @@ El resultado en cámara reverberante (`ReverberationSoundPowerResult`, ISO 3741)
 escribe mediante su propio `.report()` una ficha PDF de una página con el
 formato de una hoja de ensayo de potencia acústica, compartiendo el diseño y
 el contenedor `ReportMetadata` de la
-[ficha de los métodos de presión](/phonometry/es/devices/emission/sound-power-pressure/#informe-de-medicion).
+[ficha de los métodos de presión](/es/devices/emission/sound-power-pressure/#informe-de-medicion).
 La línea
 de base normativa nombra la ISO 3741:2010 y el grado de precisión (grado 1) e
 indica qué método se empleó, el método directo usando el área de absorción
@@ -503,7 +503,7 @@ través de un intervalo que contenga toda parte significativa del suceso
 apartado 9.2.1 reduce ambas lecturas al nivel de un suceso en cada posición
 (Ec. 22, la media energética de $N_\mathrm{e}$ lecturas individuales, o Ec. 23,
 una lectura menos $10\log_{10} N_\mathrm{e}$; `mean_single_event_level` en la
-[página de métodos de presión](/phonometry/es/devices/emission/sound-power-pressure/#cinco-sucesos-uno-a-uno-o-todos-a-la-vez)
+[página de métodos de presión](/es/devices/emission/sound-power-pressure/#cinco-sucesos-uno-a-uno-o-todos-a-la-vez)
 es el mismo par). El apartado 9.2.2 corrige cada posición por su propio fondo
 con el criterio dependiente de la frecuencia de 9.1.2 (Ec. 25/26), y el
 apartado 9.2.3 promedia en energía las posiciones corregidas (Ec. 27). El fondo
@@ -640,7 +640,7 @@ avisa de los criterios orientativos que ISO 3741 declara explícitamente (el
 volumen mínimo de la Tabla 1, el suelo de reverberación $V/S$, menos de 6
 posiciones, una dispersión entre posiciones superior a 1,5 dB). La elección
 entre las siete vías, y la declaración ISO 4871 que un resultado alimenta,
-viven en [Potencia acústica](/phonometry/es/devices/emission/sound-power/).
+viven en [Potencia acústica](/es/devices/emission/sound-power/).
 </ScopeClaim>
 </Scope>
 
@@ -648,20 +648,20 @@ viven en [Potencia acústica](/phonometry/es/devices/emission/sound-power/).
 
 ## Véase también
 
-- [Potencia acústica](/phonometry/es/devices/emission/sound-power/): la elección entre
+- [Potencia acústica](/es/devices/emission/sound-power/): la elección entre
   las siete vías de determinación, los grados de precisión y la declaración
   de emisión sonora de ISO 4871.
-- [Potencia acústica por métodos de presión (ISO 3744 / ISO 3746 / ISO 3745)](/phonometry/es/devices/emission/sound-power-pressure/):
+- [Potencia acústica por métodos de presión (ISO 3744 / ISO 3746 / ISO 3745)](/es/devices/emission/sound-power-pressure/):
   la superficie envolvente in situ y la malla anecoica de precisión.
-- [Potencia acústica por barrido de intensidad (ISO 9614)](/phonometry/es/devices/emission/sound-power-intensity/):
+- [Potencia acústica por barrido de intensidad (ISO 9614)](/es/devices/emission/sound-power-intensity/):
   las vías que toleran el ruido de fondo estacionario.
-- [Acústica de salas](/phonometry/es/buildings/rooms/room-acoustics/): la medición del
+- [Acústica de salas](/es/buildings/rooms/room-acoustics/): la medición del
   tiempo de reverberación $T_{60}$ que fija el área de absorción de Sabine.
-- [Niveles](/phonometry/es/signals/levels/levels/): el promediado en energía y la
+- [Niveles](/es/signals/levels/levels/): el promediado en energía y la
   ponderación A que sustentan $L_{W\mathrm{A}}$.
-- [Teoría](/phonometry/es/reference/theory/environment-transport/): las
+- [Teoría](/es/reference/theory/environment-transport/): las
   derivaciones de Waterhouse y $C_1$/$C_2$.
-- Referencia de la API: [`emission`: sound power in a reverberation room](/phonometry/es/reference/api/power/sound-power-reverberation/).
-- Teoría: [Determinación de la potencia acústica](/phonometry/es/reference/theory/environment-transport/#determinacion-de-la-potencia-acustica-iso-374437453746-iso-3741-iso-9614-123): los métodos de comparación y directo de la ISO 3741, deducidos de la relación de campo difuso.
+- Referencia de la API: [`emission`: sound power in a reverberation room](/es/reference/api/power/sound-power-reverberation/).
+- Teoría: [Determinación de la potencia acústica](/es/reference/theory/environment-transport/#determinacion-de-la-potencia-acustica-iso-374437453746-iso-3741-iso-9614-123): los métodos de comparación y directo de la ISO 3741, deducidos de la relación de campo difuso.
 
 </SeeAlso>

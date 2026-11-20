@@ -44,9 +44,9 @@ $$
 These element-wise reciprocals are the **free** quantities of ISO 7626-1,
 3.1.4; the *blocked* matrix quantities of Table 1 do not invert element-wise
 ($Z_{ij} \ne 1/Y_{ij}$ for multi-coordinate systems); see
-[`convert_frf`](/phonometry/reference/api/vibration/mechanical-mobility/#convert_frf).
+[`convert_frf`](/reference/api/vibration/mechanical-mobility/#convert_frf).
 
-[`convert_frf`](/phonometry/reference/api/vibration/mechanical-mobility/#convert_frf) moves between any two of the six FRFs through the receptance
+[`convert_frf`](/reference/api/vibration/mechanical-mobility/#convert_frf) moves between any two of the six FRFs through the receptance
 pivot. A **driving-point** FRF has the response and force at the same point
 ($i = j$); a **transfer** FRF has them at different points.
 
@@ -67,13 +67,13 @@ $H = G(\text{response},\text{force}) / G(\text{force},\text{force})$)
 and the ordinary coherence
 $\gamma^2 = |G_{xy}|^2 / (G_{xx} G_{yy})$
 used for its data-quality checks are
-[`phonometry.electroacoustics.frequency_response.transfer_function`](/phonometry/reference/api/electroacoustics/frequency-response/#transfer_function) (with
+[`phonometry.electroacoustics.frequency_response.transfer_function`](/reference/api/electroacoustics/frequency-response/#transfer_function) (with
 `estimator="H1"`, the default) and
-[`phonometry.electroacoustics.frequency_response.coherence`](/phonometry/reference/api/electroacoustics/frequency-response/#coherence); both are
+[`phonometry.electroacoustics.frequency_response.coherence`](/reference/api/electroacoustics/frequency-response/#coherence); both are
 exported at the package top level. This module adds the ISO 7626-2 acceptance
 criteria on top of them: the operational rigid-mass calibration of 7.5.2
-([`verify_rigid_mass_calibration`](/phonometry/reference/api/vibration/mechanical-mobility/#verify_rigid_mass_calibration), +/- 5 %) and the Annex A normalized
-random error with its \< 5 % averaging criterion ([`random_error_percent`](/phonometry/reference/api/vibration/mechanical-mobility/#random_error_percent)).
+([`verify_rigid_mass_calibration`](/reference/api/vibration/mechanical-mobility/#verify_rigid_mass_calibration), +/- 5 %) and the Annex A normalized
+random error with its \< 5 % averaging criterion ([`random_error_percent`](/reference/api/vibration/mechanical-mobility/#random_error_percent)).
 
 > Auto-generated from the source docstrings by `scripts/generate_api_docs.py` (`make api-docs`). Do not edit by hand.
 
@@ -245,7 +245,7 @@ verdict.
 | Name | Description |
 | :--- | :--- |
 | `path` | Destination path of the PDF file. |
-| `metadata` | Optional [`ReportMetadata`](/phonometry/reference/api/building/insulation/#reportmetadata) supplying the header identity (`specimen` is the tested structure) and the footer identity; the `requirement` field is ignored. |
+| `metadata` | Optional [`ReportMetadata`](/reference/api/building/insulation/#reportmetadata) supplying the header identity (`specimen` is the tested structure) and the footer identity; the `requirement` field is ignored. |
 | `engine` | Rendering back end; only `"reportlab"` is supported. |
 | `verbose` | Accepted for a uniform `.report()` signature; the mobility fiche has a single body layout, so it has no effect. |
 | `language` | Fiche language: `"en"` (default, English) or `"es"` (Spanish, with a comma decimal separator). |
@@ -267,7 +267,7 @@ MobilityResult.to(
 ) -> NDArray[np.complex128]
 ```
 
-Convert the mobility to another FRF kind (see [`convert_frf`](/phonometry/reference/api/vibration/mechanical-mobility/#convert_frf)).
+Convert the mobility to another FRF kind (see [`convert_frf`](/reference/api/vibration/mechanical-mobility/#convert_frf)).
 
 The force-per-motion kinds are element-wise reciprocals, i.e. the
 *free* quantities of ISO 7626-1, 3.1.4: on a transfer FRF
@@ -541,7 +541,7 @@ sdof_mobility_result(
 ) -> MobilityResult
 ```
 
-SDOF driving-point mobility bundled as a [`MobilityResult`](/phonometry/reference/api/vibration/mechanical-mobility/#mobilityresult).
+SDOF driving-point mobility bundled as a [`MobilityResult`](/reference/api/vibration/mechanical-mobility/#mobilityresult).
 
 **Parameters**
 
@@ -552,7 +552,7 @@ SDOF driving-point mobility bundled as a [`MobilityResult`](/phonometry/referenc
 | `stiffness` | Stiffness `k`, N/m. |
 | `damping` | Viscous damping `c`, N.s/m. |
 
-**Returns:** The [`MobilityResult`](/phonometry/reference/api/vibration/mechanical-mobility/#mobilityresult) (driving point).
+**Returns:** The [`MobilityResult`](/reference/api/vibration/mechanical-mobility/#mobilityresult) (driving point).
 
 **Raises**
 
@@ -641,7 +641,7 @@ clause's and is not a parameter.
 | `mass` | Known mass `m` of the calibration block, in kg (> 0). |
 | `quantity` | `"accelerance"` ($\lvert A \rvert = 1/m$) or `"mobility"` ($\lvert Y \rvert = 1/(\omega m)$). (Default: `"accelerance"`.) |
 
-**Returns:** A [`RigidMassCalibrationResult`](/phonometry/reference/api/vibration/mechanical-mobility/#rigidmasscalibrationresult) with per-band pass flags.
+**Returns:** A [`RigidMassCalibrationResult`](/reference/api/vibration/mechanical-mobility/#rigidmasscalibrationresult) with per-band pass flags.
 
 **Raises**
 

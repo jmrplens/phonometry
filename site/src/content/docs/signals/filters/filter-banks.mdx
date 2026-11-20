@@ -67,9 +67,9 @@ every argument off one table, cascade RBJ EQ sections, pull out per-band time
 signals and filter with zero phase. Section 1 is the mathematics the design
 rests on; if you only want to call the function, start at section 3. How the
 five architectures differ is
-[Filter Architecture Gallery](/phonometry/signals/filters/filter-gallery/), and
+[Filter Architecture Gallery](/signals/filters/filter-gallery/), and
 what "class 1" means for the result is
-[Filter Class Verification](/phonometry/signals/filters/filter-compliance/).
+[Filter Class Verification](/signals/filters/filter-compliance/).
 
 ## How do I compute octave or one-third-octave band levels in Python?
 
@@ -263,16 +263,16 @@ the record length for the whole bank.** Analysing a 1 s clip down to 12.5 Hz
 and reporting the result to one decimal is not a measurement of that band, and
 neither `octave_filter` nor `OctaveFilterBank` warns you. The general
 $1/\sqrt{BT}$ law is derived in
-[Correlation, time delay and envelope](/phonometry/signals/spectra/correlation-delay/);
+[Correlation, time delay and envelope](/signals/spectra/correlation-delay/);
 the same arithmetic applied per frame instead of per record is the
 `window_time` note of
-[Integrated and Statistical Levels](/phonometry/signals/levels/levels/).
+[Integrated and Statistical Levels](/signals/levels/levels/).
 
 The band mathematics above is shared by every architecture. How the
 architectures actually differ, the comparison at the −3 dB crossover, the
 full 1/1 and 1/3 octave response gallery and the usage examples per
 architecture, up to the Linkwitz-Riley crossover, is
-[Filter Architecture Gallery](/phonometry/signals/filters/filter-gallery/).
+[Filter Architecture Gallery](/signals/filters/filter-gallery/).
 
 ## 2. What a call gives back
 
@@ -343,14 +343,14 @@ the one-shot function, `OctaveFilterBank(...)` is the constructor, and
 | `fraction` | function, constructor | int | — | default `1`; common `3`; any $b \ge 1$ | Bands per octave = $b$ |
 | `order` | function, constructor | int | — | default `6` | SOS order per band |
 | `limits` | function, constructor | list `[lo, hi]` | Hz | default `[12, 20000]`, trimmed to the bands $f_\mathrm{s}$ holds | Analysis range; limits past $f_\mathrm{s}/2$ lose their top bands with a `FilterBankWarning`, and a rate that holds none of the bands is refused |
-| `design.filter_type` | function, constructor | str | — | `'butter'` (default), `'cheby1'`, `'cheby2'`, `'ellip'`, `'bessel'` | See the [Filter Architecture Gallery](/phonometry/signals/filters/filter-gallery/) |
+| `design.filter_type` | function, constructor | str | — | `'butter'` (default), `'cheby1'`, `'cheby2'`, `'ellip'`, `'bessel'` | See the [Filter Architecture Gallery](/signals/filters/filter-gallery/) |
 | `design.ripple` / `design.attenuation` | function, constructor | float | dB | `ripple` default `0.1`; `attenuation` default `72.0` | Passband ripple / stopband attenuation (cheby/ellip); `cheby2` needs `attenuation` $\ge 70$ for class 1, since scipy pins its equiripple floor at exactly this value |
 | `design.resample` | function, constructor | bool | — | default `True` | Filter each band on a decimated rate (multirate) |
 | `response_plot.show` | function, constructor | bool | — | default `False` | Plot the bank response (needs matplotlib) |
 | `response_plot.file` | function, constructor | str or `None` | — | default `None` | Save the bank-response plot to this path |
 | `calibration.factor` | function, constructor | float | — | default `1.0` | Scales the input to pascals (see the Calibration guide) |
 | `calibration.dbfs` | function, constructor | bool | — | default `False` | Reference levels to digital full scale instead of 20 µPa |
-| `block_processing.stateful` / `.steady_ic` | constructor only | bool | — | default `False` | Streaming state; see [Block Processing](/phonometry/signals/filters/block-processing/) |
+| `block_processing.stateful` / `.steady_ic` | constructor only | bool | — | default `False` | Streaming state; see [Block Processing](/signals/filters/block-processing/) |
 | `sigbands` | function, `.filter()` | bool | — | default `False` | Also return the per-band time signals |
 | `mode` | function, `.filter()` | str | — | `'rms'` (default) or `'peak'` | Per-band statistic returned |
 | `nominal` | function, `.filter()` | bool | — | default `False` | Return nominal band labels (e.g. `1000`) instead of exact centre frequencies |
@@ -370,7 +370,7 @@ over the whole record, which is what every standard means by "band level".
 against the same 20 µPa reference; it is an instantaneous band peak, not a
 peak-hold reading, it is band-limited and unweighted so it is *not* the
 C-weighted peak $L_\mathrm{Cpeak}$ of the
-[Levels](/phonometry/signals/levels/levels/) guide, and on impulsive signals it
+[Levels](/signals/levels/levels/) guide, and on impulsive signals it
 is dominated by the filter's own ringing; it belongs to transient diagnostics,
 not to level reporting. There is no `'sum'` mode: a total across bands is an
 energy sum the caller performs, `10*np.log10(np.sum(10**(spl/10)))`, never an
@@ -405,7 +405,7 @@ extra pole pair lengthens
 the ringing (the group-delay peaks of section 5 grow with order), which is why
 transient work and short-window spectrograms prefer low orders. The margin
 arithmetic itself is
-[Filter Class Verification](/phonometry/signals/filters/filter-compliance/).
+[Filter Class Verification](/signals/filters/filter-compliance/).
 
 ## 4. Parametric EQ (`ParametricEQ`)
 
@@ -482,7 +482,7 @@ plt.show()
 Everything above is design. Proving that a designed bank meets a
 performance class of IEC 61260-1, band by band and with its margin in
 decibels, is
-[Filter Class Verification](/phonometry/signals/filters/filter-compliance/): the
+[Filter Class Verification](/signals/filters/filter-compliance/): the
 Table 1 acceptance mask, the stricter class 0 of the withdrawn 1995 edition,
 what a class buys in a measurement, and the accredited compliance fiche.
 
@@ -705,7 +705,7 @@ where that package began. Code written for it changes in these places:
 The transition package `pyoctaveband` pins `phonometry>=3.0.0,<4`, so
 `import pyoctaveband` works on 3.x only: code moves to the names above by
 changing its import, not by updating that package.
-[Upgrading from 3.3 to 4.0](/phonometry/start/upgrading/) lists the rest of
+[Upgrading from 3.3 to 4.0](/start/upgrading/) lists the rest of
 what 4.0 changed, and the
 [changelog](https://github.com/jmrplens/phonometry/blob/main/CHANGELOG.md) what 3.0
 to 3.3 changed after PyOctaveBand 2.0.0.
@@ -726,9 +726,9 @@ Chebyshev I/II, Elliptic, Bessel), plus the RBJ Audio EQ Cookbook's
 The compared responses of the five architectures, the full 1/1 and 1/3 octave
 gallery and the per-architecture usage examples, including the Linkwitz-Riley
 crossover, are [Filter Architecture
-Gallery](/phonometry/signals/filters/filter-gallery/). The Table 1 class
+Gallery](/signals/filters/filter-gallery/). The Table 1 class
 acceptance masks and their verification have moved to [Filter Class
-Verification](/phonometry/signals/filters/filter-compliance/). Near Nyquist,
+Verification](/signals/filters/filter-compliance/). Near Nyquist,
 the bilinear transform warps the frequency axis and the bank has no correction
 for it (unlike `WeightingFilter`'s fitted `high_accuracy` design): keep the top band
 edge comfortably below Nyquist or raise `fs`, and confirm the margin with
@@ -740,14 +740,14 @@ edge comfortably below Nyquist or raise `fs`, and confirm the margin with
 
 ## See also
 
-- [Filter Architecture Gallery](/phonometry/signals/filters/filter-gallery/): the
+- [Filter Architecture Gallery](/signals/filters/filter-gallery/): the
   five architectures compared at the band edges, the full response gallery
   and per-architecture usage, with the Linkwitz-Riley crossover.
-- [Filter Class Verification (IEC 61260-1)](/phonometry/signals/filters/filter-compliance/):
+- [Filter Class Verification (IEC 61260-1)](/signals/filters/filter-compliance/):
   the Table 1 acceptance mask, class 0 and the compliance fiche of the banks
   designed here.
-- API reference: [`phonometry`](/phonometry/reference/api/filters/phonometry/), [`filters.core`](/phonometry/reference/api/filters/core/) and [`filters.weighting`](/phonometry/reference/api/filters/weighting/).
-- Theory: [Octave Band Frequencies](/phonometry/reference/theory/signal-analysis/#octave-band-frequencies-ansi-s111--iec-61260): where the base-10 midband grid and the band edges come from, and why the bank is designed on them rather than on nominal labels.
+- API reference: [`phonometry`](/reference/api/filters/phonometry/), [`filters.core`](/reference/api/filters/core/) and [`filters.weighting`](/reference/api/filters/weighting/).
+- Theory: [Octave Band Frequencies](/reference/theory/signal-analysis/#octave-band-frequencies-ansi-s111--iec-61260): where the base-10 midband grid and the band edges come from, and why the bank is designed on them rather than on nominal labels.
 
 </SeeAlso>
 

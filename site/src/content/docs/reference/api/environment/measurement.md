@@ -24,16 +24,16 @@ $K_\mathrm{t} = \Delta L_\mathrm{ta} - 4$ for $4 \le \Delta L_\mathrm{ta} \le 10
 $K_\mathrm{t} = 6$ for $\Delta L_\mathrm{ta} > 10$
 (Formulae (C.4)–(C.6)). The critical bandwidth is 100 Hz for centre
 frequencies up to 500 Hz and 20 % of the centre frequency above (Table C.1).
-[`assess_tonal_audibility`](/phonometry/reference/api/environment/measurement/#assess_tonal_audibility) returns both in a plottable result. (The 2017
+[`assess_tonal_audibility`](/reference/api/environment/measurement/#assess_tonal_audibility) returns both in a plottable result. (The 2017
 edition defers the full engineering method to ISO/PAS 20065; the detailed,
 self-contained algorithm implemented here is the 2007/2009 Annex C one.)
 
 **Survey method (ISO 1996-2:2017 Annex K).**
-[`assess_tonal_survey`](/phonometry/reference/api/environment/measurement/#assess_tonal_survey) flags a one-third-octave band that exceeds *both*
+[`assess_tonal_survey`](/reference/api/environment/measurement/#assess_tonal_survey) flags a one-third-octave band that exceeds *both*
 neighbours by 15 dB (25–125 Hz), 8 dB (160–400 Hz) or 5 dB (500–10 000 Hz).
 
 **Mean-audibility route (ISO 1996-2:2017 Table J.1).**
-[`tonal_adjustment_from_mean_audibility`](/phonometry/reference/api/environment/measurement/#tonal_adjustment_from_mean_audibility) maps the ISO/PAS 20065 mean
+[`tonal_adjustment_from_mean_audibility`](/reference/api/environment/measurement/#tonal_adjustment_from_mean_audibility) maps the ISO/PAS 20065 mean
 audibility `ΔL` to `Kt` (0–6 dB).
 
 **Residual-noise correction (Clause 10.4).**
@@ -41,7 +41,7 @@ $L = 10 \log_{10}(10^{L'/10} - 10^{L_\mathrm{res}/10})$ (Formula (16)); with a
 residual
 within 3 dB of the measured level no correction is allowed; the
 *uncorrected* measured level `L'` is then the reportable value, as an upper
-bound of the specific sound. [`gaussian_residual_level`](/phonometry/reference/api/environment/measurement/#gaussian_residual_level) estimates the
+bound of the specific sound. [`gaussian_residual_level`](/reference/api/environment/measurement/#gaussian_residual_level) estimates the
 residual from percentile levels (Annex I, Formulae (I.1)/(I.2)).
 
 **Measurement uncertainty (Clause 4, Annex F).**
@@ -64,8 +64,8 @@ assess_tonal_audibility(
 
 Assess a tone's audibility and adjustment (ISO 1996-2 Annex C).
 
-Combines [`tonal_audibility`](/phonometry/reference/api/environment/measurement/#tonal_audibility) and [`tonal_adjustment`](/phonometry/reference/api/environment/measurement/#tonal_adjustment) with the
-[`critical_bandwidth`](/phonometry/reference/api/environment/measurement/#critical_bandwidth) into a plottable result.
+Combines [`tonal_audibility`](/reference/api/environment/measurement/#tonal_audibility) and [`tonal_adjustment`](/reference/api/environment/measurement/#tonal_adjustment) with the
+[`critical_bandwidth`](/reference/api/environment/measurement/#critical_bandwidth) into a plottable result.
 
 **Parameters**
 
@@ -75,7 +75,7 @@ Combines [`tonal_audibility`](/phonometry/reference/api/environment/measurement/
 | `masking_noise_level` | Masking-noise level `Lpn`, in dB. |
 | `center_frequency` | Critical-band centre frequency `fc`, in Hz. |
 
-**Returns:** A [`TonalAssessmentResult`](/phonometry/reference/api/environment/measurement/#tonalassessmentresult).
+**Returns:** A [`TonalAssessmentResult`](/reference/api/environment/measurement/#tonalassessmentresult).
 
 ## assess_tonal_survey
 
@@ -101,7 +101,7 @@ neighbours by 15 dB (25–125 Hz), 8 dB (160–400 Hz) or 5 dB
 | `levels` | One-third-octave-band time-average levels, in dB. |
 | `frequencies` | The band centre frequencies, in Hz (same length). |
 
-**Returns:** The answer, as a [`TonalSurveyAssessment`](/phonometry/reference/api/environment/measurement/#tonalsurveyassessment); the bands with a prominent tone are its `prominent` and `tone_frequencies`.
+**Returns:** The answer, as a [`TonalSurveyAssessment`](/reference/api/environment/measurement/#tonalsurveyassessment); the bands with a prominent tone are its `prominent` and `tone_frequencies`.
 
 **Raises**
 
@@ -154,11 +154,11 @@ Coverage factor $k = 2$ for 95 % or $k = 1.3$ for 80 %.
 Several domains define an expanded uncertainty over their own coverage
 factors, and each says in its name what it is the uncertainty *of*:
 this one is
-[`environmental_expanded_uncertainty`](/phonometry/reference/api/environment/measurement/#environmental_expanded_uncertainty),
+[`environmental_expanded_uncertainty`](/reference/api/environment/measurement/#environmental_expanded_uncertainty),
 the building one is
-[`insulation_expanded_uncertainty`](/phonometry/reference/api/building/uncertainty/#insulation_expanded_uncertainty), and the
+[`insulation_expanded_uncertainty`](/reference/api/building/uncertainty/#insulation_expanded_uncertainty), and the
 work-station one is
-[`emission_expanded_uncertainty`](/phonometry/reference/api/power/workstation/#emission_expanded_uncertainty), whose
+[`emission_expanded_uncertainty`](/reference/api/power/workstation/#emission_expanded_uncertainty), whose
 coverage factor is the 1.6 that the ISO 11200 group prints. This one carried the bare name
 until the work-station one needed it too, and one package holding the
 unqualified spelling of a quantity three of them define was the reason
@@ -293,7 +293,7 @@ of the measured level, §10.4 allows **no** correction: the *uncorrected*
 measured level `L'` is the reportable value, as an upper bound of the
 specific sound (the corrected value would understate reliability, being
 the lower-side estimate). The result is then flagged `reliable = False`
-and an [`EnvironmentalMeasurementWarning`](/phonometry/reference/api/environment/measurement/#environmentalmeasurementwarning) is issued; report
+and an [`EnvironmentalMeasurementWarning`](/reference/api/environment/measurement/#environmentalmeasurementwarning) is issued; report
 `reportable_upper_bound` (= `L'`), not `corrected_level`.
 
 **Parameters**
@@ -303,7 +303,7 @@ and an [`EnvironmentalMeasurementWarning`](/phonometry/reference/api/environment
 | `measured_level` | Measured level `L'` including residual, in dB. |
 | `residual_level` | Residual (background) level `Lres`, in dB. |
 
-**Returns:** A [`ResidualCorrectionResult`](/phonometry/reference/api/environment/measurement/#residualcorrectionresult).
+**Returns:** A [`ResidualCorrectionResult`](/reference/api/environment/measurement/#residualcorrectionresult).
 
 **Raises**
 
@@ -584,7 +584,7 @@ $\sqrt{\sum (L_i - L_k)^2/(N - 1)}$ (Formula (20)) is also
 reported as
 `approximate_uncertainty`; it is valid only "if the difference between
 different Li is small", so a spread above 3 dB triggers an
-[`EnvironmentalMeasurementWarning`](/phonometry/reference/api/environment/measurement/#environmentalmeasurementwarning) (e.g. [50, 60, 70] dB gives
+[`EnvironmentalMeasurementWarning`](/reference/api/environment/measurement/#environmentalmeasurementwarning) (e.g. [50, 60, 70] dB gives
 3.94 dB by Formulae (17)+(19) but 12.18 dB by Formula (20)).
 
 **Parameters**
@@ -593,7 +593,7 @@ different Li is small", so a spread above 3 dB triggers an
 | :--- | :--- |
 | `levels` | The repeated measured levels `Li`, in dB (at least two). |
 
-**Returns:** A [`RepeatedMeasurementResult`](/phonometry/reference/api/environment/measurement/#repeatedmeasurementresult).
+**Returns:** A [`RepeatedMeasurementResult`](/reference/api/environment/measurement/#repeatedmeasurementresult).
 
 **Raises**
 

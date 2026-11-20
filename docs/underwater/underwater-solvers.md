@@ -1,6 +1,6 @@
 <!-- Written by `make llms` from site/src/content/docs/underwater/underwater-solvers.mdx: edit that page and its Spanish twin, then run `make llms`. -->
 
-← [Documentation index](../README.md) · Published at https://docs.jmrp.io/phonometry/underwater/underwater-solvers/
+← [Documentation index](../README.md) · Published at https://phonometry.dev/underwater/underwater-solvers/
 
 # Underwater propagation solvers
 
@@ -1164,7 +1164,7 @@ equation is why they all live in one module.
 - [2D FDTD wave simulation](../simulation/fdtd-simulation.md): the
   time-domain alternative behind the SOFAR ducting animation of the
   propagation guide.
-- API reference: [`underwater.propagation.numerical`](https://docs.jmrp.io/phonometry/reference/api/underwater/numerical/).
+- API reference: [`underwater.propagation.numerical`](https://phonometry.dev/reference/api/underwater/numerical/).
 
 ## Quick answers
 

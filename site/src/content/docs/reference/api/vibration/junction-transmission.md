@@ -130,21 +130,21 @@ i.e. $\bar{\tau}_{12} = \chi \bar{\tau}_{21}$.
 **Two shortcuts for right-angle joints (Norton & Karczub 2003, Section
 6.6.1).** Alongside the angle-resolved wave approach above, the SEA literature
 uses a pair of closed forms that need no integration, which is what the
-experimental SEA of [`phonometry.vibration.structural.experimental_sea`](/phonometry/reference/api/vibration/experimental-sea/) is normally
+experimental SEA of [`phonometry.vibration.structural.experimental_sea`](/reference/api/vibration/experimental-sea/) is normally
 compared against:
 
-* [`right_angle_transmission_coefficient`](/phonometry/reference/api/vibration/junction-transmission/#right_angle_transmission_coefficient) (Norton Eqs. 6.53 to 6.55, after
+* [`right_angle_transmission_coefficient`](/reference/api/vibration/junction-transmission/#right_angle_transmission_coefficient) (Norton Eqs. 6.53 to 6.55, after
   Bies & Hamid and Cremer et al.). The normal-incidence coefficient of two
   plates at right angles is
   $\tau_{12}(0) = 2 (\psi_N^{0.5} + \psi_N^{-0.5})^{-2}$ with
   $\psi_N = \rho_1 c_{\mathrm{L}1}^{1.5} h_1^{2.5} / (\rho_2 c_{\mathrm{L}2}^{1.5} h_2^{2.5})$ (note this is a *different* `psi` from
   Hopkins Eq. 5.11 above), and the random incidence value follows from the
   empirical factor $2.754 X / (1 + 3.24 X)$ with $X = h_1/h_2$.
-  Feeding it to [`coupling_loss_factor`](/phonometry/reference/api/vibration/junction-transmission/#coupling_loss_factor) reproduces Norton Eq. (6.52),
+  Feeding it to [`coupling_loss_factor`](/reference/api/vibration/junction-transmission/#coupling_loss_factor) reproduces Norton Eq. (6.52),
   $\eta_{12} = 2 c_\mathrm{B} L \tau_{12} / (\pi \omega S_1)$, identically:
   that equation and Hopkins Eq. (2.154) are the same expression once
   $c_\mathrm{g} = 2 c_\mathrm{B}$.
-* [`point_connection_coupling_loss_factor`](/phonometry/reference/api/vibration/junction-transmission/#point_connection_coupling_loss_factor) (Norton Eq. 6.56, after
+* [`point_connection_coupling_loss_factor`](/reference/api/vibration/junction-transmission/#point_connection_coupling_loss_factor) (Norton Eq. 6.56, after
   Clarkson & Ranky). Plates joined at `N` discrete points (bolts, rivets,
   spot welds) rather than along a line. Use it when the bending wavelength is
   shorter than the joint length, and the line-junction route above when it is
@@ -285,7 +285,7 @@ source-plate bending-wave group velocity `cg_i`, the junction length
 | Name | Description |
 | :--- | :--- |
 | `transmission_coefficient` | Angular-average `tau_ij` (scalar/array). |
-| `group_velocity` | Source-plate bending-wave group velocity `cg_i`, in m/s (> 0). For a thin plate $c_\mathrm{g} = 2 c_\mathrm{B}$ with the bending phase speed `cB` (see [`phonometry.vibration.structural.point_mobility.plate_bending_wave_speed`](/phonometry/reference/api/vibration/point-mobility/#plate_bending_wave_speed)). |
+| `group_velocity` | Source-plate bending-wave group velocity `cg_i`, in m/s (> 0). For a thin plate $c_\mathrm{g} = 2 c_\mathrm{B}$ with the bending phase speed `cB` (see [`phonometry.vibration.structural.point_mobility.plate_bending_wave_speed`](/reference/api/vibration/point-mobility/#plate_bending_wave_speed)). |
 | `junction_length` | Junction length `L_ij`, in m (> 0). |
 | `frequency` | Frequency `f`, in hertz (scalar or array, > 0). |
 | `plate_area` | Source-plate area `S_i`, in m^2 (> 0). |
@@ -351,7 +351,7 @@ angular averages (Eq. 5.6) from the two plates' properties, together with
 the thin-plate critical frequencies
 $f_\mathrm{c} = \sqrt{12}\, c_0^2 / (2\pi h c_\mathrm{L})$ ($c_0 = 343$ m/s)
 used by the Eq. 5.116 vibration reduction index. For the in-line junction
-(normal incidence only) use [`inline_transmission_coefficient`](/phonometry/reference/api/vibration/junction-transmission/#inline_transmission_coefficient).
+(normal incidence only) use [`inline_transmission_coefficient`](/reference/api/vibration/junction-transmission/#inline_transmission_coefficient).
 
 **Parameters**
 
@@ -366,7 +366,7 @@ used by the Eq. 5.116 vibration reduction index. For the in-line junction
 | `surface_density2` | Surface density `rho_s2` of the receiving plate, in kg/m^2 (> 0). |
 | `angles_deg` | Incidence-angle grid in degrees (Default: 0 to 90 in 91 one-degree steps). |
 
-**Returns:** A [`JunctionTransmissionResult`](/phonometry/reference/api/vibration/junction-transmission/#junctiontransmissionresult).
+**Returns:** A [`JunctionTransmissionResult`](/reference/api/vibration/junction-transmission/#junctiontransmissionresult).
 
 **Raises**
 
@@ -405,7 +405,7 @@ $\psi = (h_2 c_{\mathrm{L}2} \rho_{\mathrm{s}2}) / (h_1 c_{\mathrm{L}1} \rho_{\m
 | `wave_speed2` | Quasi-longitudinal wave speed `cL2` of plate 2, in m/s (> 0). |
 | `surface_density2` | Surface density `rho_s2` of plate 2, in kg/m^2 (> 0). |
 
-**Returns:** $\chi$ and $\psi$, as a [`JunctionWaveParameters`](/phonometry/reference/api/vibration/junction-transmission/#junctionwaveparameters).
+**Returns:** $\chi$ and $\psi$, as a [`JunctionWaveParameters`](/reference/api/vibration/junction-transmission/#junctionwaveparameters).
 
 **Raises**
 
@@ -517,7 +517,7 @@ JunctionWaveParameters(chi: float, psi: float)
 
 The wave parameters of a rigid plate junction (Hopkins Eqs. 5.10/5.11, p. 541).
 
-What [`junction_wave_parameters`](/phonometry/reference/api/vibration/junction-transmission/#junction_wave_parameters) returns: $\chi$ and
+What [`junction_wave_parameters`](/reference/api/vibration/junction-transmission/#junction_wave_parameters) returns: $\chi$ and
 $\psi$, named, where a `(chi, psi)` tuple used to be unpacked by
 position.
 
@@ -547,7 +547,7 @@ Draw a plate junction cross-section to scale.
 Plate 1 runs horizontally; the perpendicular plate(s) of thickness 2
 form the L, T or X. The incident bending wave arrives on plate 1 and
 the junction type follows
-[`junction_transmission`](/phonometry/reference/api/vibration/junction-transmission/#junction_transmission).
+[`junction_transmission`](/reference/api/vibration/junction-transmission/#junction_transmission).
 
 **Parameters**
 
@@ -625,8 +625,8 @@ with `rho_si` the surface density in kg/m^2,
 $\omega = 2 \pi f$ and `S1` the source-plate area. Norton
 recommends it when the bending wavelength in the plates is shorter than
 the length of the connected edge, and the line junction
-([`coupling_loss_factor`](/phonometry/reference/api/vibration/junction-transmission/#coupling_loss_factor) on
-[`right_angle_transmission_coefficient`](/phonometry/reference/api/vibration/junction-transmission/#right_angle_transmission_coefficient)) when it is longer. The
+([`coupling_loss_factor`](/reference/api/vibration/junction-transmission/#coupling_loss_factor) on
+[`right_angle_transmission_coefficient`](/reference/api/vibration/junction-transmission/#right_angle_transmission_coefficient)) when it is longer. The
 result falls as $1/f$, unlike the line junction's
 $1/\sqrt{f}$.
 
@@ -696,11 +696,11 @@ $$
 `tau12(0)` is symmetric in the two plates (swapping them inverts
 `psi_N`, which the expression does not see); the random-incidence factor
 is not, so `tau12` and `tau21` differ. Pass the result to
-[`coupling_loss_factor`](/phonometry/reference/api/vibration/junction-transmission/#coupling_loss_factor) with the source plate's group velocity
+[`coupling_loss_factor`](/reference/api/vibration/junction-transmission/#coupling_loss_factor) with the source plate's group velocity
 $c_\mathrm{g} = 2 c_\mathrm{B}$ to obtain Norton Eq. (6.52).
 
 `rho` here is the **volume** density in kg/m^3, not the surface density
-of [`junction_wave_parameters`](/phonometry/reference/api/vibration/junction-transmission/#junction_wave_parameters).
+of [`junction_wave_parameters`](/reference/api/vibration/junction-transmission/#junction_wave_parameters).
 
 **Parameters**
 
@@ -761,7 +761,7 @@ covered.
 | `angle_rad` | Incidence angle `theta`, in **radians** (scalar or array, $0 \le \theta \le \pi/2$). |
 | `chi` | Wave parameter `chi` (Eq. 5.10, > 0). |
 | `psi` | Wave parameter `psi` (Eq. 5.11, > 0). |
-| `junction` | `"X"` or `"T1"`, the two junctions with a straight section. T-junction (2) and the L-junction, the `"T2"` and `"L"` that [`corner_transmission_coefficient`](/phonometry/reference/api/vibration/junction-transmission/#corner_transmission_coefficient) takes, are not offered: Hopkins gives no `J3` for them, as no plate lies in line with the source plate across either. |
+| `junction` | `"X"` or `"T1"`, the two junctions with a straight section. T-junction (2) and the L-junction, the `"T2"` and `"L"` that [`corner_transmission_coefficient`](/reference/api/vibration/junction-transmission/#corner_transmission_coefficient) takes, are not offered: Hopkins gives no `J3` for them, as no plate lies in line with the source plate across either. |
 
 **Returns:** `tau13(theta)` (same shape as *angle*). A `float` for a number, an array for a sequence or an array, a zero-dimensional one included.
 

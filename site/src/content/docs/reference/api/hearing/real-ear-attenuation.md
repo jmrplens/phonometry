@@ -38,11 +38,11 @@ $$
 u = \frac{s}{\sqrt{N}}, \qquad U_{95} = k\,u, \quad k = 2
 $$
 
-which is what [`real_ear_attenuation`](/phonometry/reference/api/hearing/real-ear-attenuation/#real_ear_attenuation) returns. Table A.2 prints typical
+which is what [`real_ear_attenuation`](/reference/api/hearing/real-ear-attenuation/#real_ear_attenuation) returns. Table A.2 prints typical
 values of the three components within a laboratory and Table B.2 between
 laboratories, for earplugs and earmuffs in three frequency ranges;
-[`REAT_WITHIN_LABORATORY_UNCERTAINTY`](/phonometry/reference/api/hearing/real-ear-attenuation/#reat_within_laboratory_uncertainty) and
-[`REAT_BETWEEN_LABORATORY_UNCERTAINTY`](/phonometry/reference/api/hearing/real-ear-attenuation/#reat_between_laboratory_uncertainty) carry the components, and the
+[`REAT_WITHIN_LABORATORY_UNCERTAINTY`](/reference/api/hearing/real-ear-attenuation/#reat_within_laboratory_uncertainty) and
+[`REAT_BETWEEN_LABORATORY_UNCERTAINTY`](/reference/api/hearing/real-ear-attenuation/#reat_between_laboratory_uncertainty) carry the components, and the
 combined and expanded values are derived from them rather than copied, which
 reproduces every cell the two tables print.
 
@@ -55,8 +55,8 @@ $$
 $$
 
 which for two equal uncertainties is $\sqrt{2}\,U_{95}$, the minimum
-difference of B.1.1 and B.2. [`assess_attenuation_difference`](/phonometry/reference/api/hearing/real-ear-attenuation/#assess_attenuation_difference) applies it
-band by band and [`min_significant_difference`](/phonometry/reference/api/hearing/real-ear-attenuation/#min_significant_difference) gives the second form.
+difference of B.1.1 and B.2. [`assess_attenuation_difference`](/reference/api/hearing/real-ear-attenuation/#assess_attenuation_difference) applies it
+band by band and [`min_significant_difference`](/reference/api/hearing/real-ear-attenuation/#min_significant_difference) gives the second form.
 B.1.1 and B.2 evaluate it on the **rounded** $U_{95}$ their tables print,
 and say so: "the expanded measurement uncertainty ... is 2,3 dB. The minimum
 difference is thus $\sqrt{2}$ × 2,3 dB = 3,3 dB". From the unrounded
@@ -68,7 +68,7 @@ the level 15 cm from the reference point along the three axes stays within
 ±2.5 dB of the level at it, the two ear-side positions within 3 dB of each
 other, and from 500 Hz up a directional microphone rotated through 360° sees a
 variation no larger than Table 1 allows for its free-field rejection.
-[`check_reat_sound_field`](/phonometry/reference/api/hearing/real-ear-attenuation/#check_reat_sound_field) judges those three conditions, and its verdict
+[`check_reat_sound_field`](/reference/api/hearing/real-ear-attenuation/#check_reat_sound_field) judges those three conditions, and its verdict
 only passes a room whose directionality was measured: without the rotation, b)
 is not judged and the room is not shown to qualify.
 
@@ -123,10 +123,10 @@ $$
 |m_1 - m_2| > \sqrt{U_{95,1}^2 + U_{95,2}^2}
 $$
 
-Each measurement is either a [`RealEarAttenuationResult`](/phonometry/reference/api/hearing/real-ear-attenuation/#realearattenuationresult), which
+Each measurement is either a [`RealEarAttenuationResult`](/reference/api/hearing/real-ear-attenuation/#realearattenuationresult), which
 carries its own $U_{95}$ from its own data (B.1.2), or its mean
 attenuations with an uncertainty given alongside, such as the typical one
-[`reat_expanded_uncertainty`](/phonometry/reference/api/hearing/real-ear-attenuation/#reat_expanded_uncertainty) reads from Table A.2 or B.2 (B.1.1,
+[`reat_expanded_uncertainty`](/reference/api/hearing/real-ear-attenuation/#reat_expanded_uncertainty) reads from Table A.2 or B.2 (B.1.1,
 B.2).
 
 **Parameters**
@@ -137,9 +137,9 @@ B.2).
 | `second` | The second measurement, the same way. |
 | `first_expanded_uncertainty_db` | $U_{95,1}$ in dB, a number or one per band, when `first` is given as means. |
 | `second_expanded_uncertainty_db` | $U_{95,2}$ in dB, likewise. |
-| `frequencies` | The centre frequencies, in hertz, or `None` to take them from a result or, for bare means, to assume the test signals of 4.1 as [`real_ear_attenuation`](/phonometry/reference/api/hearing/real-ear-attenuation/#real_ear_attenuation) does. |
+| `frequencies` | The centre frequencies, in hertz, or `None` to take them from a result or, for bare means, to assume the test signals of 4.1 as [`real_ear_attenuation`](/reference/api/hearing/real-ear-attenuation/#real_ear_attenuation) does. |
 
-**Returns:** [`AttenuationDifferenceResult`](/phonometry/reference/api/hearing/real-ear-attenuation/#attenuationdifferenceresult).
+**Returns:** [`AttenuationDifferenceResult`](/reference/api/hearing/real-ear-attenuation/#attenuationdifferenceresult).
 
 **Raises**
 
@@ -259,7 +259,7 @@ Measured with the subject and the chair absent (4.2.1):
 - b) from the 500 Hz test signal up, a directional microphone rotated
   through 360° in the horizontal plane at the reference point sees the
   level vary by no more than Table 1 allows for its free-field rejection
-  ([`allowable_field_variation`](/phonometry/reference/api/hearing/real-ear-attenuation/#allowable_field_variation)).
+  ([`allowable_field_variation`](/reference/api/hearing/real-ear-attenuation/#allowable_field_variation)).
 
 The reverberation time of 4.2.3 and the ambient noise of 4.2.4 are
 separate requirements of the test site and are not judged here.
@@ -272,9 +272,9 @@ separate requirements of the test site and are not judged here.
 | `reference_levels` | The level at the reference point per test signal, in dB. |
 | `rotation_levels` | The levels the directional microphone saw while rotated, a `(readings, bands)` grid in dB, on the same band axis; bands below 500 Hz are not read and may be `nan`. `None` leaves b) unjudged, and the verdict then does not pass. |
 | `free_field_rejection` | The free-field rejection of that microphone, in dB, required with `rotation_levels`. |
-| `frequencies` | The centre frequencies, in hertz, or `None` for the test signals of 4.1 as [`real_ear_attenuation`](/phonometry/reference/api/hearing/real-ear-attenuation/#real_ear_attenuation) assumes them. |
+| `frequencies` | The centre frequencies, in hertz, or `None` for the test signals of 4.1 as [`real_ear_attenuation`](/reference/api/hearing/real-ear-attenuation/#real_ear_attenuation) assumes them. |
 
-**Returns:** [`REATSoundFieldCheck`](/phonometry/reference/api/hearing/real-ear-attenuation/#reatsoundfieldcheck).
+**Returns:** [`REATSoundFieldCheck`](/reference/api/hearing/real-ear-attenuation/#reatsoundfieldcheck).
 
 **Raises**
 
@@ -414,7 +414,7 @@ hearing level give the same difference.
 | `occluded_threshold_levels` | The thresholds with the protector in place, in dB, on the same grid. |
 | `frequencies` | The centre frequencies of the test signals, in hertz, or `None` for the seven of 4.1 (125 Hz to 8 kHz) when the grid has seven columns, or those eight with the optional 63 Hz when it has eight. |
 
-**Returns:** [`RealEarAttenuationResult`](/phonometry/reference/api/hearing/real-ear-attenuation/#realearattenuationresult).
+**Returns:** [`RealEarAttenuationResult`](/reference/api/hearing/real-ear-attenuation/#realearattenuationresult).
 
 **Raises**
 
@@ -443,7 +443,7 @@ The attenuation of a hearing protector on a panel of subjects (4.6).
 
 | Name | Description |
 | :--- | :--- |
-| `attenuation` | The individual attenuations $A_{j,f}$, one row per subject and one column per test signal, in dB. This is the grid [`phonometry.hearing.assumed_protection_value`](/phonometry/reference/api/hearing/hearing-protectors/#assumed_protection_value), [`phonometry.hearing.hml_rating`](/phonometry/reference/api/hearing/hearing-protectors/#hml_rating) and [`phonometry.hearing.snr_rating`](/phonometry/reference/api/hearing/hearing-protectors/#snr_rating) take, unchanged. |
+| `attenuation` | The individual attenuations $A_{j,f}$, one row per subject and one column per test signal, in dB. This is the grid [`phonometry.hearing.assumed_protection_value`](/reference/api/hearing/hearing-protectors/#assumed_protection_value), [`phonometry.hearing.hml_rating`](/reference/api/hearing/hearing-protectors/#hml_rating) and [`phonometry.hearing.snr_rating`](/reference/api/hearing/hearing-protectors/#snr_rating) take, unchanged. |
 | `mean_attenuation` | The mean attenuation $m$ per test signal, in dB. |
 | `standard_deviation_db` | The standard deviation $s$ per test signal over the subjects, the sample one over $N - 1$, in dB. |
 | `standard_uncertainty_db` | $u = s/\sqrt{N}$, the standard deviation of the mean (A.2), in dB. |
@@ -520,7 +520,7 @@ test signal falls in, and returns its expanded uncertainty at full
 precision. These are the typical values B.1.1 and B.2 draw on when no data
 of a specific measurement are at hand; the text of both uses them rounded
 to one decimal, as the tables print them (see
-[`min_significant_difference`](/phonometry/reference/api/hearing/real-ear-attenuation/#min_significant_difference)).
+[`min_significant_difference`](/reference/api/hearing/real-ear-attenuation/#min_significant_difference)).
 
 **Parameters**
 

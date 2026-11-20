@@ -19,12 +19,12 @@ P = \rho_0 c_0 S \langle v^2 \rangle \sigma
 $$
 
 so `sigma` is exactly the radiation factor `epsilon` that
-[`phonometry.emission.sound_power_from_vibration`](/phonometry/reference/api/power/vibration-sound-power/#sound_power_from_vibration) (ISO/TS 7849) otherwise
+[`phonometry.emission.sound_power_from_vibration`](/reference/api/power/vibration-sound-power/#sound_power_from_vibration) (ISO/TS 7849) otherwise
 takes as a measured input: this module predicts it from the plate geometry and
 its coincidence (critical) frequency, closing the ISO 7849 chain without a
 power measurement, and it supplies the *resonant* transmission path of the
 single- and double-leaf sound-reduction-index predictions in
-[`phonometry.building.prediction.panel_transmission`](/phonometry/reference/api/building/panel-transmission/).
+[`phonometry.building.prediction.panel_transmission`](/reference/api/building/panel-transmission/).
 
 **Coincidence (critical) frequency (Hopkins Eq. 2.201).** Below it the free
 bending wavelength is shorter than the acoustic wavelength, so the plate
@@ -84,7 +84,7 @@ $f_\mathrm{c} = (c_0^2 / 2\pi) \sqrt{m'' / B'}$ (identical to Bies Eq. 7.3).
 | Name | Description |
 | :--- | :--- |
 | `mass_per_area` | Mass per unit area `m''`, in kg/m^2. |
-| `bending_stiffness` | Bending stiffness per unit width `B'`, in N.m (see [`phonometry.vibration.structural.point_mobility.plate_bending_stiffness`](/phonometry/reference/api/vibration/point-mobility/#plate_bending_stiffness)). |
+| `bending_stiffness` | Bending stiffness per unit width `B'`, in N.m (see [`phonometry.vibration.structural.point_mobility.plate_bending_stiffness`](/reference/api/vibration/point-mobility/#plate_bending_stiffness)). |
 | `speed_of_sound` | Speed of sound in air `c0` (Default: 343 m/s). |
 
 **Returns:** The coincidence frequency `fc`, in hertz.
@@ -164,12 +164,12 @@ expressions.
 | `frequency` | Band centre frequency `f`, in hertz (scalar or array, > 0). |
 | `length_x` | Plate dimension `Lx`, in m (> 0). |
 | `length_y` | Plate dimension `Ly`, in m (> 0). |
-| `critical_frequency` | Coincidence frequency `fc`, in hertz (> 0); see [`coincidence_frequency`](/phonometry/reference/api/vibration/radiation-efficiency/#coincidence_frequency). |
+| `critical_frequency` | Coincidence frequency `fc`, in hertz (> 0); see [`coincidence_frequency`](/reference/api/vibration/radiation-efficiency/#coincidence_frequency). |
 | `boundary` | `"simply_supported"` ($C_\mathrm{BC} = 1$) or `"clamped"` ($C_\mathrm{BC} = 2$). |
 | `baffle` | `"infinite"` ($C_\mathrm{OB} = 1$, plate flush in a rigid baffle) or `"perpendicular"` ($C_\mathrm{OB} = 2$, baffles perpendicular to the edges). |
 | `speed_of_sound` | Speed of sound in air `c0` (Default: 343 m/s). |
 
-**Returns:** A [`RadiationEfficiencyResult`](/phonometry/reference/api/vibration/radiation-efficiency/#radiationefficiencyresult).
+**Returns:** A [`RadiationEfficiencyResult`](/reference/api/vibration/radiation-efficiency/#radiationefficiencyresult).
 
 **Raises**
 

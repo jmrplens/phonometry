@@ -31,7 +31,7 @@ IEC 60268-1 prescribes, **resampling** whose anti-alias rejection is a stated,
 verifiable specification rather than a library default, **fractional delay**
 that shifts a record by any sub-sample amount with band-limited exactness, and
 the **colored-noise generators**, whose spectral verification lives in the
-[spectral analysis guide](/phonometry/signals/spectra/spectral-analysis/#5-colored-noise-generators).
+[spectral analysis guide](/signals/spectra/spectral-analysis/#5-colored-noise-generators).
 
 Before the details, the family portrait: what each stimulus looks like in
 time and where its energy sits over frequency.
@@ -48,11 +48,11 @@ rather than steady response.
 
 Only two of the five are covered here, so this is where the other three live:
 the noise generators and their spectral verification on
-[spectral analysis](/phonometry/signals/spectra/spectral-analysis/#5-colored-noise-generators);
+[spectral analysis](/signals/spectra/spectral-analysis/#5-colored-noise-generators);
 the MLS and the exponential sweep as the ISO 18233 acquisition pair of
-[room acoustics](/phonometry/buildings/rooms/room-acoustics/); the shaped sweep
+[room acoustics](/buildings/rooms/room-acoustics/); the shaped sweep
 and the Golay pair on
-[system measurement](/phonometry/signals/spectra/system-measurement/); and the
+[system measurement](/signals/spectra/system-measurement/); and the
 tone burst in the next section.
 
 ## 1. Tone bursts (IEC 60268-1)
@@ -130,7 +130,7 @@ plt.show()
 </details>
 
 These are the bursts behind the
-[Fast/Slow/Impulse ballistics](/phonometry/signals/levels/time-weighting/) reference
+[Fast/Slow/Impulse ballistics](/signals/levels/time-weighting/) reference
 responses (IEC 61672-1 Table 4 uses 4 kHz tonebursts of 200, 50 and 10 ms)
 and the quasi-peak dynamic tests of IEC 60268-1 itself (5 kHz bursts of
 1 to 200 ms, Table AII).
@@ -146,7 +146,7 @@ continuous level is the burst level plus $10\log_{10}(\text{duty cycle})$: the
 5 % train above therefore sits exactly **13.0 dB** below the burst's own level,
 which is the quantity a detector-ballistics test compares against. The reference
 responses those numbers feed are in
-[Time weighting](/phonometry/signals/levels/time-weighting/).
+[Time weighting](/signals/levels/time-weighting/).
 
 ## 2. Resampling with a stated anti-alias specification
 
@@ -260,7 +260,7 @@ boundary conventions cover the two use cases:
   leaving one end land in padding instead of wrapping around. Use it for
   transients and impulse responses; it is bit-identical to the alignment
   kernel inside
-  [`align_impulse_responses`](/phonometry/signals/spectra/correlation-delay/#3-impulse-response-delay-and-alignment).
+  [`align_impulse_responses`](/signals/spectra/correlation-delay/#3-impulse-response-delay-and-alignment).
   An integer delay reduces to an exact sample shift.
 - `mode="circular"` applies the ramp over the record itself and wraps. For
   periodic records it is exact: a tone centered on a DFT bin delayed by
@@ -287,13 +287,13 @@ The deterministic colored-noise generators (`noise_signal`: white, pink, red,
 blue and violet, with an exact power-law slope and bit-reproducible seeds) round
 out the toolbox and are documented, with their spectral verification and their
 measured slopes, in the
-[spectral analysis guide](/phonometry/signals/spectra/spectral-analysis/#5-colored-noise-generators).
+[spectral analysis guide](/signals/spectra/spectral-analysis/#5-colored-noise-generators).
 
-The [window figures of merit](/phonometry/signals/spectra/spectral-analysis/#6-choosing-the-window)
+The [window figures of merit](/signals/spectra/spectral-analysis/#6-choosing-the-window)
 quantify the taper every spectral estimate in the library rests on; the
 burst generator feeds ballistics and dynamic-response testing; and the
 resampler and fractional delay are the sample-rate half of
-[correlation and delay work](/phonometry/signals/spectra/correlation-delay/), where
+[correlation and delay work](/signals/spectra/correlation-delay/), where
 sub-sample alignment is the difference between averaging impulse responses
 and smearing them.
 
@@ -315,13 +315,13 @@ IEC 60268-1:1985 is a general standard for sound system equipment; only the
 Appendix A tone-burst clauses are implemented on this page. Its Clause 7, the
 simulated programme signal, is in `electroacoustics.program_signal` and has
 its walk-through in the
-[Headphones and Earphones (IEC 60268-7)](/phonometry/devices/electroacoustics/headphones/)
+[Headphones and Earphones (IEC 60268-7)](/devices/electroacoustics/headphones/)
 guide. The device parts are not covered here, but they are not untouched
 either: amplifiers (IEC 60268-3), microphones (IEC 60268-4), loudspeakers
 (IEC 60268-5) and headphones (IEC 60268-7) have their own guides under
-[Electroacoustics](/phonometry/devices/electroacoustics/), and the speech
+[Electroacoustics](/devices/electroacoustics/), and the speech
 transmission index of IEC 60268-16 has the
-[Speech Transmission Index](/phonometry/perception/speech/speech-transmission/)
+[Speech Transmission Index](/perception/speech/speech-transmission/)
 guide; only the connector parts are absent from the library altogether.
 `fractional_delay` and the colored-noise generators of `noise_signal` are
 general-purpose DSP tools with no governing standard of their own; their
@@ -333,12 +333,12 @@ accuracy claims are closed-form, not normative.
 
 ## See also
 
-- [Time Weighting](/phonometry/signals/levels/time-weighting/): the detector ballistics the tone bursts exercise (IEC 61672-1 Table 4).
-- [Correlation and delay](/phonometry/signals/spectra/correlation-delay/): the alignment work built on the fractional-delay kernel.
-- [Synchronous averaging](/phonometry/signals/spectra/synchronous-averaging/): period alignment with the same band-limited shift when $f_\mathrm{s} T$ is not an integer.
-- [Spectral analysis](/phonometry/signals/spectra/spectral-analysis/): the colored-noise verification and the window metrics.
-- [Room acoustics](/phonometry/buildings/rooms/room-acoustics/): the MLS and exponential-sweep excitations of the family portrait, as ISO 18233 uses them.
-- [System measurement](/phonometry/signals/spectra/system-measurement/): the Golay pair and the shaped sweep, the other two members of the family.
-- API reference: [`signals`: test signals](/phonometry/reference/api/signals/test-signals/).
+- [Time Weighting](/signals/levels/time-weighting/): the detector ballistics the tone bursts exercise (IEC 61672-1 Table 4).
+- [Correlation and delay](/signals/spectra/correlation-delay/): the alignment work built on the fractional-delay kernel.
+- [Synchronous averaging](/signals/spectra/synchronous-averaging/): period alignment with the same band-limited shift when $f_\mathrm{s} T$ is not an integer.
+- [Spectral analysis](/signals/spectra/spectral-analysis/): the colored-noise verification and the window metrics.
+- [Room acoustics](/buildings/rooms/room-acoustics/): the MLS and exponential-sweep excitations of the family portrait, as ISO 18233 uses them.
+- [System measurement](/signals/spectra/system-measurement/): the Golay pair and the shaped sweep, the other two members of the family.
+- API reference: [`signals`: test signals](/reference/api/signals/test-signals/).
 
 </SeeAlso>

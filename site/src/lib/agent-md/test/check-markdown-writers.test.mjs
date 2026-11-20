@@ -130,7 +130,7 @@ describe('what the check refuses', () => {
   });
 
   test('a literal in an attribute of raw HTML passes', async (t) => {
-    const result = await check(t, { 'a.mdx': `${BOX}<Box />\n\nSee <a href={'/phonometry/a/'}>the guide</a> and <span id="old" />.\n` });
+    const result = await check(t, { 'a.mdx': `${BOX}<Box />\n\nSee <a href={'/a/'}>the guide</a> and <span id="old" />.\n` });
     assert.deepEqual(result.failures, []);
   });
 

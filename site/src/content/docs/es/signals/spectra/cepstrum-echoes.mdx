@@ -48,7 +48,7 @@ import SeeAlso from '../../../../../components/SeeAlso.astro';
 import ThemeImage from '../../../../../components/ThemeImage.astro';
 
 Los [estimadores
-espectrales](/phonometry/es/signals/spectra/spectral-analysis/) describen
+espectrales](/es/signals/spectra/spectral-analysis/) describen
 *qué frecuencias* contiene una señal; esta página cubre lo que se esconde en
 la *forma* de ese espectro. El **cepstrum** - la transformada de Fourier
 inversa del espectro logarítmico - vive en `phonometry.signals` y convierte
@@ -57,7 +57,7 @@ rizado espectral periódico (un eco, una familia de armónicos) colapsa en un
 único pico en la **quefrencia** de su periodo, y la envolvente espectral
 suave se separa de la estructura fina mediante un simple enventanado -
 **liftering** - en el dominio de la quefrencia. La misma maquinaria extiende
-la [envolvente de Hilbert](/phonometry/es/signals/spectra/correlation-delay/) con un
+la [envolvente de Hilbert](/es/signals/spectra/correlation-delay/) con un
 **espectro de la envolvente** en el que las modulaciones de amplitud se
 vuelven líneas discretas.
 
@@ -162,7 +162,7 @@ son pares) se repiten y el cepstrum complejo guarda su contenido anticausal
 (de fase no mínima). El relleno de ceros vía `nfft` reduce el aliasing
 temporal cepstral cuando el espectro logarítmico tiene rasgos abruptos,
 exactamente igual que el relleno `oversample` de
-[`min_phase`](/phonometry/es/devices/electroacoustics/swept-sine-distortion/).
+[`min_phase`](/es/devices/electroacoustics/swept-sine-distortion/).
 
 ## 2. Detección de ecos: el tren de picos rahmónicos
 
@@ -270,7 +270,7 @@ periodicidad espectral sin relación.
 Todo lo anterior corre sobre un clic sintético, y lo que el método consume de
 verdad es una respuesta al impulso. Mídela con cualquiera de las excitaciones de
 la biblioteca (un barrido exponencial, una MLS o la pareja de Golay de
-[medición de sistemas](/phonometry/es/signals/spectra/system-measurement/)),
+[medición de sistemas](/es/signals/spectra/system-measurement/)),
 mantén el sonido directo y la reflexión dentro de un mismo registro y pásale la
 respuesta al impulso directamente a `echo_detection`.
 
@@ -293,7 +293,7 @@ no puede pasar de uno, lo que significa que una $a$ aparente por encima de
 $1/(1 + c t_0/r_\text{directo})$ no es en absoluto una única reflexión especular.
 Donde $R$ es válido, el coeficiente de absorción a ese ángulo de incidencia es
 $\alpha = 1 - R^2$; las
-[páginas de absorción](/phonometry/es/materials/absorbers/absorption-measurement/)
+[páginas de absorción](/es/materials/absorbers/absorption-measurement/)
 son las dueñas de las vías normalizadas hacia la misma magnitud.
 
 **Un pico negativo es una inversión de fase.** Una frontera de presión nula, o un
@@ -426,7 +426,7 @@ anular los rahmónicos elimina un eco, conservar solo las quefrencias bajas
 extrae la ondícula de la fuente. Una señal de fase mínima tiene un cepstrum
 complejo causal, y por eso plegar el cepstrum real sobre las quefrencias
 positivas reconstruye la fase mínima a partir de $|H|$ únicamente:
-[`min_phase`](/phonometry/es/devices/electroacoustics/swept-sine-distortion/) y
+[`min_phase`](/es/devices/electroacoustics/swept-sine-distortion/) y
 `phase_decomposition` corren sobre ese mismo núcleo de plegado (Bendat y
 Piersol sec. 13.1.4; Tohyama, en Havelock cap. 75, edita la reverberación
 manipulando exactamente estas partes causal y anticausal).
@@ -459,7 +459,7 @@ la envolvente** encuentra periodicidades *de la amplitud*. La sección 13.3
 de Bendat y Piersol (Fig. 13.11) formaliza la estructura: un detector de
 envolvente, un eliminador de continua y una vista espectral de lo que queda.
 `envelope_spectrum` pasa la
-[envolvente de Hilbert](/phonometry/es/signals/spectra/correlation-delay/)
+[envolvente de Hilbert](/es/signals/spectra/correlation-delay/)
 (`kind="magnitude"`, el valor práctico por defecto) o el detector cuadrático
 del libro (`kind="squared"`) por exactamente esa cadena, escalada por la
 ganancia coherente de la ventana para que una modulación sinusoidal cuya
@@ -587,7 +587,7 @@ destruir la banda de la que depende el método. Pon el sensor sobre el soporte d
 cerca de la pista exterior como permita la máquina, con su eje en la dirección
 de la carga y el cable con descarga de tracción. ISO 5348 es la referencia de
 montaje, y la guía de
-[frecuencias de fallo de máquinas](/phonometry/es/vibration/machinery/machine-diagnostics/#paso-0-conseguir-el-registro)
+[frecuencias de fallo de máquinas](/es/vibration/machinery/machine-diagnostics/#paso-0-conseguir-el-registro)
 dibuja estos montajes y posiciones sobre un tren de motor y reductora.
 
 ```python
@@ -610,24 +610,24 @@ amplitud, y las familias cinemáticas que les ponen nombre (paso de bola por la
 pista exterior y por la interior, giro de la bola, jaula, engrane y sus bandas
 laterales a la frecuencia de eje) se calculan a partir de la geometría y la
 velocidad de eje en
-[Frecuencias de fallo de máquinas](/phonometry/es/vibration/machinery/machine-diagnostics/),
+[Frecuencias de fallo de máquinas](/es/vibration/machinery/machine-diagnostics/),
 que las dibuja directamente sobre un espectro de la envolvente como este. Pasar
 la envolvente sobre el `residual` de un
-[promedio síncrono](/phonometry/es/signals/spectra/synchronous-averaging/) elimina
+[promedio síncrono](/es/signals/spectra/synchronous-averaging/) elimina
 antes las componentes deterministas del engranaje y deja limpias las líneas del
 rodamiento.
 
 ## Relación con los demás estimadores
 
 El cepstrum parte de las mismas convenciones FFT de registro único que los
-[estimadores espectrales calibrados](/phonometry/es/signals/spectra/spectral-analysis/),
+[estimadores espectrales calibrados](/es/signals/spectra/spectral-analysis/),
 y su núcleo de plegado es literalmente el que hay dentro de
-[`min_phase`](/phonometry/es/devices/electroacoustics/swept-sine-distortion/) - la
+[`min_phase`](/es/devices/electroacoustics/swept-sine-distortion/) - la
 refactorización queda fijada bit a bit en los tests. El espectro de la
 envolvente es la vista en frecuencia de la misma señal analítica que la
-[envolvente de Hilbert](/phonometry/es/signals/spectra/correlation-delay/) devuelve en
+[envolvente de Hilbert](/es/signals/spectra/correlation-delay/) devuelve en
 el tiempo, y un preanálisis natural antes de las métricas dedicadas de
-[modulación de amplitud de aerogeneradores](/phonometry/es/environment/sources/wind-turbine-receptor/):
+[modulación de amplitud de aerogeneradores](/es/environment/sources/wind-turbine-receptor/):
 el espectro de la envolvente dice *si hay modulación y a qué ritmo*, las
 métricas del dominio la cuantifican normativamente.
 
@@ -658,11 +658,11 @@ espectro logarítmico en frecuencia lineal.
 
 ## Véase también
 
-- [Correlación, retardo temporal y envolvente](/phonometry/es/signals/spectra/correlation-delay/): la envolvente de Hilbert que esta página convierte en espectro.
-- [Análisis espectral calibrado](/phonometry/es/signals/spectra/spectral-analysis/): el espectro logarítmico del que parte el cepstrum.
-- [Promediado síncrono en el tiempo](/phonometry/es/signals/spectra/synchronous-averaging/): eliminar la parte síncrona antes de pasar un espectro de la envolvente sobre el residuo.
-- [Frecuencias de fallo de máquinas](/phonometry/es/vibration/machinery/machine-diagnostics/): las familias de rodamientos y engranajes que se leen exactamente sobre este espectro de la envolvente.
-- [Distorsión con barrido sinusoidal](/phonometry/es/devices/electroacoustics/swept-sine-distortion/): el plegado de fase mínima que comparte el núcleo de esta página.
-- Referencia de la API: [`signals`: cepstrum](/phonometry/es/reference/api/signals/cepstrum/).
+- [Correlación, retardo temporal y envolvente](/es/signals/spectra/correlation-delay/): la envolvente de Hilbert que esta página convierte en espectro.
+- [Análisis espectral calibrado](/es/signals/spectra/spectral-analysis/): el espectro logarítmico del que parte el cepstrum.
+- [Promediado síncrono en el tiempo](/es/signals/spectra/synchronous-averaging/): eliminar la parte síncrona antes de pasar un espectro de la envolvente sobre el residuo.
+- [Frecuencias de fallo de máquinas](/es/vibration/machinery/machine-diagnostics/): las familias de rodamientos y engranajes que se leen exactamente sobre este espectro de la envolvente.
+- [Distorsión con barrido sinusoidal](/es/devices/electroacoustics/swept-sine-distortion/): el plegado de fase mínima que comparte el núcleo de esta página.
+- Referencia de la API: [`signals`: cepstrum](/es/reference/api/signals/cepstrum/).
 
 </SeeAlso>

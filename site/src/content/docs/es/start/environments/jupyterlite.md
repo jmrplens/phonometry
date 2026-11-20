@@ -33,7 +33,7 @@ llegan de PyPI.
 extras de un paquete que ya instaló: con phonometry instalado, un
 `%pip install "phonometry[report]"` posterior no instala nada, y tampoco
 imprime nada. Para añadir lo que habría traído un extra posterior, nombra sus
-paquetes, que [Primeros pasos](/phonometry/es/start/getting-started/#extras-opcionales)
+paquetes, que [Primeros pasos](/es/start/getting-started/#extras-opcionales)
 enumera extra por extra:
 
 ```py
@@ -48,7 +48,7 @@ JupyterLite se ejecuta con un `%` delante.
 
 Todos los dominios se importan, y las tablas de los resultados, `.plot()` bajo
 la celda y `.report()` funcionan como en
-[Jupyter](/phonometry/es/start/environments/jupyter/). Los archivos WAV y FLAC
+[Jupyter](/es/start/environments/jupyter/). Los archivos WAV y FLAC
 se escriben y se vuelven a leer en la propia carpeta del cuaderno. Las
 simulaciones FDTD calculan con NumPy.
 

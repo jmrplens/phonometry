@@ -13,7 +13,7 @@ Clean-room implementation of the fluctuation-strength signal chain of
 ECMA-418-2:2025 (Clause 9, Sottek Hearing Model). The shared auditory
 front-end (Clause 5: outer/middle-ear filter, 53-band auditory filter bank,
 compressive nonlinearity of Formulae 23-25) is reused from
-[`phonometry.psychoacoustics.loudness.ecma`](/phonometry/reference/api/psychoacoustics/ecma/); this module adds the
+[`phonometry.psychoacoustics.loudness.ecma`](/reference/api/psychoacoustics/ecma/); this module adds the
 fluctuation-strength chain, which mirrors the roughness chain of Clause 7 but
 replaces the DFT-based envelope analysis with High-resolution Spectral
 Analysis (HSA):
@@ -174,11 +174,11 @@ Psychoacoustic fluctuation strength per ECMA-418-2:2025 (Clause 9).
 
 | Name | Description |
 | :--- | :--- |
-| `x` | Calibrated sound pressure signal in pascals. Accepts a [`phonometry.io.Signal`](/phonometry/reference/api/io/io/#signal), which is where "calibrated" comes from without arithmetic: this model reads absolute levels, so an uncalibrated record is taken as if one digital unit were one pascal and the answer is wrong by however far that is from true. |
-| `fs` | Sampling rate in Hz. Signals not at 48 kHz are resampled (Clause 5.1.1). Required for a bare array; a [`Signal`](/phonometry/reference/api/io/io/#signal) brings its own, and an explicit value that disagrees with it raises instead of silently winning. |
+| `x` | Calibrated sound pressure signal in pascals. Accepts a [`phonometry.io.Signal`](/reference/api/io/io/#signal), which is where "calibrated" comes from without arithmetic: this model reads absolute levels, so an uncalibrated record is taken as if one digital unit were one pascal and the answer is wrong by however far that is from true. |
+| `fs` | Sampling rate in Hz. Signals not at 48 kHz are resampled (Clause 5.1.1). Required for a bare array; a [`Signal`](/reference/api/io/io/#signal) brings its own, and an explicit value that disagrees with it raises instead of silently winning. |
 | `field` | `"free"` (default) or `"diffuse"` sound field, selecting the outer/middle-ear filter of Clause 5.1.3. |
 
-**Returns:** An [`EcmaFluctuationStrength`](/phonometry/reference/api/psychoacoustics/fluctuation-strength-ecma/#ecmafluctuationstrength) with the single value F (Clause 9.1.14), the average specific fluctuation strength F'(z) (Clause 9.1.12) and the time-dependent fluctuation strength F(l50) (Formula 169).
+**Returns:** An [`EcmaFluctuationStrength`](/reference/api/psychoacoustics/fluctuation-strength-ecma/#ecmafluctuationstrength) with the single value F (Clause 9.1.14), the average specific fluctuation strength F'(z) (Clause 9.1.12) and the time-dependent fluctuation strength F(l50) (Formula 169).
 
 **Raises**
 

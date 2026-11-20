@@ -57,7 +57,7 @@ recorded in `docs/ERRATA.md`:
 This module implements Clause 5, the standard trim case, with the
 noise-reducing trims of Clause 6 and the expander of Clause 7 alongside it.
 The hydrodynamic case of IEC 60534-8-4, where the fluid is a liquid, is
-[`phonometry.noise_control.valves_hydrodynamic`](/phonometry/reference/api/noise_control/valves-hydrodynamic/).
+[`phonometry.noise_control.valves_hydrodynamic`](/reference/api/noise_control/valves-hydrodynamic/).
 
 > Auto-generated from the source docstrings by `scripts/generate_api_docs.py` (`make api-docs`). Do not edit by hand.
 
@@ -143,7 +143,7 @@ acoustical efficiency beside it are the ones Table 3 gives in that regime.
 Which of the five regimes of Clause 5.2 the valve is in, 1 to 5.
 
 Read from `pressure_ratio` and `boundaries` by
-[`flow_regime`](/phonometry/reference/api/noise_control/valves/#flow_regime), the intervals of Clause 5.2 closed at the top.
+[`flow_regime`](/reference/api/noise_control/valves/#flow_regime), the intervals of Clause 5.2 closed at the top.
 
 ## AIR_SPEED_OF_SOUND_M_S
 
@@ -330,7 +330,7 @@ computed as supersonic is computed at Mach one instead.
 | `velocity_correction` | $L_g$ of Equation (16), in dB, which Equation (41) adds exactly as Equation (18) does. |
 | `expander` | The transition piece. |
 
-**Returns:** An [`ExpanderNoise`](/phonometry/reference/api/noise_control/valves/#expandernoise).
+**Returns:** An [`ExpanderNoise`](/reference/api/noise_control/valves/#expandernoise).
 
 **Raises**
 
@@ -410,7 +410,7 @@ normative text and its list is consistent, so this follows the clause;
 | Name | Description |
 | :--- | :--- |
 | `pressure_ratio` | $x$ of Equation (1). |
-| `boundaries` | The output of [`pressure_ratio_boundaries`](/phonometry/reference/api/noise_control/valves/#pressure_ratio_boundaries). |
+| `boundaries` | The output of [`pressure_ratio_boundaries`](/reference/api/noise_control/valves/#pressure_ratio_boundaries). |
 
 **Returns:** The regime number, 1 to 5.
 
@@ -528,7 +528,7 @@ $$
 | Name | Description |
 | :--- | :--- |
 | `flow_coefficient` | $C$, the required flow coefficient of the valve at the travel being examined. |
-| `style_modifier` | $F_d$, from [`valve_style_modifier`](/phonometry/reference/api/noise_control/valves/#valve_style_modifier). |
+| `style_modifier` | $F_d$, from [`valve_style_modifier`](/reference/api/noise_control/valves/#valve_style_modifier). |
 | `pressure_recovery` | $F_{LP}/F_p$, or $F_L$ for a valve with no attached fittings. |
 | `coefficient` | Which flow coefficient `flow_coefficient` is, `"Cv"` or `"Kv"`, which selects $N_{14}$ from Table 1. |
 
@@ -635,7 +635,7 @@ passes 0.2.
 | Name | Description |
 | :--- | :--- |
 | `flow_coefficient` | $C$ of the valve. |
-| `style_modifier` | $F_d$, from [`valve_style_modifier`](/phonometry/reference/api/noise_control/valves/#valve_style_modifier). |
+| `style_modifier` | $F_d$, from [`valve_style_modifier`](/reference/api/noise_control/valves/#valve_style_modifier). |
 | `passage_length` | $l$ of one flow passage, in m. |
 | `passage_diameter_m` | $d$ of one flow passage, in m; the hydraulic diameter for a passage that is not round. |
 | `coefficient` | `"Cv"` or `"Kv"`, selecting $N_{14}$. |
@@ -693,9 +693,9 @@ directly.
 | `outlet_pressure_pa` | $p_2$ at the valve outlet, in Pa. |
 | `inlet_density` | $\rho_1$ at the valve inlet, in kg/m³. |
 | `flow_coefficient` | $C$ of the whole valve. |
-| `last_stage_coefficient` | $C_n$ of the last stage, from [`last_stage_flow_coefficient`](/phonometry/reference/api/noise_control/valves/#last_stage_flow_coefficient) or from the manufacturer. |
+| `last_stage_coefficient` | $C_n$ of the last stage, from [`last_stage_flow_coefficient`](/reference/api/noise_control/valves/#last_stage_flow_coefficient) or from the manufacturer. |
 
-**Returns:** A [`MultistageConditions`](/phonometry/reference/api/noise_control/valves/#multistageconditions), whose three fields stand in for the valve's own inlet when the chain is run: the stagnation pressure and density go into the [`GasStream`](/phonometry/reference/api/noise_control/valves/#gasstream) in place of $p_1$ and $\rho_1$, and the flow coefficient into the [`ValveTrim`](/phonometry/reference/api/noise_control/valves/#valvetrim) in place of $C$.
+**Returns:** A [`MultistageConditions`](/reference/api/noise_control/valves/#multistageconditions), whose three fields stand in for the valve's own inlet when the chain is run: the stagnation pressure and density go into the [`GasStream`](/reference/api/noise_control/valves/#gasstream) in place of $p_1$ and $\rho_1$, and the flow coefficient into the [`ValveTrim`](/reference/api/noise_control/valves/#valvetrim) in place of $C$.
 
 **Raises**
 
@@ -1010,12 +1010,12 @@ the external level of 5.6, which are common to every regime.
 
 | Name | Description |
 | :--- | :--- |
-| `stream` | The gas and the operating point, a [`GasStream`](/phonometry/reference/api/noise_control/valves/#gasstream). |
-| `valve` | The valve at the travel being examined, a [`ValveTrim`](/phonometry/reference/api/noise_control/valves/#valvetrim). |
-| `pipe` | The downstream pipe and what surrounds it, a [`DownstreamPipe`](/phonometry/reference/api/noise_control/valves/#downstreampipe). |
+| `stream` | The gas and the operating point, a [`GasStream`](/reference/api/noise_control/valves/#gasstream). |
+| `valve` | The valve at the travel being examined, a [`ValveTrim`](/reference/api/noise_control/valves/#valvetrim). |
+| `pipe` | The downstream pipe and what surrounds it, a [`DownstreamPipe`](/reference/api/noise_control/valves/#downstreampipe). |
 | `expander` | The transition piece downstream of the valve. Give one when the valve outlet is narrower than the pipe and the outlet Mach number has passed 0.3, which is when NOTE 1 to Equation (15) sends the calculation to Clause 7. The flow leaving the outlet is then a second source, and Equation (43) adds it to the trim inside the pipe: the `band_internal_level` of the result is the sum of the two, and the transmission loss and the external level follow from that sum. |
 
-**Returns:** An [`AerodynamicValveNoise`](/phonometry/reference/api/noise_control/valves/#aerodynamicvalvenoise) carrying every printed intermediate as well as the level at 1 m.
+**Returns:** An [`AerodynamicValveNoise`](/reference/api/noise_control/valves/#aerodynamicvalvenoise) carrying every printed intermediate as well as the level at 1 m.
 
 **Raises**
 
@@ -1091,7 +1091,7 @@ typical only.
 | Name | Description |
 | :--- | :--- |
 | `flow_coefficient` | $C$. |
-| `style_modifier` | $F_d$, from [`valve_style_modifier`](/phonometry/reference/api/noise_control/valves/#valve_style_modifier). |
+| `style_modifier` | $F_d$, from [`valve_style_modifier`](/reference/api/noise_control/valves/#valve_style_modifier). |
 | `pressure_recovery` | $F_L$, or $F_{LP}/F_p$ with attached fittings. |
 | `outlet_diameter_m` | $D$ of the valve outlet, in m. |
 | `efficiency_correction` | $A_\eta$ from Table 4. |

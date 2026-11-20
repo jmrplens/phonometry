@@ -1,6 +1,6 @@
 <!-- Written by `make llms` from site/src/content/docs/io/videos.mdx: edit that page and its Spanish twin, then run `make llms`. -->
 
-← [Documentation index](../README.md) · Published at https://docs.jmrp.io/phonometry/io/videos/
+← [Documentation index](../README.md) · Published at https://phonometry.dev/io/videos/
 
 # Writing animations and FDTD runs to video
 
@@ -487,8 +487,8 @@ promise for every GPU.
   the hosts file that names a node, and how to set one up.
 - [Reading and writing measurement audio](audio-files.md): the
   audio files `phonometry.io` reads and writes.
-- API reference: [`phonometry.io`](https://docs.jmrp.io/phonometry/reference/api/io/io/),
-  [`simulation.video`](https://docs.jmrp.io/phonometry/reference/api/simulation/video/).
+- API reference: [`phonometry.io`](https://phonometry.dev/reference/api/io/io/),
+  [`simulation.video`](https://phonometry.dev/reference/api/simulation/video/).
 
 ## Quick answers
 

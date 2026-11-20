@@ -53,9 +53,9 @@ nada, en ella la solución es *peor* que la desnuda, y por encima la mejora
 crece a un ritmo que decide el tipo de construcción. Esta guía es el lado de
 la predicción de esa historia, del dato de material al espectro de mejora; el
 lado de la medida está en
-[Mejora del aislamiento a impacto de suelos (ISO 16251-1)](/phonometry/es/buildings/design/impact-improvement/)
+[Mejora del aislamiento a impacto de suelos (ISO 16251-1)](/es/buildings/design/impact-improvement/)
 y en
-[Rigidez dinámica de materiales resilientes](/phonometry/es/materials/resilient/dynamic-stiffness/).
+[Rigidez dinámica de materiales resilientes](/es/materials/resilient/dynamic-stiffness/).
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_resilient_buildups.svg" alt="Tres construcciones elásticas en sección con sus análogos masa-resorte: una solera flotante sobre una capa continua remontada contra la pared, una superficie de paso sobre apoyos discretos, y un trasdosado adherido con pelladas junto al mismo trasdosado sobre montantes con la cámara rellena" width="92%" />
 
@@ -403,7 +403,7 @@ hay que ganar. De 200 Hz hacia arriba cuesta: 1 dB a 200 Hz bajando hasta
 10 dB de 630 Hz a 1600 Hz, y recuperando a 5 dB por encima. La tabla impresa
 pone 1600 Hz en sus dos últimas filas; `weighted_lining_improvement` cobra ahí
 los 10 dB, como los imprimía la edición de 2000, y el
-[registro de erratas](/phonometry/es/reference/errata/) recoge el solapamiento.
+[registro de erratas](/es/reference/errata/) recoge el solapamiento.
 Llevar la
 resonancia bien por debajo del rango de interés es, por tanto, todo el
 encargo de diseño.
@@ -447,7 +447,7 @@ ninguna precarga**. Una rigidez declarada bajo carga de servicio es otro número
 y como $f_0 \propto \sqrt{s'}$, un factor de dos en la rigidez declarada mueve la
 resonancia en $\sqrt{2}$ y desplaza todo el espectro de mejora en
 $30\lg\sqrt{2} = 4{,}5$ dB con la ley de 30 lg y 6,0 dB con la de 40 lg. La
-[guía de rigidez dinámica](/phonometry/es/materials/resilient/dynamic-stiffness/)
+[guía de rigidez dinámica](/es/materials/resilient/dynamic-stiffness/)
 enseña qué hace la placa de carga y por qué es como es.
 
 **La ley en serie lleva una condición impresa debajo.** A la Fórmula (C.6),
@@ -480,7 +480,7 @@ mejora casi por completo. Y como un puente cortocircuita el resorte en lugar de
 desafinarlo, un suelo flotante puenteado pierde en *todo* el rango por encima de
 $f_0$ y no en una banda, que es como se distingue de una $s'$ equivocada o de
 una resonancia mal colocada en una
-[medición en campo](/phonometry/es/buildings/insulation/insulation-field/).
+[medición en campo](/es/buildings/insulation/insulation-field/).
 
 Para los trasdosados el mismo punto tiene un número, y ya está en esta página:
 la fórmula del anexo D la elige la fijación, así que una placa prevista sobre
@@ -566,19 +566,19 @@ caucho) no las cubre ninguno de estos modelos.
 
 ## Véase también
 
-- [Mejora del aislamiento a impacto de suelos (ISO 16251-1)](/phonometry/es/buildings/design/impact-improvement/):
+- [Mejora del aislamiento a impacto de suelos (ISO 16251-1)](/es/buildings/design/impact-improvement/):
   la medida con la que se contrastan estas predicciones.
-- [Rigidez dinámica de materiales resilientes (EN 29052-1)](/phonometry/es/materials/resilient/dynamic-stiffness/):
+- [Rigidez dinámica de materiales resilientes (EN 29052-1)](/es/materials/resilient/dynamic-stiffness/):
   de dónde sale $s'$.
-- [Predicción del aislamiento acústico (EN 12354)](/phonometry/es/buildings/design/insulation-prediction/):
+- [Predicción del aislamiento acústico (EN 12354)](/es/buildings/design/insulation-prediction/):
   el modelo simplificado que consume $\Delta L_\mathrm{w}$ y $\Delta R_\mathrm{w}$.
-- [Predicción detallada por bandas (ISO 12354)](/phonometry/es/buildings/design/detailed-prediction/):
+- [Predicción detallada por bandas (ISO 12354)](/es/buildings/design/detailed-prediction/):
   el modelo por bandas cuyo término de suelo flotante es
   `floating_floor_improvement`.
-- [Predicción del aislamiento de paneles](/phonometry/es/buildings/design/panel-sound-insulation/):
+- [Predicción del aislamiento de paneles](/es/buildings/design/panel-sound-insulation/):
   la resonancia masa-resorte-masa de una hoja doble, la contrapartida a ruido
   aéreo de la resonancia de la capa adicional.
-- Referencia de la API: [`building.prediction.resilient_layers`](/phonometry/es/reference/api/building/resilient-layers/).
-- Teoría: [Movilidades puntuales y eficiencia de radiación](/phonometry/es/reference/theory/vibration/#movilidades-puntuales-y-eficiencia-de-radiacion-cremer-5-hopkins-29): la imagen masa-muelle que hay detrás de un índice de mejora, y por qué una capa elástica es un desajuste de movilidad.
+- Referencia de la API: [`building.prediction.resilient_layers`](/es/reference/api/building/resilient-layers/).
+- Teoría: [Movilidades puntuales y eficiencia de radiación](/es/reference/theory/vibration/#movilidades-puntuales-y-eficiencia-de-radiacion-cremer-5-hopkins-29): la imagen masa-muelle que hay detrás de un índice de mejora, y por qué una capa elástica es un desajuste de movilidad.
 
 </SeeAlso>

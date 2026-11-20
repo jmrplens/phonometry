@@ -4,13 +4,13 @@ import assert from 'node:assert/strict';
 import { describe, test } from 'node:test';
 
 import { HEADER_RULE_LIMIT, HEADER_LINE_LIMIT, headersFile, parseHeaders, SECURITY_HEADERS } from '../lib/headers.mjs';
-import { mediaOrigins } from '../../src/data/site.mjs';
+import { clipBase, mediaOrigins } from '../../src/data/site.mjs';
 import { twinExclusions } from '../lib/twins.mjs';
 
-const prefix = '/phonometry';
+const prefix = '';
 const options = {
 	prefix,
-	origin: 'https://docs.jmrp.io',
+	origin: 'https://phonometry.dev',
 	exclusions: twinExclusions(prefix),
 	indexable: false,
 };
@@ -50,7 +50,7 @@ describe('headersFile', () => {
 	const text = headersFile(options);
 
 	test('every response carries the security set and the noindex of a preview', () => {
-		const got = headersFor(text, '/phonometry/_astro/x.css');
+		const got = headersFor(text, '/_astro/x.css');
 		for (const [name, value] of SECURITY_HEADERS) assert.equal(got.get(name.toLowerCase()), value, name);
 		assert.equal(got.get('x-robots-tag'), 'noindex');
 	});
@@ -68,25 +68,25 @@ describe('headersFile', () => {
 	});
 
 	test('a page with a copy names it and varies on Accept', () => {
-		const got = headersFor(text, '/phonometry/signals/levels/levels/');
-		assert.equal(got.get('link'), '</phonometry/signals/levels/levels/index.md>; rel="alternate"; type="text/markdown"');
+		const got = headersFor(text, '/signals/levels/levels/');
+		assert.equal(got.get('link'), '</signals/levels/levels/index.md>; rel="alternate"; type="text/markdown"');
 		assert.equal(got.get('vary'), 'Accept, Accept-Encoding');
 	});
 
 	test('the copy names its page as canonical, on the build origin', () => {
-		const got = headersFor(text, '/phonometry/signals/levels/levels/index.md');
-		assert.equal(got.get('link'), '<https://docs.jmrp.io/phonometry/signals/levels/levels/>; rel="canonical"');
+		const got = headersFor(text, '/signals/levels/levels/index.md');
+		assert.equal(got.get('link'), '<https://phonometry.dev/signals/levels/levels/>; rel="canonical"');
 		assert.equal(got.has('vary'), false);
 	});
 
 	test('the two homes name their copy too', () => {
-		assert.equal(headersFor(text, '/phonometry/').get('link'), '</phonometry/index.md>; rel="alternate"; type="text/markdown"');
-		assert.equal(headersFor(text, '/phonometry/').get('vary'), 'Accept, Accept-Encoding');
-		assert.equal(headersFor(text, '/phonometry/es/').get('link'), '</phonometry/es/index.md>; rel="alternate"; type="text/markdown"');
+		assert.equal(headersFor(text, '/').get('link'), '</index.md>; rel="alternate"; type="text/markdown"');
+		assert.equal(headersFor(text, '/').get('vary'), 'Accept, Accept-Encoding');
+		assert.equal(headersFor(text, '/es/').get('link'), '</es/index.md>; rel="alternate"; type="text/markdown"');
 	});
 
 	test('the Spanish API pages announce no copy', () => {
-		for (const path of ['/phonometry/es/reference/api/', '/phonometry/es/reference/api/signals/levels/']) {
+		for (const path of ['/es/reference/api/', '/es/reference/api/signals/levels/']) {
 			const got = headersFor(text, path);
 			assert.equal(got.has('link'), false, path);
 			assert.equal(got.has('vary'), false, path);
@@ -95,7 +95,7 @@ describe('headersFile', () => {
 	});
 
 	test('the English API pages keep their copy', () => {
-		assert.ok(headersFor(text, '/phonometry/reference/api/signals/levels/').has('link'));
+		assert.ok(headersFor(text, '/reference/api/signals/levels/').has('link'));
 	});
 
 	test('a detach comes after the rule that set the header (it removes only what came before)', () => {
@@ -106,24 +106,24 @@ describe('headersFile', () => {
 	});
 
 	test('the copies of the homes name the homes as canonical', () => {
-		assert.equal(headersFor(text, '/phonometry/index.md').get('link'), '<https://docs.jmrp.io/phonometry/>; rel="canonical"');
-		assert.equal(headersFor(text, '/phonometry/es/index.md').get('link'), '<https://docs.jmrp.io/phonometry/es/>; rel="canonical"');
+		assert.equal(headersFor(text, '/index.md').get('link'), '<https://phonometry.dev/>; rel="canonical"');
+		assert.equal(headersFor(text, '/es/index.md').get('link'), '<https://phonometry.dev/es/>; rel="canonical"');
 	});
 
 	test('no rule touches the cache lifetime: a pattern would match a 404 too', () => {
-		assert.equal(headersFor(text, '/phonometry/_astro/x.css').has('cache-control'), false);
-		assert.equal(headersFor(text, '/phonometry/signals/').has('cache-control'), false);
+		assert.equal(headersFor(text, '/_astro/x.css').has('cache-control'), false);
+		assert.equal(headersFor(text, '/signals/').has('cache-control'), false);
 		assert.ok(!text.includes('Cache-Control'));
 	});
 
 	test('Markdown and text files say they are UTF-8, and only one Content-Type is left', () => {
-		for (const path of ['/phonometry/signals/index.md', '/phonometry/index.md', '/phonometry/es/reference/api/x/index.md']) {
+		for (const path of ['/signals/index.md', '/index.md', '/es/reference/api/x/index.md']) {
 			assert.equal(headersFor(text, path).get('content-type'), 'text/markdown; charset=utf-8', path);
 		}
-		for (const path of ['/phonometry/llms.txt', '/phonometry/llms-full.txt', '/phonometry/llms/signals.txt', '/llms.txt', '/robots.txt']) {
+		for (const path of ['/llms.txt', '/llms-full.txt', '/llms/signals.txt', '/llms.txt', '/robots.txt']) {
 			assert.equal(headersFor(text, path).get('content-type'), 'text/plain; charset=utf-8', path);
 		}
-		assert.equal(headersFor(text, '/phonometry/signals/').has('content-type'), false);
+		assert.equal(headersFor(text, '/signals/').has('content-type'), false);
 		for (const { pattern, lines } of parseHeaders(text).filter(({ lines }) => lines.some((line) => line.startsWith('Content-Type:')))) {
 			assert.equal(lines.indexOf('! Content-Type'), lines.findIndex((line) => line.startsWith('Content-Type:')) - 1, pattern);
 		}
@@ -133,7 +133,7 @@ describe('headersFile', () => {
 		const csp = SECURITY_HEADERS.find(([name]) => name === 'Content-Security-Policy')[1];
 		const media = csp.split('; ').find((part) => part.startsWith('media-src '));
 		assert.deepEqual(media.split(' ').slice(1), ["'self'", ...mediaOrigins]);
-		assert.ok(new Set(mediaOrigins).has('https://docs.jmrp.io'));
+		assert.ok(mediaOrigins.includes(new URL(clipBase).origin));
 		const rest = csp.split('; ').filter((part) => !part.startsWith('media-src ')).join('; ');
 		assert.equal(
 			rest,
@@ -143,9 +143,9 @@ describe('headersFile', () => {
 
 	test('indexable drops the noindex, except on the llms files', () => {
 		const open = headersFile({ ...options, indexable: true });
-		assert.equal(headersFor(open, '/phonometry/signals/').has('x-robots-tag'), false);
-		assert.equal(headersFor(open, '/phonometry/llms.txt').get('x-robots-tag'), 'noindex');
-		assert.equal(headersFor(open, '/phonometry/llms/signals.txt').get('x-robots-tag'), 'noindex');
+		assert.equal(headersFor(open, '/signals/').has('x-robots-tag'), false);
+		assert.equal(headersFor(open, '/llms.txt').get('x-robots-tag'), 'noindex');
+		assert.equal(headersFor(open, '/llms/signals.txt').get('x-robots-tag'), 'noindex');
 		// The staging step copies llms.txt to the host root as well.
 		assert.equal(headersFor(open, '/llms.txt').get('x-robots-tag'), 'noindex');
 		assert.equal(headersFor(open, '/robots.txt').has('x-robots-tag'), false);
@@ -172,8 +172,8 @@ describe('headersFile', () => {
 	});
 
 	test('a prefix with a trailing slash or no leading slash is refused', () => {
-		assert.throws(() => headersFile({ ...options, prefix: '/phonometry/' }), /prefix/);
+		assert.throws(() => headersFile({ ...options, prefix: '/docs/' }), /prefix/);
 		assert.throws(() => headersFile({ ...options, prefix: 'phonometry' }), /prefix/);
-		assert.throws(() => headersFile({ ...options, origin: 'https://docs.jmrp.io/' }), /origin/);
+		assert.throws(() => headersFile({ ...options, origin: 'https://phonometry.dev/' }), /origin/);
 	});
 });

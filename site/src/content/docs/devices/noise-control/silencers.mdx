@@ -57,7 +57,7 @@ quarter-wave and extended-tube resonators, the independent FDTD
 cross-check, and the design trade-offs against dissipative linings. The
 rest of the installation, HVAC duct attenuation, flow noise and machine
 enclosures, lives in
-[Industrial noise control](/phonometry/devices/noise-control/noise-control/).
+[Industrial noise control](/devices/noise-control/noise-control/).
 
 ## 1. Reactive silencers (four-pole method)
 
@@ -225,7 +225,7 @@ reciprocating engine and one far below it a constant-pressure source. The
 termination is not a free choice at all; for a duct discharging into a room it
 is the radiation impedance of the open end,
 $Z_\mathrm{r} = (\rho c/S)(R_1 + jX_1)$, whose normalised $R_1$ and $X_1$ the
-[radiating piston](/phonometry/devices/electroacoustics/loudspeakers/#2-radiating-piston-radiation-impedance-and-directivity)
+[radiating piston](/devices/electroacoustics/loudspeakers/#2-radiating-piston-radiation-impedance-and-directivity)
 of the electroacoustics domain returns as `radiating_piston(...).resistance` and
 `.reactance` (its `radiation_resistance` and `radiation_reactance` are the
 *mechanical* impedance $\rho c S(R_1 + jX_1)$ in N·s/m, a factor $S^2$ away,
@@ -606,7 +606,7 @@ grid runs past it. For the 0.04 m² chamber of the figures above the limit is
 **890.8 Hz**, so the 2 kHz sweeps in the snippets are more than half outside the
 model and the second and third peaks of the $m$-family figure should be read as
 design shape rather than prediction. The cut-on analysis itself is on
-[Duct-Borne Noise](/phonometry/devices/noise-control/duct-path/#8-the-plane-wave-limit).
+[Duct-Borne Noise](/devices/noise-control/duct-path/#8-the-plane-wave-limit).
 
 Three things about the hardware are outside the algebra and decide whether a
 built device behaves like the curve. The **shell** of a chamber is a large
@@ -620,9 +620,9 @@ verified rather than trusted. And the expansion **regenerates flow noise at its
 own outlet**, which puts a floor under the delivered spectrum that the
 transmission loss says nothing about; that quantity is
 `flow_noise_straight_duct` on the
-[industrial noise-control page](/phonometry/devices/noise-control/noise-control/)
+[industrial noise-control page](/devices/noise-control/noise-control/)
 and `silencer_self_noise` on the
-[duct-path page](/phonometry/devices/noise-control/duct-path/#4-what-the-system-puts-back).
+[duct-path page](/devices/noise-control/duct-path/#4-what-the-system-puts-back).
 
 `ReactiveSilencerResult` also files itself: `.report()` renders a one-page PDF
 in the layout of a silencer performance sheet, with the method-basis line
@@ -805,7 +805,7 @@ plt.show()
 </details>
 
 The dissipative curves come from the installation models of the
-[HVAC methods](/phonometry/devices/noise-control/noise-control/), not from this
+[HVAC methods](/devices/noise-control/noise-control/), not from this
 module: `hvac.lined_rectangular_duct_attenuation(bands, 36 in, 24 in, 1.5 m, t,
 include_unlined=True)` for the two linings, and
 `hvac.splitter_silencer_insertion_loss(bands, 24 in, 5 ft, [4 in] * 5, 8 in)`
@@ -813,13 +813,13 @@ for the splitter unit.
 
 phonometry models the reactive family in closed form on this page. The
 dissipative side enters at installation level, through the
-[HVAC methods](/phonometry/devices/noise-control/noise-control/): the lined-elbow
+[HVAC methods](/devices/noise-control/noise-control/): the lined-elbow
 insertion loss read from tabulated ASHRAE data and the lined plenum
 attenuation from Wells' closed form, neither of them a liner model. The
 porous physics that
 a first-principles liner calculation needs, the equivalent-fluid models fed
 by the airflow resistivity, is the same material theory as
-[Porous and Multilayer Absorbers](/phonometry/materials/absorbers/porous-absorbers/).
+[Porous and Multilayer Absorbers](/materials/absorbers/porous-absorbers/).
 
 ## 3. How a silencer is measured (ISO 7235)
 
@@ -884,14 +884,14 @@ Two neighbouring standards complete the picture: **ISO 11691** is the survey-
 grade laboratory method without flow, and **ISO 11820** measures a silencer in
 situ, where the substitution trick is usually impossible. The arithmetic of
 the first two, the subtraction itself and the tables that go with it, is on
-[Measuring a Silencer](/phonometry/devices/noise-control/silencer-measurement/).
+[Measuring a Silencer](/devices/noise-control/silencer-measurement/).
 
 ## Cross-check against the FDTD solver
 
 That cross-check is the clip embedded in section 1, and it is worth returning
 to it now with the algebra in hand. The four-pole expansion chamber is checked
 against the independent 2D
-[FDTD wave solver](/phonometry/simulation/fdtd-simulation/), which shares no
+[FDTD wave solver](/simulation/fdtd-simulation/), which shares no
 formula and no assumption with the transfer-matrix product beyond the wave
 equation itself: a plane-wave duct that widens into the same 0.30 m, $m = 4$
 chamber and narrows back transmits far less at the four-pole TL peak
@@ -921,21 +921,21 @@ cross-checked against the independent FDTD solver; the
 `plane_wave_limit` that bounds all of them; and, as prose rather than as code,
 the ISO 7235 substitution measurement that produces the insertion loss a
 supplier publishes, whose arithmetic is on [its own
-page](/phonometry/devices/noise-control/silencer-measurement/).
+page](/devices/noise-control/silencer-measurement/).
 </ScopeClaim>
 
 <ScopeClaim status="not-covered" label="Not covered">
 Only reactive elements are computed: dissipative (absorptive, duct-lining)
 silencers are discussed for selection but not modelled from the liner
 properties, and in the [HVAC
-methods](/phonometry/devices/noise-control/noise-control/) the lined-elbow
+methods](/devices/noise-control/noise-control/) the lined-elbow
 figure is a table lookup (Bies Table 8.11) and the plenum attenuation is
 Wells' closed form driven by a declared mean absorption; neither is a liner model.
 Mean-flow effects (convection,
 temperature gradients, flow-dependent impedance of perforates) are outside the
 no-flow element matrices used here. Nothing on this page is a measurement: the
 arithmetic of ISO 7235 has [a page of its
-own](/phonometry/devices/noise-control/silencer-measurement/), the shell
+own](/devices/noise-control/silencer-measurement/), the shell
 breakout and the end corrections at the area jumps are not modelled, and the
 branch models are lossless unless a `resistance` is supplied.
 </ScopeClaim>
@@ -945,19 +945,19 @@ branch models are lossless unless a `resistance` is supplied.
 
 ## See also
 
-- [Duct-Borne Noise: Fan to Room](/phonometry/devices/noise-control/duct-path/): the
+- [Duct-Borne Noise: Fan to Room](/devices/noise-control/duct-path/): the
   end-to-end fan-to-room calculation these silencers sit inside, and the
   higher-order-mode cut-on above which the four-pole method describes the
   plane-wave mode alone.
-- [Industrial noise control](/phonometry/devices/noise-control/noise-control/): the rest
+- [Industrial noise control](/devices/noise-control/noise-control/): the rest
   of the installation: HVAC duct attenuation and flow noise, plenums, end
   reflection and machine enclosures.
-- [2D FDTD wave simulation](/phonometry/simulation/fdtd-simulation/): the
+- [2D FDTD wave simulation](/simulation/fdtd-simulation/): the
   independent solver behind the expansion-chamber cross-check.
-- [Porous and Multilayer Absorbers](/phonometry/materials/absorbers/porous-absorbers/):
+- [Porous and Multilayer Absorbers](/materials/absorbers/porous-absorbers/):
   the equivalent-fluid material theory behind dissipative linings.
-- [Loudspeaker Characterisation (IEC 60268-5)](/phonometry/devices/electroacoustics/loudspeakers/):
+- [Loudspeaker Characterisation (IEC 60268-5)](/devices/electroacoustics/loudspeakers/):
   the radiating piston, the companion radiator model of a duct's open end.
-- API reference: [`noise_control.silencers`](/phonometry/reference/api/noise_control/silencers/).
+- API reference: [`noise_control.silencers`](/reference/api/noise_control/silencers/).
 
 </SeeAlso>

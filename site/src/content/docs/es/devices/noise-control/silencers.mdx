@@ -58,7 +58,7 @@ resonadores de Helmholtz, de cuarto de onda y de tubo extendido, el contraste
 independiente con FDTD y los compromisos de diseño frente a los
 revestimientos disipativos. El resto de la instalación, la atenuación en
 conductos HVAC, el ruido de flujo y los cerramientos de máquina, vive en
-[Control de ruido industrial](/phonometry/es/devices/noise-control/noise-control/).
+[Control de ruido industrial](/es/devices/noise-control/noise-control/).
 
 ## 1. Silenciadores reactivos (método de cuatro polos)
 
@@ -236,7 +236,7 @@ a una fuente de presión constante. La terminación no es una elección libre en
 absoluto: para un conducto que descarga a una sala es la impedancia de radiación
 del extremo abierto, $Z_\mathrm{r} = (\rho c/S)(R_1 + jX_1)$, cuyas $R_1$ y $X_1$
 normalizadas devuelve el
-[pistón radiante](/phonometry/es/devices/electroacoustics/loudspeakers/#piston-radiante)
+[pistón radiante](/es/devices/electroacoustics/loudspeakers/#piston-radiante)
 del dominio de electroacústica como `radiating_piston(...).resistance` y
 `.reactance` (sus `radiation_resistance` y `radiation_reactance` son la
 impedancia *mecánica* $\rho c S(R_1 + jX_1)$ en N·s/m, a un factor $S^2$ de
@@ -634,7 +634,7 @@ más de la mitad de cada barrido hasta 2 kHz de los fragmentos queda fuera del
 modelo y el segundo y el tercer máximo de la figura de la familia $m$ hay que
 leerlos como forma de diseño y no como predicción. El análisis de corte en sí
 está en
-[Ruido por conductos](/phonometry/es/devices/noise-control/duct-path/#el-limite-de-onda-plana).
+[Ruido por conductos](/es/devices/noise-control/duct-path/#el-limite-de-onda-plana).
 
 Hay tres cosas del silenciador real que quedan fuera del álgebra y que deciden si un
 dispositivo construido se comporta como la curva. La **envolvente** de una
@@ -648,9 +648,9 @@ poco por debajo del $c/2L$ que aquí se imprime: una sintonía de tanteo hay que
 verificarla, no darla por buena. Y la expansión **regenera ruido de flujo en su
 propia salida**, lo que pone un suelo al espectro entregado del que la pérdida
 de transmisión no dice nada; esa magnitud es `flow_noise_straight_duct` en la
-[página de control de ruido industrial](/phonometry/es/devices/noise-control/noise-control/)
+[página de control de ruido industrial](/es/devices/noise-control/noise-control/)
 y `silencer_self_noise` en la
-[página de ruido por conductos](/phonometry/es/devices/noise-control/duct-path/#4-lo-que-el-sistema-devuelve).
+[página de ruido por conductos](/es/devices/noise-control/duct-path/#4-lo-que-el-sistema-devuelve).
 
 `ReactiveSilencerResult` también se archiva solo: `.report()` genera un PDF de
 una página con la disposición de una hoja de prestaciones de silenciador, con
@@ -848,7 +848,7 @@ plt.show()
 </details>
 
 Las curvas disipativas salen de los modelos de instalación de los
-[métodos HVAC](/phonometry/es/devices/noise-control/noise-control/), no de este
+[métodos HVAC](/es/devices/noise-control/noise-control/), no de este
 módulo: `hvac.lined_rectangular_duct_attenuation(bands, 36 in, 24 in, 1.5 m, t,
 include_unlined=True)` para los dos revestimientos, y
 `hvac.splitter_silencer_insertion_loss(bands, 24 in, 5 ft, [4 in] * 5, 8 in)`
@@ -856,13 +856,13 @@ para la unidad de láminas.
 
 phonometry modela la familia reactiva en forma cerrada en esta página. El
 lado disipativo entra a nivel de instalación, por los
-[métodos HVAC](/phonometry/es/devices/noise-control/noise-control/): la pérdida por inserción
+[métodos HVAC](/es/devices/noise-control/noise-control/): la pérdida por inserción
 del codo revestido, leída de datos ASHRAE tabulados, y la atenuación del
 plenum revestido según la forma cerrada de Wells; ninguna de las dos es un
 modelo de revestimiento. La física porosa que necesitaría un cálculo de
 revestimiento desde primeros principios, los modelos de fluido equivalente alimentados por
 la resistividad al flujo de aire, es la misma teoría de materiales que
-[Absorbentes porosos y multicapa](/phonometry/es/materials/absorbers/porous-absorbers/).
+[Absorbentes porosos y multicapa](/es/materials/absorbers/porous-absorbers/).
 
 <span id="como-se-mide-un-silenciador-iso-7235"></span>
 
@@ -937,14 +937,14 @@ laboratorio en grado de peritaje, sin flujo, y la **ISO 11820** mide un
 silenciador in situ, donde el truco de la sustitución suele ser imposible. La
 aritmética de las dos primeras, la resta misma y las tablas que la acompañan,
 está en [Medir un
-silenciador](/phonometry/es/devices/noise-control/silencer-measurement/).
+silenciador](/es/devices/noise-control/silencer-measurement/).
 
 ## Contraste con la simulación FDTD
 
 Ese contraste es el clip incrustado en el apartado 1, y vale la pena volver a
 él ahora con el álgebra en la mano. La cámara de expansión de cuatro polos se
 contrasta con la
-[simulación de ondas FDTD 2D](/phonometry/es/simulation/fdtd-simulation/)
+[simulación de ondas FDTD 2D](/es/simulation/fdtd-simulation/)
 independiente, que no comparte con el producto de matrices de transferencia
 ninguna fórmula ni ninguna hipótesis más allá de la propia ecuación de ondas:
 un conducto de onda plana que se ensancha en la misma cámara de 0,30 m y
@@ -981,7 +981,7 @@ publica un suministrador.
 Solo se calculan elementos reactivos: los silenciadores disipativos
 (absorbentes, con revestimiento interior) se discuten para la selección pero
 no se modelan a partir de las propiedades del revestimiento, y en los [métodos
-HVAC](/phonometry/es/devices/noise-control/noise-control/) la cifra de codo
+HVAC](/es/devices/noise-control/noise-control/) la cifra de codo
 revestido es una lectura de tabla (la Tabla 8.11 de Bies) y el plenum es la
 forma cerrada de Wells gobernada por una absorción media declarada; ninguno
 de los dos es un modelo de revestimiento. Los efectos del flujo
@@ -989,7 +989,7 @@ medio (convección, gradientes de temperatura, impedancia de los perforados
 dependiente del flujo) quedan fuera de las matrices de elemento sin flujo que
 se usan aquí. Nada de lo que hay en esta página es una medición: la aritmética
 de la ISO 7235 tiene [página
-propia](/phonometry/es/devices/noise-control/silencer-measurement/), no se
+propia](/es/devices/noise-control/silencer-measurement/), no se
 modelan ni la radiación por la envolvente ni las correcciones de extremo de los
 saltos de área, y los modelos de rama no tienen pérdidas salvo que se dé una
 `resistance`.
@@ -1000,23 +1000,23 @@ saltos de área, y los modelos de rama no tienen pérdidas salvo que se dé una
 
 ## Véase también
 
-- [Ruido por conductos: del ventilador a la sala](/phonometry/es/devices/noise-control/duct-path/):
+- [Ruido por conductos: del ventilador a la sala](/es/devices/noise-control/duct-path/):
   el cálculo completo del ventilador a la sala dentro del que viven estos
   silenciadores, y el corte de modos superiores por encima del cual el método
   de cuatro polos describe solo el modo de onda plana.
-- [Control de ruido industrial](/phonometry/es/devices/noise-control/noise-control/): el
+- [Control de ruido industrial](/es/devices/noise-control/noise-control/): el
   resto de la instalación: atenuación y ruido de flujo en conductos HVAC,
   plenums, reflexión de extremo y cerramientos de máquina.
-- [Simulación de ondas FDTD 2D](/phonometry/es/simulation/fdtd-simulation/): el
+- [Simulación de ondas FDTD 2D](/es/simulation/fdtd-simulation/): el
   esquema independiente que respalda el contraste de la cámara de
   expansión.
-- [Absorbentes porosos y multicapa](/phonometry/es/materials/absorbers/porous-absorbers/):
+- [Absorbentes porosos y multicapa](/es/materials/absorbers/porous-absorbers/):
   la teoría de materiales de fluido equivalente detrás de los revestimientos
   disipativos.
-- [Caracterización de altavoces (IEC 60268-5)](/phonometry/es/devices/electroacoustics/loudspeakers/):
+- [Caracterización de altavoces (IEC 60268-5)](/es/devices/electroacoustics/loudspeakers/):
   el pistón radiante, el modelo de radiador complementario del extremo
   abierto de un conducto.
 - Referencia de la API:
-  [`noise_control.silencers`](/phonometry/es/reference/api/noise_control/silencers/).
+  [`noise_control.silencers`](/es/reference/api/noise_control/silencers/).
 
 </SeeAlso>

@@ -310,7 +310,7 @@ left to the operator.
   are excluded from the result; `check_unwanted_input` judges them. (Clause
   7.6.1 sends this exclusion to "6.1, Inequality (1)", the 20 dB of the
   blocked output; the condition it means is 6.4, Inequality (3), as the
-  companion parts show. See the [errata](/phonometry/reference/errata/).)
+  companion parts show. See the [errata](/reference/errata/).)
 * **Transducers** (6.5, 6.6). Accelerometers and force transducers shall have a
   sensitivity level that is frequency-independent within **0.5 dB**, be
   calibrated at the laboratory temperature, and have a cross-axis sensitivity
@@ -322,7 +322,7 @@ left to the operator.
   output-force channels shall be under 0.5 dB or else applied as a correction.
 * **Coherence** between the input and output signals is the recommended running
   indicator (7.6.2): it flags poor signal-to-noise and non-linearity, and it is
-  read exactly as the [mobility guide's Annex A.1 list](/phonometry/vibration/structural/mechanical-mobility/)
+  read exactly as the [mobility guide's Annex A.1 list](/vibration/structural/mechanical-mobility/)
   reads it.
 
 Annex B of Part 2 says what each of these is worth. Its uncertainty budget
@@ -486,7 +486,7 @@ condition frequency by frequency with an overall `.passes`, draws itself with
   $20 \lg 1.06 = 0.51$ dB when the inertia force is in phase with the
   measured one and by $-20 \lg 0.94 = 0.54$ dB when it opposes it: the
   0.5 dB of NOTE 1 (which ISO 10846-4 prints as "05 dB"; see the
-  [errata](/phonometry/reference/errata/)). `check_output_mass` returns the
+  [errata](/reference/errata/)). `check_output_mass` returns the
   limit and that worst-case bias, `bias_bound_db`.
 
 For the indirect method the question is how high the blocking mass stays rigid.
@@ -691,11 +691,11 @@ That is not the isolator failing (a mobile receiver takes *less* force, so the
 real installation is quieter than the blocked-force estimate); it is the
 *single-number description* failing, and the route out is a prediction that
 carries both mobilities:
-[installed structure-borne sound (EN 12354-5)](/phonometry/buildings/design/installed-structure-borne/),
+[installed structure-borne sound (EN 12354-5)](/buildings/design/installed-structure-borne/),
 fed by a source characterised through
-[EN 15657](/phonometry/buildings/design/structure-borne-power/). The rule behind
+[EN 15657](/buildings/design/structure-borne-power/). The rule behind
 both is the source/receiver mobility rule of the
-[mobility guide](/phonometry/vibration/structural/mechanical-mobility/#why-two-mobilities-decide-the-power).
+[mobility guide](/vibration/structural/mechanical-mobility/#why-two-mobilities-decide-the-power).
 
 ## 8. Relation to the FRF family
 
@@ -703,7 +703,7 @@ The dynamic stiffness is a member of the frequency-response-function family
 (ISO 10846-1, Annex A / Table A.2): it is the reciprocal of the receptance and
 relates to the mechanical impedance $Z$ and effective mass $m_\text{eff}$ by
 $k = j\omega Z = -\omega^2 m_\text{eff}$. These conversions are the same as the
-[mechanical mobility](/phonometry/vibration/structural/mechanical-mobility/) `convert_frf`
+[mechanical mobility](/vibration/structural/mechanical-mobility/) `convert_frf`
 pivot:
 
 ```python
@@ -817,15 +817,15 @@ does not characterise them.
 
 ## See also
 
-- [Mechanical mobility and the FRF family (ISO 7626-1)](/phonometry/vibration/structural/mechanical-mobility/):
+- [Mechanical mobility and the FRF family (ISO 7626-1)](/vibration/structural/mechanical-mobility/):
   the source/receiver mobility rule that says when a blocked force is the right
   description at all, and the FRF vocabulary this page's conversions belong to.
-- [Structure-borne sound power of equipment (EN 15657)](/phonometry/buildings/design/structure-borne-power/):
+- [Structure-borne sound power of equipment (EN 15657)](/buildings/design/structure-borne-power/):
   the source characterisation that sits on the other side of the isolator.
-- [Installed structure-borne sound (EN 12354-5)](/phonometry/buildings/design/installed-structure-borne/):
+- [Installed structure-borne sound (EN 12354-5)](/buildings/design/installed-structure-borne/):
   the prediction that consumes $k_{2,1}$ together with both mobilities and
   turns it into a level in a receiving room.
-- API reference: [`vibration.structural.transfer_stiffness`](/phonometry/reference/api/vibration/transfer-stiffness/) and [`vibration.structural.mechanical_mobility`](/phonometry/reference/api/vibration/mechanical-mobility/).
-- Theory: [Point mobilities and radiation efficiency](/phonometry/reference/theory/vibration/#point-mobilities-and-radiation-efficiency-cremer-5-hopkins-29): the mobility and impedance definitions the transfer stiffness is the reciprocal of.
+- API reference: [`vibration.structural.transfer_stiffness`](/reference/api/vibration/transfer-stiffness/) and [`vibration.structural.mechanical_mobility`](/reference/api/vibration/mechanical-mobility/).
+- Theory: [Point mobilities and radiation efficiency](/reference/theory/vibration/#point-mobilities-and-radiation-efficiency-cremer-5-hopkins-29): the mobility and impedance definitions the transfer stiffness is the reciprocal of.
 
 </SeeAlso>

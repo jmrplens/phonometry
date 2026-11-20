@@ -74,21 +74,21 @@ elección, y Bies, Hansen y Howard 2017, §2.5 las repasa en paralelo):
   SEL, toda la energía del suceso normalizada a un segundo.
 - **Cribado de riesgo auditivo**: $L_\mathrm{Cpeak}$ y las medidas de dosis, que
   alimentan el flujo laboral de
-  [Exposición laboral (ISO 9612)](/phonometry/es/perception/hearing/occupational-exposure/).
+  [Exposición laboral (ISO 9612)](/es/perception/hearing/occupational-exposure/).
 - **Molestia comunitaria a largo plazo**: $L_\mathrm{den}$/$L_\mathrm{dn}$ y los niveles
   de evaluación de ISO 1996-1, que penalizan la energía de tarde y noche
   antes de promediar el día: el asunto de
-  [Niveles ambientales](/phonometry/es/environment/assessment/environmental-levels/).
+  [Niveles ambientales](/es/environment/assessment/environmental-levels/).
 
 Conviene mantener nítidas dos fronteras con las páginas hermanas. Las
 métricas integradas de esta página evitan deliberadamente el detector
 exponencial: $L_\mathrm{eq}$ y SEL no tienen constante de tiempo, y las balísticas
 Fast/Slow solo entran por los niveles percentiles, definidos sobre la traza
 de nivel con ponderación temporal (ver
-[Ponderación temporal](/phonometry/es/signals/levels/time-weighting/)). Y todo lo
+[Ponderación temporal](/es/signals/levels/time-weighting/)). Y todo lo
 de esta página supone la señal ya en pascales: el factor de sensibilidad que
 la lleva ahí es el asunto de
-[Calibración](/phonometry/es/signals/metrology/calibration/).
+[Calibración](/es/signals/metrology/calibration/).
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_levels_from_a_record.svg" alt="Un registro calibrado de presión dibujado como forma de onda entre los instantes t1 y t2 que delimitan el intervalo de tiempo establecido T, con un impulso breve, un suceso más largo y el fondo rotulados encima. El registro pasa por un bloque de ponderación frecuencial, A, C o Z, todas de 0 dB a 1 kHz, y se divide en cuatro columnas. La primera, con ponderación A o Z, promedia el cuadrado: el registro al cuadrado es una fila de picos y su media en T una línea plana baja, que da Leq y LAeq en T, y el SEL, la misma energía referida a 1 s frente a la exposición de referencia de 400 por diez elevado a menos doce pascal-cuadrado segundos. La segunda, con ponderación A, pondera el cuadrado en el tiempo: una traza F rápida con constante de tiempo de 0,125 s y una traza S más lenta y más baja con 1 s, un punto en la cima de cada una para LAFmax y LASmax, y tres líneas discontinuas para L10, L50 y L90 leídas sobre la traza F sin sus cinco primeras constantes de tiempo. La tercera, con ponderación C, mantiene la mayor excursión de cualquier signo, el impulso, marcada con líneas discontinuas en más y menos esa presión, para LCpeak sin promedio y sin constante de tiempo; un ciclo de 500 Hz da 3,5 dB sobre el LC de la señal estable de la que se extrae. La cuarta, con ponderación A, integra el cuadrado: una curva acumulada que sube un escalón en el impulso, de más o menos una quinta parte del total, y crece sobre todo durante el suceso, y termina en la exposición sonora E en pascal-cuadrado horas, retenida hasta reiniciar, y LEX,8h reparte esa exposición en 8 h, con 3,2 pascal-cuadrado horas exactamente 90 dB y 1,01 igual a 85 dB. Un recuadro al pie escribe el SEL como LAeq más 10 lg de T entre 1 s, LEX,8h como LAeq más 10 lg de T entre 8 h y como 10 lg de E entre p0 al cuadrado por 8 h, y advierte de que los máximos, los percentiles y el pico no se obtienen de esa energía y necesitan el registro mismo" width="100%" />
 
@@ -178,7 +178,7 @@ normativas que sí promedian decibelios directamente son aproximaciones
 deliberadas y lo declaran (ISO 1996-2 ofrece una como sustituto de la
 incertidumbre por mediciones repetidas y avisa de que se infla cuando los
 niveles se dispersan más de 3 dB, ver la sección de incertidumbre de
-[Niveles ambientales](/phonometry/es/environment/assessment/environmental-levels/));
+[Niveles ambientales](/es/environment/assessment/environmental-levels/));
 en todo lo demás, energía.
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/energy_vs_arithmetic_mean.svg" alt="Panel izquierdo: dos barras, medio periodo a 60 dB y medio periodo a 80 dB, con la media aritmética de los valores en decibelios marcada en 70 dB y la media energética real, el Leq, en 77 dB, y la diferencia de siete decibelios entre ambas anotada. Panel derecho: la diferencia entre el Leq y la media aritmética de los valores de nivel frente a la desviación típica de esos niveles, de cero a doce decibelios, con una curva para una dispersión gaussiana que sigue 0,115 sigma al cuadrado y otra para una dispersión de dos niveles, ambas crecientes de forma monótona desde cero, con la desviación típica de cinco decibelios que corresponde a una dispersión de diez decibelios marcada en torno a dos decibelios y medio" width="88%" />
@@ -396,7 +396,7 @@ conocidos no dan el $L_{90}$ de las dos horas con ninguna fórmula;
 recalcúlalo sobre la envolvente conjunta. Los valores de $L_\mathrm{eq}$, en cambio,
 se combinan exactamente promediando energías ponderadas por el tiempo, que es
 lo que hace el `composite_rating_level` de
-[Niveles ambientales](/phonometry/es/environment/assessment/environmental-levels/).
+[Niveles ambientales](/es/environment/assessment/environmental-levels/).
 
 ### Parámetros de `ln_levels()`
 
@@ -431,7 +431,7 @@ print(f"LAFmax = {la_fmax:.1f} dB   LASmax = {la_smax:.1f} dB")
 Las dos ponderaciones forman parte del nombre, y por buenas razones: aquí los
 mismos eventos leen 1,9 dB más bajo en Slow, y una ráfaga de 100 ms lee unos
 7,6 dB más bajo en Slow que en Fast (la aritmética es la ley de la ráfaga tonal
-de [Ponderación temporal](/phonometry/es/signals/levels/time-weighting/)).
+de [Ponderación temporal](/es/signals/levels/time-weighting/)).
 Informa $L_\mathrm{AFmax}$ o $L_\mathrm{ASmax}$, nunca un «Lmax» a secas.
 
 Un máximo es un extremo sin rango, así que lo decide una única muestra de la
@@ -542,7 +542,7 @@ plt.show()
 Más allá de la aritmética hay dos cosas que deciden si un $L_\mathrm{Cpeak}$ significa
 algo. **Qué significa el número.** En el marco laboral europeo (Directiva
 2003/10/CE, artículo 3, el esquema frente al que evalúa la
-[guía de exposición laboral](/phonometry/es/perception/hearing/occupational-exposure/))
+[guía de exposición laboral](/es/perception/hearing/occupational-exposure/))
 los valores de acción de pico son 135 y 137 dB(C), con un valor límite de
 exposición de 140 dB(C), junto a los valores de $L_\mathrm{EX,8h}$ de 80, 85 y 87 dB.
 Una lectura de pico en los 120 y pico no llama la atención en la industria,
@@ -563,7 +563,7 @@ viento y de manipulación casi sin atenuar, así que una cápsula sin paraviento
 informa del viento y no de la máquina, y un pico incoherente con el resto del
 registro hay que escucharlo antes de informarlo. Los ajustes de captura que todo
 esto da por hechos están explicados paso a paso en
-[Construye un sonómetro](/phonometry/es/signals/sound-level-meter/).
+[Construye un sonómetro](/es/signals/sound-level-meter/).
 
 ### SEL: comparar eventos de distinta duración
 
@@ -746,11 +746,11 @@ plt.show()
 `lex_8h` valora *una* grabación; componer una jornada laboral completa a
 partir de muestras por tarea o por función, con el balance de incertidumbre
 normativo de la ISO 9612, continúa en
-[Exposición al ruido en el trabajo](/phonometry/es/perception/hearing/occupational-exposure/).
+[Exposición al ruido en el trabajo](/es/perception/hearing/occupational-exposure/).
 
 Convertir estos niveles en los indicadores regulatorios día-tarde-noche y
 declararlos con garantías es
-[Niveles ambientales](/phonometry/es/environment/assessment/environmental-levels/): los
+[Niveles ambientales](/es/environment/assessment/environmental-levels/): los
 descriptores $L_\mathrm{den}$ y $L_\mathrm{dn}$, los niveles de evaluación compuestos de
 ISO 1996-1
 con sus ajustes por carácter, y la cadena de determinación de ISO 1996-2 con
@@ -877,7 +877,7 @@ demasiado corta.
 
 Esa misma aritmética, aplicada a un registro entero en vez de a una trama, es la
 regla de duración del registro de [Bancos de
-filtros](/phonometry/es/signals/filters/filter-banks/#cuanto-tiene-que-durar-el-registro).
+filtros](/es/signals/filters/filter-banks/#cuanto-tiene-que-durar-el-registro).
 :::
 
 Lee la figura publicada con eso en mente. El barrido es la diagonal brillante,
@@ -887,23 +887,23 @@ respuesta de las bandas, no una propiedad de la fuente. Subir `overlap` hace la
 representación más suave pero compra interpolación, no resolución: las tramas se
 solapan, los filtros no se vuelven más rápidos.
 
-Consulta [Calibración y dBFS](/phonometry/es/signals/metrology/calibration/) para
+Consulta [Calibración y dBFS](/es/signals/metrology/calibration/) para
 convertir unidades digitales a SPL físico, y
-[Ponderación temporal](/phonometry/es/signals/levels/time-weighting/) para los
+[Ponderación temporal](/es/signals/levels/time-weighting/) para los
 detalles de la envolvente. Las estrategias laborales de la ISO 9612
 continúan en
 [Exposición al ruido en el
-trabajo](/phonometry/es/perception/hearing/occupational-exposure/),
+trabajo](/es/perception/hearing/occupational-exposure/),
 los veredictos de prominencia tonal de ECMA-418-1 en
 [Tonos discretos
-prominentes](/phonometry/es/perception/psychoacoustics/tone-prominence/), y
+prominentes](/es/perception/psychoacoustics/tone-prominence/), y
 las
 líneas isofónicas de ISO 226 viven con las métricas de percepción en
-[Sonoridad](/phonometry/es/perception/psychoacoustics/loudness/). Que un único
+[Sonoridad](/es/perception/psychoacoustics/loudness/). Que un único
 $L_\mathrm{eq}$ sea un
 resumen justo de una medición es, de entrada, una cuestión de
 estacionariedad: los tests de
-[cualificación de datos](/phonometry/es/signals/metrology/data-qualification/) la
+[cualificación de datos](/es/signals/metrology/data-qualification/) la
 responden objetivamente a partir de valores cuadráticos medios por segmento.
 
 ## Qué cubre esta guía
@@ -925,7 +925,7 @@ ISO 1683:2015 desde los que se cuenta cada nivel, publicados como
 Los indicadores de jornada completa de la ISO 1996-1 ($L_\mathrm{den}$, $L_\mathrm{dn}$,
 niveles de evaluación) y los procedimientos de determinación de la ISO 1996-2
 se han trasladado a [Niveles
-ambientales](/phonometry/es/environment/assessment/environmental-levels/). La
+ambientales](/es/environment/assessment/environmental-levels/). La
 IEC 61252 se revisó en 2025; aquí solo están las fórmulas de la primera
 edición implementada (1993), no las de la más reciente.
 </ScopeClaim>
@@ -935,13 +935,13 @@ edición implementada (1993), no las de la más reciente.
 
 ## Véase también
 
-- [Niveles ambientales (ISO 1996-1/-2)](/phonometry/es/environment/assessment/environmental-levels/): los indicadores $L_\mathrm{den}$/$L_\mathrm{dn}$, los niveles de evaluación y la cadena de determinación de ISO 1996-2 construidos sobre los niveles de esta página.
-- [Ponderación temporal](/phonometry/es/signals/levels/time-weighting/): el detector Fast/Slow/Impulse sobre el que se definen los niveles percentiles.
-- [Calibración](/phonometry/es/signals/metrology/calibration/): el factor de sensibilidad que convierte unidades digitales en los pascales que todo nivel de esta página supone.
-- [Exposición laboral (ISO 9612)](/phonometry/es/perception/hearing/occupational-exposure/): las estrategias de medición en el puesto de trabajo que alimentan las medidas de dosis.
-- [Multicanal y rendimiento](/phonometry/es/signals/filters/multichannel/): niveles por canal y cómo combinarlos energéticamente.
-- Referencia de la API: [`signals.levels`](/phonometry/es/reference/api/signals/levels/), y [`metrology.reference_values`](/phonometry/es/reference/api/metrology/reference-values/) para la tabla de la ISO 1683.
-- Teoría: [Métricas de evento y de dosis](/phonometry/es/reference/theory/signal-analysis/#metricas-de-evento-y-de-dosis): las definiciones energéticas detrás de $L_\mathrm{eq}$, el SEL y las magnitudes de exposición, y cómo se relacionan con ellas los niveles percentiles.
+- [Niveles ambientales (ISO 1996-1/-2)](/es/environment/assessment/environmental-levels/): los indicadores $L_\mathrm{den}$/$L_\mathrm{dn}$, los niveles de evaluación y la cadena de determinación de ISO 1996-2 construidos sobre los niveles de esta página.
+- [Ponderación temporal](/es/signals/levels/time-weighting/): el detector Fast/Slow/Impulse sobre el que se definen los niveles percentiles.
+- [Calibración](/es/signals/metrology/calibration/): el factor de sensibilidad que convierte unidades digitales en los pascales que todo nivel de esta página supone.
+- [Exposición laboral (ISO 9612)](/es/perception/hearing/occupational-exposure/): las estrategias de medición en el puesto de trabajo que alimentan las medidas de dosis.
+- [Multicanal y rendimiento](/es/signals/filters/multichannel/): niveles por canal y cómo combinarlos energéticamente.
+- Referencia de la API: [`signals.levels`](/es/reference/api/signals/levels/), y [`metrology.reference_values`](/es/reference/api/metrology/reference-values/) para la tabla de la ISO 1683.
+- Teoría: [Métricas de evento y de dosis](/es/reference/theory/signal-analysis/#metricas-de-evento-y-de-dosis): las definiciones energéticas detrás de $L_\mathrm{eq}$, el SEL y las magnitudes de exposición, y cómo se relacionan con ellas los niveles percentiles.
 
 </SeeAlso>
 

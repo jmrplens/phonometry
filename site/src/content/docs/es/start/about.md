@@ -84,7 +84,7 @@ implementación se ancla a las expresiones en forma cerrada del texto normativo
 y se fija con un caso sintetizado a un resultado conocido, lo que es una
 garantía más débil que un ejemplo resuelto transcrito. Esas comprobaciones lo
 dicen en el
-[informe de conformidad](/phonometry/es/reference/conformance/), en la propia
+[informe de conformidad](/es/reference/conformance/), en la propia
 celda del valor esperado y no como una marca aparte por la que pudieras
 filtrar: la expresión que hay que buscar es «forma cerrada» o «analítico».
 Prefiero decirlo con claridad antes que redondearlo al alza, y prefiero que
@@ -92,13 +92,13 @@ sepas qué clase de evidencia tienes entre manos: una comprobación en forma
 cerrada demuestra que la implementación concuerda con las ecuaciones tal como
 están escritas, y no puede detectar una mala lectura del apartado del que
 salieron esas ecuaciones. Por eso existe a su lado el [registro de
-erratas](/phonometry/es/reference/errata/).
+erratas](/es/reference/errata/).
 
 Los números son públicos: ese informe recoge, para
 cada comprobación, la norma y el apartado, el valor esperado normativo, el
 valor que calcula realmente la biblioteca, la diferencia y un veredicto de cumple o
 no cumple; CI lo regenera en cada pull request, así que no puede desviarse del
-código. [Por qué phonometry](/phonometry/es/start/why-phonometry/) recorre
+código. [Por qué phonometry](/es/start/why-phonometry/) recorre
 el método sobre un caso resuelto concreto (la ponderación temporal según
 IEC 61672-1:2013) si quieres verlo aplicado de principio a fin antes de
 confiar en él de forma general.
@@ -126,7 +126,7 @@ originales saca a la luz de vez en cuando defectos en las propias fuentes:
 erratas de imprenta, ejemplos resueltos que contradicen su propio texto
 normativo, redacciones ambiguas. No los sorteo en silencio. Cada caso
 confirmado queda registrado en el
-[registro de erratas](/phonometry/es/reference/errata/) con la localización, la
+[registro de erratas](/es/reference/errata/) con la localización, la
 evidencia, la lectura que implementa la biblioteca y si se ha comunicado al
 organismo emisor. Se mantiene como
 [`docs/ERRATA.md`](https://github.com/jmrplens/phonometry/blob/main/docs/ERRATA.md)
@@ -163,7 +163,7 @@ BibTeX:
   year    = {2026},
   version = {4.0.0},
   doi     = {10.5281/zenodo.21215280},
-  url     = {https://docs.jmrp.io/phonometry/},
+  url     = {https://phonometry.dev/},
   license = {MIT}
 }
 ```
@@ -212,14 +212,14 @@ implementaciones; no sustituye a la compra de los documentos.
 ## Adónde ir a partir de aquí
 
 Si has llegado hasta aquí y quieres empezar a usarla, [Primeros
-pasos](/phonometry/es/start/getting-started/) instala la biblioteca y ejecuta un
+pasos](/es/start/getting-started/) instala la biblioteca y ejecuta un
 primer análisis calibrado, [¿Qué necesitas
-medir?](/phonometry/es/start/tasks/) encuentra la página de un trabajo
-concreto, y [Todas las guías](/phonometry/es/start/guides/) es el mapa de la
+medir?](/es/start/tasks/) encuentra la página de un trabajo
+concreto, y [Todas las guías](/es/start/guides/) es el mapa de la
 biblioteca entera agrupada por temas. Si has venido a comprobar un número y no
 a instalar nada, el [informe de
-conformidad](/phonometry/es/reference/conformance/) y el [registro de
-erratas](/phonometry/es/reference/errata/) son las dos páginas que responden a
+conformidad](/es/reference/conformance/) y el [registro de
+erratas](/es/reference/errata/) son las dos páginas que responden a
 eso. Y si el proyecto te resulta útil,
-[Apoya el proyecto](/phonometry/es/start/support/) cuenta cómo ayudar,
+[Apoya el proyecto](/es/start/support/) cuenta cómo ayudar,
 empezando por las fuentes que aún le faltan.

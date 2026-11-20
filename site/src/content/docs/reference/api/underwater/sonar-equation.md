@@ -13,17 +13,17 @@ target strength `TS` and reverberation level `RL`) into the signal excess
 `SE`, the signal-to-noise ratio and the figure of merit (the maximum allowable
 propagation loss at the detection limit $\mathrm{SE} = 0$):
 
-* [`passive_sonar_equation`](/phonometry/reference/api/underwater/sonar-equation/#passive_sonar_equation):
+* [`passive_sonar_equation`](/reference/api/underwater/sonar-equation/#passive_sonar_equation):
   $\mathrm{SE} = \mathrm{SL} - \mathrm{PL} - (\mathrm{NL} - \mathrm{DI}) - \mathrm{DT}$.
-* [`active_sonar_equation`](/phonometry/reference/api/underwater/sonar-equation/#active_sonar_equation): monostatic, noise-limited
+* [`active_sonar_equation`](/reference/api/underwater/sonar-equation/#active_sonar_equation): monostatic, noise-limited
   $\mathrm{SE} = \mathrm{SL} - 2\,\mathrm{PL} + \mathrm{TS} - (\mathrm{NL} - \mathrm{DI}) - \mathrm{DT}$ or, when a reverberation level
   is given, reverberation-limited
   $\mathrm{SE} = \mathrm{SL} - 2\,\mathrm{PL} + \mathrm{TS} - \mathrm{RL} - \mathrm{DT}$.
 
 Two of those terms have their own model here rather than having to be supplied
-from outside: [`array_directivity_index`](/phonometry/reference/api/underwater/sonar-equation/#array_directivity_index) gives `DI` from the length of a
+from outside: [`array_directivity_index`](/reference/api/underwater/sonar-equation/#array_directivity_index) gives `DI` from the length of a
 line array and the wavelength, which is also its array gain when the noise is
-isotropic, and [`detection_threshold`](/phonometry/reference/api/underwater/sonar-equation/#detection_threshold) gives `DT` from the false-alarm
+isotropic, and [`detection_threshold`](/reference/api/underwater/sonar-equation/#detection_threshold) gives `DT` from the false-alarm
 probability alone. Both are Ainslie (2010).
 
 All quantities are in dB (levels re a plane wave of 1 µPa rms; the terms are
@@ -38,10 +38,10 @@ a propagation-loss law at $\mathrm{PL} = \mathrm{FOM}$ gives the
 **detection range**, the
 range at which the detection probability is 50 %:
 
-* [`detection_range`](/phonometry/reference/api/underwater/sonar-equation/#detection_range) inverts the closed-form loss of
-  [`phonometry.underwater.propagation.closed_form`](/phonometry/reference/api/underwater/closed-form/) (spreading plus volume absorption),
+* [`detection_range`](/reference/api/underwater/sonar-equation/#detection_range) inverts the closed-form loss of
+  [`phonometry.underwater.propagation.closed_form`](/reference/api/underwater/closed-form/) (spreading plus volume absorption),
   which is strictly increasing with range and therefore has a single crossing;
-* [`detection_range_from_curve`](/phonometry/reference/api/underwater/sonar-equation/#detection_range_from_curve) reads the crossing off any computed loss
+* [`detection_range_from_curve`](/reference/api/underwater/sonar-equation/#detection_range_from_curve) reads the crossing off any computed loss
   curve (a normal-mode, parabolic-equation or Weston-regime prediction),
   where the oscillatory loss of a real waveguide can cross the figure of merit
   more than once (Ainslie, *Principles of Sonar Performance Modelling*, §11.2.8
@@ -82,7 +82,7 @@ $\mathrm{SE} = \mathrm{SL} - 2\,\mathrm{PL} + \mathrm{TS} - \mathrm{RL} - \mathr
 | `detection_threshold` | Detection threshold `DT`, in dB. |
 | `reverberation_level` | Reverberation level `RL` in dB; when given, the case is reverberation-limited. |
 
-**Returns:** A [`SonarEquationResult`](/phonometry/reference/api/underwater/sonar-equation/#sonarequationresult).
+**Returns:** A [`SonarEquationResult`](/reference/api/underwater/sonar-equation/#sonarequationresult).
 
 **Raises**
 
@@ -120,7 +120,7 @@ broadside directivity factor.
 This is the **array gain** whenever the noise is isotropic and the signal a
 plane wave, which is the case the sonar equation is written for
 (Section 6.1.3.1): the two coincide in that limit, so this is what
-[`passive_sonar_equation`](/phonometry/reference/api/underwater/sonar-equation/#passive_sonar_equation) wants for its `directivity_index`.
+[`passive_sonar_equation`](/reference/api/underwater/sonar-equation/#passive_sonar_equation) wants for its `directivity_index`.
 
 The book states three limits, and they are what the implementation is
 checked against: $10 \log_{10}(2L/\lambda)$ at high frequency for
@@ -171,10 +171,10 @@ Range at which the closed-form propagation loss equals the figure of
 merit.
 
 Solves $\mathrm{PL}(r) = \mathrm{FOM}$ for the loss of
-[`propagation_loss`](/phonometry/reference/api/underwater/closed-form/#propagation_loss), which is
+[`propagation_loss`](/reference/api/underwater/closed-form/#propagation_loss), which is
 strictly increasing in range, so the root is unique. A **one-way** figure of
 merit works for both sonar modes: the active figure of merit returned by
-[`active_sonar_equation`](/phonometry/reference/api/underwater/sonar-equation/#active_sonar_equation) is already the maximum allowable one-way loss.
+[`active_sonar_equation`](/reference/api/underwater/sonar-equation/#active_sonar_equation) is already the maximum allowable one-way loss.
 
 **Parameters**
 
@@ -182,17 +182,17 @@ merit works for both sonar modes: the active figure of merit returned by
 | :--- | :--- |
 | `figure_of_merit` | Maximum allowable one-way propagation loss, in dB. |
 | `frequency_hz` | Acoustic frequency, in Hz. |
-| `law` | Spreading law (see [`spreading_loss`](/phonometry/reference/api/underwater/closed-form/#spreading_loss)). One of `"spherical"`, `"cylindrical"` or `"practical"`. |
+| `law` | Spreading law (see [`spreading_loss`](/reference/api/underwater/closed-form/#spreading_loss)). One of `"spherical"`, `"cylindrical"` or `"practical"`. |
 | `transition_range` | Transition range for the `"practical"` law, in m. |
 | `temperature_c` | Temperature `T`, in degrees Celsius. |
 | `salinity` | Salinity `S`, in parts per thousand. |
 | `depth` | Depth, in metres. |
 | `ph` | Acidity (default 8). |
-| `model` | Absorption model (see [`seawater_absorption`](/phonometry/reference/api/underwater/closed-form/#seawater_absorption)). One of `"francois-garrison"`, `"ainslie-mccolm"` or `"thorp"`. |
+| `model` | Absorption model (see [`seawater_absorption`](/reference/api/underwater/closed-form/#seawater_absorption)). One of `"francois-garrison"`, `"ainslie-mccolm"` or `"thorp"`. |
 | `max_range` | Upper bound of the search, in metres. |
 | `n_points` | Number of ranges kept on the returned loss curve. |
 
-**Returns:** A [`DetectionRangeResult`](/phonometry/reference/api/underwater/sonar-equation/#detectionrangeresult).
+**Returns:** A [`DetectionRangeResult`](/reference/api/underwater/sonar-equation/#detectionrangeresult).
 
 **Raises**
 
@@ -228,7 +228,7 @@ linearly between the two bracketing samples. Real waveguides oscillate, so
 | `propagation_loss` | Loss at each range, in dB (same length). |
 | `crossing` | `"first"` (default) or `"last"` upward crossing. |
 
-**Returns:** The detection range, in metres. Two limiting cases carry no crossing and are distinguished by the loss at the **last** sample: `inf` when the loss is still below the figure of merit there (the target stays detectable past the end of the grid) and `0.0` when the loss exceeds it there, which without an upward crossing means it exceeded it at every sample and the target is detectable nowhere. [`detection_range`](/phonometry/reference/api/underwater/sonar-equation/#detection_range) returns the same two values for the same two situations.
+**Returns:** The detection range, in metres. Two limiting cases carry no crossing and are distinguished by the loss at the **last** sample: `inf` when the loss is still below the figure of merit there (the target stays detectable past the end of the grid) and `0.0` when the loss exceeds it there, which without an upward crossing means it exceeded it at every sample and the target is detectable nowhere. [`detection_range`](/reference/api/underwater/sonar-equation/#detection_range) returns the same two values for the same two situations.
 
 **Raises**
 
@@ -350,7 +350,7 @@ Passive sonar equation $\mathrm{SE} = \mathrm{SL} - \mathrm{PL} - (\mathrm{NL} -
 | `directivity_index` | Receiver directivity index `DI`, in dB. |
 | `detection_threshold` | Detection threshold `DT`, in dB. |
 
-**Returns:** A [`SonarEquationResult`](/phonometry/reference/api/underwater/sonar-equation/#sonarequationresult).
+**Returns:** A [`SonarEquationResult`](/reference/api/underwater/sonar-equation/#sonarequationresult).
 
 **Raises**
 

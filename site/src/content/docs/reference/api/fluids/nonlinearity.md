@@ -29,13 +29,13 @@ and that is not decoration: at 30 °C water
 prints four values between 5.18 and 5.38 from four papers, and toluene prints
 5.6 at 20 °C from one paper and 8.929 at 30 °C from another. A caller who
 wants "the" B/A of a liquid has to choose, and the row carries in
-[`attributed_to`](/phonometry/reference/api/io/io/#cataloguerow) the full
+[`attributed_to`](/reference/api/io/io/#cataloguerow) the full
 reference the chapter's list gives for that number, so that the choice can be
 made on the paper and not on the digits. The paper credits the measurement,
 temperature and year with the value, so it is the row's credit, under
 `"row"`; on the rows of Table 8.2 it is the caption's, under `"table"`.
 Where the page prints a plus-or-minus beside the value it is in
-[`uncertainty`](/phonometry/reference/api/io/io/#cataloguerow).
+[`uncertainty`](/reference/api/io/io/#cataloguerow).
 
 Table 8.2 is the only one that prints a pressure, from 0.1 to 50 MPa, and its
 rows carry it; the other three say "at atmospheric pressure" in the caption and
@@ -76,7 +76,7 @@ Every value whose substance name contains *name*.
 | Name | Description |
 | :--- | :--- |
 | `name` | Part of a substance's name as the page prints it, matched without regard to case: `"water"` answers with every row of Tables 8.1 and 8.2 and with the sea water of Table 8.4. |
-| `catalogue` | The rows to search in place of [`PUBLISHED_NONLINEARITY`](/phonometry/reference/api/fluids/nonlinearity/#published_nonlinearity): a catalogue of your own that [`phonometry.io.read_catalogue`](/phonometry/reference/api/io/io/#read_catalogue) returns, `PUBLISHED_NONLINEARITY \| mine` to search both at once, or any mapping of key to row (Default: `None`, which searches [`PUBLISHED_NONLINEARITY`](/phonometry/reference/api/fluids/nonlinearity/#published_nonlinearity)). |
+| `catalogue` | The rows to search in place of [`PUBLISHED_NONLINEARITY`](/reference/api/fluids/nonlinearity/#published_nonlinearity): a catalogue of your own that [`phonometry.io.read_catalogue`](/reference/api/io/io/#read_catalogue) returns, `PUBLISHED_NONLINEARITY \| mine` to search both at once, or any mapping of key to row (Default: `None`, which searches [`PUBLISHED_NONLINEARITY`](/reference/api/fluids/nonlinearity/#published_nonlinearity)). |
 
 **Returns:** The matching rows, in catalogue order. Empty when nothing matches, which is not an error.
 
@@ -84,7 +84,7 @@ Every value whose substance name contains *name*.
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | for a *catalogue* that is not a mapping, or that holds a row that is not a [`NonlinearityParameter`](/phonometry/reference/api/fluids/nonlinearity/#nonlinearityparameter), naming its key. |
+| TypeError | for a *catalogue* that is not a mapping, or that holds a row that is not a [`NonlinearityParameter`](/reference/api/fluids/nonlinearity/#nonlinearityparameter), naming its key. |
 
 ## NonlinearityParameter
 
@@ -133,7 +133,7 @@ One published value of B/A, with the conditions it was measured at.
 | `variant` | Which specimen or condition this row is, when the page prints several under one name: `"chemically pure"`, `"direction x"`, `"0.68 mm diameter"`. Empty when the page prints one. |
 | `source` | Document, table, PDF page and printed folio. |
 | `table` | The data file this row was read from, without the extension, which is also the first half of its key in the catalogue that holds it. |
-| `basis` | What the source says a value is: a field name, or `"row"` for the whole row, to one of [`CATALOGUE_BASES`](/phonometry/reference/api/io/io/#catalogue_bases). Hopkins marks most of his Poisson ratios "Estimate", and those cells hold `"estimated"`; a datasheet that declares a class under a product standard would hold `"declared"`. A field with no entry takes the row's, and a row with neither is one whose source does not say, which is a different answer from any of the five. `basis_of` reads it. Independent of `derived`: this is what the source claims for a cell, that is what this library computed. |
+| `basis` | What the source says a value is: a field name, or `"row"` for the whole row, to one of [`CATALOGUE_BASES`](/reference/api/io/io/#catalogue_bases). Hopkins marks most of his Poisson ratios "Estimate", and those cells hold `"estimated"`; a datasheet that declares a class under a product standard would hold `"declared"`. A field with no entry takes the row's, and a row with neither is one whose source does not say, which is a different answer from any of the five. `basis_of` reads it. Independent of `derived`: this is what the source claims for a cell, that is what this library computed. |
 | `approximate` | Fields the page prints with a `~`. Not an estimate and not an interval: a number the author rounded on purpose. |
 | `derived` | Field to how it was computed, for the ones this library worked out from the cells the page did print. A derived value is never stored as if it had been read, and on every row the library builds it follows again from the row's own cells: `from_printed` writes it, and nothing else in the library does. One a caller passes to the literal constructor is the caller's word, which the row keeps and `printed_fields` leaves out with its value, as it leaves out every derived one. When the printed cells a value rests on do not all have one `basis`, the text names the basis of each, so a modulus worked out from a plate speed and a Poisson ratio Hopkins marks as an estimate says it rests on that estimate. A value converted from the unit the page prints is not derived (`converted` holds it), and neither is one the page gives by reference to another of its rows (`carried` does). |
 | `converted` | Field to `(figure, unit)`, the page's figure and the unit it is in, for a value this row holds in a unit the page does not use. Ver and Beranek print their damping materials in degrees Fahrenheit and pounds per square inch, and the row holds degrees Celsius and pascals, so `("3e5", "psi")` sits beside a modulus in pascals. The figure is kept as the page writes it, so the cell can always be read back in the page's own terms. The unit is the one the page prints with the figure or over its column. Long prints the figures of his musician bare, and the sabins recorded for them are a reading of the table, which is set in inches and pounds and names sabins on the next row; that row's note says so. A figure written in another unit of the same kind as the field's (`thickness_m` for `thickness_mm`, `flow_resistivity_kpa_s_m2` for `flow_resistivity_pa_s_m2`) is converted by `from_printed` and recorded here, whether it is a value, the end of a range or one of several readings; for a range the figure is the printed end of a bound, or both ends as `"5 to 10"`, and for readings the list as the page gives it. A packaged table transcribed in the base unit with only its SI prefix changed, such as the megapascals of Rossing Table 15.5, holds no entry here, and the table's `about` says so. |
@@ -157,7 +157,7 @@ One published value of B/A, with the conditions it was measured at.
 NonlinearityParameter.basis_of(field_name: str) -> str
 ```
 
-What the source says this field is, one of [`CATALOGUE_BASES`](/phonometry/reference/api/io/io/#catalogue_bases).
+What the source says this field is, one of [`CATALOGUE_BASES`](/reference/api/io/io/#catalogue_bases).
 
 The five are `measured`, `declared`, `calculated`, `estimated`
 and `extended`.
@@ -187,7 +187,7 @@ unit of the same kind as its field (`thickness_m` for
 `thickness_mm`, `flow_resistivity_kpa_s_m2` for
 `flow_resistivity_pa_s_m2`), or in a unit the class takes as an
 alias of its own (an
-[`AbsorptionAreaSpectrum`](/phonometry/reference/api/materials/measured/#absorptionareaspectrum) takes
+[`AbsorptionAreaSpectrum`](/reference/api/materials/measured/#absorptionareaspectrum) takes
 `absorption_area_125_ft2` for `absorption_area_125_m2`), is
 converted on its digits with an exact factor and rounded once,
 whether it is a value or stands as the key of a hedge (the ends of a

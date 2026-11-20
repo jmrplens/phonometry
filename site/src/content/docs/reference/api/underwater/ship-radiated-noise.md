@@ -11,18 +11,18 @@ A surface ship measured in deep water is characterised by its **radiated noise
 level** and then by an **equivalent monopole source level** referred to a point
 source below the sea surface:
 
-* [`radiated_noise_level`](/phonometry/reference/api/underwater/ship-radiated-noise/#radiated_noise_level):
+* [`radiated_noise_level`](/reference/api/underwater/ship-radiated-noise/#radiated_noise_level):
   $L_{\mathrm{RN}} = 20 \log_{10}(p_{\mathrm{rms}}/p_0) + 20 \log_{10}(r/r_0)$
   dB re 1 µPa·m (ISO 17208-1), the level of the product of the far-field RMS
   pressure and the source distance.
-* [`monopole_source_level`](/phonometry/reference/api/underwater/ship-radiated-noise/#monopole_source_level): converts `LRN` to the source level
+* [`monopole_source_level`](/reference/api/underwater/ship-radiated-noise/#monopole_source_level): converts `LRN` to the source level
   $L_\mathrm{s} = L_{\mathrm{RN}} + \Delta L$ with the Lloyd's-mirror surface
   correction $\Delta L$ of ISO 17208-2 Formula 3, for a nominal source
   depth $d_\mathrm{s} = 0.7 D$ (Formula 1).
 
 Supporting helpers give the ISO 17208-1 three-hydrophone measurement depths
-([`hydrophone_depths`](/phonometry/reference/api/underwater/ship-radiated-noise/#hydrophone_depths)) and the ISO 17208-2 tabulated source-level
-uncertainty ([`source_level_uncertainty`](/phonometry/reference/api/underwater/ship-radiated-noise/#source_level_uncertainty)). The conversion assumes an ideal
+([`hydrophone_depths`](/reference/api/underwater/ship-radiated-noise/#hydrophone_depths)) and the ISO 17208-2 tabulated source-level
+uncertainty ([`source_level_uncertainty`](/reference/api/underwater/ship-radiated-noise/#source_level_uncertainty)). The conversion assumes an ideal
 pressure-release sea surface and ignores wind; the reported source level is an
 *equivalent monopole broadside* value and must be quoted with its source depth.
 
@@ -94,7 +94,7 @@ depth is $d_\mathrm{s} = 0.7 D$ (Formula 1).
 | `draft_m` | Ship draught `D` (mean of bow and stern), in m. |
 | `speed_of_sound` | Speed of sound in sea water, in m/s (default 1500). |
 
-**Returns:** A [`ShipSourceLevelResult`](/phonometry/reference/api/underwater/ship-radiated-noise/#shipsourcelevelresult).
+**Returns:** A [`ShipSourceLevelResult`](/reference/api/underwater/ship-radiated-noise/#shipsourcelevelresult).
 
 **Raises**
 

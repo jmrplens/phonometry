@@ -93,7 +93,7 @@ standard normal cumulative distribution at the protection performance
 | `performance` | The protection performance `x`, in per cent, from Table 1: 50, 75, 80, 84 (the default), 90, 95 or 98. |
 | `frequencies` | Octave-band mid-frequencies, in hertz, or `None` for the eight bands of Formula (2) when the grid has eight columns. |
 
-**Returns:** [`AssumedProtectionResult`](/phonometry/reference/api/hearing/hearing-protectors/#assumedprotectionresult).
+**Returns:** [`AssumedProtectionResult`](/reference/api/hearing/hearing-protectors/#assumedprotectionresult).
 
 **Raises**
 
@@ -203,9 +203,9 @@ $L'_{p,\mathrm{A}x}$.
 | :--- | :--- |
 | `l_p_a` | A-weighted sound pressure level of the noise, in dB. |
 | `l_p_c` | C-weighted sound pressure level of the noise, in dB. |
-| `rating` | The protector's [`HMLRatingResult`](/phonometry/reference/api/hearing/hearing-protectors/#hmlratingresult). |
+| `rating` | The protector's [`HMLRatingResult`](/reference/api/hearing/hearing-protectors/#hmlratingresult). |
 
-**Returns:** [`ProtectedLevelResult`](/phonometry/reference/api/hearing/hearing-protectors/#protectedlevelresult).
+**Returns:** [`ProtectedLevelResult`](/reference/api/hearing/hearing-protectors/#protectedlevelresult).
 
 **Raises**
 
@@ -260,7 +260,7 @@ reduces the attenuation (Formulas (3) to (11)).
 | `attenuation` | A `(subjects, bands)` grid of sound attenuation values, in dB. Formula (15) reads 125 Hz to 8000 Hz, so a grid of eight bands is taken to start at 63 Hz and its first column is dropped; a grid of seven is taken to start at 125 Hz. |
 | `performance` | The protection performance `x`, in per cent, from Table 1. |
 
-**Returns:** [`HMLRatingResult`](/phonometry/reference/api/hearing/hearing-protectors/#hmlratingresult).
+**Returns:** [`HMLRatingResult`](/reference/api/hearing/hearing-protectors/#hmlratingresult).
 
 **Raises**
 
@@ -387,11 +387,11 @@ The summation runs over the eight octaves from 63 Hz, or over seven from
 | Name | Description |
 | :--- | :--- |
 | `noise_levels` | Octave-band sound pressure levels of the noise, $L_{p,f(k)}$, in dB. Unweighted: the A weighting is added here. |
-| `apv` | Assumed protection values, in dB, or the [`AssumedProtectionResult`](/phonometry/reference/api/hearing/hearing-protectors/#assumedprotectionresult) that carries them. |
+| `apv` | Assumed protection values, in dB, or the [`AssumedProtectionResult`](/reference/api/hearing/hearing-protectors/#assumedprotectionresult) that carries them. |
 | `frequencies` | Octave-band mid-frequencies, in hertz, or `None` for the eight bands of Formula (2), or those seven without 63 Hz. |
-| `a_weighting` | Frequency weighting A at those bands, in dB, or `None` for [`PROTECTOR_A_WEIGHTING`](/phonometry/reference/api/hearing/hearing-protectors/#protector_a_weighting), which is IEC 61672-1:2013 Table 3. |
+| `a_weighting` | Frequency weighting A at those bands, in dB, or `None` for [`PROTECTOR_A_WEIGHTING`](/reference/api/hearing/hearing-protectors/#protector_a_weighting), which is IEC 61672-1:2013 Table 3. |
 
-**Returns:** [`ProtectedLevelResult`](/phonometry/reference/api/hearing/hearing-protectors/#protectedlevelresult).
+**Returns:** [`ProtectedLevelResult`](/reference/api/hearing/hearing-protectors/#protectedlevelresult).
 
 **Raises**
 
@@ -531,12 +531,12 @@ integer.
 
 | Name | Description |
 | :--- | :--- |
-| `rating` | The protector's [`SNRRatingResult`](/phonometry/reference/api/hearing/hearing-protectors/#snrratingresult). |
+| `rating` | The protector's [`SNRRatingResult`](/reference/api/hearing/hearing-protectors/#snrratingresult). |
 | `l_p_c` | C-weighted sound pressure level of the noise, in dB, for Formula (23). |
 | `l_p_a` | A-weighted sound pressure level of the noise, in dB, for Formula (24). |
 | `c_minus_a` | The difference $(L_{p,\mathrm{C}} - L_{p,\mathrm{A}})$, in dB, for Formula (24). |
 
-**Returns:** [`ProtectedLevelResult`](/phonometry/reference/api/hearing/hearing-protectors/#protectedlevelresult).
+**Returns:** [`ProtectedLevelResult`](/reference/api/hearing/hearing-protectors/#protectedlevelresult).
 
 **Raises**
 
@@ -578,7 +578,7 @@ what the `HML` method's three values recover.
 | `attenuation` | A `(subjects, bands)` grid of sound attenuation values, in dB, over the eight octaves from 63 Hz or the seven from 125 Hz. |
 | `performance` | The protection performance `x`, in per cent, from Table 1. |
 
-**Returns:** [`SNRRatingResult`](/phonometry/reference/api/hearing/hearing-protectors/#snrratingresult).
+**Returns:** [`SNRRatingResult`](/reference/api/hearing/hearing-protectors/#snrratingresult).
 
 **Raises**
 

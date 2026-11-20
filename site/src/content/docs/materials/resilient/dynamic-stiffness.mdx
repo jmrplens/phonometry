@@ -32,7 +32,7 @@ ISO 9052-1:1989) measures the **dynamic stiffness per unit area** $s'$ of the
 resilient layer from the resonance of a standard load plate on a
 200 mm × 200 mm specimen. $s'$ is the input to the floating-floor term of the
 EN 12354-2 impact model covered in
-[Predicting Sound Insulation (EN 12354)](/phonometry/buildings/design/insulation-prediction/). (ISO 16251-1 does not apply
+[Predicting Sound Insulation (EN 12354)](/buildings/design/insulation-prediction/). (ISO 16251-1 does not apply
 here: its scope is limited to soft, locally-reacting floor coverings and
 explicitly excludes floating floors.)
 
@@ -309,7 +309,7 @@ library follows the standard and puts the unit in the argument's name,
 that is not plain SI, and it takes it by name only, so that the unit is on
 the line that passes it. A mineral wool measured at 50 000 Pa·s/m² goes in as `50.0`,
 not `50000.0`; convert an
-[ISO 9053 result](/phonometry/materials/absorbers/airflow-resistance/) with
+[ISO 9053 result](/materials/absorbers/airflow-resistance/) with
 `sigma / 1000`. Passing the Pa·s/m² number would land in the
 $r \ge 100$ branch, which drops the enclosed-gas term: for the determination
 below that turns $s' = 10.49$ MN/m³ into 4.93 MN/m³ and the design natural
@@ -555,7 +555,7 @@ plt.show()
 
 How much improvement that actually buys band by band, and what it becomes as a
 weighted single number, is
-[Predicting Resilient-Layer Performance](/phonometry/buildings/design/resilient-layers/).
+[Predicting Resilient-Layer Performance](/buildings/design/resilient-layers/).
 
 ## What this guide covers
 
@@ -595,17 +595,17 @@ supplied in the metadata.
 
 ## See also
 
-- [Predicting Resilient-Layer Performance](/phonometry/buildings/design/resilient-layers/):
+- [Predicting Resilient-Layer Performance](/buildings/design/resilient-layers/):
   what the design side does with $s'$, from the mass-spring resonance to the
   improvement laws above it and their weighted single number.
-- [Predicting Sound Insulation (EN 12354)](/phonometry/buildings/design/insulation-prediction/):
+- [Predicting Sound Insulation (EN 12354)](/buildings/design/insulation-prediction/):
   the floating-floor term this measurement feeds.
-- [Airflow Resistance](/phonometry/materials/absorbers/airflow-resistance/): the
+- [Airflow Resistance](/materials/absorbers/airflow-resistance/): the
   ISO 9053 determination of the lateral resistivity $r$ that clause 8.2 needs,
   reported there as $\sigma$ in Pa·s/m².
-- [Resilient layers overview](/phonometry/materials/resilient/): where this
+- [Resilient layers overview](/materials/resilient/): where this
   measurement sits among the materials guides.
-- API reference: [`materials.resilient.dynamic_stiffness`](/phonometry/reference/api/materials/dynamic-stiffness/).
-- Theory: [Point mobilities and radiation efficiency](/phonometry/reference/theory/vibration/#point-mobilities-and-radiation-efficiency-cremer-5-hopkins-29): the mass-spring resonance the EN 29052-1 rig measures, seen as a mobility.
+- API reference: [`materials.resilient.dynamic_stiffness`](/reference/api/materials/dynamic-stiffness/).
+- Theory: [Point mobilities and radiation efficiency](/reference/theory/vibration/#point-mobilities-and-radiation-efficiency-cremer-5-hopkins-29): the mass-spring resonance the EN 29052-1 rig measures, seen as a mobility.
 
 </SeeAlso>

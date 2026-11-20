@@ -1,6 +1,6 @@
 <!-- Written by `make llms` from site/src/content/docs/materials/absorbers/metamaterial-absorbers.mdx: edit that page and its Spanish twin, then run `make llms`. -->
 
-← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/materials/absorbers/metamaterial-absorbers/
+← [Documentation index](../../README.md) · Published at https://phonometry.dev/materials/absorbers/metamaterial-absorbers/
 
 # Metamaterial Absorbers
 
@@ -615,7 +615,7 @@ incidence above.
   behind the animation above.
 - [Airflow Resistance](airflow-resistance.md): the viscous
   physics of the narrow channels, measured on the bulk material.
-- API reference: [`materials.absorbers.slow_sound`](https://docs.jmrp.io/phonometry/reference/api/materials/slow-sound/).
+- API reference: [`materials.absorbers.slow_sound`](https://phonometry.dev/reference/api/materials/slow-sound/).
 - Theory: [Acoustic material characterisation](../../reference/theory/materials-surfaces.md#acoustic-material-characterisation-iso-11654-iso-9053-12-iso-10534-12-astm-e2611): the surface-impedance and absorption definitions the resonator models are evaluated against.
 
 ## References

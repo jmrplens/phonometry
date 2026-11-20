@@ -314,11 +314,11 @@ coherencia ordinaria, la estimación de Welch queda sesgada a la baja cuando
 un retardo global entre una entrada y la salida se convierte en una
 fracción apreciable de la longitud del segmento; elimina primero los
 retardos de propagación conocidos (ver
-[Correlación y retardo](/phonometry/es/signals/spectra/correlation-delay/)) y
+[Correlación y retardo](/es/signals/spectra/correlation-delay/)) y
 mantén `nperseg` bien por encima del mayor retardo restante.
 
 Los estimadores comparten el núcleo de Welch de la página de
-[análisis espectral calibrado](/phonometry/es/signals/spectra/spectral-analysis/)
+[análisis espectral calibrado](/es/signals/spectra/spectral-analysis/)
 (mismo enventanado de Hann, solape del 50 % y calibración sin eliminación de
 tendencia), de modo que una coherencia MISO y un `power_spectral_density`
 calculados con la misma longitud de segmento son congruentes bin a bin.
@@ -352,9 +352,9 @@ llamada a `miso_coherence` por cada salida.
 
 ## Véase también
 
-- [Análisis espectral](/phonometry/es/signals/spectra/spectral-analysis/): el espectro de salida coherente de una entrada que esta página generaliza, y el núcleo de Welch compartido.
-- [Correlación y retardo](/phonometry/es/signals/spectra/correlation-delay/): estimar y eliminar los retardos globales que sesgan la coherencia a la baja.
-- [Multicanal y rendimiento](/phonometry/es/signals/filters/multichannel/): la ruta por canal que este análisis cruzado complementa.
-- Referencia de la API: [`signals.miso`](/phonometry/es/reference/api/signals/miso/).
+- [Análisis espectral](/es/signals/spectra/spectral-analysis/): el espectro de salida coherente de una entrada que esta página generaliza, y el núcleo de Welch compartido.
+- [Correlación y retardo](/es/signals/spectra/correlation-delay/): estimar y eliminar los retardos globales que sesgan la coherencia a la baja.
+- [Multicanal y rendimiento](/es/signals/filters/multichannel/): la ruta por canal que este análisis cruzado complementa.
+- Referencia de la API: [`signals.miso`](/es/reference/api/signals/miso/).
 
 </SeeAlso>

@@ -8,7 +8,7 @@ sidebar:
 Sound calibrators (IEC 60942:2017): the class tables and the verdict on one.
 
 A calibrator is the one instrument every calibrated level in this library
-leans on: [`phonometry.metrology.sensitivity`](/phonometry/reference/api/metrology/calibration/#sensitivity) turns its tone into the
+leans on: [`phonometry.metrology.sensitivity`](/reference/api/metrology/calibration/#sensitivity) turns its tone into the
 factor that converts digital units into pascals, so an error in the tone is
 an error in every level measured after it. IEC 60942:2017 (EN IEC 60942:2018)
 says how good the tone has to be, in three classes: **LS** (laboratory
@@ -36,7 +36,7 @@ number with an acceptance limit and a maximum-permitted uncertainty:
   A.7.4.8.
 
 Each is judged by the conformance rule of IEC TC 29
-([`phonometry.metrology.verify_conformance`](/phonometry/reference/api/metrology/conformance/#verify_conformance), 5.1.15): the measured
+([`phonometry.metrology.verify_conformance`](/reference/api/metrology/conformance/#verify_conformance), 5.1.15): the measured
 deviation within the acceptance limit **and** the laboratory's actual expanded
 uncertainty within the maximum permitted, both inclusive. The deviation limits
 of the level, the supply-voltage effect, the frequency and the field immunity
@@ -45,13 +45,13 @@ $\pm$ the limit; the short-term fluctuation and the total distortion +
 noise are magnitudes, judged against zero and the limit.
 
 **The tables.** Tables 2, 5 and 7 and Tables A.1, A.3 and A.4 are keyed by a
-range of nominal frequencies, published as tuples of [`CalibratorTableRow`](/phonometry/reference/api/metrology/sound-calibrator/#calibratortablerow);
+range of nominal frequencies, published as tuples of [`CalibratorTableRow`](/reference/api/metrology/sound-calibrator/#calibratortablerow);
 Tables 3, 4 and 6 and Tables A.2 and A.5 hold one figure per class, published as
 read-only mappings keyed by `"LS"`, `"1"` and `"2"`. A dash in the printed
 table, the ranges of nominal frequency "for which this document provides no
 acceptance limits", is `None`: classes LS and 2 are specified only from
 160 Hz to 1 250 Hz, and 5.1.2 forbids stating conformance where there is no
-limit, so [`verify_sound_calibrator`](/phonometry/reference/api/metrology/sound-calibrator/#verify_sound_calibrator) refuses such a nominal frequency
+limit, so [`verify_sound_calibrator`](/reference/api/metrology/sound-calibrator/#verify_sound_calibrator) refuses such a nominal frequency
 rather than grading it against a neighbouring row.
 
 **The /M correction is an input.** A class LS/M or 1/M pistonphone's output
@@ -59,7 +59,7 @@ follows the ambient static pressure, and its manual gives the correction to
 the reference 101.325 kPa (5.1.5, 6.3 i). That correction depends on the
 barometer reading and on data only the manufacturer has, so this module does
 not compute it: the caller supplies it as
-[`SoundCalibratorMeasurements.static_pressure_correction`](/phonometry/reference/api/metrology/sound-calibrator/#soundcalibratormeasurements) and it is
+[`SoundCalibratorMeasurements.static_pressure_correction`](/reference/api/metrology/sound-calibrator/#soundcalibratormeasurements) and it is
 added to the measured level before the level is graded (5.3.2, A.5.1.2,
 B.4.3.2). Every other calibrator shall not need any environmental correction
 (5.1.7), and is refused one.
@@ -386,7 +386,7 @@ The `(deviation, uncertainty)` pairs measured for a requirement.
 
 | Name | Description |
 | :--- | :--- |
-| `requirement` | One of [`CALIBRATOR_REQUIREMENTS`](/phonometry/reference/api/metrology/sound-calibrator/#calibrator_requirements). One of `"level"`, `"fluctuation"`, `"frequency"`, `"distortion"`, `"supply_voltage"`, `"environmental_level"`, `"environmental_level_in_band"`, `"environmental_frequency"` or `"field_immunity"`. |
+| `requirement` | One of [`CALIBRATOR_REQUIREMENTS`](/reference/api/metrology/sound-calibrator/#calibrator_requirements). One of `"level"`, `"fluctuation"`, `"frequency"`, `"distortion"`, `"supply_voltage"`, `"environmental_level"`, `"environmental_level_in_band"`, `"environmental_frequency"` or `"field_immunity"`. |
 
 **Returns:** One pair per measurement, empty when it was not measured.
 
@@ -414,10 +414,10 @@ One requirement of IEC 60942:2017, judged on every measurement of it.
 
 | Name | Description |
 | :--- | :--- |
-| `name` | The requirement, one of [`CALIBRATOR_REQUIREMENTS`](/phonometry/reference/api/metrology/sound-calibrator/#calibrator_requirements). |
+| `name` | The requirement, one of [`CALIBRATOR_REQUIREMENTS`](/reference/api/metrology/sound-calibrator/#calibrator_requirements). |
 | `clause` | The subclause of IEC 60942:2017 that states it. |
 | `tables` | Where its acceptance limit and maximum-permitted uncertainty are printed. |
-| `verifications` | One [`ConformanceVerification`](/phonometry/reference/api/metrology/conformance/#conformanceverification) per measurement, in the order they were given. |
+| `verifications` | One [`ConformanceVerification`](/reference/api/metrology/conformance/#conformanceverification) per measurement, in the order they were given. |
 
 ### SoundCalibratorRequirement.acceptance_limits
 
@@ -485,11 +485,11 @@ The IEC 60942:2017 verdict on one setting of a sound calibrator.
 
 | Name | Description |
 | :--- | :--- |
-| `calibrator_class` | The designation it was judged as, one of [`CALIBRATOR_CLASSES`](/phonometry/reference/api/metrology/sound-calibrator/#calibrator_classes). One of `"LS"`, `"LS/M"`, `"1"`, `"1/M"` or `"2"`. |
+| `calibrator_class` | The designation it was judged as, one of [`CALIBRATOR_CLASSES`](/reference/api/metrology/sound-calibrator/#calibrator_classes). One of `"LS"`, `"LS/M"`, `"1"`, `"1/M"` or `"2"`. |
 | `nominal_frequency_hz` | The nominal frequency of the setting, in hertz, which selects the rows of the banded tables. |
 | `environmental_test` | `"full"` (Tables 5 and 6) or `"abbreviated"` (the reduced limits of A.6.4.7). |
 | `measurements` | The record the verdict was reached on. |
-| `requirements` | One [`SoundCalibratorRequirement`](/phonometry/reference/api/metrology/sound-calibrator/#soundcalibratorrequirement) per requirement measured, in the order of [`CALIBRATOR_REQUIREMENTS`](/phonometry/reference/api/metrology/sound-calibrator/#calibrator_requirements). |
+| `requirements` | One [`SoundCalibratorRequirement`](/reference/api/metrology/sound-calibrator/#soundcalibratorrequirement) per requirement measured, in the order of [`CALIBRATOR_REQUIREMENTS`](/reference/api/metrology/sound-calibrator/#calibrator_requirements). |
 
 ### SoundCalibratorVerification.failed
 
@@ -550,9 +550,9 @@ The verdict on one requirement.
 
 | Name | Description |
 | :--- | :--- |
-| `name` | One of [`CALIBRATOR_REQUIREMENTS`](/phonometry/reference/api/metrology/sound-calibrator/#calibrator_requirements). |
+| `name` | One of [`CALIBRATOR_REQUIREMENTS`](/reference/api/metrology/sound-calibrator/#calibrator_requirements). |
 
-**Returns:** Its [`SoundCalibratorRequirement`](/phonometry/reference/api/metrology/sound-calibrator/#soundcalibratorrequirement).
+**Returns:** Its [`SoundCalibratorRequirement`](/reference/api/metrology/sound-calibrator/#soundcalibratorrequirement).
 
 **Raises**
 
@@ -591,12 +591,12 @@ verify_sound_calibrator(
 Verify what a laboratory measured on a sound calibrator against IEC 60942:2017.
 
 Every requirement given in `measurements` is judged by the conformance
-rule of IEC TC 29 (5.1.15, [`phonometry.metrology.verify_conformance`](/phonometry/reference/api/metrology/conformance/#verify_conformance))
+rule of IEC TC 29 (5.1.15, [`phonometry.metrology.verify_conformance`](/reference/api/metrology/conformance/#verify_conformance))
 against the acceptance limit and the maximum-permitted uncertainty that
 the class and the nominal frequency select, and the calibrator passes when
 every measurement of every requirement does. The requirements, their
 clauses and tables are listed in the module documentation of
-[`phonometry.metrology.sound_calibrator`](/phonometry/reference/api/metrology/sound-calibrator/).
+[`phonometry.metrology.sound_calibrator`](/reference/api/metrology/sound-calibrator/).
 
 One call judges one setting: a multi-frequency calibrator is verified once
 per frequency setting, because the banded tables change with it. For an
@@ -608,11 +608,11 @@ static-pressure correction is added to it (5.3.2, B.4.3.2).
 | Name | Description |
 | :--- | :--- |
 | `calibrator_class` | `"LS"`, `"LS/M"`, `"1"`, `"1/M"` or `"2"` (Table 1); `1` and `2` may be given as integers. |
-| `measurements` | What was measured, as [`SoundCalibratorMeasurements`](/phonometry/reference/api/metrology/sound-calibrator/#soundcalibratormeasurements). |
+| `measurements` | What was measured, as [`SoundCalibratorMeasurements`](/reference/api/metrology/sound-calibrator/#soundcalibratormeasurements). |
 | `nominal_frequency_hz` | The nominal frequency of the setting, in hertz. It has to be one the class has acceptance limits at: 31.5 Hz to 16 kHz for class 1, 160 Hz to 1 250 Hz for classes LS and 2 (5.1.2). |
 | `environmental_test` | `"full"` (default) judges the environmental requirements against Tables 5 and 6; `"abbreviated"` against the reduced limits of A.6.4.7, where a failure calls for the full tests rather than a non-conformance (A.6.1.2). |
 
-**Returns:** The [`SoundCalibratorVerification`](/phonometry/reference/api/metrology/sound-calibrator/#soundcalibratorverification), whose `passes` is the verdict and whose `requirements` carry one verdict each.
+**Returns:** The [`SoundCalibratorVerification`](/reference/api/metrology/sound-calibrator/#soundcalibratorverification), whose `passes` is the verdict and whose `requirements` carry one verdict each.
 
 **Raises**
 

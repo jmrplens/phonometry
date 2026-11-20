@@ -1,6 +1,6 @@
 <!-- Written by `make llms` from site/src/content/docs/devices/noise-control/noise-control.mdx: edit that page and its Spanish twin, then run `make llms`. -->
 
-← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/devices/noise-control/noise-control/
+← [Documentation index](../../README.md) · Published at https://phonometry.dev/devices/noise-control/noise-control/
 
 # Industrial Noise Control: HVAC and Enclosures
 
@@ -585,8 +585,8 @@ with a value computed here compares two different things.
   the closed forms and worked anchors these implementations are validated
   against.
 - API reference:
-  [`noise_control.hvac`](https://docs.jmrp.io/phonometry/reference/api/noise_control/hvac/) and
-  [`noise_control.enclosures`](https://docs.jmrp.io/phonometry/reference/api/noise_control/enclosures/).
+  [`noise_control.hvac`](https://phonometry.dev/reference/api/noise_control/hvac/) and
+  [`noise_control.enclosures`](https://phonometry.dev/reference/api/noise_control/enclosures/).
 
 ## References
 

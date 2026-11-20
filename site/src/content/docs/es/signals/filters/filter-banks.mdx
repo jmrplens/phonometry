@@ -69,9 +69,9 @@ extraer las señales temporales por banda y filtrar con fase cero. El apartado 1
 son las matemáticas sobre las que se apoya el diseño; si solo quieres llamar a
 la función, empieza por el apartado 3. En qué se diferencian las cinco
 arquitecturas es la
-[Galería de arquitecturas de filtro](/phonometry/es/signals/filters/filter-gallery/),
+[Galería de arquitecturas de filtro](/es/signals/filters/filter-gallery/),
 y qué significa «clase 1» para el resultado es
-[Verificación de clase de filtros](/phonometry/es/signals/filters/filter-compliance/).
+[Verificación de clase de filtros](/es/signals/filters/filter-compliance/).
 
 ## ¿Cómo calculo niveles por bandas de octava o de tercio de octava en Python?
 
@@ -286,16 +286,16 @@ informar fija la duración del registro de todo el banco.** Analizar un
 fragmento de 1 s hasta 12,5 Hz e informar el resultado con un decimal no es una
 medida de esa banda, y ni `octave_filter` ni `OctaveFilterBank` te avisan. La
 ley general $1/\sqrt{BT}$ se deduce en
-[Correlación, retardo y envolvente](/phonometry/es/signals/spectra/correlation-delay/);
+[Correlación, retardo y envolvente](/es/signals/spectra/correlation-delay/);
 esa misma aritmética aplicada por trama en vez de por registro es la nota sobre
 `window_time` de
-[Niveles integrados y estadísticos](/phonometry/es/signals/levels/levels/).
+[Niveles integrados y estadísticos](/es/signals/levels/levels/).
 
 Las matemáticas de banda anteriores son comunes a todas las arquitecturas.
 Cómo difieren realmente las arquitecturas, la comparación en el cruce a
 −3 dB, la galería completa de respuestas en octava y tercio de octava y los
 ejemplos de uso por arquitectura, hasta el crossover Linkwitz-Riley, es la
-[Galería de arquitecturas de filtro](/phonometry/es/signals/filters/filter-gallery/).
+[Galería de arquitecturas de filtro](/es/signals/filters/filter-gallery/).
 
 <span id="2-que-devuelve-una-llamada"></span>
 
@@ -370,14 +370,14 @@ constructor y `bank.filter()` es el método por llamada.
 | `fraction` | función, constructor | int | — | por defecto `1`; habitual `3`; cualquier $b \ge 1$ | Bandas por octava = $b$ |
 | `order` | función, constructor | int | — | por defecto `6` | Orden SOS por banda |
 | `limits` | función, constructor | lista `[lo, hi]` | Hz | por defecto `[12, 20000]` | Rango de análisis |
-| `design.filter_type` | función, constructor | str | — | `'butter'` (por defecto), `'cheby1'`, `'cheby2'`, `'ellip'`, `'bessel'` | Consulta la [Galería de arquitecturas de filtro](/phonometry/es/signals/filters/filter-gallery/) |
+| `design.filter_type` | función, constructor | str | — | `'butter'` (por defecto), `'cheby1'`, `'cheby2'`, `'ellip'`, `'bessel'` | Consulta la [Galería de arquitecturas de filtro](/es/signals/filters/filter-gallery/) |
 | `design.ripple` / `design.attenuation` | función, constructor | float | dB | `ripple` defecto `0.1`; `attenuation` defecto `72.0` | Rizado de banda de paso / atenuación en banda atenuada (cheby/ellip); `cheby2` necesita `attenuation` $\ge 70$ para clase 1, ya que scipy fija su suelo de rizado constante en exactamente este valor |
 | `design.resample` | función, constructor | bool | — | por defecto `True` | Filtra cada banda a una frecuencia diezmada (multitasa) |
 | `response_plot.show` | función, constructor | bool | — | por defecto `False` | Dibuja la respuesta del banco (requiere matplotlib) |
 | `response_plot.file` | función, constructor | str o `None` | — | por defecto `None` | Guarda la gráfica de respuesta del banco en esta ruta |
 | `calibration.factor` | función, constructor | float | — | por defecto `1.0` | Escala la entrada a pascales (consulta la guía de Calibración) |
 | `calibration.dbfs` | función, constructor | bool | — | por defecto `False` | Referencia los niveles a fondo de escala digital en vez de 20 µPa |
-| `block_processing.stateful` / `.steady_ic` | solo constructor | bool | — | por defecto `False` | Estado en streaming; consulta [Procesado por bloques](/phonometry/es/signals/filters/block-processing/) |
+| `block_processing.stateful` / `.steady_ic` | solo constructor | bool | — | por defecto `False` | Estado en streaming; consulta [Procesado por bloques](/es/signals/filters/block-processing/) |
 | `sigbands` | función, `.filter()` | bool | — | por defecto `False` | Devuelve también las señales temporales por banda |
 | `mode` | función, `.filter()` | str | — | `'rms'` (por defecto) o `'peak'` | Estadístico por banda devuelto |
 | `nominal` | función, `.filter()` | bool | — | por defecto `False` | Devuelve etiquetas nominales (p. ej. `1000`) en vez de las frecuencias centrales exactas |
@@ -398,7 +398,7 @@ banda». `'peak'` da $20\log_{10}$ de la mayor muestra en valor absoluto dentro
 de la banda, contra la misma referencia de 20 µPa; es un pico instantáneo de
 banda, no una lectura de retención de pico, está limitado en banda y sin
 ponderar, así que *no* es el pico ponderado C $L_\mathrm{Cpeak}$ de la guía de
-[Niveles](/phonometry/es/signals/levels/levels/), y en señales impulsivas lo
+[Niveles](/es/signals/levels/levels/), y en señales impulsivas lo
 domina la propia resonancia del filtro: pertenece al diagnóstico de transitorios,
 no a la comunicación de niveles. No hay modo `'sum'`: un total entre bandas es
 una suma energética que hace quien llama,
@@ -435,7 +435,7 @@ cumplen con 0,04 dB, 0,08 dB y 0,07 dB. Y un orden mayor cuesta: cada par de pol
 grupo del apartado 5 crecen con el orden), que es la razón por la que el trabajo
 con transitorios y los espectrogramas de ventana corta prefieren órdenes bajos.
 La aritmética del margen en sí es
-[Verificación de clase de filtros](/phonometry/es/signals/filters/filter-compliance/).
+[Verificación de clase de filtros](/es/signals/filters/filter-compliance/).
 
 ## 4. EQ paramétrico (`ParametricEQ`)
 
@@ -514,7 +514,7 @@ plt.show()
 
 Todo lo anterior es diseño. Demostrar que un banco diseñado cumple una clase
 de prestaciones de IEC 61260-1, banda a banda y con su margen en decibelios,
-es [Verificación de clase de filtros](/phonometry/es/signals/filters/filter-compliance/):
+es [Verificación de clase de filtros](/es/signals/filters/filter-compliance/):
 la máscara de aceptación de la Tabla 1, la clase 0 más estricta de la edición
 retirada de 1995, qué aporta una clase en una medición y la ficha de
 conformidad acreditada.
@@ -743,7 +743,7 @@ estos puntos:
 El paquete de transición `pyoctaveband` fija `phonometry>=3.0.0,<4`, así que
 `import pyoctaveband` solo funciona en la 3.x: el código pasa a los nombres de
 arriba cambiando su import, no actualizando ese paquete.
-[Actualizar de la 3.3 a la 4.0](/phonometry/es/start/upgrading/) recoge el
+[Actualizar de la 3.3 a la 4.0](/es/start/upgrading/) recoge el
 resto de lo que cambió en la 4.0, y el
 [registro de cambios](https://github.com/jmrplens/phonometry/blob/main/CHANGELOG.md) lo
 que cambió de la 3.0 a la 3.3 después de PyOctaveBand 2.0.0.
@@ -765,10 +765,10 @@ el filtrado de fase cero.
 Las respuestas comparadas de las cinco arquitecturas, la galería completa de
 octava y tercio de octava y los ejemplos de uso por arquitectura, incluido el
 crossover Linkwitz-Riley, son la [Galería de arquitecturas de
-filtro](/phonometry/es/signals/filters/filter-gallery/). Las máscaras de
+filtro](/es/signals/filters/filter-gallery/). Las máscaras de
 aceptación de clase de la Tabla 1 y su verificación se han trasladado a
 [Verificación de clase de
-filtros](/phonometry/es/signals/filters/filter-compliance/). Cerca de Nyquist,
+filtros](/es/signals/filters/filter-compliance/). Cerca de Nyquist,
 la transformada bilineal deforma el eje de frecuencia y el banco no tiene
 corrección para ello (a diferencia del diseño ajustado `high_accuracy` de
 `WeightingFilter`): mantén el borde superior de banda con margen cómodo
@@ -781,15 +781,15 @@ respecto a Nyquist, o sube `fs`, y confirma el margen con
 
 ## Véase también
 
-- [Galería de arquitecturas de filtro](/phonometry/es/signals/filters/filter-gallery/):
+- [Galería de arquitecturas de filtro](/es/signals/filters/filter-gallery/):
   las cinco arquitecturas comparadas en los bordes de banda, la galería
   completa de respuestas y el uso por arquitectura, con el crossover
   Linkwitz-Riley.
-- [Verificación de clase de filtros (IEC 61260-1)](/phonometry/es/signals/filters/filter-compliance/):
+- [Verificación de clase de filtros (IEC 61260-1)](/es/signals/filters/filter-compliance/):
   la máscara de aceptación de la Tabla 1, la clase 0 y la ficha de
   conformidad de los bancos que se diseñan aquí.
-- Referencia de la API: [`phonometry`](/phonometry/es/reference/api/filters/phonometry/), [`filters.core`](/phonometry/es/reference/api/filters/core/) y [`filters.weighting`](/phonometry/es/reference/api/filters/weighting/).
-- Teoría: [Frecuencias de banda de octava](/phonometry/es/reference/theory/signal-analysis/#frecuencias-de-banda-de-octava-ansi-s111--iec-61260): de dónde salen la rejilla de frecuencias centrales en base 10 y los bordes de banda, y por qué el banco se diseña sobre ellos y no sobre las etiquetas nominales.
+- Referencia de la API: [`phonometry`](/es/reference/api/filters/phonometry/), [`filters.core`](/es/reference/api/filters/core/) y [`filters.weighting`](/es/reference/api/filters/weighting/).
+- Teoría: [Frecuencias de banda de octava](/es/reference/theory/signal-analysis/#frecuencias-de-banda-de-octava-ansi-s111--iec-61260): de dónde salen la rejilla de frecuencias centrales en base 10 y los bordes de banda, y por qué el banco se diseña sobre ellos y no sobre las etiquetas nominales.
 
 </SeeAlso>
 

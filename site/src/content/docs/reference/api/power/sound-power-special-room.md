@@ -62,13 +62,13 @@ ISO 3743-1:2010 Table B.1. Clause 11 prints its own typical upper bounds of
 $\sigma_{R0}$ (Table 5): 5.0 dB at 125 Hz, 3.0 dB at 250 Hz, 2.0 dB from
 500 Hz to 4 kHz, 3.0 dB at 8 kHz and 2.0 dB A-weighted.
 
-The room is qualified by [`check_special_room_reverberation`](/phonometry/reference/api/power/sound-power-special-room/#check_special_room_reverberation) (6.2, 6.3
-and the climate of 6.6), [`check_special_room_surfaces`](/phonometry/reference/api/power/sound-power-special-room/#check_special_room_surfaces) (6.4) and
-[`check_special_room_suitability`](/phonometry/reference/api/power/sound-power-special-room/#check_special_room_suitability) (6.7, the octave-band power of a
+The room is qualified by [`check_special_room_reverberation`](/reference/api/power/sound-power-special-room/#check_special_room_reverberation) (6.2, 6.3
+and the climate of 6.6), [`check_special_room_surfaces`](/reference/api/power/sound-power-special-room/#check_special_room_surfaces) (6.4) and
+[`check_special_room_suitability`](/reference/api/power/sound-power-special-room/#check_special_room_suitability) (6.7, the octave-band power of a
 calibrated reference source determined in the room against its calibration,
 Table 1, an ISO 6926 calibration read at the conditions of the test). The
 number of source locations and microphone positions follows from the survey
-of 9.4 by [`special_room_source_locations`](/phonometry/reference/api/power/sound-power-special-room/#special_room_source_locations) (Table 3), which also reads
+of 9.4 by [`special_room_source_locations`](/reference/api/power/sound-power-special-room/#special_room_source_locations) (Table 3), which also reads
 the spectral character of 9.5.
 
 > Auto-generated from the source docstrings by `scripts/generate_api_docs.py` (`make api-docs`). Do not edit by hand.
@@ -98,7 +98,7 @@ Is this room's reverberation time the one ISO 3743-2:2018 prescribes?
 
 The measured reverberation time shall lie between $0.9\,R\, T_\mathrm{nom}$ and $1.1\,R\,T_\mathrm{nom}$ in every band (0.8
 and 1.2 above 6.3 kHz), with $R$ from Formula (1) or its NOTE
-([`reverberation_parameter`](/phonometry/reference/api/power/sound-power-special-room/#reverberation_parameter)), and $T_\mathrm{nom}$ between
+([`reverberation_parameter`](/reference/api/power/sound-power-special-room/#reverberation_parameter)), and $T_\mathrm{nom}$ between
 0.5 s and 1.0 s. Annex B finds $T_\mathrm{nom}$ "by centring the
 measured values of T (normalized to the reverberation time at 1 000 Hz)
 within the limiting curves" (B.5) and prints no rule for it. The library
@@ -149,13 +149,13 @@ but keeps it out of the verdict, the clause saying "should".
 | `reverberation_temperature_c` | Temperature while the reverberation time was measured, in degrees Celsius. |
 | `source_volume_m3` | Volume of the noise source to be tested, in cubic metres, for the recommendation of clause 5; `None` skips it. |
 
-**Returns:** The verdict, as a [`SpecialRoomReverberationCheck`](/phonometry/reference/api/power/sound-power-special-room/#specialroomreverberationcheck).
+**Returns:** The verdict, as a [`SpecialRoomReverberationCheck`](/reference/api/power/sound-power-special-room/#specialroomreverberationcheck).
 
 **Raises**
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | for reverberation times that are not positive and finite, a length mismatch, the refusals of [`reverberation_parameter`](/phonometry/reference/api/power/sound-power-special-room/#reverberation_parameter), an unknown method, a climate given in part or out of range, or a source volume that is not positive. |
+| ValueError | for reverberation times that are not positive and finite, a length mismatch, the refusals of [`reverberation_parameter`](/reference/api/power/sound-power-special-room/#reverberation_parameter), an unknown method, a climate given in part or out of range, or a source volume that is not positive. |
 | TypeError | if `method` is not a text, or `nominal_reverberation_time_s` or `source_volume_m3` is not a single number, or `frequencies` or `reverberation_time` holds a text or a value that is not a real number. |
 
 ## check_special_room_suitability
@@ -185,24 +185,24 @@ level "under the meteorological conditions which occurred at the time
 and place of the test", and a calibration holds the power under the
 reference conditions, 23.0 °C and 101.325 kPa. The two are compared
 where the room measured: a
-[`ReferenceSourceCalibration`](/phonometry/reference/api/power/reference-sound-source/#referencesourcecalibration) of ISO 6926 is
+[`ReferenceSourceCalibration`](/reference/api/power/reference-sound-source/#referencesourcecalibration) of ISO 6926 is
 read at the temperature and static pressure of the test as
 $L_W - C_2$, with $C_2$ evaluated there by the Annex A
 formula the calibration used (ISO 6926:2016, 8.4), each octave the
 energy sum of its three one-third octave bands, exactly as
-[`sound_power_special_room_comparison`](/phonometry/reference/api/power/sound-power-special-room/#sound_power_special_room_comparison) reads it.
+[`sound_power_special_room_comparison`](/reference/api/power/sound-power-special-room/#sound_power_special_room_comparison) reads it.
 
 **Parameters**
 
 | Name | Description |
 | :--- | :--- |
-| `measured_power_levels` | The reference source's octave-band power levels determined in the room, in decibels: the `sound_power_level` of [`sound_power_special_room`](/phonometry/reference/api/power/sound-power-special-room/#sound_power_special_room), the level at the test, and not its `sound_power_level_at_reference_conditions`, which the Annex E $C_2$ has already carried to the reference conditions: against a calibration read at the conditions of the test, it would count $C_2$ twice. |
-| `calibrated_power_levels` | Its calibrated octave-band levels, in decibels, already under the meteorological conditions of the test; or its [`ReferenceSourceCalibration`](/phonometry/reference/api/power/reference-sound-source/#referencesourcecalibration), which is read there. |
+| `measured_power_levels` | The reference source's octave-band power levels determined in the room, in decibels: the `sound_power_level` of [`sound_power_special_room`](/reference/api/power/sound-power-special-room/#sound_power_special_room), the level at the test, and not its `sound_power_level_at_reference_conditions`, which the Annex E $C_2$ has already carried to the reference conditions: against a calibration read at the conditions of the test, it would count $C_2$ twice. |
+| `calibrated_power_levels` | Its calibrated octave-band levels, in decibels, already under the meteorological conditions of the test; or its [`ReferenceSourceCalibration`](/reference/api/power/reference-sound-source/#referencesourcecalibration), which is read there. |
 | `frequencies` | Octave centres from 125 Hz to 8 kHz, ascending. |
 | `temperature_c` | Air temperature in the room during step 2, in degrees Celsius; it reads a calibration and is otherwise only validated. |
 | `static_pressure_kpa` | Static pressure in the room during step 2, in kilopascals, likewise. |
 
-**Returns:** The verdict, as a [`SpecialRoomSuitabilityCheck`](/phonometry/reference/api/power/sound-power-special-room/#specialroomsuitabilitycheck).
+**Returns:** The verdict, as a [`SpecialRoomSuitabilityCheck`](/reference/api/power/sound-power-special-room/#specialroomsuitabilitycheck).
 
 **Raises**
 
@@ -241,7 +241,7 @@ and without them it is the plain mean of the surfaces.
 | `frequencies` | Octave-band centre frequencies, in hertz. |
 | `surface_areas_m2` | Area of each wall and of the ceiling, in square metres, for the area-weighted mean; `None` for the plain mean. |
 
-**Returns:** The verdict, as a [`SpecialRoomSurfaceCheck`](/phonometry/reference/api/power/sound-power-special-room/#specialroomsurfacecheck).
+**Returns:** The verdict, as a [`SpecialRoomSurfaceCheck`](/reference/api/power/sound-power-special-room/#specialroomsurfacecheck).
 
 **Raises**
 
@@ -361,7 +361,7 @@ Annex F total of the octave bands.
 | `levels` | Measured octave-band levels, in decibels: `(bands,)` for a microphone traverse, `(NM, bands)` for fixed positions, or `(NS, NM, bands)` for several source locations (9.4). |
 | `frequencies` | Nominal octave centres from 63 Hz to 8 kHz, ascending (Table F.1; 63 Hz under its footnote). |
 | `volume` | Volume of the test room, in cubic metres. |
-| `nominal_reverberation_time_s` | $T_\mathrm{nom}$ of the room (6.3), in seconds, as [`check_special_room_reverberation`](/phonometry/reference/api/power/sound-power-special-room/#check_special_room_reverberation) finds it. |
+| `nominal_reverberation_time_s` | $T_\mathrm{nom}$ of the room (6.3), in seconds, as [`check_special_room_reverberation`](/reference/api/power/sound-power-special-room/#check_special_room_reverberation) finds it. |
 | `background_levels` | Background levels, `(NM, bands)` or one `(bands,)` spectrum for every position, in decibels; `None` applies no correction, warns, and leaves `background_requirement_met` `False`. |
 | `a_weighted_levels` | The A-weighted levels measured with the source, one per position (`(NM,)` or `(NS, NM)`) or one traverse level, in decibels; `None` leaves the direct A-weighted level `NaN`. |
 | `a_weighted_background_levels` | The A-weighted background, one level or one per position, in decibels. |
@@ -370,7 +370,7 @@ Annex F total of the octave bands.
 | `sigma_omc_db` | Operating-and-mounting standard deviation (11.2), in decibels; `None` leaves the total and expanded uncertainty `NaN`. |
 | `coverage_factor` | `k` of Formula (13), 2 by default. |
 
-**Returns:** [`SpecialRoomSoundPowerResult`](/phonometry/reference/api/power/sound-power-special-room/#specialroomsoundpowerresult) with `method='direct'`.
+**Returns:** [`SpecialRoomSoundPowerResult`](/reference/api/power/sound-power-special-room/#specialroomsoundpowerresult) with `method='direct'`.
 
 **Raises**
 
@@ -420,16 +420,16 @@ needed, and the 300 m³ ceiling of 6.2 does not apply (NOTE).
 | :--- | :--- |
 | `levels` | Levels of the source under test, `(bands,)`, `(NM, bands)` or `(NS, NM, bands)`, in decibels. |
 | `reference_levels` | Levels of the reference source, `(NMr, bands)`, at least six positions (10.3), or one traverse level `(bands,)`. |
-| `reference_sound_power_levels` | The reference source's calibrated octave-band power level $L_{W\mathrm{r}}$, `(bands,)`, in decibels, under the meteorological conditions of the test, since Formula (10) gives $L_{W\mathrm{e}}$ there (Annex E); or the [`ReferenceSourceCalibration`](/phonometry/reference/api/power/reference-sound-source/#referencesourcecalibration) of ISO 6926, whose one-third octave bands are summed into the octaves at `frequencies` and carried from the reference conditions to those of the test by its own `C2` (ISO 6926:2016, 8.4). |
+| `reference_sound_power_levels` | The reference source's calibrated octave-band power level $L_{W\mathrm{r}}$, `(bands,)`, in decibels, under the meteorological conditions of the test, since Formula (10) gives $L_{W\mathrm{e}}$ there (Annex E); or the [`ReferenceSourceCalibration`](/reference/api/power/reference-sound-source/#referencesourcecalibration) of ISO 6926, whose one-third octave bands are summed into the octaves at `frequencies` and carried from the reference conditions to those of the test by its own `C2` (ISO 6926:2016, 8.4). |
 | `frequencies` | Nominal octave centres from 63 Hz to 8 kHz. |
-| `background_levels` | Background for the source under test, as in [`sound_power_special_room`](/phonometry/reference/api/power/sound-power-special-room/#sound_power_special_room). |
+| `background_levels` | Background for the source under test, as in [`sound_power_special_room`](/reference/api/power/sound-power-special-room/#sound_power_special_room). |
 | `reference_background_levels` | Background at the reference source's positions; `None` reuses `background_levels` when it fits them. |
 | `temperature_c` | Air temperature at the test, in degrees Celsius. |
 | `static_pressure_kpa` | Static pressure at the test, in kilopascals. |
 | `sigma_omc_db` | Operating-and-mounting standard deviation, in decibels. |
 | `coverage_factor` | `k` of Formula (13), 2 by default. |
 
-**Returns:** [`SpecialRoomSoundPowerResult`](/phonometry/reference/api/power/sound-power-special-room/#specialroomsoundpowerresult) with `method='comparison'`.
+**Returns:** [`SpecialRoomSoundPowerResult`](/reference/api/power/sound-power-special-room/#specialroomsoundpowerresult) with `method='comparison'`.
 
 **Raises**
 
@@ -534,7 +534,7 @@ shall be reported.
 | `n_microphone_positions` | The column of Table 3 to read, 3, 6 (default) or 12. |
 | `a_weighted_levels` | The six A-weighted levels, `(n,)`, for the A-weighted row; `None` leaves it unevaluated. |
 
-**Returns:** The [`SourceLocationPlan`](/phonometry/reference/api/power/sound-power-hard-walled/#sourcelocationplan).
+**Returns:** The [`SourceLocationPlan`](/reference/api/power/sound-power-hard-walled/#sourcelocationplan).
 
 **Raises**
 
@@ -857,7 +857,7 @@ as 9.8 asks.
 | Name | Description |
 | :--- | :--- |
 | `path` | Destination path of the PDF file. |
-| `metadata` | Optional [`ReportMetadata`](/phonometry/reference/api/building/insulation/#reportmetadata) for the header, the footer identity and, via `requirement`, a declared A-weighted limit the boxed level is checked against (lower is better). |
+| `metadata` | Optional [`ReportMetadata`](/reference/api/building/insulation/#reportmetadata) for the header, the footer identity and, via `requirement`, a declared A-weighted limit the boxed level is checked against (lower is better). |
 | `engine` | Rendering back end; only `"reportlab"` is supported. |
 | `verbose` | When `True` the table adds the per-band shift of the Table 4 background corrections. |
 | `language` | Sheet language: `"en"` (default) or `"es"`. |

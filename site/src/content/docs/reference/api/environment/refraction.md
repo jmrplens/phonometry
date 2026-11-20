@@ -15,15 +15,15 @@ predicts that refraction with two complementary models, clean-room from
 Salomons, *Computational Atmospheric Acoustics* (Springer, 2001) and
 Attenborough & Van Renterghem, *Predicting Outdoor Sound* (2e, CRC, 2021,
 Ch. 11), and it is the refracting-atmosphere counterpart of the range-independent
-ocean solvers in [`phonometry.underwater.propagation.numerical`](/phonometry/reference/api/underwater/numerical/):
+ocean solvers in [`phonometry.underwater.propagation.numerical`](/reference/api/underwater/numerical/):
 
-* [`atmospheric_ray_paths`](/phonometry/reference/api/environment/refraction/#atmospheric_ray_paths): geometrical acoustics. Integrates Snell's law
+* [`atmospheric_ray_paths`](/reference/api/environment/refraction/#atmospheric_ray_paths): geometrical acoustics. Integrates Snell's law
   for sound rays (Salomons Eq. (4.3)) with a fixed-step Runge-Kutta scheme,
   returning the curved ray paths, their turning points, travel times and ground
   reflections. It shares its ray core with the ocean `ray_trace`: the
   atmospheric version reflects at the ground ($z = 0$) instead of the sea
   surface and marches an upward-open half space.
-* [`atmospheric_parabolic_equation`](/phonometry/reference/api/environment/refraction/#atmospheric_parabolic_equation): the Green's Function Parabolic
+* [`atmospheric_parabolic_equation`](/reference/api/environment/refraction/#atmospheric_parabolic_equation): the Green's Function Parabolic
   Equation (GFPE, Salomons Appendix H). Marches the one-way wave equation in
   range with the split-step Fourier algorithm (the same range-marching family
   as the ocean `parabolic_equation`), a Gaussian starter (Salomons
@@ -34,16 +34,16 @@ ocean solvers in [`phonometry.underwater.propagation.numerical`](/phonometry/ref
   the relative sound level (dB re free field) over the range-height plane.
 
 For a linear effective sound-speed profile the ray paths are exact circular
-arcs of radius [`ray_curvature_radius`](/phonometry/reference/api/environment/refraction/#ray_curvature_radius), and an upward-refracting linear
-profile has a closed-form [`shadow_zone_distance`](/phonometry/reference/api/environment/refraction/#shadow_zone_distance); both anchor the ray
+arcs of radius [`ray_curvature_radius`](/reference/api/environment/refraction/#ray_curvature_radius), and an upward-refracting linear
+profile has a closed-form [`shadow_zone_distance`](/reference/api/environment/refraction/#shadow_zone_distance); both anchor the ray
 model. The PE is anchored against the exact spherical-wave ground effect
-([`phonometry.environment.ground_effect`](/phonometry/reference/api/environment/ground-barriers/#ground_effect)) in the homogeneous limit
+([`phonometry.environment.ground_effect`](/reference/api/environment/ground-barriers/#ground_effect)) in the homogeneous limit
 (gradient zero), which it reproduces to a few tenths of a dB on the default
 grid (finer `height_step_m` converges it further).
 
 The ground impedance is taken in the $\mathrm{e}^{-i \omega t}$ convention of
 Salomons (a passive ground has $\operatorname{Im}(Z) > 0$), shared with
-[`phonometry.environment.propagation.ground_barriers`](/phonometry/reference/api/environment/ground-barriers/). The porous models of
+[`phonometry.environment.propagation.ground_barriers`](/reference/api/environment/ground-barriers/). The porous models of
 `phonometry.materials` work in the opposite $\mathrm{e}^{+j \omega t}$
 convention ($\operatorname{Im}(Z) < 0$), so an impedance derived from
 them (`flow_resistivity_pa_s_m2=` or a
@@ -92,11 +92,11 @@ The relative sound level re the free field is
 $\Delta L(z, r) = 20 \log_{10}(|p(z, r)| \, R_1)$ with $R_1$ the
 direct source-receiver distance (Salomons Eq. (3.6)); in a homogeneous
 atmosphere it reproduces the spherical-wave ground effect of
-[`ground_effect`](/phonometry/reference/api/environment/ground-barriers/#ground_effect).
+[`ground_effect`](/reference/api/environment/ground-barriers/#ground_effect).
 
 The ground surface impedance is either supplied through `impedance` (a
 normalized complex value/array, or a
-[`PorousMediumResult`](/phonometry/reference/api/materials/porous/#porousmediumresult)) or derived from an
+[`PorousMediumResult`](/reference/api/materials/porous/#porousmediumresult)) or derived from an
 effective `flow_resistivity_pa_s_m2` (Pa s/m2) via the `model` porous model.
 Exactly one of the two must be given. A plain `impedance` value is taken
 in the $\mathrm{e}^{-i \omega t}$ convention ($\operatorname{Im}(Z) > 0$
@@ -118,9 +118,9 @@ convention.
 | `max_height_m` | Top of the output height grid, in metres (the receiver region of interest; an absorbing layer is added above it). |
 | `range_step` | Range marching step `dr`, in metres. Default (`None`): one wavelength. |
 | `height_step_m` | Vertical grid spacing `dz`, in metres. Default (`None`): a tenth of a wavelength (Salomons Sec. G.2). |
-| `fluid` | The medium, a [`Fluid`](/phonometry/reference/api/fluids/fluids/#fluid) (Default: [`ABSORBER_AIR`](/phonometry/reference/api/materials/porous/#absorber_air), dry air at 20 degC at textbook values). Pass a computed one, such as `fluids.air(temperature_c=30.0, relative_humidity_percent=70.0)`, to work in the air of the room. |
+| `fluid` | The medium, a [`Fluid`](/reference/api/fluids/fluids/#fluid) (Default: [`ABSORBER_AIR`](/reference/api/materials/porous/#absorber_air), dry air at 20 degC at textbook values). Pass a computed one, such as `fluids.air(temperature_c=30.0, relative_humidity_percent=70.0)`, to work in the air of the room. |
 
-**Returns:** An [`AtmosphericPEResult`](/phonometry/reference/api/environment/refraction/#atmosphericperesult).
+**Returns:** An [`AtmosphericPEResult`](/reference/api/environment/refraction/#atmosphericperesult).
 
 **Raises**
 
@@ -152,7 +152,7 @@ slowness $\zeta = \sin(\gamma)/c$; with the range-invariant
 $\xi = \cos(\gamma_0)/c(z_\mathrm{s})$ the equations are
 $dz/dr = \zeta/\xi$ and
 $d\zeta/dr = -(dc/dz)/(c^3 \xi)$, the same ray core as the ocean
-[`ray_trace`](/phonometry/reference/api/underwater/numerical/#ray_trace) (with a ground
+[`ray_trace`](/reference/api/underwater/numerical/#ray_trace) (with a ground
 reflection in place of the sea surface). The travel time is a third state of
 the same Runge-Kutta step, $dt/dr = 1/(\xi c^2)$, so it is integrated
 with the very stages that place the ray rather than run over the finished
@@ -162,13 +162,13 @@ path; a ground reflection is instantaneous and leaves it continuous.
 
 | Name | Description |
 | :--- | :--- |
-| `profile` | The effective sound-speed profile (see [`linear_sound_speed_profile`](/phonometry/reference/api/environment/refraction/#linear_sound_speed_profile) / [`log_linear_sound_speed_profile`](/phonometry/reference/api/environment/refraction/#log_linear_sound_speed_profile)). |
+| `profile` | The effective sound-speed profile (see [`linear_sound_speed_profile`](/reference/api/environment/refraction/#linear_sound_speed_profile) / [`log_linear_sound_speed_profile`](/reference/api/environment/refraction/#log_linear_sound_speed_profile)). |
 | `source_height_m` | Source height `zs`, in metres (>= 0). |
 | `launch_angles_deg` | Launch angles from the horizontal, in degrees (positive upward), within `(-90, 90)`. |
 | `max_range` | Maximum horizontal range to trace, in metres. |
 | `n_steps` | Number of range steps per ray (>= 2). |
 
-**Returns:** An [`AtmosphericRayResult`](/phonometry/reference/api/environment/refraction/#atmosphericrayresult).
+**Returns:** An [`AtmosphericRayResult`](/reference/api/environment/refraction/#atmosphericrayresult).
 
 **Raises**
 
@@ -385,7 +385,7 @@ and creates an acoustic shadow near the ground (Salomons Sec. 4.2).
 | `ground_speed_of_sound` | Sound speed `c0` at the ground, in m/s. |
 | `max_height_m` | Top of the sampled profile, in metres. |
 
-**Returns:** A two-point [`EffectiveSoundSpeedProfile`](/phonometry/reference/api/environment/refraction/#effectivesoundspeedprofile).
+**Returns:** A two-point [`EffectiveSoundSpeedProfile`](/reference/api/environment/refraction/#effectivesoundspeedprofile).
 
 **Raises**
 
@@ -426,7 +426,7 @@ near the ground is resolved by sampling the height grid logarithmically.
 | `max_height_m` | Top of the sampled profile, in metres. |
 | `n_points` | Number of samples of the height grid (>= 2). |
 
-**Returns:** An [`EffectiveSoundSpeedProfile`](/phonometry/reference/api/environment/refraction/#effectivesoundspeedprofile).
+**Returns:** An [`EffectiveSoundSpeedProfile`](/reference/api/environment/refraction/#effectivesoundspeedprofile).
 
 **Raises**
 

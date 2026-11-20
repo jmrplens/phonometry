@@ -1,6 +1,6 @@
 <!-- Written by `make llms` from site/src/content/docs/materials/surfaces/road-absorption.mdx: edit that page and its Spanish twin, then run `make llms`. -->
 
-← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/materials/surfaces/road-absorption/
+← [Documentation index](../../README.md) · Published at https://phonometry.dev/materials/surfaces/road-absorption/
 
 # In-situ Road-Surface Absorption
 
@@ -718,9 +718,9 @@ few positions.
   for materials that can be brought indoors.
 - [Outdoor Sound Propagation](../../environment/propagation/outdoor-propagation.md): where
   the absorption of the ground surface enters the propagation models.
-- API reference: [`materials.surfaces.road_absorption`](https://docs.jmrp.io/phonometry/reference/api/materials/road-absorption/).
+- API reference: [`materials.surfaces.road_absorption`](https://phonometry.dev/reference/api/materials/road-absorption/).
 - Theory: [In-situ road surface absorption](../../reference/theory/materials-surfaces.md#in-situ-road-surface-absorption-iso-13472-1-iso-13472-2): the ISO 13472 subtraction and the geometry that makes an in-situ measurement possible at all.
-- [Published catalogues](https://docs.jmrp.io/phonometry/reference/catalogues/ground-surfaces/): the
+- [Published catalogues](https://phonometry.dev/reference/catalogues/ground-surfaces/): the
   flow resistivity and the model parameters the books print for grass, snow,
   asphalt and the rest of the ground surfaces.
 

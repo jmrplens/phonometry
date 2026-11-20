@@ -1,6 +1,6 @@
 <!-- Written by `make llms` from site/src/content/docs/start/getting-started.mdx: edit that page and its Spanish twin, then run `make llms`. -->
 
-← [Documentation index](../README.md) · Published at https://docs.jmrp.io/phonometry/start/getting-started/
+← [Documentation index](../README.md) · Published at https://phonometry.dev/start/getting-started/
 
 # Getting Started
 
@@ -666,5 +666,5 @@ format, a `.report()` method that renders the normative PDF fiche.
 - [Calibration and dBFS](../signals/metrology/calibration.md): get real-world SPL values
 - [Why phonometry](why-phonometry.md): the conformance-first design philosophy
 - [Conformance report](../CONFORMANCE.md): the expected and computed value of all 1899 checks
-- [API Reference](https://docs.jmrp.io/phonometry/reference/api/): every parameter of every function
+- [API Reference](https://phonometry.dev/reference/api/): every parameter of every function
 - [Bibliography](../reference/bibliography.md): every work the guides cite, with the pages that cite it and its link where it has one

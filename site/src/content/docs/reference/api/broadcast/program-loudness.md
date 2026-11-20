@@ -125,9 +125,9 @@ normalises to -23.0 LUFS.
 
 | Name | Description |
 | :--- | :--- |
-| `x` | Input signal (1D mono or 2D `[channels, samples]`), full-scale units (1.0 = 0 dBFS). Accepts a [`phonometry.io.Signal`](/phonometry/reference/api/io/io/#signal) for its rate; a calibration factor it carries is deliberately **not** applied, because this quantity is counted from a full-scale sine rather than from 20 uPa. See [`k_weighting`](/phonometry/reference/api/broadcast/program-loudness/#k_weighting) for the reasoning. |
-| `fs` | Sample rate, Hz. Required for a bare array; a [`Signal`](/phonometry/reference/api/io/io/#signal) brings its own, and an explicit value that disagrees with it raises instead of silently winning. |
-| `weights` | Per-channel weights `Gi`, or `None` for the Table 3 defaults by channel count (see [`DEFAULT_CHANNEL_WEIGHTS`](/phonometry/reference/api/broadcast/program-loudness/#default_channel_weights) and [`channel_weight`](/phonometry/reference/api/broadcast/program-loudness/#channel_weight)). |
+| `x` | Input signal (1D mono or 2D `[channels, samples]`), full-scale units (1.0 = 0 dBFS). Accepts a [`phonometry.io.Signal`](/reference/api/io/io/#signal) for its rate; a calibration factor it carries is deliberately **not** applied, because this quantity is counted from a full-scale sine rather than from 20 uPa. See [`k_weighting`](/reference/api/broadcast/program-loudness/#k_weighting) for the reasoning. |
+| `fs` | Sample rate, Hz. Required for a bare array; a [`Signal`](/reference/api/io/io/#signal) brings its own, and an explicit value that disagrees with it raises instead of silently winning. |
+| `weights` | Per-channel weights `Gi`, or `None` for the Table 3 defaults by channel count (see [`DEFAULT_CHANNEL_WEIGHTS`](/reference/api/broadcast/program-loudness/#default_channel_weights) and [`channel_weight`](/reference/api/broadcast/program-loudness/#channel_weight)). |
 
 **Returns:** The programme loudness, LUFS (`-inf` when the signal is shorter than one gating block or entirely below the absolute gate).
 
@@ -156,8 +156,8 @@ low-frequency B-curve high-pass. Their concatenation is the K-weighting.
 
 | Name | Description |
 | :--- | :--- |
-| `x` | Input signal (1D or 2D `[channels, samples]`), linear units. Accepts a [`phonometry.io.Signal`](/phonometry/reference/api/io/io/#signal) for its rate; a calibration factor it carries is deliberately **not** applied. This family is referenced to digital full scale, not to 20 uPa: LUFS, LU and dBTP are all counted from a full-scale sine, so scaling the samples to pascals would move every one of them by `20 lg(factor)` and still call them by their full-scale names. |
-| `fs` | Sample rate, Hz. Required for a bare array; a [`Signal`](/phonometry/reference/api/io/io/#signal) brings its own, and an explicit value that disagrees with it raises instead of silently winning. |
+| `x` | Input signal (1D or 2D `[channels, samples]`), linear units. Accepts a [`phonometry.io.Signal`](/reference/api/io/io/#signal) for its rate; a calibration factor it carries is deliberately **not** applied. This family is referenced to digital full scale, not to 20 uPa: LUFS, LU and dBTP are all counted from a full-scale sine, so scaling the samples to pascals would move every one of them by `20 lg(factor)` and still call them by their full-scale names. |
+| `fs` | Sample rate, Hz. Required for a bare array; a [`Signal`](/reference/api/io/io/#signal) brings its own, and an explicit value that disagrees with it raises instead of silently winning. |
 
 **Returns:** The K-weighted signal, same shape as the input.
 
@@ -210,9 +210,9 @@ K-weighting magnitude frequency response (BS.1770-5 Annex 1, Tables 1-2).
 
 Evaluates the two-stage K-weighting pre-filter as a transfer function and
 returns its magnitude in dB. The biquad coefficients come from
-[`k_weighting_coefficients`](/phonometry/reference/api/broadcast/program-loudness/#k_weighting_coefficients) (the verbatim 48 kHz tables, or the
+[`k_weighting_coefficients`](/reference/api/broadcast/program-loudness/#k_weighting_coefficients) (the verbatim 48 kHz tables, or the
 analog-prototype redesign at other rates), so the response is the exact
-frequency-domain counterpart of the filter [`k_weighting`](/phonometry/reference/api/broadcast/program-loudness/#k_weighting) applies; no
+frequency-domain counterpart of the filter [`k_weighting`](/reference/api/broadcast/program-loudness/#k_weighting) applies; no
 coefficients are re-derived here. Each stage is evaluated with
 `scipy.signal.freqz` and their magnitudes summed in dB.
 
@@ -225,11 +225,11 @@ RLB high-pass; near 1 kHz it passes through the ~0.69 dB gain that the
 
 | Name | Description |
 | :--- | :--- |
-| `fs` | Sample rate the response is evaluated at, Hz (16 kHz or higher, as [`k_weighting_coefficients`](/phonometry/reference/api/broadcast/program-loudness/#k_weighting_coefficients) requires; default 48 kHz). |
+| `fs` | Sample rate the response is evaluated at, Hz (16 kHz or higher, as [`k_weighting_coefficients`](/reference/api/broadcast/program-loudness/#k_weighting_coefficients) requires; default 48 kHz). |
 | `frequencies` | Explicit frequency grid, in Hz (each in the half-open interval `(0, fs/2]`); `None` (the default) uses `n` log-spaced points from 10 Hz to the Nyquist rate. |
 | `n` | Number of log-spaced points when `frequencies` is `None` (default 512); ignored otherwise. |
 
-**Returns:** A frozen [`KWeightingResponse`](/phonometry/reference/api/broadcast/program-loudness/#kweightingresponse).
+**Returns:** A frozen [`KWeightingResponse`](/reference/api/broadcast/program-loudness/#kweightingresponse).
 
 **Raises**
 
@@ -256,10 +256,10 @@ The two-stage K-weighting of Annex 1 evaluated as a transfer function: the
 spherical-head high-frequency shelf (stage 1, about +4 dB above 2 kHz), the
 RLB high-pass (stage 2) and their combination, each as a magnitude in dB
 over a shared logarithmic frequency grid. It is the frequency-domain view of
-the same biquads that [`k_weighting`](/phonometry/reference/api/broadcast/program-loudness/#k_weighting) applies in the time domain, built
-from the tabulated (or redesigned) coefficients of [`k_weighting_coefficients`](/phonometry/reference/api/broadcast/program-loudness/#k_weighting_coefficients).
+the same biquads that [`k_weighting`](/reference/api/broadcast/program-loudness/#k_weighting) applies in the time domain, built
+from the tabulated (or redesigned) coefficients of [`k_weighting_coefficients`](/reference/api/broadcast/program-loudness/#k_weighting_coefficients).
 
-Build it with [`k_weighting_response`](/phonometry/reference/api/broadcast/program-loudness/#k_weighting_response); the frozen instance then exposes
+Build it with [`k_weighting_response`](/reference/api/broadcast/program-loudness/#k_weighting_response); the frozen instance then exposes
 `plot` (the magnitude response versus frequency).
 
 **Attributes**
@@ -363,14 +363,14 @@ finished programme:
 
 | Name | Description |
 | :--- | :--- |
-| `x` | Input signal (1D mono or 2D `[channels, samples]`), full-scale units (1.0 = 0 dBFS). Accepts a [`phonometry.io.Signal`](/phonometry/reference/api/io/io/#signal) for its rate; a calibration factor it carries is deliberately **not** applied, because this quantity is counted from a full-scale sine rather than from 20 uPa. See [`k_weighting`](/phonometry/reference/api/broadcast/program-loudness/#k_weighting) for the reasoning. |
-| `fs` | Sample rate, Hz. Required for a bare array; a [`Signal`](/phonometry/reference/api/io/io/#signal) brings its own, and an explicit value that disagrees with it raises instead of silently winning. |
-| `weights` | Per-channel weights `Gi`, or `None` for the Table 3 defaults by channel count (see [`DEFAULT_CHANNEL_WEIGHTS`](/phonometry/reference/api/broadcast/program-loudness/#default_channel_weights); for other layouts derive the weights with [`channel_weight`](/phonometry/reference/api/broadcast/program-loudness/#channel_weight)). |
+| `x` | Input signal (1D mono or 2D `[channels, samples]`), full-scale units (1.0 = 0 dBFS). Accepts a [`phonometry.io.Signal`](/reference/api/io/io/#signal) for its rate; a calibration factor it carries is deliberately **not** applied, because this quantity is counted from a full-scale sine rather than from 20 uPa. See [`k_weighting`](/reference/api/broadcast/program-loudness/#k_weighting) for the reasoning. |
+| `fs` | Sample rate, Hz. Required for a bare array; a [`Signal`](/reference/api/io/io/#signal) brings its own, and an explicit value that disagrees with it raises instead of silently winning. |
+| `weights` | Per-channel weights `Gi`, or `None` for the Table 3 defaults by channel count (see [`DEFAULT_CHANNEL_WEIGHTS`](/reference/api/broadcast/program-loudness/#default_channel_weights); for other layouts derive the weights with [`channel_weight`](/reference/api/broadcast/program-loudness/#channel_weight)). |
 | `momentary_step` | Hop of the momentary series, s (default 10 ms, a 100 Hz update rate; EBU Tech 3341 requires at least 10 Hz). |
 | `short_term_step` | Hop of the short-term series, s (default 100 ms, the 10 Hz minimum rate that Tech 3342 requires for the LRA input). |
 | `oversample` | True-peak oversampling factor; `None` picks the smallest factor reaching 192 kHz (4 at 48 kHz). |
 
-**Returns:** The frozen [`ProgramLoudnessResult`](/phonometry/reference/api/broadcast/program-loudness/#programloudnessresult).
+**Returns:** The frozen [`ProgramLoudnessResult`](/reference/api/broadcast/program-loudness/#programloudnessresult).
 
 **Raises**
 
@@ -474,7 +474,7 @@ PASS/FAIL verdict row and a footer with the fixed disclaimer.
 | Name | Description |
 | :--- | :--- |
 | `path` | Destination path of the PDF file. |
-| `metadata` | Optional [`ReportMetadata`](/phonometry/reference/api/building/insulation/#reportmetadata); `None` produces a measurement fiche (compliance table, plot and verdict only). A supplied `requirement` is read as the target programme loudness in LUFS (defaulting to the EBU R 128 -23.0 LUFS). |
+| `metadata` | Optional [`ReportMetadata`](/reference/api/building/insulation/#reportmetadata); `None` produces a measurement fiche (compliance table, plot and verdict only). A supplied `requirement` is read as the target programme loudness in LUFS (defaulting to the EBU R 128 -23.0 LUFS). |
 | `engine` | Rendering back end; only `"reportlab"` is supported. |
 | `verbose` | Accepted for a uniform signature; it has no effect on the single-layout programme-loudness fiche. |
 | `language` | Fiche language: `"en"` (default, English) or `"es"` (Spanish, with a comma decimal separator). |
@@ -505,7 +505,7 @@ True-peak level in dBTP (BS.1770-5 Annex 2).
 Estimates the inter-sample peak by oversampling the signal to at least
 192 kHz with a polyphase FIR interpolator before taking the absolute
 maximum (the same machinery behind
-[`phonometry.signals.levels.lc_peak`](/phonometry/reference/api/signals/levels/#lc_peak)). At 48 kHz this is the
+[`phonometry.signals.levels.lc_peak`](/reference/api/signals/levels/#lc_peak)). At 48 kHz this is the
 4-times oversampling of the Annex 2 block diagram; higher input rates
 need proportionately less. The initial 12.04 dB attenuation of the
 Annex 2 integer pipeline is unnecessary in floating point and omitted.
@@ -517,8 +517,8 @@ and inter-sample peaks above full scale give positive values.
 
 | Name | Description |
 | :--- | :--- |
-| `x` | Input signal (1D or 2D `[channels, samples]`), full-scale units (1.0 = 0 dBFS). Accepts a [`phonometry.io.Signal`](/phonometry/reference/api/io/io/#signal) for its rate; a calibration factor it carries is deliberately **not** applied, because this quantity is counted from a full-scale sine rather than from 20 uPa. See [`k_weighting`](/phonometry/reference/api/broadcast/program-loudness/#k_weighting) for the reasoning. |
-| `fs` | Sample rate, Hz. Required for a bare array; a [`Signal`](/phonometry/reference/api/io/io/#signal) brings its own, and an explicit value that disagrees with it raises instead of silently winning. |
+| `x` | Input signal (1D or 2D `[channels, samples]`), full-scale units (1.0 = 0 dBFS). Accepts a [`phonometry.io.Signal`](/reference/api/io/io/#signal) for its rate; a calibration factor it carries is deliberately **not** applied, because this quantity is counted from a full-scale sine rather than from 20 uPa. See [`k_weighting`](/reference/api/broadcast/program-loudness/#k_weighting) for the reasoning. |
+| `fs` | Sample rate, Hz. Required for a bare array; a [`Signal`](/reference/api/io/io/#signal) brings its own, and an explicit value that disagrees with it raises instead of silently winning. |
 | `oversample` | Integer oversampling factor >= 1, or `None` (the default) for the smallest factor whose oversampled rate reaches 192 kHz (4 at 48 kHz, 2 at 96 kHz, 1 at 192 kHz and above, matching the Annex 2 guidance that higher input rates need proportionately less oversampling). |
 
 **Returns:** The true-peak level in dBTP: a float for 1D input, an array of shape `(channels,)` for 2D input.

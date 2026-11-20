@@ -84,7 +84,7 @@ campaña de hincado.
 Los niveles van en dB re 1 µPa (presión acústica), dB re 1 µPa²·s (exposición
 sonora) o, para los dos grupos de carnívoros en aire, dB re 20 µPa y
 dB re (20 µPa)²·s. Las convenciones de referencia submarinas están en
-[Acústica submarina](/phonometry/es/underwater/underwater-acoustics/).
+[Acústica submarina](/es/underwater/underwater-acoustics/).
 
 ## Grupos auditivos (y por qué chocan los nombres)
 
@@ -215,7 +215,7 @@ $TS = -29{,}0$ dB re m² y su propio umbral de audición en lugar de un umbral d
 detección, la figura de mérito limitada por audición es
 $(SL + TS - HT)/2 = 59{,}0$ dB re m²: la máxima pérdida *de ida* que puede
 permitirse. La
-[ecuación del sonar](/phonometry/es/underwater/underwater-propagation/#ecuacion-del-sonar)
+[ecuación del sonar](/es/underwater/underwater-propagation/#ecuacion-del-sonar)
 de la que salen esos términos, y `detection_range`, convierten esa figura en una
 distancia.
 
@@ -316,7 +316,7 @@ implementa 1,36 (recalcular $C$ como el máximo de $W$ da 1,3643) y conserva el
 dígito impreso en `c_db_as_printed`. La Tabla 7 de Southall arrastra cuatro
 erratas de nivel de pico corregidas por la fe de erratas de la propia revista, y
 los valores corregidos son los implementados. Ambas quedan registradas en
-[Erratas encontradas en fuentes publicadas](/phonometry/es/reference/errata/).
+[Erratas encontradas en fuentes publicadas](/es/reference/errata/).
 :::
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/marine_mammal_exposure_functions.svg" alt="Arriba a la izquierda, la función de exposición E(f) de los cinco grupos auditivos en agua frente a la frecuencia, cada una con su mínimo marcado como el inicio de TTS ponderado de ese grupo; arriba a la derecha, la función de ponderación de los cetáceos de baja frecuencia bajo las guías de 2024 y de 2018, que muestra la falda de alta frecuencia más pronunciada que produce b igual a cinco; abajo, los criterios de inicio impulsivos de los cinco grupos como barras agrupadas, con la exposición sonora ponderada y el pico sin ponderar uno junto a otro" width="92%" />
@@ -430,7 +430,7 @@ golpe registrado al veredicto:
 1. `strike_sel_spectrum` reparte la exposición sonora de un golpe del registro
    en bandas de fracción de octava (las energías por banda vuelven a sumar el
    `single_strike_sel` de banda ancha de
-   [Acústica submarina](/phonometry/es/underwater/underwater-acoustics/#3-sonido-del-hincado-de-pilotes-iso-18406), por
+   [Acústica submarina](/es/underwater/underwater-acoustics/#3-sonido-del-hincado-de-pilotes-iso-18406), por
    Parseval);
 2. `weighted_exposure` aplica $W(f)$ banda a banda, suma la energía ponderada,
    la acumula sobre el número de golpes (el $+10\log_{10} N$ de la ISO 18406) y
@@ -653,7 +653,7 @@ Tampoco comprueba que el espectro aportado abarque la banda de paso del grupo:
 un registro que se queda corto respecto de $f_2$ se pondera tal cual y
 subestima la exposición. La propagación de la fuente al receptor pertenece a
 [Propagación submarina del
-sonido](/phonometry/es/underwater/underwater-propagation/).
+sonido](/es/underwater/underwater-propagation/).
 </ScopeClaim>
 </Scope>
 
@@ -661,12 +661,12 @@ sonido](/phonometry/es/underwater/underwater-propagation/).
 
 ## Véase también
 
-- [Acústica submarina: ruido radiado e hincado de pilotes](/phonometry/es/underwater/underwater-acoustics/):
+- [Acústica submarina: ruido radiado e hincado de pilotes](/es/underwater/underwater-acoustics/):
   los niveles de referencia de la ISO 18405 y la exposición por hincado de la
   ISO 18406 que alimentan esta página.
-- [Propagación submarina del sonido](/phonometry/es/underwater/underwater-propagation/):
+- [Propagación submarina del sonido](/es/underwater/underwater-propagation/):
   la pérdida de propagación y la maquinaria de figura de mérito que convierte un
   criterio en una distancia.
-- Referencia de la API: [`underwater.bioacoustics.weighting`](/phonometry/es/reference/api/underwater/weighting/) y [`underwater.bioacoustics.audiograms`](/phonometry/es/reference/api/underwater/audiograms/).
+- Referencia de la API: [`underwater.bioacoustics.weighting`](/es/reference/api/underwater/weighting/) y [`underwater.bioacoustics.audiograms`](/es/reference/api/underwater/audiograms/).
 
 </SeeAlso>

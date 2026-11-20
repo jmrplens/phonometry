@@ -33,7 +33,7 @@ Procedures* (4th ed., 2010):
   $B_\mathrm{r}$
   becomes $\varepsilon_\mathrm{b} \approx -(B_\mathrm{e}/B_\mathrm{r})^2/3$ (Eq. 8.141),
   exposed here as
-  [`resolution_bias_error`](/phonometry/reference/api/signals/spectra/#resolution_bias_error);
+  [`resolution_bias_error`](/reference/api/signals/spectra/#resolution_bias_error);
 * the **coherent output spectrum**
   $G_{vv} = \gamma^2_{xy} G_{yy}$ and the noise output
   spectrum $G_{nn} = (1 - \gamma^2_{xy}) G_{yy}$ of the
@@ -45,8 +45,8 @@ Procedures* (4th ed., 2010):
 The same Welch core (Hann taper and 50% overlap by default, `detrend`
 off so absolute calibration is preserved) also backs the H1/H2 frequency
 response and coherence estimators of
-[`phonometry.electroacoustics.frequency_response`](/phonometry/reference/api/electroacoustics/frequency-response/) and the p-p intensity
-probe of [`phonometry.emission.intensity`](/phonometry/reference/api/power/intensity/).
+[`phonometry.electroacoustics.frequency_response`](/reference/api/electroacoustics/frequency-response/) and the p-p intensity
+probe of [`phonometry.emission.intensity`](/reference/api/power/intensity/).
 
 A **fractional-octave smoothing** utility completes the module: a
 constant-power rectangular kernel of 1/n-octave width in log-frequency
@@ -57,9 +57,9 @@ exactly unchanged.
 
 The taper the `window` parameter selects is characterized, with the
 figures of merit of Harris (1978), by
-[`phonometry.signals.windows.window_metrics`](/phonometry/reference/api/signals/windows/#window_metrics); the whole-record
+[`phonometry.signals.windows.window_metrics`](/reference/api/signals/windows/#window_metrics); the whole-record
 alternative to Welch segment averaging, Thomson's multitaper estimator,
-is [`phonometry.signals.multitaper.multitaper_psd`](/phonometry/reference/api/signals/multitaper/#multitaper_psd).
+is [`phonometry.signals.multitaper.multitaper_psd`](/reference/api/signals/multitaper/#multitaper_psd).
 
 > Auto-generated from the source docstrings by `scripts/generate_api_docs.py` (`make api-docs`). Do not edit by hand.
 
@@ -98,15 +98,15 @@ the implementation.
 
 | Name | Description |
 | :--- | :--- |
-| `x` | Input (reference) signal, 1-D. Accepts a [`phonometry.io.Signal`](/phonometry/reference/api/io/io/#signal), whose calibration is applied to the samples, so all three densities come out in Pa²/Hz, or Pa² for `scaling='spectrum'`. The coherence and the signal-to-noise ratio are ratios and do not move. |
-| `y` | Output (response) signal, 1-D, same length as `x`. Accepts a [`phonometry.io.Signal`](/phonometry/reference/api/io/io/#signal), whose calibration is applied to the samples, so all three densities come out in Pa²/Hz, or Pa² for `scaling='spectrum'`. The coherence and the signal-to-noise ratio are ratios and do not move. |
-| `fs` | Sample rate, in Hz. Required when both records are bare arrays; either may be a [`Signal`](/phonometry/reference/api/io/io/#signal) and supply it, and two Signals recorded at different rates are refused rather than arbitrated. |
+| `x` | Input (reference) signal, 1-D. Accepts a [`phonometry.io.Signal`](/reference/api/io/io/#signal), whose calibration is applied to the samples, so all three densities come out in Pa²/Hz, or Pa² for `scaling='spectrum'`. The coherence and the signal-to-noise ratio are ratios and do not move. |
+| `y` | Output (response) signal, 1-D, same length as `x`. Accepts a [`phonometry.io.Signal`](/reference/api/io/io/#signal), whose calibration is applied to the samples, so all three densities come out in Pa²/Hz, or Pa² for `scaling='spectrum'`. The coherence and the signal-to-noise ratio are ratios and do not move. |
+| `fs` | Sample rate, in Hz. Required when both records are bare arrays; either may be a [`Signal`](/reference/api/io/io/#signal) and supply it, and two Signals recorded at different rates are refused rather than arbitrated. |
 | `window` | Segment taper, a scipy window name or a tuple of a name and its parameters, such as `("kaiser", 8.6)` (default Hann). |
 | `nperseg` | Welch segment length; `None` picks a default. |
 | `overlap` | Segment overlap fraction in [0, 1) (default 0.5). |
 | `scaling` | `'density'` or `'spectrum'`. |
 
-**Returns:** A [`CoherentOutputSpectrumResult`](/phonometry/reference/api/signals/spectra/#coherentoutputspectrumresult).
+**Returns:** A [`CoherentOutputSpectrumResult`](/reference/api/signals/spectra/#coherentoutputspectrumresult).
 
 **Raises**
 
@@ -226,15 +226,15 @@ with the measured coherence in place of the unknown true value.
 
 | Name | Description |
 | :--- | :--- |
-| `x` | First signal, 1-D. Accepts a [`phonometry.io.Signal`](/phonometry/reference/api/io/io/#signal), whose calibration is applied to the samples, so the cross-spectrum and its magnitude come out in Pa²/Hz, or Pa² for `scaling='spectrum'`. The coherence and the phase are ratios and do not move. |
-| `y` | Second signal, 1-D, same length as `x`. Accepts a [`phonometry.io.Signal`](/phonometry/reference/api/io/io/#signal), whose calibration is applied to the samples, so the cross-spectrum and its magnitude come out in Pa²/Hz, or Pa² for `scaling='spectrum'`. The coherence and the phase are ratios and do not move. |
-| `fs` | Sample rate, in Hz. Required when both records are bare arrays; either may be a [`Signal`](/phonometry/reference/api/io/io/#signal) and supply it, and two Signals recorded at different rates are refused rather than arbitrated. |
+| `x` | First signal, 1-D. Accepts a [`phonometry.io.Signal`](/reference/api/io/io/#signal), whose calibration is applied to the samples, so the cross-spectrum and its magnitude come out in Pa²/Hz, or Pa² for `scaling='spectrum'`. The coherence and the phase are ratios and do not move. |
+| `y` | Second signal, 1-D, same length as `x`. Accepts a [`phonometry.io.Signal`](/reference/api/io/io/#signal), whose calibration is applied to the samples, so the cross-spectrum and its magnitude come out in Pa²/Hz, or Pa² for `scaling='spectrum'`. The coherence and the phase are ratios and do not move. |
+| `fs` | Sample rate, in Hz. Required when both records are bare arrays; either may be a [`Signal`](/reference/api/io/io/#signal) and supply it, and two Signals recorded at different rates are refused rather than arbitrated. |
 | `window` | Segment taper, a scipy window name or a tuple of a name and its parameters, such as `("kaiser", 8.6)` (default Hann). |
 | `nperseg` | Welch segment length; `None` picks a default. |
 | `overlap` | Segment overlap fraction in [0, 1) (default 0.5). |
 | `scaling` | `'density'` or `'spectrum'`. |
 
-**Returns:** A [`CrossSpectralDensityResult`](/phonometry/reference/api/signals/spectra/#crossspectraldensityresult).
+**Returns:** A [`CrossSpectralDensityResult`](/reference/api/signals/spectra/#crossspectraldensityresult).
 
 **Raises**
 
@@ -387,21 +387,21 @@ $\varepsilon = 1/\sqrt{n_\mathrm{d}}$ (Eq. 8.158) and the chi-square
 confidence interval with
 $2 n_\mathrm{d}$ degrees of freedom (Eq. 8.163). For the first-order
 resolution-bias error at a resonance peak see
-[`resolution_bias_error`](/phonometry/reference/api/signals/spectra/#resolution_bias_error).
+[`resolution_bias_error`](/reference/api/signals/spectra/#resolution_bias_error).
 
 **Parameters**
 
 | Name | Description |
 | :--- | :--- |
-| `x` | Signal, 1-D. Accepts a [`phonometry.io.Signal`](/phonometry/reference/api/io/io/#signal), whose calibration is applied to the samples, so the density and its confidence interval come out in Pa²/Hz, or Pa² for `scaling='spectrum'`. |
-| `fs` | Sample rate, in Hz. Required for a bare array; a [`Signal`](/phonometry/reference/api/io/io/#signal) brings its own, and an explicit value that disagrees with it raises instead of silently winning. |
+| `x` | Signal, 1-D. Accepts a [`phonometry.io.Signal`](/reference/api/io/io/#signal), whose calibration is applied to the samples, so the density and its confidence interval come out in Pa²/Hz, or Pa² for `scaling='spectrum'`. |
+| `fs` | Sample rate, in Hz. Required for a bare array; a [`Signal`](/reference/api/io/io/#signal) brings its own, and an explicit value that disagrees with it raises instead of silently winning. |
 | `window` | Segment taper, a scipy window name or a tuple of a name and its parameters, such as `("kaiser", 8.6)` (default Hann, the B&P Section 11.5.2 recommendation for side-lobe suppression). |
-| `nperseg` | Welch segment length; `None` picks a length giving a bin spacing of at most 4 Hz (the resolution bandwidth $B_\mathrm{e}$ further depends on the taper; see [`SpectralDensityResult.resolution_bandwidth`](/phonometry/reference/api/signals/spectra/#spectraldensityresult)). |
+| `nperseg` | Welch segment length; `None` picks a length giving a bin spacing of at most 4 Hz (the resolution bandwidth $B_\mathrm{e}$ further depends on the taper; see [`SpectralDensityResult.resolution_bandwidth`](/reference/api/signals/spectra/#spectraldensityresult)). |
 | `overlap` | Segment overlap fraction in [0, 1) (default 0.5, which with a Hann taper retrieves most of the stability lost to tapering, B&P Section 11.5.2.2). |
 | `scaling` | `'density'` (units²/Hz) or `'spectrum'` (units² per segment bandwidth). |
 | `confidence` | Confidence level for the chi-square interval. |
 
-**Returns:** A [`SpectralDensityResult`](/phonometry/reference/api/signals/spectra/#spectraldensityresult).
+**Returns:** A [`SpectralDensityResult`](/reference/api/signals/spectra/#spectraldensityresult).
 
 **Raises**
 
@@ -432,7 +432,7 @@ approximation assumes $B_\mathrm{e} < B_\mathrm{r}$.
 
 | Name | Description |
 | :--- | :--- |
-| `resolution_bandwidth` | Analysis resolution bandwidth $B_\mathrm{e}$, Hz ([`SpectralDensityResult.resolution_bandwidth`](/phonometry/reference/api/signals/spectra/#spectraldensityresult)). |
+| `resolution_bandwidth` | Analysis resolution bandwidth $B_\mathrm{e}$, Hz ([`SpectralDensityResult.resolution_bandwidth`](/reference/api/signals/spectra/#spectraldensityresult)). |
 | `half_power_bandwidth` | Half-power (-3 dB) bandwidth $B_\mathrm{r}$ of the spectral peak, in Hz. |
 
 **Returns:** Normalized bias error (dimensionless, negative at a peak).

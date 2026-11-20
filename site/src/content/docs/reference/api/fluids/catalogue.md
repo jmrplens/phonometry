@@ -8,14 +8,14 @@ sidebar:
 Fluid states read from a printed page.
 
 A density and a speed of sound stand behind every level this library computes,
-and most of them are computed: [`air`](/phonometry/reference/api/fluids/air/#air),
-[`ideal_gas`](/phonometry/reference/api/fluids/gas/#ideal_gas) and [`sea_water`](/phonometry/reference/api/fluids/water/#sea_water)
+and most of them are computed: [`air`](/reference/api/fluids/air/#air),
+[`ideal_gas`](/reference/api/fluids/gas/#ideal_gas) and [`sea_water`](/reference/api/fluids/water/#sea_water)
 take the conditions that were measured and return the state that follows. A
 few are not. Some books print a table of fluids the way they print a table of
 solids, a density and a speed of sound at a stated temperature, and those are
 read rather than derived. This is where they live.
 
-The distinction is carried in [`model`](/phonometry/reference/api/fluids/fluids/#fluid), which
+The distinction is carried in [`model`](/reference/api/fluids/fluids/#fluid), which
 every state already uses to say what produced it. A computed state names the
 closed form, the annex or the fit; a state from here names the table, with its
 PDF page and its printed folio, because the table is what produced it and a
@@ -50,8 +50,8 @@ fluids: not a density and a speed of sound, which a gas only has once a
 temperature and a pressure are named, but the ratio of specific heats and the
 molar mass, which close the ideal-gas state at any temperature and pressure.
 So the gases live in a
-catalogue of their own, [`PUBLISHED_GASES`](/phonometry/reference/api/fluids/catalogue/#published_gases), and reach a state through
-[`Gas.ideal_state`](/phonometry/reference/api/fluids/catalogue/#gasideal_state), which is [`ideal_gas`](/phonometry/reference/api/fluids/gas/#ideal_gas) with the
+catalogue of their own, [`PUBLISHED_GASES`](/reference/api/fluids/catalogue/#published_gases), and reach a state through
+[`Gas.ideal_state`](/reference/api/fluids/catalogue/#gasideal_state), which is [`ideal_gas`](/reference/api/fluids/gas/#ideal_gas) with the
 citation carried along. Air appears in both, and it should: Bies prints it once
 as a state at 20 degC and once as a pair of constants, and those are two
 different readings of the same gas.
@@ -59,9 +59,9 @@ different readings of the same gas.
 What it is not
 --------------
 It is not a table of fluid properties to look values up in. Air at 23 degC and
-50 per cent relative humidity is [`air`](/phonometry/reference/api/fluids/air/#air), which computes
+50 per cent relative humidity is [`air`](/reference/api/fluids/air/#air), which computes
 it from the conditions that were measured; sea water is
-[`sea_water`](/phonometry/reference/api/fluids/water/#sea_water). Use a row here to reproduce a book's own
+[`sea_water`](/reference/api/fluids/water/#sea_water). Use a row here to reproduce a book's own
 number.
 
 > Auto-generated from the source docstrings by `scripts/generate_api_docs.py` (`make api-docs`). Do not edit by hand.
@@ -106,11 +106,11 @@ the ratio of specific heats and the molar mass, and
 `ideal_state` walks from that pair to the ideal-gas state at
 whichever temperature and pressure the caller asks for.
 That is the difference between this catalogue and
-[`PUBLISHED_FLUIDS`](/phonometry/reference/api/fluids/catalogue/#published_fluids), which holds states: a row there is one condition
+[`PUBLISHED_FLUIDS`](/reference/api/fluids/catalogue/#published_fluids), which holds states: a row there is one condition
 a book measured, a row here is every condition its two constants close under
 the ideal-gas relations.
 
-The hedges of [`CatalogueRow`](/phonometry/reference/api/io/io/#cataloguerow) apply
+The hedges of [`CatalogueRow`](/reference/api/io/io/#cataloguerow) apply
 unchanged. A cell printed as an interval is a range and not a value, which
 is what saturated steam is in the table this reads first.
 
@@ -124,7 +124,7 @@ is what saturated steam is in the table this reads first.
 | `variant` | Which specimen or condition this row is, when the page prints several under one name: `"chemically pure"`, `"direction x"`, `"0.68 mm diameter"`. Empty when the page prints one. |
 | `source` | Document, table, PDF page and printed folio. |
 | `table` | The data file this row was read from, without the extension, which is also the first half of its key in the catalogue that holds it. |
-| `basis` | What the source says a value is: a field name, or `"row"` for the whole row, to one of [`CATALOGUE_BASES`](/phonometry/reference/api/io/io/#catalogue_bases). Hopkins marks most of his Poisson ratios "Estimate", and those cells hold `"estimated"`; a datasheet that declares a class under a product standard would hold `"declared"`. A field with no entry takes the row's, and a row with neither is one whose source does not say, which is a different answer from any of the five. `basis_of` reads it. Independent of `derived`: this is what the source claims for a cell, that is what this library computed. |
+| `basis` | What the source says a value is: a field name, or `"row"` for the whole row, to one of [`CATALOGUE_BASES`](/reference/api/io/io/#catalogue_bases). Hopkins marks most of his Poisson ratios "Estimate", and those cells hold `"estimated"`; a datasheet that declares a class under a product standard would hold `"declared"`. A field with no entry takes the row's, and a row with neither is one whose source does not say, which is a different answer from any of the five. `basis_of` reads it. Independent of `derived`: this is what the source claims for a cell, that is what this library computed. |
 | `approximate` | Fields the page prints with a `~`. Not an estimate and not an interval: a number the author rounded on purpose. |
 | `derived` | Field to how it was computed, for the ones this library worked out from the cells the page did print. A derived value is never stored as if it had been read, and on every row the library builds it follows again from the row's own cells: `from_printed` writes it, and nothing else in the library does. One a caller passes to the literal constructor is the caller's word, which the row keeps and `printed_fields` leaves out with its value, as it leaves out every derived one. When the printed cells a value rests on do not all have one `basis`, the text names the basis of each, so a modulus worked out from a plate speed and a Poisson ratio Hopkins marks as an estimate says it rests on that estimate. A value converted from the unit the page prints is not derived (`converted` holds it), and neither is one the page gives by reference to another of its rows (`carried` does). |
 | `converted` | Field to `(figure, unit)`, the page's figure and the unit it is in, for a value this row holds in a unit the page does not use. Ver and Beranek print their damping materials in degrees Fahrenheit and pounds per square inch, and the row holds degrees Celsius and pascals, so `("3e5", "psi")` sits beside a modulus in pascals. The figure is kept as the page writes it, so the cell can always be read back in the page's own terms. The unit is the one the page prints with the figure or over its column. Long prints the figures of his musician bare, and the sabins recorded for them are a reading of the table, which is set in inches and pounds and names sabins on the next row; that row's note says so. A figure written in another unit of the same kind as the field's (`thickness_m` for `thickness_mm`, `flow_resistivity_kpa_s_m2` for `flow_resistivity_pa_s_m2`) is converted by `from_printed` and recorded here, whether it is a value, the end of a range or one of several readings; for a range the figure is the printed end of a bound, or both ends as `"5 to 10"`, and for readings the list as the page gives it. A packaged table transcribed in the base unit with only its SI prefix changed, such as the megapascals of Rossing Table 15.5, holds no entry here, and the table's `about` says so. |
@@ -148,7 +148,7 @@ is what saturated steam is in the table this reads first.
 Gas.basis_of(field_name: str) -> str
 ```
 
-What the source says this field is, one of [`CATALOGUE_BASES`](/phonometry/reference/api/io/io/#catalogue_bases).
+What the source says this field is, one of [`CATALOGUE_BASES`](/reference/api/io/io/#catalogue_bases).
 
 The five are `measured`, `declared`, `calculated`, `estimated`
 and `extended`.
@@ -178,7 +178,7 @@ unit of the same kind as its field (`thickness_m` for
 `thickness_mm`, `flow_resistivity_kpa_s_m2` for
 `flow_resistivity_pa_s_m2`), or in a unit the class takes as an
 alias of its own (an
-[`AbsorptionAreaSpectrum`](/phonometry/reference/api/materials/measured/#absorptionareaspectrum) takes
+[`AbsorptionAreaSpectrum`](/reference/api/materials/measured/#absorptionareaspectrum) takes
 `absorption_area_125_ft2` for `absorption_area_125_m2`), is
 converted on its digits with an exact factor and rounded once,
 whether it is a value or stands as the key of a hedge (the ends of a
@@ -242,9 +242,9 @@ The gas at one state, through the ideal-gas closure.
 | Name | Description |
 | :--- | :--- |
 | `temperature_c` | Temperature `t`, in degrees Celsius. |
-| `static_pressure_pa` | Static pressure `p`, in pascals. Omitted means one standard atmosphere, and [`ideal_gas`](/phonometry/reference/api/fluids/gas/#ideal_gas) says so with a warning. |
+| `static_pressure_pa` | Static pressure `p`, in pascals. Omitted means one standard atmosphere, and [`ideal_gas`](/reference/api/fluids/gas/#ideal_gas) says so with a warning. |
 
-**Returns:** The [`Fluid`](/phonometry/reference/api/fluids/fluids/#fluid) the two printed constants give at that state, carrying this row's citation in its model so the state can be traced back to the page.
+**Returns:** The [`Fluid`](/reference/api/fluids/fluids/#fluid) the two printed constants give at that state, carrying this row's citation in its model so the state can be traced back to the page.
 
 **Raises**
 
@@ -402,15 +402,15 @@ to load first.
 | Name | Description |
 | :--- | :--- |
 | `name` | The gas as a table names it, matched without regard to case and ignoring a parenthesis the page adds: `"air"` answers with the row Hopkins prints as `"Air (dry)"`. |
-| `catalogue` | The rows to search in place of [`PUBLISHED_GASES`](/phonometry/reference/api/fluids/catalogue/#published_gases): a catalogue of your own that [`phonometry.io.read_catalogue`](/phonometry/reference/api/io/io/#read_catalogue) returns, `PUBLISHED_GASES \| mine` to search both at once, or any mapping of key to row (Default: `None`, which searches [`PUBLISHED_GASES`](/phonometry/reference/api/fluids/catalogue/#published_gases)). |
+| `catalogue` | The rows to search in place of [`PUBLISHED_GASES`](/reference/api/fluids/catalogue/#published_gases): a catalogue of your own that [`phonometry.io.read_catalogue`](/reference/api/io/io/#read_catalogue) returns, `PUBLISHED_GASES \| mine` to search both at once, or any mapping of key to row (Default: `None`, which searches [`PUBLISHED_GASES`](/reference/api/fluids/catalogue/#published_gases)). |
 
-**Returns:** The rows whose [`Gas.name`](/phonometry/reference/api/fluids/catalogue/#gas) matches, in catalogue order, which is empty when no row names it.
+**Returns:** The rows whose [`Gas.name`](/reference/api/fluids/catalogue/#gas) matches, in catalogue order, which is empty when no row names it.
 
 **Raises**
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | for a *catalogue* that is not a mapping, or that holds a row that is not a [`Gas`](/phonometry/reference/api/fluids/catalogue/#gas), naming its key. |
+| TypeError | for a *catalogue* that is not a mapping, or that holds a row that is not a [`Gas`](/reference/api/fluids/catalogue/#gas), naming its key. |
 
 ## PUBLISHED_FLUIDS
 

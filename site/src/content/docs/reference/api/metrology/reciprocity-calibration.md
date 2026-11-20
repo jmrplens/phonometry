@@ -22,9 +22,9 @@ $$
 
 In a coupler (IEC 61094-2) $Z_\mathrm{a,12}$ is the acoustic impedance
 of the enclosed gas, worked out in
-[`reciprocity_coupler`](/phonometry/reference/api/metrology/reciprocity-coupler/); in a free field (IEC
+[`reciprocity_coupler`](/reference/api/metrology/reciprocity-coupler/); in a free field (IEC
 61094-3) it is that of a spherical wave between the two acoustic centres,
-worked out in [`reciprocity_free_field`](/phonometry/reference/api/metrology/reciprocity-free-field/). Either way
+worked out in [`reciprocity_free_field`](/reference/api/metrology/reciprocity-free-field/). Either way
 three pairs taken from three microphones give three products, and each
 sensitivity follows from them alone:
 
@@ -48,18 +48,18 @@ that the three are consistent with every product at every frequency. The
 modulus does not depend on the choice.
 
 **Uncertainty.** Both parts list the components of a calibration in their
-Table 1 ([`IEC61094_2_TABLE_1`](/phonometry/reference/api/metrology/reciprocity-calibration/#iec61094_2_table_1), [`IEC61094_3_TABLE_1`](/phonometry/reference/api/metrology/reciprocity-calibration/#iec61094_3_table_1)) and ask for
+Table 1 ([`IEC61094_2_TABLE_1`](/reference/api/metrology/reciprocity-calibration/#iec61094_2_table_1), [`IEC61094_3_TABLE_1`](/reference/api/metrology/reciprocity-calibration/#iec61094_3_table_1)) and ask for
 each as a standard uncertainty as a function of frequency, in linear or
 logarithmic form (7.5 of the first part, 7.8 of the second).
-[`reciprocity_uncertainty_budget`](/phonometry/reference/api/metrology/reciprocity-calibration/#reciprocity_uncertainty_budget) combines them in quadrature at each
+[`reciprocity_uncertainty_budget`](/reference/api/metrology/reciprocity-calibration/#reciprocity_uncertainty_budget) combines them in quadrature at each
 frequency and multiplies by the coverage factor: $k = 2$ in IEC 61094-2
 7.5, and the factor for a 95 % coverage probability in IEC 61094-3 7.8, which
 is 2 for a combination dominated by many comparable components. The
 components the acoustic transfer impedance contributes are found, as both
 parts describe, by "repeating a calculation while the various components are
 changed one at a time by their associated uncertainty":
-[`coupler_parameter_uncertainty`](/phonometry/reference/api/metrology/reciprocity-coupler/#coupler_parameter_uncertainty) and
-[`free_field_parameter_uncertainty`](/phonometry/reference/api/metrology/reciprocity-free-field/#free_field_parameter_uncertainty) do that.
+[`coupler_parameter_uncertainty`](/reference/api/metrology/reciprocity-coupler/#coupler_parameter_uncertainty) and
+[`free_field_parameter_uncertainty`](/reference/api/metrology/reciprocity-free-field/#free_field_parameter_uncertainty) do that.
 
 > Auto-generated from the source docstrings by `scripts/generate_api_docs.py` (`make api-docs`). Do not edit by hand.
 
@@ -107,13 +107,13 @@ The uncertainty budget of a reciprocity calibration (IEC 61094-2:2009
 
 Each component is the standard uncertainty of the sensitivity level it
 causes, in dB, one value or one per frequency, keyed by the names of the
-field's Table 1 ([`IEC61094_2_TABLE_1`](/phonometry/reference/api/metrology/reciprocity-calibration/#iec61094_2_table_1), [`IEC61094_3_TABLE_1`](/phonometry/reference/api/metrology/reciprocity-calibration/#iec61094_3_table_1)).
+field's Table 1 ([`IEC61094_2_TABLE_1`](/reference/api/metrology/reciprocity-calibration/#iec61094_2_table_1), [`IEC61094_3_TABLE_1`](/reference/api/metrology/reciprocity-calibration/#iec61094_3_table_1)).
 Neither table is exhaustive ("Not all of the components may be relevant in
 a given calibration setup"), so a component may be left out and
 `additional_uncertainties_db` adds others. The components that come from
 the acoustic transfer impedance are what
-[`coupler_parameter_uncertainty`](/phonometry/reference/api/metrology/reciprocity-coupler/#coupler_parameter_uncertainty) and
-[`free_field_parameter_uncertainty`](/phonometry/reference/api/metrology/reciprocity-free-field/#free_field_parameter_uncertainty) return,
+[`coupler_parameter_uncertainty`](/reference/api/metrology/reciprocity-coupler/#coupler_parameter_uncertainty) and
+[`free_field_parameter_uncertainty`](/reference/api/metrology/reciprocity-free-field/#free_field_parameter_uncertainty) return,
 keyed the same way.
 
 The combination is the root-sum-square at each frequency; the expanded
@@ -133,7 +133,7 @@ freedom passes its own.
 | `additional_uncertainties_db` | Further components, by name, in the same form (Default: none). |
 | `coverage_factor` | $k$ (Default: 2). |
 
-**Returns:** The [`ReciprocityUncertaintyBudget`](/phonometry/reference/api/metrology/reciprocity-calibration/#reciprocityuncertaintybudget).
+**Returns:** The [`ReciprocityUncertaintyBudget`](/reference/api/metrology/reciprocity-calibration/#reciprocityuncertaintybudget).
 
 **Raises**
 
@@ -159,10 +159,10 @@ ReciprocityCalibration(
 The complex sensitivities of microphones calibrated by reciprocity
 (IEC 61094-2:2009 5.7 in a coupler, IEC 61094-3:2016 5.7 in a free field).
 
-Built by [`pressure_reciprocity`](/phonometry/reference/api/metrology/reciprocity-coupler/#pressure_reciprocity),
-[`pressure_reciprocity_pair`](/phonometry/reference/api/metrology/reciprocity-coupler/#pressure_reciprocity_pair),
-[`free_field_reciprocity`](/phonometry/reference/api/metrology/reciprocity-free-field/#free_field_reciprocity) and
-[`free_field_reciprocity_pair`](/phonometry/reference/api/metrology/reciprocity-free-field/#free_field_reciprocity_pair).
+Built by [`pressure_reciprocity`](/reference/api/metrology/reciprocity-coupler/#pressure_reciprocity),
+[`pressure_reciprocity_pair`](/reference/api/metrology/reciprocity-coupler/#pressure_reciprocity_pair),
+[`free_field_reciprocity`](/reference/api/metrology/reciprocity-free-field/#free_field_reciprocity) and
+[`free_field_reciprocity_pair`](/reference/api/metrology/reciprocity-free-field/#free_field_reciprocity_pair).
 
 **Attributes**
 

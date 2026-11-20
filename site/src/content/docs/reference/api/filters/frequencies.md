@@ -22,8 +22,8 @@ FractionalOctaveBands(
 
 A set of fractional-octave bands: centres, edges and nominal labels.
 
-What [`nominal_frequencies`](/phonometry/reference/api/filters/frequencies/#nominal_frequencies) returns and what an
-[`OctaveFilterBank`](/phonometry/reference/api/filters/core/#octavefilterbank) is designed on. The three
+What [`nominal_frequencies`](/reference/api/filters/frequencies/#nominal_frequencies) returns and what an
+[`OctaveFilterBank`](/reference/api/filters/core/#octavefilterbank) is designed on. The three
 frequency arrays are read-only, in hertz, one value per band in ascending
 order; the labels are the IEC 61260-1 nominal mid-band frequencies, as
 text (`"31.5"`, `"1k"`). It is a record with named fields rather than
@@ -64,7 +64,7 @@ reaches `limits[1]`.
 | `fraction` | Bandwidth fraction `b` (e.g., 1 for octaves, 3 for one-third octaves). |
 | `limits` | `[f_min, f_max]` in hertz, a sequence or an array of the two (Default: `[12, 20000]`). |
 
-**Returns:** A [`FractionalOctaveBands`](/phonometry/reference/api/filters/frequencies/#fractionaloctavebands) with the exact centres (`.frequencies`), the band edges (`.lower_edges` and `.upper_edges`) and the nominal labels (`.labels`).
+**Returns:** A [`FractionalOctaveBands`](/reference/api/filters/frequencies/#fractionaloctavebands) with the exact centres (`.frequencies`), the band edges (`.lower_edges` and `.upper_edges`) and the nominal labels (`.labels`).
 
 **Raises**
 

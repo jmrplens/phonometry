@@ -42,7 +42,7 @@ import ScopeClaim from '../../../../../components/ScopeClaim.astro';
 import SeeAlso from '../../../../../components/SeeAlso.astro';
 import ThemeImage from '../../../../../components/ThemeImage.astro';
 
-La [IEC 61400-11](/phonometry/es/environment/sources/wind-turbine-noise/) mide lo
+La [IEC 61400-11](/es/environment/sources/wind-turbine-noise/) mide lo
 que emite un aerogenerador, cerca de él y a sotavento. La IEC TS 61400-11-2:2024
 mide lo que llega a una vivienda a varios cientos de metros, donde el viento que
 mueve el rotor también agita los árboles, sube el fondo y curva el sonido por el
@@ -313,7 +313,7 @@ plt.show()
 La diferencia es como mucho de 0,02 dB/km, unas centésimas de decibelio en las
 distancias para las que se usa el Anexo C, pero quien recalcule la fila en la
 atmósfera del título no puede reproducir su mitad inferior, así que está en el
-[registro de erratas](/phonometry/es/reference/errata/). La biblioteca publica la fila tal como
+[registro de erratas](/es/reference/errata/). La biblioteca publica la fila tal como
 está impresa, `LOW_FREQUENCY_AIR_ATTENUATION_DB_PER_KM`, y la usa por defecto,
 así que sus resultados reproducen la TS y la orden danesa; para la ISO 9613-1 en
 otra atmósfera, pasa tú los coeficientes:
@@ -338,7 +338,7 @@ print(round(at_70.indoor_level - low.indoor_level, 3))   # -0.005
 
 La Tabla C.4, la de presentación de resultados, suma el término de distancia que
 la Ecuación (C.1) resta; lo implementado es la ecuación, y la tabla está en el
-[registro de erratas](/phonometry/es/reference/errata/).
+[registro de erratas](/es/reference/errata/).
 
 ## Emergencia (Anexo J)
 
@@ -528,7 +528,7 @@ ha usado como oráculo y nunca como fuente: la biblioteca reproduce los resultad
 impresos del ejemplo, prominencia 44,64, fundamental 0,70 Hz y una valoración de
 10 s de 8,38 dB para la serie de 100 Hz a 400 Hz en el rango de 0,4 Hz a 0,9 Hz,
 y coincide con el código sin modificar en bloques y periodos sintéticos, como
-muestra el [informe de conformidad](/phonometry/es/reference/conformance/). Donde
+muestra el [informe de conformidad](/es/reference/conformance/). Donde
 los dos divergen decide la TS, y las filas lo fijan: un periodo de 29 bloques
 válidos se valora con 0 dB. Un detalle es sólo del código: compara las
 frecuencias de sus líneas espectrales, calculadas como múltiplos de 0,1 Hz, con
@@ -544,9 +544,9 @@ lee en el «between» de la TS.
 $L_\mathrm{r} = L_\mathrm{eq} + K$, con $K$ el más severo de los ajustes tonal, de
 modulación de amplitud e impulsivo, sólo uno cada vez (A.1). Los ejemplos de la
 TS son la Tabla A.1 para los tonos (ISO 1996-2 Tabla J.1,
-[`tonal_adjustment_from_mean_audibility`](/phonometry/es/environment/assessment/environmental-levels/)),
+[`tonal_adjustment_from_mean_audibility`](/es/environment/assessment/environmental-levels/)),
 la ISO/PAS 1996-3 para los impulsos
-([`impulse_adjustment`](/phonometry/es/environment/assessment/impulsive-sound/)) y
+([`impulse_adjustment`](/es/environment/assessment/impulsive-sound/)) y
 la Figura A.1 para la modulación de amplitud: nada por debajo de una profundidad
 de 3 dB, 3 dB en 3 dB, subiendo hasta 5 dB en 10 dB y constante por encima.
 
@@ -594,7 +594,7 @@ La fila de la Tabla 7 impresa para 10 °C y 80 % lleva las frecuencias que da
 la regla a −10 °C y 80 % (no las de la propia fila de −10 °C de la tabla, que
 está al 100 %); a 10 °C y 80 % la función da 10, 6,3, 5 y 4 kHz donde la tabla imprime
 10, 5, 2,5 y 2 kHz. Esa fila, con otros ocho defectos impresos de la TS, está en
-el [registro de erratas](/phonometry/es/reference/errata/).
+el [registro de erratas](/es/reference/errata/).
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/wind_turbine_tone_search.svg" alt="La atenuación de la ISO 9613-1 en 600 m a 10 grados C y 50 % de humedad relativa para cada banda de tercio de octava de 50 Hz a 10 kHz en ejes logarítmicos, subiendo de 0,06 dB a 50 Hz a unos 130 dB a 10 kHz, la línea de 20 dB discontinua, y la frecuencia superior de búsqueda de 4 kHz marcada donde la atenuación la alcanza por primera vez" width="84%" />
 
@@ -631,7 +631,7 @@ sonidos ajenos y la escucha de audio del Anexo F son cosa del técnico. No está
 implementado el procedimiento de audibilidad tonal del 12.5 (espectros de 3 s,
 la agrupación de frecuencias del 12.5.2.6 y la media de 1 min del 12.5.2.7); la
 audibilidad tonal de la biblioteca es la de la ISO/PAS 20065:2016 de la página de
-[audibilidad de tonos](/phonometry/es/perception/psychoacoustics/tone-audibility/).
+[audibilidad de tonos](/es/perception/psychoacoustics/tone-audibility/).
 Tampoco lo están la impulsividad del apartado 14 más allá del ajuste de la
 ISO/PAS 1996-3, el infrasonido del Anexo D, los criterios sueco y danés como
 dictámenes, ni la propagación Nord2000 sobre la que se construye el Anexo C.
@@ -645,10 +645,10 @@ encima de los 1,6 Hz del 13.2.
 
 ## Véase también
 
-- [Ruido de aerogeneradores: potencia y audibilidad tonal](/phonometry/es/environment/sources/wind-turbine-noise/): la emisión de la IEC 61400-11 cuyos niveles de potencia acústica alimentan el Anexo C y la previsión del 10.3.4.
-- [Propagación del sonido en exteriores](/phonometry/es/environment/propagation/outdoor-propagation/): la absorción atmosférica de la ISO 9613-1 y la cadena de la ISO 9613-2.
-- [Prominencia del sonido impulsivo](/phonometry/es/environment/assessment/impulsive-sound/): el ajuste de la ISO/PAS 1996-3 del A.4.
-- [Intensidad de fluctuación y aspereza](/phonometry/es/perception/psychoacoustics/sound-quality/): la visión psicoacústica de la modulación.
-- Referencia de la API: [`environment.assessment.wind_turbine_receptor`](/phonometry/es/reference/api/environment/wind-turbine-receptor/) y [`environment.assessment.wind_turbine_modulation`](/phonometry/es/reference/api/environment/wind-turbine-modulation/).
+- [Ruido de aerogeneradores: potencia y audibilidad tonal](/es/environment/sources/wind-turbine-noise/): la emisión de la IEC 61400-11 cuyos niveles de potencia acústica alimentan el Anexo C y la previsión del 10.3.4.
+- [Propagación del sonido en exteriores](/es/environment/propagation/outdoor-propagation/): la absorción atmosférica de la ISO 9613-1 y la cadena de la ISO 9613-2.
+- [Prominencia del sonido impulsivo](/es/environment/assessment/impulsive-sound/): el ajuste de la ISO/PAS 1996-3 del A.4.
+- [Intensidad de fluctuación y aspereza](/es/perception/psychoacoustics/sound-quality/): la visión psicoacústica de la modulación.
+- Referencia de la API: [`environment.assessment.wind_turbine_receptor`](/es/reference/api/environment/wind-turbine-receptor/) y [`environment.assessment.wind_turbine_modulation`](/es/reference/api/environment/wind-turbine-modulation/).
 
 </SeeAlso>

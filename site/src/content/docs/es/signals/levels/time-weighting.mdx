@@ -54,12 +54,12 @@ cubre la práctica instrumental).
 
 Dos páginas hermanas completan la cadena. La salida del detector es la
 traza de nivel sobre la que se definen los niveles percentiles $L_N$ de
-[Niveles integrados y estadísticos](/phonometry/es/signals/levels/levels/),
+[Niveles integrados y estadísticos](/es/signals/levels/levels/),
 mientras que las métricas
 integradas ($L_\mathrm{eq}$, SEL) se saltan el detector por completo; y la cadena
 completa de instrumento IEC 61672-1 que envuelve este detector
 (ponderación, rangos, verificaciones periódicas) es el asunto de
-[Construye un sonómetro](/phonometry/es/signals/sound-level-meter/).
+[Construye un sonómetro](/es/signals/sound-level-meter/).
 
 ## 1. El detector exponencial
 
@@ -198,12 +198,12 @@ $L_\mathrm{eq}$ sí.
   valora la impulsividad
   con $L_\mathrm{Aeq}$ más un ajuste (Tabla A.1 de ISO 1996-1, o el análisis de
   inicio de
-  [Prominencia de sonidos impulsivos](/phonometry/es/environment/assessment/impulsive-sound/))
+  [Prominencia de sonidos impulsivos](/es/environment/assessment/impulsive-sound/))
   y evalúa el riesgo de daño auditivo con $L_\mathrm{Cpeak}$, nunca con niveles
   ponderados I. Algunas normas nacionales siguen exigiendo explícitamente la
   ponderación I: el RD 1367/2007 español gradúa su corrección por impulsividad
   $K_\mathrm{i}$ sobre $L_\mathrm{AIeq} - L_\mathrm{Aeq}$ (ver
-  [Normativa española de ruido](/phonometry/es/environment/assessment/spanish-noise-regulation/)),
+  [Normativa española de ruido](/es/environment/assessment/spanish-noise-regulation/)),
   y por eso `mode='impulse'` es aquí una opción de pleno derecho y no un parche
   de compatibilidad.
 
@@ -419,9 +419,9 @@ El modo `impulse` usa un kernel asimétrico que se compila JIT cuando
 Sin numba, un fallback en Python puro produce resultados idénticos, solo que más
 lento.
 
-Consulta [Niveles integrados y estadísticos](/phonometry/es/signals/levels/levels/)
+Consulta [Niveles integrados y estadísticos](/es/signals/levels/levels/)
 para las métricas $L_\mathrm{eq}$/$L_N$ construidas sobre estas envolventes, y
-[Por qué phonometry](/phonometry/es/start/why-phonometry/) para la
+[Por qué phonometry](/es/start/why-phonometry/) para la
 verificación con ráfagas tonales de IEC 61672-1.
 
 ## Qué cubre esta guía
@@ -441,12 +441,12 @@ internacionales desde las características FAST/SLOW/IMPULSE de ANSI S1.4-1983.
 La cadena de instrumento más amplia de la IEC 61672-1 (ponderación
 frecuencial, rangos de nivel, verificaciones periódicas) no está en esta
 página; es el asunto de [Construye un
-sonómetro](/phonometry/es/signals/sound-level-meter/). La ANSI S1.4-1983 se
+sonómetro](/es/signals/sound-level-meter/). La ANSI S1.4-1983 se
 cita solo por el origen histórico de las constantes F y S, no se implementa
 como especificación de instrumento propia. La valoración moderna de
 impulsividad ($L_\mathrm{Aeq}$ más un ajuste, o el análisis de inicio) está en la
 página de [Prominencia de sonidos
-impulsivos](/phonometry/es/environment/assessment/impulsive-sound/), no
+impulsivos](/es/environment/assessment/impulsive-sound/), no
 construida sobre la ponderación Impulse de aquí.
 </ScopeClaim>
 </Scope>
@@ -455,15 +455,15 @@ construida sobre la ponderación Impulse de aquí.
 
 ## Véase también
 
-- [Niveles](/phonometry/es/signals/levels/levels/): los niveles percentiles definidos sobre la salida del detector, y las métricas integradas que lo evitan.
-- [Construye un sonómetro](/phonometry/es/signals/sound-level-meter/): la cadena completa de instrumento IEC 61672-1 alrededor de este detector.
-- [Ponderación frecuencial](/phonometry/es/signals/levels/weighting/): los filtros A/C/Z aplicados antes del detector.
-- [Procesado por bloques](/phonometry/es/signals/filters/block-processing/): el detector en streaming sobre tramas sin discontinuidades de estado.
-- [Prominencia de sonidos impulsivos](/phonometry/es/environment/assessment/impulsive-sound/): la valoración de impulsos por análisis de inicio a la que se pasaron las normas internacionales.
-- [Normativa española de ruido](/phonometry/es/environment/assessment/spanish-noise-regulation/): una valoración en vigor que sigue exigiendo la ponderación I, a través de la corrección por impulsividad $K_\mathrm{i}$ sobre $L_\mathrm{AIeq} - L_\mathrm{Aeq}$.
-- [Calibración y dBFS](/phonometry/es/signals/metrology/calibration/): los ensayos periódicos de IEC 61672-3, en los que esta balística se comprueba por muestreo contra los límites de clase sobre un instrumento real.
-- Referencia de la API: [`filters.weighting`](/phonometry/es/reference/api/filters/weighting/).
-- Teoría: [Integración temporal](/phonometry/es/reference/theory/signal-analysis/#integracion-temporal): la ecuación de primer orden que resuelven los detectores exponenciales, y qué cambiaría integrarla en su lugar sobre un bloque fijo.
+- [Niveles](/es/signals/levels/levels/): los niveles percentiles definidos sobre la salida del detector, y las métricas integradas que lo evitan.
+- [Construye un sonómetro](/es/signals/sound-level-meter/): la cadena completa de instrumento IEC 61672-1 alrededor de este detector.
+- [Ponderación frecuencial](/es/signals/levels/weighting/): los filtros A/C/Z aplicados antes del detector.
+- [Procesado por bloques](/es/signals/filters/block-processing/): el detector en streaming sobre tramas sin discontinuidades de estado.
+- [Prominencia de sonidos impulsivos](/es/environment/assessment/impulsive-sound/): la valoración de impulsos por análisis de inicio a la que se pasaron las normas internacionales.
+- [Normativa española de ruido](/es/environment/assessment/spanish-noise-regulation/): una valoración en vigor que sigue exigiendo la ponderación I, a través de la corrección por impulsividad $K_\mathrm{i}$ sobre $L_\mathrm{AIeq} - L_\mathrm{Aeq}$.
+- [Calibración y dBFS](/es/signals/metrology/calibration/): los ensayos periódicos de IEC 61672-3, en los que esta balística se comprueba por muestreo contra los límites de clase sobre un instrumento real.
+- Referencia de la API: [`filters.weighting`](/es/reference/api/filters/weighting/).
+- Teoría: [Integración temporal](/es/reference/theory/signal-analysis/#integracion-temporal): la ecuación de primer orden que resuelven los detectores exponenciales, y qué cambiaría integrarla en su lugar sobre un bloque fijo.
 
 </SeeAlso>
 

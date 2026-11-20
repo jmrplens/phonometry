@@ -85,14 +85,14 @@ that measurement chain: the direction-averaged velocity level difference,
 the equivalent absorption lengths, the SEA validity checks of Part 4 and
 the three accredited-report-style fiches. The empirical junction values a prediction
 falls back on when no measurement exists live in
-[Predicting Sound Insulation (EN 12354)](/phonometry/buildings/design/insulation-prediction/);
+[Predicting Sound Insulation (EN 12354)](/buildings/design/insulation-prediction/);
 the wave-theory $K_{ij}$ of ideal plate junctions is derived in
-[Bending-wave transmission at plate junctions](/phonometry/vibration/structural/junction-transmission/).
+[Bending-wave transmission at plate junctions](/vibration/structural/junction-transmission/).
 
 ## The vibration reduction index and the flanking descriptors
 
 ISO 10848:2006/2010 is the laboratory method that **measures** the junction
-**vibration reduction index** $K_{ij}$ that the [EN 12354 prediction](/phonometry/buildings/design/insulation-prediction/) takes
+**vibration reduction index** $K_{ij}$ that the [EN 12354 prediction](/buildings/design/insulation-prediction/) takes
 as an input, together with the overall flanking descriptors $D_\mathrm{n,f}$
 (airborne) and $L_\mathrm{n,f}$ (impact). It is the measurement counterpart of the
 empirical `junction_vibration_reduction()` of that prediction.
@@ -481,7 +481,7 @@ power attenuation coefficient $m = 2\,\mathrm{Re}\{\Gamma\} = -2\,\mathrm{Im}\{k
 gives Eq. (9.18), whose receiving side carries the leakage back into the room,
 $m'_\mathrm{R} = m_\mathrm{R} + s_\mathrm{R}\tau_\mathrm{R}/h$ (Eq. (9.17)). Vigran prints the *unprimed* $m_\mathrm{R}$ in
 that expression's denominator; that is a misprint, recorded in
-[the errata register](/phonometry/reference/errata/), and the derived $m'_\mathrm{R}$ is
+[the errata register](/reference/errata/), and the derived $m'_\mathrm{R}$ is
 used here. Read literally, the printed form is non-monotonic in the plenum
 damping (adding absorber would predict a worse path than none) and unbounded as
 $m_\mathrm{R} \to 0$. For a plenum with little
@@ -705,22 +705,22 @@ duct is an input here, not a prediction.
 
 ## See also
 
-- [Predicting Sound Insulation (EN 12354)](/phonometry/buildings/design/insulation-prediction/):
+- [Predicting Sound Insulation (EN 12354)](/buildings/design/insulation-prediction/):
   the flanking model that consumes the measured $K_{ij}$, and its empirical
   Annex E junction values.
-- [Bending-wave transmission at plate junctions](/phonometry/vibration/structural/junction-transmission/):
+- [Bending-wave transmission at plate junctions](/vibration/structural/junction-transmission/):
   the wave-theory transmission coefficients behind an ideal junction's
   $K_{ij}$.
-- [Laboratory Insulation Measurement](/phonometry/buildings/insulation/insulation-lab/):
+- [Laboratory Insulation Measurement](/buildings/insulation/insulation-lab/):
   the ISO 10140 suite whose direct transmission these flanking paths bypass.
-- [Insulation Ratings (ISO 717)](/phonometry/buildings/insulation/insulation-ratings/):
+- [Insulation Ratings (ISO 717)](/buildings/insulation/insulation-ratings/):
   the reference-curve engines behind $D_\mathrm{n,f,w}$ and $L_\mathrm{n,f,w}$.
-- [Theory](/phonometry/reference/theory/rooms-buildings/): the flanking
+- [Theory](/reference/theory/rooms-buildings/): the flanking
   formulae in the EN 12354 derivation.
-- [Room-to-room and open-plan acoustics](/phonometry/buildings/rooms/open-plan-acoustics/): the open-plan context
+- [Room-to-room and open-plan acoustics](/buildings/rooms/open-plan-acoustics/): the open-plan context
   the ceiling flanking path usually appears in.
-- API reference: [`building.measurement.flanking_transmission`](/phonometry/reference/api/building/flanking-transmission/)
-  and [`building.prediction.ceiling_plenum`](/phonometry/reference/api/building/ceiling-plenum/).
-- Theory: [Point mobilities and radiation efficiency](/phonometry/reference/theory/vibration/#point-mobilities-and-radiation-efficiency-cremer-5-hopkins-29): the mobility and radiation-efficiency theory behind a flanking path.
+- API reference: [`building.measurement.flanking_transmission`](/reference/api/building/flanking-transmission/)
+  and [`building.prediction.ceiling_plenum`](/reference/api/building/ceiling-plenum/).
+- Theory: [Point mobilities and radiation efficiency](/reference/theory/vibration/#point-mobilities-and-radiation-efficiency-cremer-5-hopkins-29): the mobility and radiation-efficiency theory behind a flanking path.
 
 </SeeAlso>

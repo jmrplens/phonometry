@@ -1,6 +1,6 @@
 <!-- Written by `make llms` from site/src/content/docs/buildings/insulation/insulation-ratings.mdx: edit that page and its Spanish twin, then run `make llms`. -->
 
-← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/buildings/insulation/insulation-ratings/
+← [Documentation index](../../README.md) · Published at https://phonometry.dev/buildings/insulation/insulation-ratings/
 
 # Insulation Ratings (ISO 717)
 
@@ -610,7 +610,7 @@ numeric fields are validated on construction by physical range.
   the single-number model that consumes these ratings.
 - [Theory](../../reference/theory/rooms-buildings.md): the
   reference-curve derivation behind the weighted single-number ratings.
-- API reference: [`building.measurement.insulation`](https://docs.jmrp.io/phonometry/reference/api/building/insulation/).
+- API reference: [`building.measurement.insulation`](https://phonometry.dev/reference/api/building/insulation/).
 
 ## Quick answers
 

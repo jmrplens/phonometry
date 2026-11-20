@@ -1,6 +1,6 @@
 <!-- Written by `make llms` from site/src/content/docs/devices/noise-control/control-valve-noise.mdx: edit that page and its Spanish twin, then run `make llms`. -->
 
-← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/devices/noise-control/control-valve-noise/
+← [Documentation index](../../README.md) · Published at https://phonometry.dev/devices/noise-control/control-valve-noise/
 
 # Control Valve Noise (IEC 60534-8-3)
 
@@ -457,7 +457,7 @@ took out.
   the ISO 5136 measurement of what a source puts into a pipe, which is the
   measured counterpart of what this page predicts.
 - API reference:
-  [`noise_control.valves`](https://docs.jmrp.io/phonometry/reference/api/noise_control/valves/).
+  [`noise_control.valves`](https://phonometry.dev/reference/api/noise_control/valves/).
 
 ## References
 

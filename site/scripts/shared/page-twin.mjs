@@ -517,7 +517,7 @@ export const COPY_FORMS = Object.freeze({
  * }} page
  *   The page's source with its frontmatter out, its kind, its title and the
  *   works it cites, the heading of its References section, the address of the
- *   site with its base path (`https://docs.jmrp.io/phonometry`), how many
+ *   site with its base path (`https://phonometry.dev` at the root), how many
  *   catalogues a list of them holds in the page's language, and the number of
  *   the page's line `source` opens on, for the messages. With no `title` the
  *   copy's first line is not read (a check that holds the title to the built

@@ -5,7 +5,7 @@ description: "Use phonometry in Jupyter and JupyterLab: the kernel and the extra
 
 A notebook runs phonometry in an ordinary IPython kernel, so it installs as
 anywhere else; what the notebook adds is how a result shows itself under a
-cell. [In a notebook](/phonometry/start/getting-started/#in-a-notebook), in
+cell. [In a notebook](/start/getting-started/#in-a-notebook), in
 Getting Started, walks through a first cell and the table it displays; this
 page is the rest of what a notebook user meets.
 
@@ -105,7 +105,7 @@ directory; `[report]` writes it and `[plot]` draws its figure.
 
 `io.write_video` and the FDTD animation writers run ffmpeg, a program that
 pip does not install. On Debian it comes from the system's packages, with
-`apt install ffmpeg`, and [Writing videos](/phonometry/io/videos/) gives the
+`apt install ffmpeg`, and [Writing videos](/io/videos/) gives the
 command for conda, macOS and Windows. IPython's own display classes then show
 the file under the cell:
 

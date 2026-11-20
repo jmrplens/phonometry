@@ -1,6 +1,6 @@
 <!-- Written by `make llms` from site/src/content/docs/start/environments/pip-and-uv.md: edit that page and its Spanish twin, then run `make llms`. -->
 
-← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/start/environments/pip-and-uv/
+← [Documentation index](../../README.md) · Published at https://phonometry.dev/start/environments/pip-and-uv/
 
 # pip and uv
 

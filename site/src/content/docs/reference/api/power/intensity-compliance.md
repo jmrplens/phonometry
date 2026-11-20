@@ -34,7 +34,7 @@ Two related requirements of the same standard are exposed here as well:
   one-third-octave range *or*, alternatively, 45 Hz to 5.6 kHz in octave bands
   (the 7 octave bands from 63 Hz to 4 kHz). A verdict computed over a narrower
   set of bands attests only the bands supplied, which
-  [`verify_intensity_class`](/phonometry/reference/api/power/intensity-compliance/#verify_intensity_class) flags as `range_limited`. Because the octave
+  [`verify_intensity_class`](/reference/api/power/intensity-compliance/#verify_intensity_class) flags as `range_limited`. Because the octave
   range is open to class 2 alone, a class 1 verdict reached over octave bands
   only is flagged too, and a probe (tested in one-third octaves by clause 12.4)
   cannot use the alternative at all.
@@ -45,15 +45,15 @@ Two related requirements of the same standard are exposed here as well:
 * **Clause 8** (instrument assembled from separate components): a class 1
   instrument consists of a class 1 processor and a class 1 probe; a class 2
   instrument of any other combination of class 1 and class 2 components. See
-  [`instrument_class_from_components`](/phonometry/reference/api/power/intensity-compliance/#instrument_class_from_components).
+  [`instrument_class_from_components`](/reference/api/power/intensity-compliance/#instrument_class_from_components).
 
 The index is also the instrument's phase-error floor in disguise. In an axially
 propagating plane progressive wave the true phase difference across the spacer
 is $k d$, so a residual intensity produced by a channel phase mismatch
 $\phi_s$ gives $\delta_{pI0} = 10 \log_{10}(k d / \phi_s)$ (Fahy,
 *Sound Intensity*
-2nd ed., equation (7.16)); [`phase_mismatch_from_residual_index`](/phonometry/reference/api/power/intensity-compliance/#phase_mismatch_from_residual_index) and
-[`residual_index_from_phase_mismatch`](/phonometry/reference/api/power/intensity-compliance/#residual_index_from_phase_mismatch) convert between the two. Fahy's
+2nd ed., equation (7.16)); [`phase_mismatch_from_residual_index`](/reference/api/power/intensity-compliance/#phase_mismatch_from_residual_index) and
+[`residual_index_from_phase_mismatch`](/reference/api/power/intensity-compliance/#residual_index_from_phase_mismatch) convert between the two. Fahy's
 worked check in section 6.8 is the anchor: $\delta_{pI0} = 20$ dB means
 a mismatch of one hundredth of $k d$, about 0.26 degrees at 1 kHz over
 a 25 mm
@@ -63,7 +63,7 @@ The measured `delta_pI0` this module classifies is a property of the whole
 probe-spacer-analyser chain and must be determined with the spacer that will be
 fitted in the field; the library does not measure it. Once classified, the
 ISO 9614 dynamic capability $L_\mathrm{d} = \delta_{pI0} - K$ follows from
-[`phonometry.emission.intensity.dynamic_capability_index`](/phonometry/reference/api/power/intensity/#dynamic_capability_index).
+[`phonometry.emission.intensity.dynamic_capability_index`](/reference/api/power/intensity/#dynamic_capability_index).
 
 > Auto-generated from the source docstrings by `scripts/generate_api_docs.py` (`make api-docs`). Do not edit by hand.
 
@@ -114,7 +114,7 @@ IntensityInstrumentComplianceResult(
 
 IEC 61043:1993 class verdict of a p-p sound-intensity chain.
 
-What [`verify_intensity_class`](/phonometry/reference/api/power/intensity-compliance/#verify_intensity_class) returns: the measured spectrum, the
+What [`verify_intensity_class`](/reference/api/power/intensity-compliance/#verify_intensity_class) returns: the measured spectrum, the
 device and the separation it was judged at. The two Table 2 masks, the
 band rows, the classes and the range are read from them, so none of them
 is a field: a verdict cannot be built, or rewritten with
@@ -223,7 +223,7 @@ IntensityInstrumentComplianceResult.phase_mismatch_deg(
 Equivalent channel phase mismatch per band, in degrees.
 
 Converts the measured `delta_pI0` spectrum with
-[`phase_mismatch_from_residual_index`](/phonometry/reference/api/power/intensity-compliance/#phase_mismatch_from_residual_index) at the result's own
+[`phase_mismatch_from_residual_index`](/reference/api/power/intensity-compliance/#phase_mismatch_from_residual_index) at the result's own
 microphone separation, so the verdict can be read as the phase-matching
 the chain achieves.
 
@@ -306,7 +306,7 @@ class result, an optional verdict row against a supplied
 | Name | Description |
 | :--- | :--- |
 | `path` | Destination path of the PDF file. |
-| `metadata` | Optional [`ReportMetadata`](/phonometry/reference/api/building/insulation/#reportmetadata); `None` produces a bare fiche (body, result and disclaimer only). A supplied `required_class` drives the verdict row. |
+| `metadata` | Optional [`ReportMetadata`](/reference/api/building/insulation/#reportmetadata); `None` produces a bare fiche (body, result and disclaimer only). A supplied `required_class` drives the verdict row. |
 | `engine` | Rendering back end; only `"reportlab"` is supported. |
 | `verbose` | Accepted for a uniform signature; it has no effect on the single-layout intensity-compliance fiche. |
 | `language` | Fiche language: `"en"` (default) or `"es"`. |
@@ -436,7 +436,7 @@ residual_index_from_phase_mismatch(
 
 Pressure-residual intensity index of a given channel phase mismatch.
 
-The inverse of [`phase_mismatch_from_residual_index`](/phonometry/reference/api/power/intensity-compliance/#phase_mismatch_from_residual_index):
+The inverse of [`phase_mismatch_from_residual_index`](/reference/api/power/intensity-compliance/#phase_mismatch_from_residual_index):
 
 $$
 \delta_{pI0} = 10 \log_{10}\frac{k d}{\phi_s}, \qquad k d = \frac{2 \pi f d}{c}
@@ -497,7 +497,7 @@ for a spacing in metres).
 | `spacing_m` | Microphone separation in metres (default 0.025, the nominal separation the table is printed for). |
 | `frequencies` | Band centre frequencies in Hz to report the limits at, as nominal labels or the exact base-ten centres behind them. `None` (default) returns all 22 tabulated one-third-octave bands. |
 
-**Returns:** The nominal band centres in Hz and the two minimum `delta_pI0` requirements in dB, as a [`ResidualIndexLimits`](/phonometry/reference/api/power/intensity-compliance/#residualindexlimits) (`frequencies`, `class_1`, `class_2`).
+**Returns:** The nominal band centres in Hz and the two minimum `delta_pI0` requirements in dB, as a [`ResidualIndexLimits`](/reference/api/power/intensity-compliance/#residualindexlimits) (`frequencies`, `class_1`, `class_2`).
 
 **Raises**
 
@@ -518,7 +518,7 @@ ResidualIndexLimits(
 
 The IEC 61043 Table 2 minimum pressure-residual intensity index, per class.
 
-What [`residual_index_limits`](/phonometry/reference/api/power/intensity-compliance/#residual_index_limits) returns: the bands and the two class
+What [`residual_index_limits`](/reference/api/power/intensity-compliance/#residual_index_limits) returns: the bands and the two class
 minima, named, where a `(frequencies, class1, class2)` tuple used to be
 unpacked by position.
 
@@ -575,7 +575,7 @@ intervals across the whole 50 Hz to 6.3 kHz range.
 | `device` | `"probe"`, `"processor"` or `"instrument"`. |
 | `spacing_m` | Microphone separation in metres (default 0.025). |
 
-**Returns:** An [`IntensityInstrumentComplianceResult`](/phonometry/reference/api/power/intensity-compliance/#intensityinstrumentcomplianceresult), which carries the verdict together with the measured spectrum and the two rescaled Table 2 masks, so it exposes `.plot()` and an accredited `.report()` fiche.
+**Returns:** An [`IntensityInstrumentComplianceResult`](/reference/api/power/intensity-compliance/#intensityinstrumentcomplianceresult), which carries the verdict together with the measured spectrum and the two rescaled Table 2 masks, so it exposes `.plot()` and an accredited `.report()` fiche.
 
 **Raises**
 

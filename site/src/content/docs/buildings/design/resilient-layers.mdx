@@ -53,9 +53,9 @@ construction is *worse* than bare, and above it the improvement climbs at a
 rate the construction type decides. This guide is the prediction side of that
 story, from the material data to the improvement spectrum; the measurement
 side lives in
-[Floor-Covering Impact Improvement (ISO 16251-1)](/phonometry/buildings/design/impact-improvement/)
+[Floor-Covering Impact Improvement (ISO 16251-1)](/buildings/design/impact-improvement/)
 and
-[Dynamic stiffness of resilient materials](/phonometry/materials/resilient/dynamic-stiffness/).
+[Dynamic stiffness of resilient materials](/materials/resilient/dynamic-stiffness/).
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_resilient_buildups.svg" alt="Three resilient constructions in section with their mass-spring analogues: a floating screed on a continuous layer turned up at the wall, a walking surface on discrete mounts, and a wall lining bonded with adhesive dabs beside the same lining on studs over a filled cavity" width="92%" />
 
@@ -394,7 +394,7 @@ to gain. From 200 Hz upwards it costs: 1 dB at 200 Hz falling to 10 dB from
 630 Hz to 1600 Hz, recovering to 5 dB above. The printed table puts 1600 Hz in
 both of its last two rows; `weighted_lining_improvement` charges the 10 dB
 there, as the 2000 edition printed it, and the
-[errata registry](/phonometry/reference/errata/) records the overlap. Getting the resonance well below
+[errata registry](/reference/errata/) records the overlap. Getting the resonance well below
 the range of interest is therefore the entire design brief.
 
 ```python
@@ -436,7 +436,7 @@ pre-load**. A stiffness quoted under service load is a different number, and
 since $f_0 \propto \sqrt{s'}$ a factor of two in the declared stiffness moves the
 resonance by $\sqrt{2}$ and shifts the whole improvement spectrum by
 $30\lg\sqrt{2} = 4.5$ dB on the 30 lg law, 6.0 dB on the 40 lg one. The
-[dynamic-stiffness guide](/phonometry/materials/resilient/dynamic-stiffness/)
+[dynamic-stiffness guide](/materials/resilient/dynamic-stiffness/)
 shows what the load plate does and why it is what it is.
 
 **The series law has a condition printed under it.** Formula (C.6),
@@ -467,7 +467,7 @@ almost entirely. And because a bridge short-circuits the spring rather than
 detuning it, a bridged floating floor loses across the *whole* range above $f_0$
 rather than in one band, which is how it is told apart from a wrong $s'$ or a
 misplaced resonance in a
-[field measurement](/phonometry/buildings/insulation/insulation-field/).
+[field measurement](/buildings/insulation/insulation-field/).
 
 For linings the same point has a number on it, and it is on this page already:
 the Annex D formula is chosen by the fixing, so a board specified on studs over a
@@ -551,18 +551,18 @@ these models.
 
 ## See also
 
-- [Floor-Covering Impact Improvement (ISO 16251-1)](/phonometry/buildings/design/impact-improvement/):
+- [Floor-Covering Impact Improvement (ISO 16251-1)](/buildings/design/impact-improvement/):
   the measurement these predictions are checked against.
-- [Dynamic stiffness of resilient materials (EN 29052-1)](/phonometry/materials/resilient/dynamic-stiffness/):
+- [Dynamic stiffness of resilient materials (EN 29052-1)](/materials/resilient/dynamic-stiffness/):
   where $s'$ comes from.
-- [Predicting Sound Insulation (EN 12354)](/phonometry/buildings/design/insulation-prediction/):
+- [Predicting Sound Insulation (EN 12354)](/buildings/design/insulation-prediction/):
   the simplified model that consumes $\Delta L_\mathrm{w}$ and $\Delta R_\mathrm{w}$.
-- [Detailed Per-Band Prediction (ISO 12354)](/phonometry/buildings/design/detailed-prediction/):
+- [Detailed Per-Band Prediction (ISO 12354)](/buildings/design/detailed-prediction/):
   the per-band model whose floating-floor term is `floating_floor_improvement`.
-- [Predicting Panel Sound Insulation](/phonometry/buildings/design/panel-sound-insulation/):
+- [Predicting Panel Sound Insulation](/buildings/design/panel-sound-insulation/):
   the mass-spring-mass resonance of a double leaf, the airborne counterpart of
   the lining resonance.
-- API reference: [`building.prediction.resilient_layers`](/phonometry/reference/api/building/resilient-layers/).
-- Theory: [Point mobilities and radiation efficiency](/phonometry/reference/theory/vibration/#point-mobilities-and-radiation-efficiency-cremer-5-hopkins-29): the mass-spring picture behind an improvement index, and why a resilient layer is a mobility mismatch.
+- API reference: [`building.prediction.resilient_layers`](/reference/api/building/resilient-layers/).
+- Theory: [Point mobilities and radiation efficiency](/reference/theory/vibration/#point-mobilities-and-radiation-efficiency-cremer-5-hopkins-29): the mass-spring picture behind an improvement index, and why a resilient layer is a mobility mismatch.
 
 </SeeAlso>

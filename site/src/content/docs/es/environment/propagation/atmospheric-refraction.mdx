@@ -25,16 +25,16 @@ import SeeAlso from '../../../../../components/SeeAlso.astro';
 import ThemeImage from '../../../../../components/ThemeImage.astro';
 import Video from '../../../../../components/Video.astro';
 
-El [método ISO 9613-2](/phonometry/es/environment/propagation/outdoor-propagation/) y el
+El [método ISO 9613-2](/es/environment/propagation/outdoor-propagation/) y el
 [efecto suelo de onda
-esférica](/phonometry/es/environment/propagation/ground-barriers/) suponen
+esférica](/es/environment/propagation/ground-barriers/) suponen
 ambos una atmósfera **homogénea**. En realidad la velocidad del sonido cambia
 con la altura, porque la temperatura y el viento cambian con la altura, y esto
 **refracta** el sonido: los rayos se curvan y, en unos cientos de metros, el
 nivel recibido puede variar en decenas de decibelios. Esta página cubre
 `phonometry.environment.propagation.refraction`, el homólogo para atmósfera
 refractante de los métodos numéricos oceánicos de
-[`phonometry.underwater.propagation.numerical`](/phonometry/es/underwater/underwater-solvers/):
+[`phonometry.underwater.propagation.numerical`](/es/underwater/underwater-solvers/):
 un **modelo de rayos** y una **ecuación parabólica (PE)** que avanza en distancia.
 
 Que la refracción importe es, sobre todo, cuestión de distancia. Un gradiente
@@ -165,7 +165,7 @@ favor / en contra en una línea de aritmética. Es también la física que hay
 detrás de la ventana de condiciones favorables de ISO 9613-2 (viento dentro de
 ±45° de la línea fuente-receptor, de 1 a 5 m/s medidos entre 3 y 11 m sobre el
 suelo), citada entera en
-[Propagación del sonido en exteriores](/phonometry/es/environment/propagation/outdoor-propagation/#que-significan-las-condiciones-favorables-a-la-propagacion).
+[Propagación del sonido en exteriores](/es/environment/propagation/outdoor-propagation/#que-significan-las-condiciones-favorables-a-la-propagacion).
 
 La temperatura no tiene dirección, y por eso una noche despejada y en calma
 refracta hacia abajo en *todas* las direcciones. Cerca de 10 °C la velocidad del
@@ -342,7 +342,7 @@ límite, y la hace avanzar en distancia sobre una malla distancia-altura.
 `atmospheric_parabolic_equation` implementa la **PE de la función de Green**
 (GFPE, Salomons apéndice H), el miembro atmosférico de la misma familia
 split-step de Fourier que la
-[`parabolic_equation`](/phonometry/es/underwater/underwater-solvers/) oceánica.
+[`parabolic_equation`](/es/underwater/underwater-solvers/) oceánica.
 Cada paso en distancia transforma el campo al dominio del número de onda
 vertical (una FFT), aplica el propagador de espacio libre
 $\exp(i\,\Delta r\,(\sqrt{k_a^2 - k_z^2} - k_a))$ junto con la reflexión
@@ -425,7 +425,7 @@ complejo normalizado en el convenio $\mathrm{e}^{-i\omega t}$ de Salomons, con
 $\operatorname{Im}(Z) > 0$ para un suelo pasivo), como un
 `PorousMediumResult`, o a partir de una
 `flow_resistivity_pa_s_m2` efectiva mediante los
-[modelos porosos](/phonometry/es/materials/absorbers/porous-absorbers/) del dominio de
+[modelos porosos](/es/materials/absorbers/porous-absorbers/) del dominio de
 materiales; los modelos porosos trabajan en el convenio opuesto
 $\mathrm{e}^{+j\omega t}$, así que su impedancia se conjuga internamente.
 
@@ -448,11 +448,11 @@ silencio más allá de la frontera de sombra del modelo de rayos.
 ## 4. Validación
 
 Los modelos están anclados por oráculos independientes, fijados numéricamente en
-el [informe de conformidad](/phonometry/es/reference/conformance/) (sección
+el [informe de conformidad](/es/reference/conformance/) (sección
 «Atmospheric refraction»):
 
 - **Límite homogéneo → efecto suelo esférico.** Con gradiente nulo el campo
-  GFPE reproduce el [`ground_effect`](/phonometry/es/environment/propagation/ground-barriers/)
+  GFPE reproduce el [`ground_effect`](/es/environment/propagation/ground-barriers/)
   exacto de Weyl-Van der Pol a cualquier distancia, con unas décimas de dB
   sobre pradera en la malla por defecto, y el refuerzo coherente de **+6 dB** de
   los dos rayos sobre un suelo rígido.
@@ -548,6 +548,6 @@ admite un perfil de elevación del terreno.
 
 ## Véase también
 
-- Teoría: [Propagación en exteriores](/phonometry/es/reference/theory/environment-transport/#propagacion-en-exteriores-iso-9613-12): las hipótesis meteorológicas que hace ISO 9613-2, que es justo lo que la refracción desmonta.
+- Teoría: [Propagación en exteriores](/es/reference/theory/environment-transport/#propagacion-en-exteriores-iso-9613-12): las hipótesis meteorológicas que hace ISO 9613-2, que es justo lo que la refracción desmonta.
 
 </SeeAlso>

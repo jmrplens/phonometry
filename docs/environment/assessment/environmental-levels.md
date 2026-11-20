@@ -1,6 +1,6 @@
 <!-- Written by `make llms` from site/src/content/docs/environment/assessment/environmental-levels.mdx: edit that page and its Spanish twin, then run `make llms`. -->
 
-← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/environment/assessment/environmental-levels/
+← [Documentation index](../../README.md) · Published at https://phonometry.dev/environment/assessment/environmental-levels/
 
 # Environmental Levels (ISO 1996-1/-2)
 
@@ -531,7 +531,7 @@ above.
 - [Objective audibility of tones in noise (ISO/PAS 20065)](../../perception/psychoacoustics/tone-audibility.md): the tonal audibility whose mean value maps to the $K_\mathrm{t}$ adjustment (Table J.1).
 - [Prominent Discrete Tones](../../perception/psychoacoustics/tone-prominence.md): the ECMA-418-1 tone-to-noise and prominence-ratio verdicts, complementary emission screening for the tonal question.
 - [Occupational exposure (ISO 9612)](../../perception/hearing/occupational-exposure.md): the workplace counterpart, from task samples to the daily exposure level with its uncertainty budget.
-- API reference: [`environment.assessment.measurement`](https://docs.jmrp.io/phonometry/reference/api/environment/measurement/) and [`environment.assessment.rating`](https://docs.jmrp.io/phonometry/reference/api/environment/rating/).
+- API reference: [`environment.assessment.measurement`](https://phonometry.dev/reference/api/environment/measurement/) and [`environment.assessment.rating`](https://phonometry.dev/reference/api/environment/rating/).
 - Theory: [Environmental descriptors (ISO 1996-1)](../../reference/theory/environment-transport.md#environmental-descriptors-iso-1996-1): the ISO 1996-1 definitions of the rating level and the day-evening-night indicators, and what the adjustments do to them.
 
 ## Quick answers

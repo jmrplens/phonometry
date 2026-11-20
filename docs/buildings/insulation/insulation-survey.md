@@ -1,6 +1,6 @@
 <!-- Written by `make llms` from site/src/content/docs/buildings/insulation/insulation-survey.mdx: edit that page and its Spanish twin, then run `make llms`. -->
 
-← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/buildings/insulation/insulation-survey/
+← [Documentation index](../../README.md) · Published at https://phonometry.dev/buildings/insulation/insulation-survey/
 
 # Sound Insulation Survey Method (ISO 10052)
 
@@ -427,7 +427,7 @@ Survey façade fiche (SurveyFacadeResult.report), D2m,nT,w (C; Ctr).
   octave-band levels.
 - [Theory](../../reference/theory/rooms-buildings.md): the
   reference-curve derivation behind the weighted single-number ratings.
-- API reference: [`building.measurement.survey_insulation`](https://docs.jmrp.io/phonometry/reference/api/building/survey-insulation/).
+- API reference: [`building.measurement.survey_insulation`](https://phonometry.dev/reference/api/building/survey-insulation/).
 
 ## References
 

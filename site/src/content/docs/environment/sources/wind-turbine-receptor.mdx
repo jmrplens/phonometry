@@ -42,7 +42,7 @@ import ScopeClaim from '../../../../components/ScopeClaim.astro';
 import SeeAlso from '../../../../components/SeeAlso.astro';
 import ThemeImage from '../../../../components/ThemeImage.astro';
 
-[IEC 61400-11](/phonometry/environment/sources/wind-turbine-noise/) measures what a
+[IEC 61400-11](/environment/sources/wind-turbine-noise/) measures what a
 turbine emits, close to it and downwind. IEC TS 61400-11-2:2024 measures what
 arrives at a dwelling several hundred metres away, where the wind that drives
 the rotor also stirs the trees, raises the background and bends the sound on
@@ -305,7 +305,7 @@ plt.show()
 The difference is at most 0.02 dB/km, a few hundredths of a decibel over the
 distances Annex C is used for, but a reader who recomputes the row at the
 caption's atmosphere cannot reproduce its lower half, so it is in the
-[errata register](/phonometry/reference/errata/). The library publishes the row as printed,
+[errata register](/reference/errata/). The library publishes the row as printed,
 `LOW_FREQUENCY_AIR_ATTENUATION_DB_PER_KM`, and uses it by default, so its
 results reproduce the TS and the Danish order; for ISO 9613-1 at another
 atmosphere pass the coefficients yourself:
@@ -330,7 +330,7 @@ print(round(at_70.indoor_level - low.indoor_level, 3))   # -0.005
 
 Table C.4, the reporting table, adds the distance term that Equation (C.1)
 subtracts; the equation is the one implemented, and the table is in the
-[errata register](/phonometry/reference/errata/).
+[errata register](/reference/errata/).
 
 ## Emergence (Annex J)
 
@@ -510,7 +510,7 @@ used here as an oracle and never as a source: the library reproduces the
 printed sample results, prominence 44.64, fundamental 0.70 Hz and a 10 s rating
 of 8.38 dB for the 100 Hz to 400 Hz series in the 0.4 Hz to 0.9 Hz range, and
 agrees with the unmodified code on synthetic blocks and periods, as the
-[conformance report](/phonometry/reference/conformance/) shows. Where the two
+[conformance report](/reference/conformance/) shows. Where the two
 diverge the TS decides, and the rows pin it: a period of 29 valid blocks is
 rated 0 dB. One detail belongs to the code alone: it compares the frequencies
 of its spectrum lines, computed as multiples of 0.1 Hz, with the range limits
@@ -525,9 +525,9 @@ as the TS's "between" reads.
 $L_\mathrm{r} = L_\mathrm{eq} + K$, with $K$ the most severe of the tonal, the
 amplitude modulation and the impulsive adjustment, only one at a time (A.1).
 The TS's examples are Table A.1 for tones (ISO 1996-2 Table J.1,
-[`tonal_adjustment_from_mean_audibility`](/phonometry/environment/assessment/environmental-levels/)),
+[`tonal_adjustment_from_mean_audibility`](/environment/assessment/environmental-levels/)),
 ISO/PAS 1996-3 for impulses
-([`impulse_adjustment`](/phonometry/environment/assessment/impulsive-sound/)) and
+([`impulse_adjustment`](/environment/assessment/impulsive-sound/)) and
 Figure A.1 for amplitude modulation: nothing below a depth of 3 dB, 3 dB at
 3 dB, rising to 5 dB at 10 dB and flat above.
 
@@ -575,7 +575,7 @@ The row of Table 7 printed for 10 °C and 80 % holds the frequencies the rule
 gives at −10 °C and 80 % (not those of the table's own −10 °C row, which is at
 100 %); at 10 °C and 80 % the function gives 10, 6.3, 5 and 4 kHz where the table prints
 10, 5, 2.5 and 2 kHz. That row, with eight other printed defects of the TS, is
-in the [errata register](/phonometry/reference/errata/).
+in the [errata register](/reference/errata/).
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/wind_turbine_tone_search.svg" alt="The ISO 9613-1 attenuation over 600 m at 10 degrees C and 50 % relative humidity for each one-third octave band from 50 Hz to 10 kHz on logarithmic axes, rising from 0.06 dB at 50 Hz to about 130 dB at 10 kHz, the 20 dB line dashed, and the upper search frequency of 4 kHz marked where the attenuation first reaches it" width="84%" />
 
@@ -611,7 +611,7 @@ extraneous sound and the audio auditioning of Annex F are the practitioner's.
 The tonal audibility procedure of 12.5 (3 s spectra, the frequency grouping of
 12.5.2.6 and the 1 min mean of 12.5.2.7) is not implemented; the library's
 tonal audibility is that of ISO/PAS 20065:2016 on the
-[tone audibility](/phonometry/perception/psychoacoustics/tone-audibility/) page.
+[tone audibility](/perception/psychoacoustics/tone-audibility/) page.
 Nor are the impulsivity of clause 14 beyond the ISO/PAS 1996-3 adjustment, the
 infrasound of Annex D, the Swedish and Danish criteria as verdicts, or the
 Nord2000 propagation Annex C builds on. The faster rotors of Annex G.2, whose
@@ -624,10 +624,10 @@ functions refuse a range above the 1.6 Hz of 13.2.
 
 ## See also
 
-- [Wind-turbine noise: sound power and tonal audibility](/phonometry/environment/sources/wind-turbine-noise/): the IEC 61400-11 emission whose sound power levels feed Annex C and the prediction of 10.3.4.
-- [Outdoor Sound Propagation](/phonometry/environment/propagation/outdoor-propagation/): ISO 9613-1 air absorption and the ISO 9613-2 chain.
-- [Impulsive-sound prominence](/phonometry/environment/assessment/impulsive-sound/): the ISO/PAS 1996-3 adjustment of A.4.
-- [Fluctuation strength and roughness](/phonometry/perception/psychoacoustics/sound-quality/): the psychoacoustic view of modulation.
-- API reference: [`environment.assessment.wind_turbine_receptor`](/phonometry/reference/api/environment/wind-turbine-receptor/) and [`environment.assessment.wind_turbine_modulation`](/phonometry/reference/api/environment/wind-turbine-modulation/).
+- [Wind-turbine noise: sound power and tonal audibility](/environment/sources/wind-turbine-noise/): the IEC 61400-11 emission whose sound power levels feed Annex C and the prediction of 10.3.4.
+- [Outdoor Sound Propagation](/environment/propagation/outdoor-propagation/): ISO 9613-1 air absorption and the ISO 9613-2 chain.
+- [Impulsive-sound prominence](/environment/assessment/impulsive-sound/): the ISO/PAS 1996-3 adjustment of A.4.
+- [Fluctuation strength and roughness](/perception/psychoacoustics/sound-quality/): the psychoacoustic view of modulation.
+- API reference: [`environment.assessment.wind_turbine_receptor`](/reference/api/environment/wind-turbine-receptor/) and [`environment.assessment.wind_turbine_modulation`](/reference/api/environment/wind-turbine-modulation/).
 
 </SeeAlso>

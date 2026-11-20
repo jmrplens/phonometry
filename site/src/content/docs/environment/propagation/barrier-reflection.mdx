@@ -250,7 +250,7 @@ The edges are Formula (7) sampled as printed, each a half of a full
 Blackman-Harris window twice its own length. Table 1 calls $T_\mathrm{W,BH}$ the length
 of the trailing edge, which read into Formula (7) would draw a whole bell
 where the edge should fall; the [errata
-registry](/phonometry/reference/errata/) records it. The second line is the
+registry](/reference/errata/) records it. The second line is the
 window's low frequency limit, the subject of section 5.
 
 ## 4. The index, band by band
@@ -280,7 +280,7 @@ $$
   500 Hz to 2 kHz. The library **divides** by it. Formula (1) prints it as a
   multiplier, and since Formula (4) makes it the gain change itself, a
   multiplier would square the change instead of removing it; the [errata
-  registry](/phonometry/reference/errata/) records the case. Above 20 % the
+  registry](/reference/errata/) records the case. Above 20 % the
   standard reads the change as a sign the settings moved, and the function
   warns.
 
@@ -533,7 +533,7 @@ plt.show()
 ## Relation to the other parts of EN 1793
 
 The declaration of a road device ([Spherical ground effect and advanced
-barriers](/phonometry/environment/propagation/ground-barriers/#3-what-the-product-declaration-says-en-1793))
+barriers](/environment/propagation/ground-barriers/#3-what-the-product-declaration-says-en-1793))
 carries $DL_\alpha$ from EN 1793-1 and $DL_R$ from EN 1793-2, both from a
 laboratory. $DL_{RI}$ answers the question of $DL_\alpha$ again, in the direct
 field beside the road rather than the diffuse field of a reverberation room,
@@ -562,7 +562,7 @@ B.1 and B.2) are conformance checks.
 
 <ScopeClaim status="not-covered" label="Not covered">
 Obtaining the impulse responses, by MLS or sweep and deconvolution (5.4.3),
-which is the [room impulse response](/phonometry/buildings/rooms/room-impulse-response/)
+which is the [room impulse response](/buildings/rooms/room-impulse-response/)
 machinery; the anti-aliasing filter of 5.5.2 and the signal-to-noise ratio of
 5.5.3, which a laboratory states rather than computes; the meteorological and
 surface conditions of 5.7 and the order of the work of 5.10, which section 1
@@ -577,9 +577,9 @@ lowest reliable band: that stays with the report.
 
 ## See also
 
-- [Spherical ground effect and advanced barriers](/phonometry/environment/propagation/ground-barriers/): the declaration of a road device, $DL_\alpha$ and $DL_R$ over the same spectrum, and what a barrier does to a receiver behind it.
-- [In-situ Road-Surface Absorption](/phonometry/materials/surfaces/road-absorption/): ISO 13472-1, the same subtraction and Adrienne window pointed at a road surface.
-- [Errata found in published sources](/phonometry/reference/errata/): the gain factor of Formula (1), Table B.2 and the other defects of EN 1793-5.
-- API reference: [`environment.propagation.barrier_reflection`](/phonometry/reference/api/environment/barrier-reflection/).
+- [Spherical ground effect and advanced barriers](/environment/propagation/ground-barriers/): the declaration of a road device, $DL_\alpha$ and $DL_R$ over the same spectrum, and what a barrier does to a receiver behind it.
+- [In-situ Road-Surface Absorption](/materials/surfaces/road-absorption/): ISO 13472-1, the same subtraction and Adrienne window pointed at a road surface.
+- [Errata found in published sources](/reference/errata/): the gain factor of Formula (1), Table B.2 and the other defects of EN 1793-5.
+- API reference: [`environment.propagation.barrier_reflection`](/reference/api/environment/barrier-reflection/).
 
 </SeeAlso>

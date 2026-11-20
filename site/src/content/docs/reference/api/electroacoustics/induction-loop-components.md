@@ -11,7 +11,7 @@ IEC 62489-1:2010, with its Amendment 1:2014 (read in the consolidated BS EN
 62489-1:2010+A1:2015), says how the manufacturer of an induction-loop
 amplifier, of a loop and of a neck loop measures and states what the
 component does. IEC 60118-4:2014 then judges the installed system built from
-them ([`phonometry.electroacoustics.induction_loop`](/phonometry/reference/api/electroacoustics/induction-loop/)). This module holds
+them ([`phonometry.electroacoustics.induction_loop`](/reference/api/electroacoustics/induction-loop/)). This module holds
 the parts of IEC 62489-1 that are arithmetic, and the loop formulas both
 standards lean on.
 
@@ -31,8 +31,8 @@ $$
 and extends it to a rectangle of sides $d_1$ and $d_2$:
 "Provided that the sides d1, d2 of a rectangular loop are not extremely
 different", $d$ is taken as $\sqrt{d_1 d_2}$
-([`loop_center_field`](/phonometry/reference/api/electroacoustics/induction-loop-components/#loop_center_field)). Everything else about the field is a figure in
-that standard. Here it is computed: [`rectangular_loop_field`](/phonometry/reference/api/electroacoustics/induction-loop-components/#rectangular_loop_field) sums the
+([`loop_center_field`](/reference/api/electroacoustics/induction-loop-components/#loop_center_field)). Everything else about the field is a figure in
+that standard. Here it is computed: [`rectangular_loop_field`](/reference/api/electroacoustics/induction-loop-components/#rectangular_loop_field) sums the
 Biot-Savart field of the four straight sides exactly, at any point, which is
 how the E.1 formula is checked (it is exact for the square and off by 0.35 dB
 for a rectangle of aspect ratio 1.5). Two of the figures are reproduced: the
@@ -40,13 +40,13 @@ curves of Figure E.2 b), both components within about half a decibel, taken
 across the 10-unit width of its 15 by 10 loop, as E.1 describes them (the
 figure's panel a) puts the vertical-field line along the length, see
 `docs/ERRATA.md`), and the currents of Figure H.1 through
-[`loop_current`](/phonometry/reference/api/electroacoustics/induction-loop-components/#loop_current). Figures E.3 to E.5 and A.1 draw the same kind of
+[`loop_current`](/reference/api/electroacoustics/induction-loop-components/#loop_current). Figures E.3 to E.5 and A.1 draw the same kind of
 pattern and are not checked point by point.
 
 IEC 62489-1:2010 5.4.10.2 fixes where an amplifier's field is measured: 1.4 m
 above the centre of a horizontal square loop whose resistance and inductance
-equal the rated load. [`loop_current`](/phonometry/reference/api/electroacoustics/induction-loop-components/#loop_current) gives the current that loop needs
-for a field strength, and [`loop_dimensions`](/phonometry/reference/api/electroacoustics/induction-loop-components/#loop_dimensions) answers 5.4.11 the other way
+equal the rated load. [`loop_current`](/reference/api/electroacoustics/induction-loop-components/#loop_current) gives the current that loop needs
+for a field strength, and [`loop_dimensions`](/reference/api/electroacoustics/induction-loop-components/#loop_dimensions) answers 5.4.11 the other way
 round, the largest square loop, or loop of aspect ratio 3:1, whose centre
 reaches 400 mA/m at that height with the amplifier's current.
 
@@ -55,16 +55,16 @@ The loop as a load
 
 The loop is a resistance in series with an inductance (IEC 62489-1 B.2).
 The resistance is $R = \rho l / a$ for a conductor of length $l$
-and area $a$ ([`loop_resistance`](/phonometry/reference/api/electroacoustics/induction-loop-components/#loop_resistance)), with the resistivity of standard
+and area $a$ ([`loop_resistance`](/reference/api/electroacoustics/induction-loop-components/#loop_resistance)), with the resistivity of standard
 annealed copper, 1/58 ohm square millimetre per metre at 20 degrees Celsius
 and a temperature coefficient of 0.00393 per degree (IEC 60028:1925, clause I).
 The inductance of a rectangle of round wire is Grover's Formula (58)
-([`rectangular_loop_inductance`](/phonometry/reference/api/electroacoustics/induction-loop-components/#rectangular_loop_inductance)); for $N$ turns it is multiplied by
+([`rectangular_loop_inductance`](/reference/api/electroacoustics/induction-loop-components/#rectangular_loop_inductance)); for $N$ turns it is multiplied by
 $N^2$, the perfect coupling Table B.1 assumes. The impedance
 $|Z| = \sqrt{R^2 + (2\pi f L)^2}$ rises above the frequency where the
 reactance equals the resistance, where it is $\sqrt{2}$ times the
 resistance (IEC 60118-4 E.3), and the voltage the amplifier has to deliver is
-$U = I |Z|$ ([`LoopImpedance`](/phonometry/reference/api/electroacoustics/induction-loop-components/#loopimpedance)).
+$U = I |Z|$ ([`LoopImpedance`](/reference/api/electroacoustics/induction-loop-components/#loopimpedance)).
 
 Table B.1 of IEC 62489-1 is the oracle. Its six resistances are reproduced by
 the 20 degree resistivity with the perimeter of each loop, which for the
@@ -89,32 +89,32 @@ are:
   current is raised until the total harmonic distortion across the resistive
   part of the load reaches the rated value, and the current is the total
   voltage across that resistance over its value
-  ([`max_output_current`](/phonometry/reference/api/electroacoustics/induction-loop-components/#max_output_current));
+  ([`max_output_current`](/reference/api/electroacoustics/induction-loop-components/#max_output_current));
 * the compliance voltage, 5.4.8: the maximum positive-going and negative-going
   peak voltages across the rated load, over at least 60 s of the specified
   pink noise, averaged and divided by $\sqrt{2}$
-  ([`compliance_voltage`](/phonometry/reference/api/electroacoustics/induction-loop-components/#compliance_voltage));
+  ([`compliance_voltage`](/reference/api/electroacoustics/induction-loop-components/#compliance_voltage));
 * the noise, 5.4.9: the equivalent input noise voltage
   $U_\mathrm{n} = U I_\mathrm{n} / I$ and the signal-to-noise ratio
   $S = 10\lg(I_\mathrm{r}^2 / I_\mathrm{n}^2)$ dB
-  ([`equivalent_input_noise_voltage`](/phonometry/reference/api/electroacoustics/induction-loop-components/#equivalent_input_noise_voltage),
-  [`amplifier_signal_to_noise_ratio`](/phonometry/reference/api/electroacoustics/induction-loop-components/#amplifier_signal_to_noise_ratio));
+  ([`equivalent_input_noise_voltage`](/reference/api/electroacoustics/induction-loop-components/#equivalent_input_noise_voltage),
+  [`amplifier_signal_to_noise_ratio`](/reference/api/electroacoustics/induction-loop-components/#amplifier_signal_to_noise_ratio));
 * the frequency response, 5.4.12: the load current at one-third-octave
   centres from at least 50 Hz to 8 kHz, with the response at 1 kHz taken as
-  0 dB ([`amplifier_frequency_response`](/phonometry/reference/api/electroacoustics/induction-loop-components/#amplifier_frequency_response));
+  0 dB ([`amplifier_frequency_response`](/reference/api/electroacoustics/induction-loop-components/#amplifier_frequency_response));
 * the automatic gain control, 5.4.13: the steady-state output current against
   the source e.m.f., and the recommendation Amendment 1 added as 5.4.13.4, an
   input range of at least 32 dB for an output change of at most 3 dB
-  ([`agc_characteristic`](/phonometry/reference/api/electroacoustics/induction-loop-components/#agc_characteristic));
+  ([`agc_characteristic`](/reference/api/electroacoustics/induction-loop-components/#agc_characteristic));
 * the phase error of the quadrature network of a phased loop array, 5.4.14:
   the maximum deviation from 90 degrees between the loop currents over 100 Hz
-  to 5 kHz ([`quadrature_phase_error`](/phonometry/reference/api/electroacoustics/induction-loop-components/#quadrature_phase_error)).
+  to 5 kHz ([`quadrature_phase_error`](/reference/api/electroacoustics/induction-loop-components/#quadrature_phase_error)).
 
 The rated conditions (5.4.1 to 5.4.6) are what the manufacturer states and are
 not measured; the standard measuring conditions of 5.2.2 put the output
 current 10 dB below the rated one. The test signal of 5.4.8.2 b) is the pink
 noise of IEC 60118-4 6.4, generated by
-[`loop_test_noise`](/phonometry/reference/api/electroacoustics/induction-loop/#loop_test_noise).
+[`loop_test_noise`](/reference/api/electroacoustics/induction-loop/#loop_test_noise).
 
 The neck loop
 -------------
@@ -124,14 +124,14 @@ that produces 400 mA/m at the telecoil position of the test jig of Annex E,
 the smallest magnitude of its input impedance over 100 Hz to 5 kHz rounded to
 the nearest ohm, and its frequency response, stated in text as the
 frequencies where it differs from the response at 1 kHz by 3 dB
-([`neck_loop_characteristics`](/phonometry/reference/api/electroacoustics/induction-loop-components/#neck_loop_characteristics)). The draft Amendment 2 (prEN
+([`neck_loop_characteristics`](/reference/api/electroacoustics/induction-loop-components/#neck_loop_characteristics)). The draft Amendment 2 (prEN
 62489-1:2010/prA2:2017, read in E DIN EN 62489-1/A2:2017-10) replaces Annex D
 with two example specifications: type 1, for audio sources powered by two
 primary 1.5 V cells and higher voltage supplies, by a DC resistance of 32 ohm
 plus or minus 5 %, and type 2, a neck loop with a transformer or an amplifier,
 by an input DC resistance of at least 32 ohm, both reaching 400 mA/m on the
-jig with at most 1.06 V at the input ([`NECK_LOOP_TYPES`](/phonometry/reference/api/electroacoustics/induction-loop-components/#neck_loop_types),
-[`verify_neck_loop`](/phonometry/reference/api/electroacoustics/induction-loop-components/#verify_neck_loop)). It is a draft, and
+jig with at most 1.06 V at the input ([`NECK_LOOP_TYPES`](/reference/api/electroacoustics/induction-loop-components/#neck_loop_types),
+[`verify_neck_loop`](/reference/api/electroacoustics/induction-loop-components/#verify_neck_loop)). It is a draft, and
 this module cites it as one. Its Table D.1 (the field a type 1 loop reaches
 from a 3 V and a 9 V battery) rests on a source model the draft does not give
 and is not reproduced.
@@ -184,7 +184,7 @@ measured.
 | `source_emf_levels` | Source e.m.f. levels, in dB re any fixed voltage, strictly ascending. |
 | `output_level` | Output current level at each, in dB re the rated maximum output current. |
 
-**Returns:** An [`AGCCharacteristic`](/phonometry/reference/api/electroacoustics/induction-loop-components/#agccharacteristic).
+**Returns:** An [`AGCCharacteristic`](/reference/api/electroacoustics/induction-loop-components/#agccharacteristic).
 
 **Raises**
 
@@ -275,7 +275,7 @@ range of at least 50 Hz to 8 kHz" and the load current measured at each
 | `frequencies` | The measurement frequencies, in hertz, ascending and including 1000 Hz. |
 | `output_current_a` | The RMS load current at each, in amperes. |
 
-**Returns:** An [`AmplifierFrequencyResponse`](/phonometry/reference/api/electroacoustics/induction-loop-components/#amplifierfrequencyresponse).
+**Returns:** An [`AmplifierFrequencyResponse`](/reference/api/electroacoustics/induction-loop-components/#amplifierfrequencyresponse).
 
 **Raises**
 
@@ -486,7 +486,7 @@ with $d$ the side of a square loop, or $\sqrt{d_1 d_2}$ for a
 rectangle, which E.1 allows "Provided that the sides d1, d2 of a
 rectangular loop are not extremely different". For the square it is
 exact; for a rectangle
-it is the approximation E.1 prints, and [`rectangular_loop_field`](/phonometry/reference/api/electroacoustics/induction-loop-components/#rectangular_loop_field)
+it is the approximation E.1 prints, and [`rectangular_loop_field`](/reference/api/electroacoustics/induction-loop-components/#rectangular_loop_field)
 gives the exact value, which is larger by
 $\sqrt{(d_1^2 + d_2^2)/(2 d_1 d_2)}$: 0.35 dB at an aspect ratio
 of 1.5 and 3.3 dB at 4.
@@ -582,7 +582,7 @@ specification is read for.
 | `field_strength_a_per_m` | The field strength to reach, in A/m (400 mA/m). |
 | `n_turns` | Number of turns. |
 
-**Returns:** The short and the long side, in metres, as a [`LoopDimensions`](/phonometry/reference/api/electroacoustics/induction-loop-components/#loopdimensions) (`width_m`, `length_m`).
+**Returns:** The short and the long side, in metres, as a [`LoopDimensions`](/reference/api/electroacoustics/induction-loop-components/#loopdimensions) (`width_m`, `length_m`).
 
 **Raises**
 
@@ -608,11 +608,11 @@ The impedance of a loop from its resistance and inductance.
 
 | Name | Description |
 | :--- | :--- |
-| `resistance_ohm` | Series resistance, in ohms ([`loop_resistance`](/phonometry/reference/api/electroacoustics/induction-loop-components/#loop_resistance), plus that of the feed cable). |
-| `inductance_h` | Series inductance, in henries ([`rectangular_loop_inductance`](/phonometry/reference/api/electroacoustics/induction-loop-components/#rectangular_loop_inductance), plus that of the feed cable). |
+| `resistance_ohm` | Series resistance, in ohms ([`loop_resistance`](/reference/api/electroacoustics/induction-loop-components/#loop_resistance), plus that of the feed cable). |
+| `inductance_h` | Series inductance, in henries ([`rectangular_loop_inductance`](/reference/api/electroacoustics/induction-loop-components/#rectangular_loop_inductance), plus that of the feed cable). |
 | `frequencies` | Frequencies to tabulate the magnitude at, in hertz; by default the one-third-octave centres from 50 Hz to 10 kHz. |
 
-**Returns:** A [`LoopImpedance`](/phonometry/reference/api/electroacoustics/induction-loop-components/#loopimpedance).
+**Returns:** A [`LoopImpedance`](/reference/api/electroacoustics/induction-loop-components/#loopimpedance).
 
 **Raises**
 
@@ -667,9 +667,9 @@ LoopDimensions(width_m: float, length_m: float)
 
 The sides of the largest loop an amplifier drives to a field strength.
 
-What [`loop_dimensions`](/phonometry/reference/api/electroacoustics/induction-loop-components/#loop_dimensions) returns: the two sides, named, where a
+What [`loop_dimensions`](/reference/api/electroacoustics/induction-loop-components/#loop_dimensions) returns: the two sides, named, where a
 `(short side, long side)` tuple used to be unpacked by position, with
-the names [`loop_current`](/phonometry/reference/api/electroacoustics/induction-loop-components/#loop_current) takes them by.
+the names [`loop_current`](/reference/api/electroacoustics/induction-loop-components/#loop_current) takes them by.
 
 **Attributes**
 
@@ -957,7 +957,7 @@ interpolated linearly between the two steps either side of it.
 | `load_resistance_ohm` | The resistance of the resistive part of the rated load, in ohms. |
 | `rated_thd_percent` | The rated total harmonic distortion (5.4.6), in percent. |
 
-**Returns:** A [`MaxOutputCurrent`](/phonometry/reference/api/electroacoustics/induction-loop-components/#maxoutputcurrent).
+**Returns:** A [`MaxOutputCurrent`](/reference/api/electroacoustics/induction-loop-components/#maxoutputcurrent).
 
 **Raises**
 
@@ -1050,7 +1050,7 @@ that gives 0 dB, where the scaling does nothing.
 | `impedance_ohm` | The input impedance at each, in ohms; complex values are reduced to their magnitude, and real ones must be positive. |
 | `input_voltage_v` | The input voltage the field was measured with, in volts. |
 
-**Returns:** A [`NeckLoopCharacteristics`](/phonometry/reference/api/electroacoustics/induction-loop-components/#neckloopcharacteristics).
+**Returns:** A [`NeckLoopCharacteristics`](/reference/api/electroacoustics/induction-loop-components/#neckloopcharacteristics).
 
 **Raises**
 
@@ -1164,14 +1164,14 @@ A neck loop judged against one type of the draft Annex D (prA2:2017).
 | `input_voltage_v` | The input voltage that produces 400 mA/m on the jig, in volts. |
 
 The limits of the type (`limits`) are read from
-[`NECK_LOOP_TYPES`](/phonometry/reference/api/electroacoustics/induction-loop-components/#neck_loop_types), so a verification cannot be built against other
+[`NECK_LOOP_TYPES`](/reference/api/electroacoustics/induction-loop-components/#neck_loop_types), so a verification cannot be built against other
 limits.
 
 ### NeckLoopVerification.limits
 
 *property*
 
-The [`NeckLoopType`](/phonometry/reference/api/electroacoustics/induction-loop-components/#necklooptype) judged against.
+The [`NeckLoopType`](/reference/api/electroacoustics/induction-loop-components/#necklooptype) judged against.
 
 ### NeckLoopVerification.passes
 
@@ -1240,7 +1240,7 @@ degrees are as much in quadrature as 90.
 | `frequencies` | The measurement frequencies, in hertz, ascending, at least one of them inside 100 Hz to 5 kHz. |
 | `phase_difference_deg` | The phase angle between the loop currents at each, in degrees. |
 
-**Returns:** A [`QuadraturePhaseError`](/phonometry/reference/api/electroacoustics/induction-loop-components/#quadraturephaseerror).
+**Returns:** A [`QuadraturePhaseError`](/reference/api/electroacoustics/induction-loop-components/#quadraturephaseerror).
 
 **Raises**
 
@@ -1360,7 +1360,7 @@ it. Metal in the building, which Annex F describes, is not modelled.
 | `z_m` | $z$ coordinates (height above the loop plane), broadcast against both. |
 | `n_turns` | Number of turns, all carrying the same current. |
 
-**Returns:** A [`LoopField`](/phonometry/reference/api/electroacoustics/induction-loop-components/#loopfield).
+**Returns:** A [`LoopField`](/reference/api/electroacoustics/induction-loop-components/#loopfield).
 
 **Raises**
 
@@ -1441,17 +1441,17 @@ sources powered by two primary 1.5 V cells and higher voltage supplies, by
 a DC resistance of 32 ohm plus or minus 5 % and a type 2 neck loop with a
 transformer or an amplifier by an input DC resistance of at least 32 ohm,
 both reaching 400 mA/m on the jig of Annex E with at most 1.06 V at the
-input ([`NECK_LOOP_TYPES`](/phonometry/reference/api/electroacoustics/induction-loop-components/#neck_loop_types)). It is a draft, cited as one.
+input ([`NECK_LOOP_TYPES`](/reference/api/electroacoustics/induction-loop-components/#neck_loop_types)). It is a draft, cited as one.
 
 **Parameters**
 
 | Name | Description |
 | :--- | :--- |
 | `dc_resistance_ohm` | The measured DC input resistance, in ohms. |
-| `input_voltage_v` | The input voltage that produces 400 mA/m on the jig, in volts ([`NeckLoopCharacteristics.reference_input_voltage_v`](/phonometry/reference/api/electroacoustics/induction-loop-components/#neckloopcharacteristics)). |
+| `input_voltage_v` | The input voltage that produces 400 mA/m on the jig, in volts ([`NeckLoopCharacteristics.reference_input_voltage_v`](/reference/api/electroacoustics/induction-loop-components/#neckloopcharacteristics)). |
 | `neck_loop_type` | 1 or 2. |
 
-**Returns:** A [`NeckLoopVerification`](/phonometry/reference/api/electroacoustics/induction-loop-components/#neckloopverification).
+**Returns:** A [`NeckLoopVerification`](/reference/api/electroacoustics/induction-loop-components/#neckloopverification).
 
 **Raises**
 

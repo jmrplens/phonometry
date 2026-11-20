@@ -1,6 +1,6 @@
 <!-- Written by `make llms` from site/src/content/docs/buildings/rooms/workroom-sound-decay.mdx: edit that page and its Spanish twin, then run `make llms`. -->
 
-← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/buildings/rooms/workroom-sound-decay/
+← [Documentation index](../../README.md) · Published at https://phonometry.dev/buildings/rooms/workroom-sound-decay/
 
 # Spatial Sound Decay in Workrooms
 
@@ -299,8 +299,8 @@ workshop.
   described above, with the page it was read on, and the two constants of
   Equations (5) and (8), the printed 0.3 against $\lg 2$: one conversion
   written twice to different precision.
-- API reference: [`room.spatial_decay`](https://docs.jmrp.io/phonometry/reference/api/rooms/spatial-decay/)
-  and [`room.workroom_prediction`](https://docs.jmrp.io/phonometry/reference/api/rooms/workroom-prediction/).
+- API reference: [`room.spatial_decay`](https://phonometry.dev/reference/api/rooms/spatial-decay/)
+  and [`room.workroom_prediction`](https://phonometry.dev/reference/api/rooms/workroom-prediction/).
 
 ## References
 

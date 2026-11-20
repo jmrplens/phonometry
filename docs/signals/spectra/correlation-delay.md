@@ -1,6 +1,6 @@
 <!-- Written by `make llms` from site/src/content/docs/signals/spectra/correlation-delay.mdx: edit that page and its Spanish twin, then run `make llms`. -->
 
-← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/signals/spectra/correlation-delay/
+← [Documentation index](../../README.md) · Published at https://phonometry.dev/signals/spectra/correlation-delay/
 
 # Correlation, time delay and envelope
 
@@ -525,7 +525,7 @@ shares its band-limited kernel with the public
 - [Calibrated spectral analysis](spectral-analysis.md): the cross-spectrum the GCC weightings are built from, and the two-channel acquisition rules.
 - [Test signals](test-signals.md): the band-limited fractional-delay kernel behind the sub-sample alignment.
 - [Time synchronous averaging](synchronous-averaging.md): the same alignment applied per revolution.
-- API reference: [`signals`: correlation](https://docs.jmrp.io/phonometry/reference/api/signals/correlation/) and [`signals`: envelope](https://docs.jmrp.io/phonometry/reference/api/signals/envelope/).
+- API reference: [`signals`: correlation](https://phonometry.dev/reference/api/signals/correlation/) and [`signals`: envelope](https://phonometry.dev/reference/api/signals/envelope/).
 
 ## References
 

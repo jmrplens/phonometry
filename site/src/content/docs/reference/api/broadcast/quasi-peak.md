@@ -10,7 +10,7 @@ Psophometric quasi-peak programme-level meter (ITU-R BS.468-4 clause 2).
 ITU-R BS.468-4 specifies the instrument that measures audio-frequency noise
 voltage in sound broadcasting as two parts. Clause 1 is the weighting
 network, realised elsewhere in this library
-([`phonometry.filters.weighting_filter`](/phonometry/reference/api/filters/weighting/#weighting_filter) with `weighting="468"`, from the
+([`phonometry.filters.weighting_filter`](/reference/api/filters/weighting/#weighting_filter) with `weighting="468"`, from the
 Fig. 1a ladder). Clause 2 is the detector this module implements: a
 **quasi-peak** value method, whose reading is reported in **dBqps**
 (clause 3).
@@ -27,14 +27,14 @@ Table 2 reads a single 5 kHz tone burst at eight durations from 1 ms to
 and each cell carries a reference reading with a lower and an upper limit,
 expressed as a percentage of the reading the same tone gives steadily. Those
 eleven windows are the entire specification of the dynamics, and they are
-what [`verify_quasi_peak_dynamics`](/phonometry/reference/api/broadcast/quasi-peak/#verify_quasi_peak_dynamics) checks.
+what [`verify_quasi_peak_dynamics`](/reference/api/broadcast/quasi-peak/#verify_quasi_peak_dynamics) checks.
 
 The one absolute statement clause 2 does make is clause 2.6: a steady 1 kHz
 sine at 0.775 V r.m.s. shall read 0.775 V, that is 0 dBqps. So the detector
 reads the **r.m.s.** of a steady sine, not its peak, and that fixes the scale
 of the whole instrument (NOTE 2 to clause 1: "The whole instrument is
 calibrated at 1 kHz"). Here that scale is not a stored number but a
-measurement: [`quasi_peak_meter`](/phonometry/reference/api/broadcast/quasi-peak/#quasi_peak_meter) runs its own chain on a 1 kHz sine of
+measurement: [`quasi_peak_meter`](/reference/api/broadcast/quasi-peak/#quasi_peak_meter) runs its own chain on a 1 kHz sine of
 1 V r.m.s. at the caller's sample rate and divides by what it reads, so
 clause 2.6 holds exactly at every rate rather than at the one rate a frozen
 constant would have been fitted at.
@@ -43,14 +43,14 @@ What this module chooses, because the Recommendation does not
 --------------------------------------------------------------
 
 Six decisions, none of them in BS.468-4, all of them inseparable: change any
-one and [`BS468_BALLISTICS`](/phonometry/reference/api/broadcast/quasi-peak/#bs468_ballistics) has to be refitted.
+one and [`BS468_BALLISTICS`](/reference/api/broadcast/quasi-peak/#bs468_ballistics) has to be refitted.
 
 * **Full-wave rectification** as $|x|$, following the Note's own
   wording. An analytic-signal envelope also meets all eleven windows when it
   is refitted from scratch, with a three times larger worst-case residual.
 * **A peak rectifier** as a one-pole recursion with different rise and fall
   rates, the same asymmetric kernel the impulse time weighting uses
-  ([`phonometry.filters.weighting.time_weighting`](/phonometry/reference/api/filters/weighting/#time_weighting)), discharging toward
+  ([`phonometry.filters.weighting.time_weighting`](/reference/api/filters/weighting/#time_weighting)), discharging toward
   the input rather than toward zero. Refitting toward zero instead moves the
   worst residual by 0.002 dB, so the discharge law is not load-bearing.
 * **One symmetric reading device** after it, first order. Clause 2.5 treats
@@ -65,7 +65,7 @@ one and [`BS468_BALLISTICS`](/phonometry/reference/api/broadcast/quasi-peak/#bs4
   tone through the same network, so both tables are ratios and every
   absolute factor, the network's +11.7 dB at 5 kHz included, cancels.
 * **The ballistics run at the caller's rate** on the record
-  [`phonometry.filters.weighting_filter`](/phonometry/reference/api/filters/weighting/#weighting_filter) returns. Measured across 32,
+  [`phonometry.filters.weighting_filter`](/reference/api/filters/weighting/#weighting_filter) returns. Measured across 32,
   44.1, 48, 96 and 192 kHz, no reading moves by more than 0.043 dB, and none
   by more than 1.8 % of its own window.
 
@@ -98,10 +98,10 @@ instrument hardware, and "80 % of full scale" constrains where a real needle
 sits during the test rather than the quantity, which is why this module does
 not model a full scale at all.
 
-**There is no** [`report`](/phonometry/reference/api/broadcast/quasi-peak/#quasipeakresult) **fiche.** BS.468-4
+**There is no** [`report`](/reference/api/broadcast/quasi-peak/#quasipeakresult) **fiche.** BS.468-4
 prescribes no report format, no declaration form and no worked example; the
 conformity evidence is the eleven windows, and its home is
-`docs/CONFORMANCE.md` through [`verify_quasi_peak_dynamics`](/phonometry/reference/api/broadcast/quasi-peak/#verify_quasi_peak_dynamics).
+`docs/CONFORMANCE.md` through [`verify_quasi_peak_dynamics`](/reference/api/broadcast/quasi-peak/#verify_quasi_peak_dynamics).
 
 > Auto-generated from the source docstrings by `scripts/generate_api_docs.py` (`make api-docs`). Do not edit by hand.
 
@@ -139,15 +139,15 @@ sample is read before the needle has finished rising.
 
 The chain and everything it chooses that the Recommendation does not are
 described in the module docstring; the time constants are
-[`BS468_BALLISTICS`](/phonometry/reference/api/broadcast/quasi-peak/#bs468_ballistics), a fit to Tables 2 and 3 rather than a quoted
-value, and [`verify_quasi_peak_dynamics`](/phonometry/reference/api/broadcast/quasi-peak/#verify_quasi_peak_dynamics) is what checks them.
+[`BS468_BALLISTICS`](/reference/api/broadcast/quasi-peak/#bs468_ballistics), a fit to Tables 2 and 3 rather than a quoted
+value, and [`verify_quasi_peak_dynamics`](/reference/api/broadcast/quasi-peak/#verify_quasi_peak_dynamics) is what checks them.
 
 **Units.** The detector itself is unit-agnostic: rectification,
 first-order recursions and a maximum carry whatever unit the record
 arrived in, and the eleven acceptance windows are ratios in which every
 unit cancels. Only the *level* needs a unit, and clause 2.6 gives
 BS.468-4 exactly one, the volt. A bare array or an uncalibrated
-[`Signal`](/phonometry/reference/api/io/io/#signal) is therefore read against 0.775 V and its
+[`Signal`](/reference/api/io/io/#signal) is therefore read against 0.775 V and its
 `level` is dBqps. A **calibrated** Signal is analysed in pascals,
 as everywhere else in this library, and then has to be given a
 *reference* of its own: 0.775 V is not a pressure, and BS.468-4 offers
@@ -158,12 +158,12 @@ scale came out.
 
 | Name | Description |
 | :--- | :--- |
-| `x` | The record: a 1-D array, or a [`phonometry.io.Signal`](/phonometry/reference/api/io/io/#signal). Multichannel input is refused rather than mixed, because a quasi-peak reading is one needle over one channel. |
-| `fs` | Sample rate, Hz. Required for a bare array; a [`Signal`](/phonometry/reference/api/io/io/#signal) brings its own, and an explicit value that disagrees with it raises instead of silently winning. |
+| `x` | The record: a 1-D array, or a [`phonometry.io.Signal`](/reference/api/io/io/#signal). Multichannel input is refused rather than mixed, because a quasi-peak reading is one needle over one channel. |
+| `fs` | Sample rate, Hz. Required for a bare array; a [`Signal`](/reference/api/io/io/#signal) brings its own, and an explicit value that disagrees with it raises instead of silently winning. |
 | `weighting` | `"468"` (default) to run the record through the clause 1 weighting network first, which is what clause 2's preamble requires of every test but the clause 2.4 reversibility check, or `"Z"` to read it unweighted. |
 | `reference` | The reference of `level`, in the record's own unit. `None` (the default) is the 0.775 V of clause 2.6, and is refused for a calibrated Signal, whose samples are pascals. |
 
-**Returns:** A [`QuasiPeakResult`](/phonometry/reference/api/broadcast/quasi-peak/#quasipeakresult).
+**Returns:** A [`QuasiPeakResult`](/reference/api/broadcast/quasi-peak/#quasipeakresult).
 
 **Raises**
 
@@ -201,7 +201,7 @@ QuasiPeakDynamicsResult(fs: float, readings_percent: tuple[float, ...])
 
 The eleven acceptance windows of clause 2, read on one chain.
 
-What [`verify_quasi_peak_dynamics`](/phonometry/reference/api/broadcast/quasi-peak/#verify_quasi_peak_dynamics) returns: the eleven readings, in
+What [`verify_quasi_peak_dynamics`](/reference/api/broadcast/quasi-peak/#verify_quasi_peak_dynamics) returns: the eleven readings, in
 percent of the steady reading, and the sample rate they were run at. The
 rows put each reading beside the window Table 2 or Table 3 prints for it,
 and the verdict and the two summary numbers are the conjunction, the
@@ -365,10 +365,10 @@ answer by construction.
 
 | Name | Description |
 | :--- | :--- |
-| `fs` | Sample rate to run the stimuli at, in Hz. At 44.1 kHz the 25-cycle burst is not sample-exact (it spans 220.5 samples) and [`tone_burst`](/phonometry/reference/api/signals/test-signals/#tone_burst) warns; gating it a whole sample later moves the reading by under 0.0001 dB, against a 2.626 dB window. |
-| `ballistics` | The chain to check, defaulting to the fitted [`BS468_BALLISTICS`](/phonometry/reference/api/broadcast/quasi-peak/#bs468_ballistics). Passing another set is how the published statement about how far each constant can move is reproduced, and the reason the chain takes them as an argument at all. |
+| `fs` | Sample rate to run the stimuli at, in Hz. At 44.1 kHz the 25-cycle burst is not sample-exact (it spans 220.5 samples) and [`tone_burst`](/reference/api/signals/test-signals/#tone_burst) warns; gating it a whole sample later moves the reading by under 0.0001 dB, against a 2.626 dB window. |
+| `ballistics` | The chain to check, defaulting to the fitted [`BS468_BALLISTICS`](/reference/api/broadcast/quasi-peak/#bs468_ballistics). Passing another set is how the published statement about how far each constant can move is reproduced, and the reason the chain takes them as an argument at all. |
 
-**Returns:** A [`QuasiPeakDynamicsResult`](/phonometry/reference/api/broadcast/quasi-peak/#quasipeakdynamicsresult), which carries the verdict together with the eleven rows it is the conjunction of.
+**Returns:** A [`QuasiPeakDynamicsResult`](/reference/api/broadcast/quasi-peak/#quasipeakdynamicsresult), which carries the verdict together with the eleven rows it is the conjunction of.
 
 **Raises**
 

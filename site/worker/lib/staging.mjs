@@ -334,8 +334,8 @@ export function stage({ from, out, prefix, origin, pairs, exclusions, indexable,
 	mkdirSync(site, { recursive: true });
 	cpSync(from, site, { recursive: true });
 	// The beacon goes into the copies, after they are made, so the build
-	// (GitHub Pages' artifact, already deployed to docs.jmrp.io) is never
-	// written; the root copies below are taken from the staged pages.
+	// (the artifact docs.yml uploaded) is never written; the root copies
+	// below are taken from the staged pages.
 	for (const { path } of pages) {
 		const file = join(site, path);
 		writeFileSync(file, withBeacon(readFileSync(file, 'utf8'), path.split('/').at(-1) === '404.html', prefix));

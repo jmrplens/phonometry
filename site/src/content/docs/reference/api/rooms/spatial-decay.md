@@ -52,7 +52,7 @@ at one conventional distance by Equation (8).
 **The 0.3 of Equation (5).** The slope of a least-squares fit of $D$
 against $\lg r$ is a rate per decade; a doubling is $\lg 2$ of a
 decade, which is 0.301 03. The clause prints 0.3, and that is what
-[`DECADE_TO_DOUBLING`](/phonometry/reference/api/rooms/spatial-decay/#decade_to_doubling) carries, because the printed constant is what
+[`DECADE_TO_DOUBLING`](/reference/api/rooms/spatial-decay/#decade_to_doubling) carries, because the printed constant is what
 reproduces the printed results. Equation (8) prints $\lg 2$ in full a page
 later, so the two are not the same number in the same document; the difference
 is 0.3 % of a slope and the errata registry records it.
@@ -67,7 +67,7 @@ A-weighting curve over the six octaves, 6.23 dB, printed to one decimal, and it
 is there so that a flat curve comes back unchanged. Table 1 prints the same
 curve to one decimal weight by weight, and the six printed weights sum to
 6.251 5 dB, so the printed equation returns a flat curve 0.05 dB high.
-[`NORMALIZED_OFFSET_DB`](/phonometry/reference/api/rooms/spatial-decay/#normalized_offset_db) carries the printed 6.2 on the same rule as the
+[`NORMALIZED_OFFSET_DB`](/reference/api/rooms/spatial-decay/#normalized_offset_db) carries the printed 6.2 on the same rule as the
 0.3 above: four printings print it and a reader checking against the page will
 use it. Annex C was normalised exactly: its normalized column and its
 Table C.10 land inside the printed rounding under Equation (3) with the Table 1
@@ -119,15 +119,15 @@ so they are not fields.
 
 True where the margin is under the preferred 10 dB and over the 6 dB.
 
-[`ISO14257_PREFERRED_BACKGROUND_MARGIN_DB`](/phonometry/reference/api/rooms/spatial-decay/#iso14257_preferred_background_margin_db) and
-[`ISO14257_MIN_BACKGROUND_MARGIN_DB`](/phonometry/reference/api/rooms/spatial-decay/#iso14257_min_background_margin_db) bound the window where
+[`ISO14257_PREFERRED_BACKGROUND_MARGIN_DB`](/reference/api/rooms/spatial-decay/#iso14257_preferred_background_margin_db) and
+[`ISO14257_MIN_BACKGROUND_MARGIN_DB`](/reference/api/rooms/spatial-decay/#iso14257_min_background_margin_db) bound the window where
 the clause asks for the ISO 3744 background correction.
 
 ### BackgroundMarginCheck.passes
 
 *property*
 
-The verdict: every margin clears [`ISO14257_PREFERRED_BACKGROUND_MARGIN_DB`](/phonometry/reference/api/rooms/spatial-decay/#iso14257_preferred_background_margin_db).
+The verdict: every margin clears [`ISO14257_PREFERRED_BACKGROUND_MARGIN_DB`](/reference/api/rooms/spatial-decay/#iso14257_preferred_background_margin_db).
 
 That is the only case that needs nothing done to it.
 
@@ -135,7 +135,7 @@ That is the only case that needs nothing done to it.
 
 *property*
 
-True where the margin is at or under [`ISO14257_MIN_BACKGROUND_MARGIN_DB`](/phonometry/reference/api/rooms/spatial-decay/#iso14257_min_background_margin_db).
+True where the margin is at or under [`ISO14257_MIN_BACKGROUND_MARGIN_DB`](/reference/api/rooms/spatial-decay/#iso14257_min_background_margin_db).
 
 The clause offers no correction for those. Judged settled.
 
@@ -152,14 +152,14 @@ Does the source stand clear of the background? 5.1.4.
 
 The clause asks for 10 dB at every position and in every octave band the
 curve is measured over. Between 10 dB and 6 dB it asks for the background
-correction of ISO 3744 ([`phonometry.emission.background_correction`](/phonometry/reference/api/building/laboratory-insulation/#background_correction))
+correction of ISO 3744 ([`phonometry.emission.background_correction`](/reference/api/building/laboratory-insulation/#background_correction))
 before the levels are used; at 6 dB or less it asks for neither, because
 there is no longer a source level to correct towards.
 
 The verdict is returned rather than applied: correcting the levels here
 would change a measured number behind the caller's back, and the correction
 the clause names belongs to the standard that prints it. A margin under
-10 dB anywhere also emits [`SpatialDecayWarning`](/phonometry/reference/api/rooms/spatial-decay/#spatialdecaywarning), so a curve computed
+10 dB anywhere also emits [`SpatialDecayWarning`](/reference/api/rooms/spatial-decay/#spatialdecaywarning), so a curve computed
 from levels nobody checked says so on the way past.
 
 One octave band at a time, as every other function of clause 6 takes its
@@ -173,7 +173,7 @@ read band by band.
 | `levels` | $L_p$ with the test source running, in decibels, one value per measured position of one octave band. |
 | `background_levels` | The background at the same positions, in decibels, as a scalar or one value per position. |
 
-**Returns:** The verdict, as a [`BackgroundMarginCheck`](/phonometry/reference/api/rooms/spatial-decay/#backgroundmargincheck).
+**Returns:** The verdict, as a [`BackgroundMarginCheck`](/reference/api/rooms/spatial-decay/#backgroundmargincheck).
 
 **Raises**
 
@@ -463,7 +463,7 @@ $$
 
 This is the height of the fitted line over the free-field line at a
 conventional distance: 4 m for the near region, 10 m for the middle one and
-30 m for the far one ([`EVALUATION_DISTANCES_M`](/phonometry/reference/api/rooms/spatial-decay/#evaluation_distances_m)). Unlike Equation (7)
+30 m for the far one ([`EVALUATION_DISTANCES_M`](/reference/api/rooms/spatial-decay/#evaluation_distances_m)). Unlike Equation (7)
 it does not average the measured points, it reads the line, so a single
 outlying position moves it much less.
 
@@ -574,14 +574,14 @@ printed equation returns a flat curve 0.05 dB high. It is used as printed:
 the result is what a hand evaluation of the printed equation gives, which
 is 0.05 dB above Annex C, normalised exactly (see the errata registry). For
 the exact normalisation, which returns a flat curve unchanged, call
-[`spectrum_distribution_value`](/phonometry/reference/api/rooms/spatial-decay/#spectrum_distribution_value) with the values of
-[`PINK_NOISE_WEIGHTS_DB`](/phonometry/reference/api/rooms/spatial-decay/#pink_noise_weights_db) as the machine spectrum.
+[`spectrum_distribution_value`](/reference/api/rooms/spatial-decay/#spectrum_distribution_value) with the values of
+[`PINK_NOISE_WEIGHTS_DB`](/reference/api/rooms/spatial-decay/#pink_noise_weights_db) as the machine spectrum.
 
 **Parameters**
 
 | Name | Description |
 | :--- | :--- |
-| `distribution_levels` | $D_j$ in each band, in decibels, in the order of [`SPATIAL_DECAY_BANDS_HZ`](/phonometry/reference/api/rooms/spatial-decay/#spatial_decay_bands_hz) unless `frequencies` says otherwise. |
+| `distribution_levels` | $D_j$ in each band, in decibels, in the order of [`SPATIAL_DECAY_BANDS_HZ`](/reference/api/rooms/spatial-decay/#spatial_decay_bands_hz) unless `frequencies` says otherwise. |
 | `frequencies` | The nominal octave centres the values belong to, in hertz. |
 
 **Returns:** $D_\mathrm{Norm}$, in decibels.
@@ -793,7 +793,7 @@ The curve of one region with its two descriptors, clause 6.
 | `region` | `"near"`, `"middle"`, `"far"` or `"whole"`. |
 | `band` | The octave centre the curve belongs to, in hertz. |
 
-**Returns:** The curve and its descriptors, as a [`SpatialDecayResult`](/phonometry/reference/api/rooms/spatial-decay/#spatialdecayresult).
+**Returns:** The curve and its descriptors, as a [`SpatialDecayResult`](/reference/api/rooms/spatial-decay/#spatialdecayresult).
 
 **Raises**
 

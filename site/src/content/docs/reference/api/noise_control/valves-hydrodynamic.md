@@ -43,12 +43,12 @@ recorded in `docs/ERRATA.md`:
   Strouhal number a leading 0.02 and no valve style modifier, Annex A's
   Table A.1 gives it 0.036 and a factor $F_d^{0.75}$. Only the annex
   form reproduces the annex's own printed $N_\mathrm{Str}$, which is why
-  [`STROUHAL_CONSTANTS`](/phonometry/reference/api/noise_control/valves-hydrodynamic/#strouhal_constants) carries both and the default is `"annex"`.
+  [`STROUHAL_CONSTANTS`](/reference/api/noise_control/valves-hydrodynamic/#strouhal_constants) carries both and the default is `"annex"`.
 * Table A.1 prints the band transmission loss as `TL(8 000 Hz) = 51.76 dB`,
   positive, where its own two inputs sum to $-51.763$ dB.
 * The seat diameter formula of 6.3.2 b), $d_o = 5.2\sqrt{N_{34}C_n}$,
   returns millimetres for a symbol Clause 3 declares in metres, which is why
-  [`last_stage_seat_diameter_mm`](/phonometry/reference/api/noise_control/valves-hydrodynamic/#last_stage_seat_diameter_mm) carries the unit in its name.
+  [`last_stage_seat_diameter_mm`](/reference/api/noise_control/valves-hydrodynamic/#last_stage_seat_diameter_mm) carries the unit in its name.
 * Equation (23b) computes each stage's inlet pressure from the **next**
   stage's, which contradicts Equation (23a) and runs the pressure the wrong
   way along the trim.
@@ -61,7 +61,7 @@ recorded in `docs/ERRATA.md`:
   printed beside them, by up to 0.08 dB.
 
 Clause 6, the multistage trim, is the same method with per-stage inputs:
-[`stage_conditions`](/phonometry/reference/api/noise_control/valves-hydrodynamic/#stage_conditions) splits the differential, and either the stages are
+[`stage_conditions`](/reference/api/noise_control/valves-hydrodynamic/#stage_conditions) splits the differential, and either the stages are
 summed in energy by Equation (27) or, for a fixed device with increasing flow
 areas, only the last stage is calculated at all.
 
@@ -240,7 +240,7 @@ gravel where turbulence is heard as a hiss around one frequency.
 | Name | Description |
 | :--- | :--- |
 | `frequency` | $f_i$, the band centre or centres, in Hz (scalar or array). |
-| `peak` | $f_\mathrm{p,cav}$ from [`cavitation_peak_frequency`](/phonometry/reference/api/noise_control/valves-hydrodynamic/#cavitation_peak_frequency), in Hz. |
+| `peak` | $f_\mathrm{p,cav}$ from [`cavitation_peak_frequency`](/reference/api/noise_control/valves-hydrodynamic/#cavitation_peak_frequency), in Hz. |
 
 **Returns:** $F_{cav}(f_i)$, in dB. A `float` for a number, an array for a sequence or an array, a zero-dimensional one included.
 
@@ -282,9 +282,9 @@ stops.
 
 | Name | Description |
 | :--- | :--- |
-| `turbulent` | $\eta_\mathrm{turb}$ from [`turbulent_efficiency`](/phonometry/reference/api/noise_control/valves-hydrodynamic/#turbulent_efficiency). |
+| `turbulent` | $\eta_\mathrm{turb}$ from [`turbulent_efficiency`](/reference/api/noise_control/valves-hydrodynamic/#turbulent_efficiency). |
 | `differential` | $p_1 - p_2$, in Pa. |
-| `choked_differential` | $\Delta p_c$ from [`cavitation_differential`](/phonometry/reference/api/noise_control/valves-hydrodynamic/#cavitation_differential), in Pa. |
+| `choked_differential` | $\Delta p_c$ from [`cavitation_differential`](/reference/api/noise_control/valves-hydrodynamic/#cavitation_differential), in Pa. |
 | `pressure_ratio` | $x_F$ of Equation (1). |
 | `corrected_ratio` | $x_{Fzp1}$ of Equation (3c). |
 
@@ -333,7 +333,7 @@ drops back down into a rumble.
 
 | Name | Description |
 | :--- | :--- |
-| `turbulent_peak` | $f_\mathrm{p,turb}$ from [`turbulent_peak_frequency`](/phonometry/reference/api/noise_control/valves-hydrodynamic/#turbulent_peak_frequency), in Hz. |
+| `turbulent_peak` | $f_\mathrm{p,turb}$ from [`turbulent_peak_frequency`](/reference/api/noise_control/valves-hydrodynamic/#turbulent_peak_frequency), in Hz. |
 | `pressure_ratio` | $x_F$ of Equation (1). |
 | `corrected_ratio` | $x_{Fzp1}$ of Equation (3c). |
 
@@ -467,7 +467,7 @@ later.
 
 | Name | Description |
 | :--- | :--- |
-| `incipient_ratio` | $x_{Fz}$ at 6 × 10⁵ Pa, measured or from [`incipient_cavitation_ratio`](/phonometry/reference/api/noise_control/valves-hydrodynamic/#incipient_cavitation_ratio). |
+| `incipient_ratio` | $x_{Fz}$ at 6 × 10⁵ Pa, measured or from [`incipient_cavitation_ratio`](/reference/api/noise_control/valves-hydrodynamic/#incipient_cavitation_ratio). |
 | `inlet_pressure_pa` | $p_1$, absolute, in Pa. |
 
 **Returns:** $x_{Fzp1}$, dimensionless.
@@ -919,8 +919,8 @@ The valve, at the travel being examined.
 | `flow_coefficient` | $C$. |
 | `style_modifier` | $F_d$, taken from IEC 60534-8-3, since 4.3 prints no table of its own. |
 | `pressure_recovery` | $F_L$. |
-| `incipient_ratio` | $x_{Fz}$ at 6 × 10⁵ Pa, measured to IEC 60534-8-2 or estimated with [`incipient_cavitation_ratio`](/phonometry/reference/api/noise_control/valves-hydrodynamic/#incipient_cavitation_ratio). Equation (3c) corrects it to the working inlet pressure. |
-| `power_ratio` | $r_W$ from Table 2, the share of the sound power radiated into the pipe. See [`ACOUSTIC_POWER_RATIOS`](/phonometry/reference/api/noise_control/valves-hydrodynamic/#acoustic_power_ratios). |
+| `incipient_ratio` | $x_{Fz}$ at 6 × 10⁵ Pa, measured to IEC 60534-8-2 or estimated with [`incipient_cavitation_ratio`](/reference/api/noise_control/valves-hydrodynamic/#incipient_cavitation_ratio). Equation (3c) corrects it to the working inlet pressure. |
+| `power_ratio` | $r_W$ from Table 2, the share of the sound power radiated into the pipe. See [`ACOUSTIC_POWER_RATIOS`](/reference/api/noise_control/valves-hydrodynamic/#acoustic_power_ratios). |
 | `valve_diameter_m` | $d$, the valve inlet internal diameter, in m. |
 | `seat_diameter_m` | $d_o$, in m. |
 | `coefficient` | Which flow coefficient `flow_coefficient` is, `"Cv"` or `"Kv"`. |
@@ -951,7 +951,7 @@ $10^{-6}$ of this and calls it sound.
 | Name | Description |
 | :--- | :--- |
 | `mass_flow` | $\dot m$, in kg/s. |
-| `velocity` | $U_\mathrm{vc}$ from [`vena_contracta_velocity`](/phonometry/reference/api/noise_control/valves-hydrodynamic/#vena_contracta_velocity), in m/s. |
+| `velocity` | $U_\mathrm{vc}$ from [`vena_contracta_velocity`](/reference/api/noise_control/valves-hydrodynamic/#vena_contracta_velocity), in m/s. |
 | `pressure_recovery` | $F_L$, dimensionless. |
 
 **Returns:** $W_m$, in W.
@@ -1138,7 +1138,7 @@ see `docs/ERRATA.md`.
 | `stage_coefficients` | $C_i$, the rated flow coefficient of each stage in flow order, two or more of them. |
 | `flow_coefficient` | $C$ of the whole valve, in the same units. |
 
-**Returns:** One [`StageConditions`](/phonometry/reference/api/noise_control/valves-hydrodynamic/#stageconditions) per stage, in flow order.
+**Returns:** One [`StageConditions`](/reference/api/noise_control/valves-hydrodynamic/#stageconditions) per stage, in flow order.
 
 **Raises**
 
@@ -1220,7 +1220,7 @@ costs 6.02.
 | Name | Description |
 | :--- | :--- |
 | `frequency` | $f$, in Hz. A scalar or a 1-D array. |
-| `ring` | $f_r$ from [`pipe_ring_frequency`](/phonometry/reference/api/noise_control/valves-hydrodynamic/#pipe_ring_frequency), in Hz. |
+| `ring` | $f_r$ from [`pipe_ring_frequency`](/reference/api/noise_control/valves-hydrodynamic/#pipe_ring_frequency), in Hz. |
 
 **Returns:** $\Delta TL$, in dB, one value per frequency, and always negative: the correction is worth at least 5.85 dB even where it is smallest. A `float` for a number, an array for a sequence or an array, a zero-dimensional one included.
 
@@ -1276,7 +1276,7 @@ page renders it as a bare 1, which flattens the low-frequency side.
 | Name | Description |
 | :--- | :--- |
 | `frequency` | $f_i$, the band centre or centres, in Hz (scalar or array). |
-| `peak` | $f_\mathrm{p,turb}$ from [`turbulent_peak_frequency`](/phonometry/reference/api/noise_control/valves-hydrodynamic/#turbulent_peak_frequency), in Hz. |
+| `peak` | $f_\mathrm{p,turb}$ from [`turbulent_peak_frequency`](/reference/api/noise_control/valves-hydrodynamic/#turbulent_peak_frequency), in Hz. |
 
 **Returns:** $F_{turb}(f_i)$, in dB. A `float` for a number, an array for a sequence or an array, a zero-dimensional one included.
 
@@ -1346,7 +1346,7 @@ diameter of Equation (4) stands for that size.
 
 | Name | Description |
 | :--- | :--- |
-| `strouhal_number` | $N_\mathrm{STR}$ from [`jet_strouhal_number`](/phonometry/reference/api/noise_control/valves-hydrodynamic/#jet_strouhal_number). |
+| `strouhal_number` | $N_\mathrm{STR}$ from [`jet_strouhal_number`](/reference/api/noise_control/valves-hydrodynamic/#jet_strouhal_number). |
 | `velocity` | $U_\mathrm{vc}$, in m/s. |
 | `jet` | $D_j$ of Equation (4), in m. |
 
@@ -1424,13 +1424,13 @@ exactly zero, so the two branches meet without a step.
 
 | Name | Description |
 | :--- | :--- |
-| `stream` | The liquid and the operating point, a [`LiquidStream`](/phonometry/reference/api/noise_control/valves-hydrodynamic/#liquidstream). |
-| `valve` | The valve at the travel being examined, a [`LiquidTrim`](/phonometry/reference/api/noise_control/valves-hydrodynamic/#liquidtrim). |
-| `pipe` | The downstream pipe and the air around it, a [`LiquidPipe`](/phonometry/reference/api/noise_control/valves-hydrodynamic/#liquidpipe). |
-| `strouhal_form` | Which printing of Equation (12) to follow, `"annex"` or `"clause"`; see [`STROUHAL_CONSTANTS`](/phonometry/reference/api/noise_control/valves-hydrodynamic/#strouhal_constants). |
+| `stream` | The liquid and the operating point, a [`LiquidStream`](/reference/api/noise_control/valves-hydrodynamic/#liquidstream). |
+| `valve` | The valve at the travel being examined, a [`LiquidTrim`](/reference/api/noise_control/valves-hydrodynamic/#liquidtrim). |
+| `pipe` | The downstream pipe and the air around it, a [`LiquidPipe`](/reference/api/noise_control/valves-hydrodynamic/#liquidpipe). |
+| `strouhal_form` | Which printing of Equation (12) to follow, `"annex"` or `"clause"`; see [`STROUHAL_CONSTANTS`](/reference/api/noise_control/valves-hydrodynamic/#strouhal_constants). |
 | `frequencies` | The band centres to report, in Hz. The default is the one-third-octave set 5.4.1 prints, 50 Hz to 20 kHz. |
 
-**Returns:** A [`HydrodynamicValveNoise`](/phonometry/reference/api/noise_control/valves-hydrodynamic/#hydrodynamicvalvenoise) carrying every printed intermediate as well as the level at 1 m.
+**Returns:** A [`HydrodynamicValveNoise`](/reference/api/noise_control/valves-hydrodynamic/#hydrodynamicvalvenoise) carrying every printed intermediate as well as the level at 1 m.
 
 **Raises**
 
@@ -1463,7 +1463,7 @@ ideal velocity head the valve actually reaches at the vena contracta.
 
 | Name | Description |
 | :--- | :--- |
-| `differential` | $\Delta p_c$ from [`cavitation_differential`](/phonometry/reference/api/noise_control/valves-hydrodynamic/#cavitation_differential), in Pa. |
+| `differential` | $\Delta p_c$ from [`cavitation_differential`](/reference/api/noise_control/valves-hydrodynamic/#cavitation_differential), in Pa. |
 | `density` | $\rho_L$ of the liquid, in kg/m³. |
 | `pressure_recovery` | $F_L$, dimensionless. |
 

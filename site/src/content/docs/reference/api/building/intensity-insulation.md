@@ -8,7 +8,7 @@ sidebar:
 Sound insulation measured with sound intensity (ISO 15186).
 
 This is the sound-**intensity** counterpart of the sound-pressure methods in
-[`phonometry.building.measurement.laboratory_insulation`](/phonometry/reference/api/building/laboratory-insulation/) (ISO 10140) and [`phonometry.building.measurement.insulation`](/phonometry/reference/api/building/insulation/)
+[`phonometry.building.measurement.laboratory_insulation`](/reference/api/building/laboratory-insulation/) (ISO 10140) and [`phonometry.building.measurement.insulation`](/reference/api/building/insulation/)
 (ISO 16283). Instead of an equivalent absorption area in the receiving room,
 the transmitted sound power is measured directly by scanning an intensity
 probe over a measurement surface enclosing the specimen. The main use is when
@@ -72,7 +72,7 @@ this module answer over 50 Hz to 160 Hz instead (its Clause 1.1), and results
 from the two ranges are meant to be combined into one 50 Hz to 5000 Hz curve.
  The single-number weighted rating uses the ISO 717-1 core range, so
 the automatic rating (`RI,w`, `RI,M,w`, `DI,n,e,w`) is formed via the
-verified [`phonometry.building.weighted_rating`](/phonometry/reference/api/building/ratings/#weighted_rating) engine only when exactly
+verified [`phonometry.building.weighted_rating`](/reference/api/building/ratings/#weighted_rating) engine only when exactly
 16 one-third-octave (100-3150 Hz) or 5 octave (125-2000 Hz) values are
 supplied.
 
@@ -149,7 +149,7 @@ normal sound intensity level `LIn` over the measurement surface of area
 `Sm` (`measurement_area`), the reference absorption area
 $A_0 = 10$ m² and the number `N` of element units installed within
 the surface. The weighted rating `DI,n,e,w` is computed via
-[`phonometry.building.weighted_rating`](/phonometry/reference/api/building/ratings/#weighted_rating) (ISO 717-1) when exactly 16 or
+[`phonometry.building.weighted_rating`](/reference/api/building/ratings/#weighted_rating) (ISO 717-1) when exactly 16 or
 5 values are supplied.
 
 :::note
@@ -173,7 +173,7 @@ function implements the corrected per-unit form and warns when
 | `measurement_area` | Measurement-surface area `Sm`, in m². |
 | `n` | Number `N` of small element units in the surface (Default: 1). |
 
-**Returns:** [`IntensityElementNormalizedResult`](/phonometry/reference/api/building/intensity-insulation/#intensityelementnormalizedresult).
+**Returns:** [`IntensityElementNormalizedResult`](/reference/api/building/intensity-insulation/#intensityelementnormalizedresult).
 
 **Raises**
 
@@ -214,17 +214,17 @@ normal sound intensity level `LIn` over the measurement surface of area
 `Sm` (`measurement_area`), for a specimen of area `S` (`area`). The
 same formula gives the apparent index `R'I` in the field (ISO 15186-2).
 When an adaptation term `kc` is supplied (see
-[`adaptation_term_kc`](/phonometry/reference/api/building/intensity-insulation/#adaptation_term_kc)), the modified index
+[`adaptation_term_kc`](/reference/api/building/intensity-insulation/#adaptation_term_kc)), the modified index
 $R_{I,\mathrm{M}} = R_I + K_\mathrm{c}$ (Formula (9)) is also
 formed. Weighted ratings `RI,w` (and `RI,M,w`) are computed via
-[`phonometry.building.weighted_rating`](/phonometry/reference/api/building/ratings/#weighted_rating) (ISO 717-1) when exactly 16
+[`phonometry.building.weighted_rating`](/reference/api/building/ratings/#weighted_rating) (ISO 717-1) when exactly 16
 one-third-octave (100-3150 Hz) or 5 octave (125-2000 Hz) values are
 supplied.
 
 `lp1` and `l_in` may be one value per band (already averaged) or a
 two-dimensional `(positions, bands)` array, in which case the positions
 are energy-averaged. Subareas scanned separately should first be combined
-with [`subarea_intensity_level`](/phonometry/reference/api/building/intensity-insulation/#subarea_intensity_level).
+with [`subarea_intensity_level`](/reference/api/building/intensity-insulation/#subarea_intensity_level).
 
 **Parameters**
 
@@ -236,7 +236,7 @@ with [`subarea_intensity_level`](/phonometry/reference/api/building/intensity-in
 | `area` | Specimen area `S`, in m². |
 | `kc` | Adaptation term `Kc` per band (dB) for the modified index, or `None` to skip it. |
 
-**Returns:** [`IntensityReductionResult`](/phonometry/reference/api/building/intensity-insulation/#intensityreductionresult).
+**Returns:** [`IntensityReductionResult`](/reference/api/building/intensity-insulation/#intensityreductionresult).
 
 **Raises**
 
@@ -324,7 +324,7 @@ automatically only for exactly 16 one-third-octave (100 Hz to 3150 Hz)
 or 5 octave (125 Hz to 2000 Hz) bands, and a result carrying no rating
 (any other band count) is rejected.
 
-The applicable [`ReportMetadata`](/phonometry/reference/api/building/insulation/#reportmetadata) fields describe the
+The applicable [`ReportMetadata`](/reference/api/building/insulation/#reportmetadata) fields describe the
 intensity measurement: `specimen` (the tested element and its
 mounting and sealing, Clause 8 e), `area` (the element area),
 `client`, `manufacturer`, `test_room` (the laboratory /
@@ -342,7 +342,7 @@ PASS/FAIL verdict; the element insulation passes at or above the target.
 | Name | Description |
 | :--- | :--- |
 | `path` | Destination path of the PDF file. |
-| `metadata` | Optional [`ReportMetadata`](/phonometry/reference/api/building/insulation/#reportmetadata); `None` produces a lightweight fiche (body, rating, statement and disclaimer only). |
+| `metadata` | Optional [`ReportMetadata`](/reference/api/building/insulation/#reportmetadata); `None` produces a lightweight fiche (body, rating, statement and disclaimer only). |
 | `engine` | Rendering back end; only `"reportlab"` is supported. |
 | `verbose` | When `True`, the left table shows the ISO 717 evaluation per band (the `DI,n,e` value, the shifted reference and the unfavourable deviation) instead of the two-column form. |
 | `language` | Fiche language: `"en"` (default, English) or `"es"` (Spanish, with a comma decimal separator). |
@@ -441,7 +441,7 @@ exactly 16 one-third-octave (100 Hz to 3150 Hz) or 5 octave (125 Hz
 to 2000 Hz) bands, and a result carrying no rating (any other band
 count) is rejected.
 
-The applicable [`ReportMetadata`](/phonometry/reference/api/building/insulation/#reportmetadata) fields describe the
+The applicable [`ReportMetadata`](/reference/api/building/insulation/#reportmetadata) fields describe the
 intensity measurement: `specimen` (the tested element and its
 mounting, sealing and mass per unit area, Clause 8 e), `client`,
 `manufacturer`, `test_room` (the laboratory / facility),
@@ -458,7 +458,7 @@ and name the measurement standard in `measurement_standard`
 | Name | Description |
 | :--- | :--- |
 | `path` | Destination path of the PDF file. |
-| `metadata` | Optional [`ReportMetadata`](/phonometry/reference/api/building/insulation/#reportmetadata); `None` produces a lightweight fiche (body, rating, statement and disclaimer only). |
+| `metadata` | Optional [`ReportMetadata`](/reference/api/building/insulation/#reportmetadata); `None` produces a lightweight fiche (body, rating, statement and disclaimer only). |
 | `engine` | Rendering back end; only `"reportlab"` is supported. |
 | `verbose` | When `True` and the Kc-modified index `RI,M` is available, the table annexes `RI,M` beside the reported `RI`. |
 | `language` | Fiche language: `"en"` (default, English) or `"es"` (Spanish, with a comma decimal separator). |
@@ -530,7 +530,7 @@ Any frequency is computed, and no range is imposed. A.1 declares Formula
 result outside 50 Hz to 160 Hz is the model evaluated past its stated
 validity: useful for seeing where a real panel leaves it, not usable as a
 qualification. Restricting the input is the caller's to do, unlike
-[`low_frequency_intensity_reduction`](/phonometry/reference/api/building/intensity-insulation/#low_frequency_intensity_reduction), whose quantity is defined over
+[`low_frequency_intensity_reduction`](/reference/api/building/intensity-insulation/#low_frequency_intensity_reduction), whose quantity is defined over
 that range and nowhere else.
 
 **Parameters**
@@ -578,7 +578,7 @@ $$
 
 with the reference absorption area $A_0 = 10$ m². Two things
 separate it from its part 1 sibling
-([`intensity_element_normalized_difference`](/phonometry/reference/api/building/intensity-insulation/#intensity_element_normalized_difference)): the 9 dB of the
+([`intensity_element_normalized_difference`](/reference/api/building/intensity-insulation/#intensity_element_normalized_difference)): the 9 dB of the
 surface measurement in place of 6, and the sign of the $10\lg N$
 term, which this part prints as the derivable one. Part 1 prints it
 subtracted, which is registered in `docs/ERRATA.md`; the two parts
@@ -596,7 +596,7 @@ disagree on the page, and this is the one that agrees with the physics.
 | `frequencies` | Mid-band frequencies, in hertz, or `None`. Clause 6.6 admits 50 Hz to 160 Hz and nothing else. |
 | `absorbing_specimen_surface` | `True` when the test specimen presents a sound-absorbing surface in the receiving room, which tightens the Clause 6.4.2 limit from 10 dB to 6 dB. |
 
-**Returns:** [`LowFrequencyElementResult`](/phonometry/reference/api/building/intensity-insulation/#lowfrequencyelementresult).
+**Returns:** [`LowFrequencyElementResult`](/reference/api/building/intensity-insulation/#lowfrequencyelementresult).
 
 **Raises**
 
@@ -631,7 +631,7 @@ $$
 R_I = L_{p\mathrm{S}} - 9 - \left[ L_{I\mathrm{n}} + 10 \lg \frac{S_\mathrm{m}}{S} \right] \mathrm{dB}
 $$
 
-The 9 dB is the whole difference from [`intensity_sound_reduction`](/phonometry/reference/api/building/intensity-insulation/#intensity_sound_reduction),
+The 9 dB is the whole difference from [`intensity_sound_reduction`](/reference/api/building/intensity-insulation/#intensity_sound_reduction),
 which subtracts 6: close to a rigid boundary a diffuse field carries twice
 the mean-square pressure it carries away from one, so the surface average
 sits three decibels above the room average of the same field.
@@ -653,12 +653,12 @@ guessed.
 
 Clause 6.4.2 refuses a negative measured intensity for the same reason,
 which a level cannot carry: pass the signed sub-area intensities through
-[`subarea_intensity_level`](/phonometry/reference/api/building/intensity-insulation/#subarea_intensity_level) first, which is where the sign lives.
+[`subarea_intensity_level`](/reference/api/building/intensity-insulation/#subarea_intensity_level) first, which is where the sign lives.
 
 `lp_surface` and `l_in` may be one value per band or a
 `(positions, bands)` array, in which case the positions are
 energy-averaged. Sub-areas scanned separately are combined first with
-[`subarea_intensity_level`](/phonometry/reference/api/building/intensity-insulation/#subarea_intensity_level), which is Formulas (9) and (10) here.
+[`subarea_intensity_level`](/reference/api/building/intensity-insulation/#subarea_intensity_level), which is Formulas (9) and (10) here.
 
 **Parameters**
 
@@ -672,7 +672,7 @@ energy-averaged. Sub-areas scanned separately are combined first with
 | `frequencies` | Mid-band frequencies, in hertz, or `None`. Clause 6.6 requires at least the 50 Hz, 63 Hz and 80 Hz one-third octaves and allows 100 Hz, 125 Hz and 160 Hz; a band outside 50 Hz to 160 Hz is refused, because this method is defined for the low-frequency range alone. |
 | `absorbing_specimen_surface` | `True` when the test specimen presents a sound-absorbing surface in the receiving room, which tightens the Clause 6.4.2 limit from 10 dB to 6 dB. A specimen absorbing on one side only is mounted with that side towards the source room (Clause 5.3), so this is the two-absorbing-sides case. |
 
-**Returns:** [`LowFrequencyIntensityResult`](/phonometry/reference/api/building/intensity-insulation/#lowfrequencyintensityresult).
+**Returns:** [`LowFrequencyIntensityResult`](/reference/api/building/intensity-insulation/#lowfrequencyintensityresult).
 
 **Raises**
 
@@ -698,7 +698,7 @@ LowFrequencyElementResult(
 Per-band element normalized level difference at low frequencies.
 
 The result of ISO 15186-3:2002, Clause 3.9, Formula (8), the small-element
-counterpart of [`LowFrequencyIntensityResult`](/phonometry/reference/api/building/intensity-insulation/#lowfrequencyintensityresult). No single-number
+counterpart of [`LowFrequencyIntensityResult`](/reference/api/building/intensity-insulation/#lowfrequencyintensityresult). No single-number
 rating accompanies it: Clause 6.6 stops at 160 Hz, six one-third octaves,
 and ISO 717-1 needs sixteen.
 
@@ -865,7 +865,7 @@ unsigned area sum.
 | `l_in` | Per-subarea intensity levels as a `(subareas, bands)` array (one row per subarea), in dB (magnitude of the intensity). |
 | `measurement_area` | Subarea areas `Smi`, in m² (one per row). Negative values mark reverse-flow subareas per Clause 6.4.6; zero is invalid. |
 
-**Returns:** The combination, as a [`SubareaIntensityLevel`](/phonometry/reference/api/building/intensity-insulation/#subareaintensitylevel): the combined level per band, in dB, in its `levels`, and the total measured area $S_\mathrm{m} = \sum \lvert S_{\mathrm{m}i} \rvert$, in m², in its `measurement_area`.
+**Returns:** The combination, as a [`SubareaIntensityLevel`](/reference/api/building/intensity-insulation/#subareaintensitylevel): the combined level per band, in dB, in its `levels`, and the total measured area $S_\mathrm{m} = \sum \lvert S_{\mathrm{m}i} \rvert$, in m², in its `measurement_area`.
 
 **Raises**
 
@@ -882,7 +882,7 @@ SubareaIntensityLevel(levels: NDArray[np.float64], measurement_area: float)
 
 The intensity level of a surface scanned in subareas (ISO 15186-1 F. (11)-(12)).
 
-What [`subarea_intensity_level`](/phonometry/reference/api/building/intensity-insulation/#subarea_intensity_level) returns: the combined level and the
+What [`subarea_intensity_level`](/reference/api/building/intensity-insulation/#subarea_intensity_level) returns: the combined level and the
 area it is combined over, named, where a `(LIn, Sm)` tuple used to be
 unpacked by position.
 

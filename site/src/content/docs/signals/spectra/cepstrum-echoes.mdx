@@ -47,7 +47,7 @@ import ScopeClaim from '../../../../components/ScopeClaim.astro';
 import SeeAlso from '../../../../components/SeeAlso.astro';
 import ThemeImage from '../../../../components/ThemeImage.astro';
 
-The [spectral estimators](/phonometry/signals/spectra/spectral-analysis/) describe *what
+The [spectral estimators](/signals/spectra/spectral-analysis/) describe *what
 frequencies* a signal contains; this page covers what hides in the *shape* of
 that spectrum. The **cepstrum** - the inverse Fourier transform of the log
 spectrum - lives in `phonometry.signals` and turns two hard spectral
@@ -55,7 +55,7 @@ problems into easy peak-picking: periodic spectral ripple (an echo, a harmonic
 family) collapses onto a single spike at the **quefrency** of its period, and
 the smooth spectral envelope separates from the fine structure by plain
 windowing - **liftering** - in the quefrency domain. The same machinery
-extends the [Hilbert envelope](/phonometry/signals/spectra/correlation-delay/) with an
+extends the [Hilbert envelope](/signals/spectra/correlation-delay/) with an
 **envelope spectrum** in which amplitude modulations become discrete lines.
 
 The whole trick is a chain of four steps: the logarithm turns a
@@ -156,7 +156,7 @@ the even power and real cepstra repeat and the complex cepstrum keeps its
 anticausal (non-minimum-phase) content. Zero-padding via `nfft` reduces
 cepstral time-aliasing when the log spectrum has sharp features, exactly like
 the `oversample` padding of
-[`min_phase`](/phonometry/devices/electroacoustics/swept-sine-distortion/).
+[`min_phase`](/devices/electroacoustics/swept-sine-distortion/).
 
 ## 2. Echo detection: the rahmonic spike train
 
@@ -258,7 +258,7 @@ an echo and not an unrelated spectral periodicity.
 Everything above runs on a synthetic click, and the input the method actually
 consumes is an impulse response. Measure it with any of the library's
 excitations (an exponential sweep, an MLS, or the Golay pair of
-[system measurement](/phonometry/signals/spectra/system-measurement/)), and keep the
+[system measurement](/signals/spectra/system-measurement/)), and keep the
 direct sound and the reflection inside one record, and pass the impulse response
 straight to `echo_detection`.
 
@@ -280,7 +280,7 @@ direct path that ratio is 3.74, so $R = 3.74\,a$: a number that cannot exceed
 one, which means an apparent $a$ above $1/(1 + c t_0/r_\text{direct})$ is not a
 single specular reflection at all. Where $R$ is valid, the absorption
 coefficient at that angle of incidence is $\alpha = 1 - R^2$; the
-[absorption pages](/phonometry/materials/absorbers/absorption-measurement/) own
+[absorption pages](/materials/absorbers/absorption-measurement/) own
 the standardized routes to the same quantity.
 
 **A negative peak is a phase inversion.** A pressure-release boundary (or an
@@ -409,7 +409,7 @@ homomorphic deconvolution (Havelock Ch. 87, Sec. 3.3): zero the rahmonics to
 remove an echo, keep only the low quefrencies to extract a source wavelet.
 A minimum-phase signal has a causal complex cepstrum, which is why folding
 the real cepstrum onto positive quefrencies reconstructs the minimum phase
-from $|H|$ alone: [`min_phase`](/phonometry/devices/electroacoustics/swept-sine-distortion/)
+from $|H|$ alone: [`min_phase`](/devices/electroacoustics/swept-sine-distortion/)
 and `phase_decomposition` run on that same folding core (Bendat & Piersol
 Sec. 13.1.4; Tohyama in Havelock Ch. 75 edits reverberation by manipulating
 exactly these causal/anticausal parts).
@@ -438,7 +438,7 @@ Where the cepstrum finds periodicities *of the spectrum*, the **envelope
 spectrum** finds periodicities *of the amplitude*. Bendat & Piersol
 Section 13.3 (Fig. 13.11) formalizes the structure: an envelope detector, a
 DC remover, and a spectral view of what remains. `envelope_spectrum` runs the
-[Hilbert envelope](/phonometry/signals/spectra/correlation-delay/) (`kind="magnitude"`,
+[Hilbert envelope](/signals/spectra/correlation-delay/) (`kind="magnitude"`,
 the practical default) or the book's square-law detector (`kind="squared"`)
 through exactly that chain, scaled by the taper's coherent gain so a
 sinusoidal modulation whose frequency falls on an analysis bin reads out as
@@ -556,7 +556,7 @@ flat steel); and a hand-held probe stays under 1 kHz: that is, the mounting
 alone can destroy the band the method depends on. Put the sensor on the bearing housing, in the load zone, as
 close to the outer race as the machine allows, with its axis in the load
 direction and the cable strain-relieved. ISO 5348 is the mounting reference,
-and [machine fault frequencies](/phonometry/vibration/machinery/machine-diagnostics/#step-0-getting-the-record)
+and [machine fault frequencies](/vibration/machinery/machine-diagnostics/#step-0-getting-the-record)
 draws these mounts and positions on a motor and gearbox train.
 
 ```python
@@ -577,23 +577,23 @@ The lines the chain produces are identified by *frequency*, not by amplitude,
 and the kinematic families that name them (ball-pass outer and inner race, ball
 spin, cage, gear mesh and its shaft-rate sidebands) are computed from the
 geometry and the shaft speed at
-[Machine fault frequencies](/phonometry/vibration/machinery/machine-diagnostics/),
+[Machine fault frequencies](/vibration/machinery/machine-diagnostics/),
 which draws them straight onto an envelope spectrum like this one. Running the
 envelope on the `residual` of a
-[synchronous average](/phonometry/signals/spectra/synchronous-averaging/) first
+[synchronous average](/signals/spectra/synchronous-averaging/) first
 removes the deterministic gear components and leaves the bearing lines clear.
 
 ## Relation to the other estimators
 
 The cepstrum starts from the same one-record FFT conventions as the
-[calibrated spectral estimators](/phonometry/signals/spectra/spectral-analysis/), and its
+[calibrated spectral estimators](/signals/spectra/spectral-analysis/), and its
 folding core is literally the one inside
-[`min_phase`](/phonometry/devices/electroacoustics/swept-sine-distortion/) - the refactor is
+[`min_phase`](/devices/electroacoustics/swept-sine-distortion/) - the refactor is
 pinned bit-exact in the tests. The envelope spectrum is the frequency-domain
 view of the same analytic signal the
-[Hilbert envelope](/phonometry/signals/spectra/correlation-delay/) returns in time, and a
+[Hilbert envelope](/signals/spectra/correlation-delay/) returns in time, and a
 natural pre-analysis before the dedicated
-[wind-turbine amplitude-modulation](/phonometry/environment/sources/wind-turbine-receptor/)
+[wind-turbine amplitude-modulation](/environment/sources/wind-turbine-receptor/)
 metrics: the envelope spectrum tells you *whether and at what rate* a signal
 is modulated, the domain metrics quantify it normatively.
 
@@ -624,11 +624,11 @@ spectrum only.
 
 ## See also
 
-- [Correlation, time delay and envelope](/phonometry/signals/spectra/correlation-delay/): the Hilbert envelope this page transforms into a spectrum.
-- [Calibrated spectral analysis](/phonometry/signals/spectra/spectral-analysis/): the log spectrum the cepstrum starts from.
-- [Time synchronous averaging](/phonometry/signals/spectra/synchronous-averaging/): removing the synchronous part before running an envelope spectrum on the residual.
-- [Machine fault frequencies](/phonometry/vibration/machinery/machine-diagnostics/): the bearing and gear families read off exactly this envelope spectrum.
-- [Swept-sine distortion](/phonometry/devices/electroacoustics/swept-sine-distortion/): the minimum-phase folding that shares this page's core.
-- API reference: [`signals`: cepstrum](/phonometry/reference/api/signals/cepstrum/).
+- [Correlation, time delay and envelope](/signals/spectra/correlation-delay/): the Hilbert envelope this page transforms into a spectrum.
+- [Calibrated spectral analysis](/signals/spectra/spectral-analysis/): the log spectrum the cepstrum starts from.
+- [Time synchronous averaging](/signals/spectra/synchronous-averaging/): removing the synchronous part before running an envelope spectrum on the residual.
+- [Machine fault frequencies](/vibration/machinery/machine-diagnostics/): the bearing and gear families read off exactly this envelope spectrum.
+- [Swept-sine distortion](/devices/electroacoustics/swept-sine-distortion/): the minimum-phase folding that shares this page's core.
+- API reference: [`signals`: cepstrum](/reference/api/signals/cepstrum/).
 
 </SeeAlso>

@@ -30,7 +30,7 @@ subtraction $10 \log_{10}(10^{L'/10} - 10^{L_\mathrm{b}/10})$ for
 $6 \le \mathrm{margin} < 15$ dB; and the fixed $L' - 1.3$ dB limit
 for $< 6$ dB. Bands hitting the 1.3 dB limit are flagged as the *limit of
 measurement* (reported as $> \Delta L$). This differs from the ISO
-10140-4 correction ([`phonometry.building.background_correction`](/phonometry/reference/api/building/laboratory-insulation/#background_correction)) only at
+10140-4 correction ([`phonometry.building.background_correction`](/reference/api/building/laboratory-insulation/#background_correction)) only at
 exactly $\mathrm{margin} = 6$ dB.
 
 **Improvement (Formulae (3)/(4)).** The per-position difference is
@@ -45,12 +45,12 @@ the three one-third-octave values in each octave.
 
 **Weighted improvement.** `ΔLw` is the ISO 717-2 weighted reduction of impact
 sound pressure level (Clause 6.5), computed with the heavyweight reference
-floor via [`phonometry.building.weighted_impact_improvement`](/phonometry/reference/api/building/ratings/#weighted_impact_improvement) on the 16
+floor via [`phonometry.building.weighted_impact_improvement`](/reference/api/building/ratings/#weighted_impact_improvement) on the 16
 rating bands 100 Hz to 3150 Hz; a wider clause 6.3 spectrum (18 bands 100-5000
 Hz, optionally extended to 50 Hz) is rated on that sub-range. The statement of
 results (Clause 8 e)) also carries the spectrum adaptation term `CI,Δ` (ISO
 717-2:2020 Formula (A.4)) via
-[`phonometry.building.impact_improvement_adaptation_term`](/phonometry/reference/api/building/ratings/#impact_improvement_adaptation_term).
+[`phonometry.building.impact_improvement_adaptation_term`](/reference/api/building/ratings/#impact_improvement_adaptation_term).
 
 > Auto-generated from the source docstrings by `scripts/generate_api_docs.py` (`make api-docs`). Do not edit by hand.
 
@@ -117,7 +117,7 @@ Correct a measured level for background noise (ISO 16251-1 F. (2)).
 | `background` | Background-noise level `Lb` per band, in dB, of the same shape. |
 | `frequencies` | The band centre frequencies, in Hz, one per band, for the plot to name the bands by; `None` (the default) numbers them. |
 
-**Returns:** The correction, as a [`BackgroundCorrectedLevel`](/phonometry/reference/api/building/floor-covering-improvement/#backgroundcorrectedlevel): the corrected levels `L` in its `corrected_levels`, and in its `limited` the bands at the 1.3 dB limit of measurement (report as $> \Delta L$).
+**Returns:** The correction, as a [`BackgroundCorrectedLevel`](/reference/api/building/floor-covering-improvement/#backgroundcorrectedlevel): the corrected levels `L` in its `corrected_levels`, and in its `limited` the bands at the 1.3 dB limit of measurement (report as $> \Delta L$).
 
 **Raises**
 
@@ -303,7 +303,7 @@ rating bands 100-3150 Hz), an optional verdict row and a footer.
 | Name | Description |
 | :--- | :--- |
 | `path` | Destination path of the PDF file. |
-| `metadata` | Optional [`ReportMetadata`](/phonometry/reference/api/building/insulation/#reportmetadata); `None` produces a body-and-disclaimer fiche whose header shows only the measured frequency range. The applicable descriptive fields are `client`, `manufacturer`, `specimen` (the floor covering under test), `mounting`, `mass_per_area`, `test_room`, `test_date`, `temperature_c`, `pressure`, `measurement_standard`, `laboratory`, `operator`, `report_id` and `notes`. The bare reference floor is the standardised heavyweight floor of ISO 717-2:2020 Table 4, fixed by the standard. When `requirement` is set the fiche adds a verdict row (a higher weighted improvement is better, so the result passes at or above the requirement). |
+| `metadata` | Optional [`ReportMetadata`](/reference/api/building/insulation/#reportmetadata); `None` produces a body-and-disclaimer fiche whose header shows only the measured frequency range. The applicable descriptive fields are `client`, `manufacturer`, `specimen` (the floor covering under test), `mounting`, `mass_per_area`, `test_room`, `test_date`, `temperature_c`, `pressure`, `measurement_standard`, `laboratory`, `operator`, `report_id` and `notes`. The bare reference floor is the standardised heavyweight floor of ISO 717-2:2020 Table 4, fixed by the standard. When `requirement` is set the fiche adds a verdict row (a higher weighted improvement is better, so the result passes at or above the requirement). |
 | `engine` | Rendering back end; only `"reportlab"` is supported. |
 | `verbose` | When `True`, the per-band table gains the reference-floor-with-covering column $L_\mathrm{n,r} = L_\mathrm{n,r,0} - \Delta L$ (ISO 717-2:2020 Formula (1)), the derivation basis of `ΔLw`, when the spectrum is exactly the 16 rating bands 100-3150 Hz. |
 | `language` | Fiche language: `"en"` (default, English, decimal point) or `"es"` (Spanish, decimal comma). |
@@ -355,7 +355,7 @@ over positions $\Delta L = \mathrm{mean}(\Delta L_{t,a})$
 | `frequencies` | One-third-octave band centre frequencies, in Hz (`(bands,)`). |
 | `background` | Optional background-noise level `Lb`, in dB; `(bands,)` (applied to every position) or `(positions, bands)`. When given, `L0` and `L1` are background-corrected (Formula (2)) per position before the difference, and bands where any position hits the 1.3 dB limit are flagged. |
 
-**Returns:** [`FloorCoveringImprovementResult`](/phonometry/reference/api/building/floor-covering-improvement/#floorcoveringimprovementresult) (`ΔL` per band).
+**Returns:** [`FloorCoveringImprovementResult`](/reference/api/building/floor-covering-improvement/#floorcoveringimprovementresult) (`ΔL` per band).
 
 **Raises**
 
@@ -387,9 +387,9 @@ each octave.
 | :--- | :--- |
 | `improvement` | Improvement `ΔL` per one-third-octave band, in dB. |
 | `frequencies` | The matching one-third-octave centre frequencies, in Hz; must contain whole octave triplets (centre / centre·2^(±1/3)). |
-| `quantity` | What the values are, for the record and its plot: `"ΔL"` (Default), `"ΔR"` or `"Rs"`, the three quantities folded into octaves by this average of transmitted power. The rainfall sound intensity levels, the `"LI"` and `"LI,norm"` an [`OctaveBandSpectrum`](/phonometry/reference/api/building/floor-covering-improvement/#octavebandspectrum) holds too, are not offered: ISO 10140-1 Formula (K.3) sums their energy, which [`RainfallSoundResult.octave_bands`](/phonometry/reference/api/building/rainfall-sound/#rainfallsoundresultoctave_bands) does. |
+| `quantity` | What the values are, for the record and its plot: `"ΔL"` (Default), `"ΔR"` or `"Rs"`, the three quantities folded into octaves by this average of transmitted power. The rainfall sound intensity levels, the `"LI"` and `"LI,norm"` an [`OctaveBandSpectrum`](/reference/api/building/floor-covering-improvement/#octavebandspectrum) holds too, are not offered: ISO 10140-1 Formula (K.3) sums their energy, which [`RainfallSoundResult.octave_bands`](/reference/api/building/rainfall-sound/#rainfallsoundresultoctave_bands) does. |
 
-**Returns:** An [`OctaveBandSpectrum`](/phonometry/reference/api/building/floor-covering-improvement/#octavebandspectrum) with the octave centres (`.frequencies`) and the octave values (`.values`).
+**Returns:** An [`OctaveBandSpectrum`](/reference/api/building/floor-covering-improvement/#octavebandspectrum) with the octave centres (`.frequencies`) and the octave values (`.values`).
 
 **Raises**
 
@@ -410,7 +410,7 @@ OctaveBandSpectrum(
 
 A one-third-octave result folded into octave bands, with what it holds.
 
-What [`improvement_octave_bands`](/phonometry/reference/api/building/floor-covering-improvement/#improvement_octave_bands) returns, and what the
+What [`improvement_octave_bands`](/reference/api/building/floor-covering-improvement/#improvement_octave_bands) returns, and what the
 `octave_bands()` methods of the floor-covering, laboratory lining,
 laboratory floor-covering, joint and rainfall results return: the octave
 centres and the octave values side by side, named, so that neither can be

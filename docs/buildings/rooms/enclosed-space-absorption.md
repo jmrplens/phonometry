@@ -1,6 +1,6 @@
 <!-- Written by `make llms` from site/src/content/docs/buildings/rooms/enclosed-space-absorption.mdx: edit that page and its Spanish twin, then run `make llms`. -->
 
-← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/buildings/rooms/enclosed-space-absorption/
+← [Documentation index](../../README.md) · Published at https://phonometry.dev/buildings/rooms/enclosed-space-absorption/
 
 # Sound absorption in enclosed spaces (EN 12354-6)
 
@@ -557,7 +557,7 @@ Enclosed-space fiche (ReverberationResult.report), the per-band A/T table and th
   the full ISO 9613-1 atmospheric-absorption model, for conditions or
   frequencies the six built-in climate profiles do not cover, via
   `environment.propagation.air_absorption`.
-- API reference: [`room.enclosed_space_absorption`](https://docs.jmrp.io/phonometry/reference/api/rooms/enclosed-space-absorption/).
+- API reference: [`room.enclosed_space_absorption`](https://phonometry.dev/reference/api/rooms/enclosed-space-absorption/).
 - Theory: [Sound insulation and absorption, predicted](../../reference/theory/rooms-buildings.md#sound-insulation-and-absorption-predicted-en-12354-1-2-6-bies-cremer-hopkins): the equivalent-absorption-area definition the EN 12354-6 procedure computes.
 
 ## References

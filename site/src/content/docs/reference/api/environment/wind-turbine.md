@@ -9,21 +9,21 @@ Wind-turbine acoustic noise (IEC 61400-11:2012+A1:2018).
 
 Two closed-form quantities of the standard:
 
-* [`apparent_sound_power_level`](/phonometry/reference/api/environment/wind-turbine/#apparent_sound_power_level): the A-weighted apparent sound power
+* [`apparent_sound_power_level`](/reference/api/environment/wind-turbine/#apparent_sound_power_level): the A-weighted apparent sound power
   level `L_WA` referred to the equivalent point source at the rotor centre,
   from the ground-board sound pressure level and the slant distance
-  ([`slant_distance`](/phonometry/reference/api/environment/wind-turbine/#slant_distance)),
+  ([`slant_distance`](/reference/api/environment/wind-turbine/#slant_distance)),
   $L_{W\mathrm{A}} = L_p - 6 + 10 \cdot \log_{10}(4\pi R_1^2/S_0)$ (Formula 26).
-* [`wind_turbine_tonality`](/phonometry/reference/api/environment/wind-turbine/#wind_turbine_tonality): the tonal-audibility chain of Formulae 30-34,
+* [`wind_turbine_tonality`](/reference/api/environment/wind-turbine/#wind_turbine_tonality): the tonal-audibility chain of Formulae 30-34,
   through the critical bandwidth (Formula 30), the masking-noise level,
   the tonality and the audibility criterion, giving the tonal audibility
   `ΔL_a` that decides whether a tone is audible.
 
 The tonal-audibility formula itself is the ISO 1996-2 Annex C one already in
-[`measurement`](/phonometry/reference/api/environment/measurement/); what is specific to IEC 61400-11 is
+[`measurement`](/reference/api/environment/measurement/); what is specific to IEC 61400-11 is
 how the tone and masking-noise levels and the (Zwicker) critical band are
 determined from the narrowband spectrum. The rating adjustment `K_T` is the
-ISO 1996-2 [`tonal_adjustment`](/phonometry/reference/api/environment/measurement/#tonal_adjustment). The
+ISO 1996-2 [`tonal_adjustment`](/reference/api/environment/measurement/#tonal_adjustment). The
 full measurement pipeline (binning, regression to standardised wind speeds,
 uncertainty budgets) is out of scope; these are the underlying closed forms.
 
@@ -49,7 +49,7 @@ pressure doubling; $S_0 = 1$ m².
 
 | Name | Description |
 | :--- | :--- |
-| `band_levels` | Background-corrected A-weighted band sound pressure levels `L_p,i`, in dB (scalar or per band). The 61400-11-specific background correction (Formula 23 subtraction with the 3-6 dB asterisk marking and the \<= 3 dB not-reported rule, subclause 9.3) is out of scope here and must be applied beforehand; note its rule set differs from the ISO 1996-2 correction in [`residual_sound_correction`](/phonometry/reference/api/environment/measurement/#residual_sound_correction). |
+| `band_levels` | Background-corrected A-weighted band sound pressure levels `L_p,i`, in dB (scalar or per band). The 61400-11-specific background correction (Formula 23 subtraction with the 3-6 dB asterisk marking and the \<= 3 dB not-reported rule, subclause 9.3) is out of scope here and must be applied beforehand; note its rule set differs from the ISO 1996-2 correction in [`residual_sound_correction`](/reference/api/environment/measurement/#residual_sound_correction). |
 | `r1` | Slant distance `R1` to the rotor centre, in m. |
 
 **Returns:** The apparent sound power level `L_WA`, in dB re 1 pW.
@@ -127,11 +127,11 @@ that highest line (9.5.4), which also anchors `L_a`. When the candidate
 fails the 9.5.2 screening or no line classifies as "tone", the result
 carries `has_identified_tone = False`: its numeric fields are
 non-standard fallbacks and the spectrum must be excluded from the 9.5.1
-bin averaging (see [`WindTurbineTonalityResult`](/phonometry/reference/api/environment/wind-turbine/#windturbinetonalityresult)).
+bin averaging (see [`WindTurbineTonalityResult`](/reference/api/environment/wind-turbine/#windturbinetonalityresult)).
 
 Spectra must extend over the whole critical band: a truncated band leaves
 the masking average over the surviving lines while Formula 31 still scales
-to the full bandwidth, so a [`WindTurbineNoiseWarning`](/phonometry/reference/api/environment/wind-turbine/#windturbinenoisewarning) is issued.
+to the full bandwidth, so a [`WindTurbineNoiseWarning`](/reference/api/environment/wind-turbine/#windturbinenoisewarning) is issued.
 Candidates below 20 Hz are outside the standard's analysis range (the
 critical band would extend to negative frequencies) and are rejected.
 
@@ -143,7 +143,7 @@ critical band would extend to negative frequencies) and are rejected.
 | `frequencies` | Line frequencies, in Hz (uniform spacing). |
 | `tone_frequency` | Candidate tone frequency, in Hz; if `None` the highest-level line is used. |
 
-**Returns:** A [`WindTurbineTonalityResult`](/phonometry/reference/api/environment/wind-turbine/#windturbinetonalityresult).
+**Returns:** A [`WindTurbineTonalityResult`](/reference/api/environment/wind-turbine/#windturbinetonalityresult).
 
 **Raises**
 
@@ -269,7 +269,7 @@ verdict row and a footer with the fixed disclaimer.
 | Name | Description |
 | :--- | :--- |
 | `path` | Destination path of the PDF file. |
-| `metadata` | Optional [`ReportMetadata`](/phonometry/reference/api/building/insulation/#reportmetadata); `None` produces a bare assessment fiche (body, result and disclaimer only). A supplied `requirement` is read as the maximum acceptable tonal audibility `ΔL_a` in dB (a lower audibility passes). |
+| `metadata` | Optional [`ReportMetadata`](/reference/api/building/insulation/#reportmetadata); `None` produces a bare assessment fiche (body, result and disclaimer only). A supplied `requirement` is read as the maximum acceptable tonal audibility `ΔL_a` in dB (a lower audibility passes). |
 | `engine` | Rendering back end; only `"reportlab"` is supported. |
 | `verbose` | Accepted for signature parity with the other fiches; the metrics table already shows the full Formula 30-34 chain, so it has no effect. |
 | `language` | Fiche language: `"en"` (default, English) or `"es"` (Spanish, with a comma decimal separator). |

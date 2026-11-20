@@ -1,6 +1,6 @@
 <!-- Written by `make llms` from site/src/content/docs/devices/noise-control/room-to-room.mdx: edit that page and its Spanish twin, then run `make llms`. -->
 
-← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/devices/noise-control/room-to-room/
+← [Documentation index](../../README.md) · Published at https://phonometry.dev/devices/noise-control/room-to-room/
 
 # Room to Room: Partition, Receiving Room, Criterion
 
@@ -641,7 +641,7 @@ that distance.
 - [Sound power](../emission/sound-power.md): the machine $L_W$
   the whole chain starts from.
 - API reference:
-  [`noise_control.room_to_room`](https://docs.jmrp.io/phonometry/reference/api/noise_control/room-to-room/).
+  [`noise_control.room_to_room`](https://phonometry.dev/reference/api/noise_control/room-to-room/).
 
 ## References
 

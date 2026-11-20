@@ -1,6 +1,6 @@
 <!-- Written by `make llms` from site/src/content/docs/devices/emission/sound-power-test-rooms.mdx: edit that page and its Spanish twin, then run `make llms`. -->
 
-← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/devices/emission/sound-power-test-rooms/
+← [Documentation index](../../README.md) · Published at https://phonometry.dev/devices/emission/sound-power-test-rooms/
 
 # Sound Power in Small Test Rooms (ISO 3743)
 
@@ -777,8 +777,8 @@ Special reverberation test room fiche (SpecialRoomSoundPowerResult.report): the 
 - [Sound Power by Pressure Methods](sound-power-pressure.md):
   the enveloping surface of ISO 3744, ISO 3745 and ISO 3746 for a source
   measured in its direct field.
-- API reference: [`emission`: sound power in a hard-walled room](https://docs.jmrp.io/phonometry/reference/api/power/sound-power-hard-walled/),
-  [`emission`: sound power in a special reverberation room](https://docs.jmrp.io/phonometry/reference/api/power/sound-power-special-room/).
+- API reference: [`emission`: sound power in a hard-walled room](https://phonometry.dev/reference/api/power/sound-power-hard-walled/),
+  [`emission`: sound power in a special reverberation room](https://phonometry.dev/reference/api/power/sound-power-special-room/).
 
 ## References
 

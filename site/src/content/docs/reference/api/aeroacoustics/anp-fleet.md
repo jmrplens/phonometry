@@ -7,7 +7,7 @@ sidebar:
 
 EASA ANP fleet database bridge for the ECAC Doc 29 airport-noise chain.
 
-The ECAC Doc 29 method in [`phonometry.aircraft.airport_noise`](/phonometry/reference/api/aeroacoustics/airport-noise/) places an
+The ECAC Doc 29 method in [`phonometry.aircraft.airport_noise`](/reference/api/aeroacoustics/airport-noise/) places an
 aircraft's noise at a receiver from a Noise-Power-Distance (NPD) table and a
 flight profile. Both come, for real aircraft types, from the **Aircraft Noise
 and Performance (ANP)** database maintained by EUROCONTROL/EASA: per aircraft it
@@ -17,24 +17,24 @@ engine power settings, per operation mode) and default trajectories.
 This module reads the ANP database tables (the semicolon-delimited CSV exports)
 and exposes, for a given aircraft identifier and operation:
 
-* [`ANPNPDCurves`](/phonometry/reference/api/aeroacoustics/anp-fleet/#anpnpdcurves): the NPD curves (`LAmax`/`SEL` versus distance for
+* [`ANPNPDCurves`](/reference/api/aeroacoustics/anp-fleet/#anpnpdcurves): the NPD curves (`LAmax`/`SEL` versus distance for
   each tabulated power), with a `.plot()`;
-* [`ANPProfile`](/phonometry/reference/api/aeroacoustics/anp-fleet/#anpprofile): the default fixed-point trajectory as a Doc 29 flight
+* [`ANPProfile`](/reference/api/aeroacoustics/anp-fleet/#anpprofile): the default fixed-point trajectory as a Doc 29 flight
   path `(N, 5)` with the takeoff/landing ground-roll masks, with a `.plot()`;
-* [`ANPAircraft`](/phonometry/reference/api/aeroacoustics/anp-fleet/#anpaircraft): the aircraft metadata plus convenience wiring
-  ([`ANPAircraft.event_level`](/phonometry/reference/api/aeroacoustics/anp-fleet/#anpaircraftevent_level), [`ANPAircraft.noise_contour`](/phonometry/reference/api/aeroacoustics/anp-fleet/#anpaircraftnoise_contour)) that feeds
+* [`ANPAircraft`](/reference/api/aeroacoustics/anp-fleet/#anpaircraft): the aircraft metadata plus convenience wiring
+  ([`ANPAircraft.event_level`](/reference/api/aeroacoustics/anp-fleet/#anpaircraftevent_level), [`ANPAircraft.noise_contour`](/reference/api/aeroacoustics/anp-fleet/#anpaircraftnoise_contour)) that feeds
   the NPD curves and the profile straight into the existing Doc 29 functions.
 
-[`load_anp_database`](/phonometry/reference/api/aeroacoustics/anp-fleet/#load_anp_database) returns an [`ANPDatabase`](/phonometry/reference/api/aeroacoustics/anp-fleet/#anpdatabase). Called without a path
+[`load_anp_database`](/reference/api/aeroacoustics/anp-fleet/#load_anp_database) returns an [`ANPDatabase`](/reference/api/aeroacoustics/anp-fleet/#anpdatabase). Called without a path
 it loads the full EASA ANP database (archive version 2.3) shipped with the
 package (see `aircraft/data/anp/PROVENANCE.md`); pointed at a directory it
 reads any other ANP CSV export the user provides.
 
 Aircraft whose default trajectory is published as *procedural steps* rather than
-as fixed points are reached through [`phonometry.aircraft.flight_performance`](/phonometry/reference/api/aeroacoustics/flight-performance/),
+as fixed points are reached through [`phonometry.aircraft.flight_performance`](/reference/api/aeroacoustics/flight-performance/),
 the ECAC Doc 29 Vol. 2 Appendix B performance model:
-[`ANPDatabase.flight_profile`](/phonometry/reference/api/aeroacoustics/anp-fleet/#anpdatabaseflight_profile) flies the published procedure for an
-aerodrome and its weather, and [`ANPDatabase.procedural_profile`](/phonometry/reference/api/aeroacoustics/anp-fleet/#anpdatabaseprocedural_profile) returns the
+[`ANPDatabase.flight_profile`](/reference/api/aeroacoustics/anp-fleet/#anpdatabaseflight_profile) flies the published procedure for an
+aerodrome and its weather, and [`ANPDatabase.procedural_profile`](/reference/api/aeroacoustics/anp-fleet/#anpdatabaseprocedural_profile) returns the
 result as the same Doc 29 flight path the fixed-point bridge produces, so either
 kind of profile feeds the same chain. NPD curves are available for every aircraft
 regardless.
@@ -78,7 +78,7 @@ One ANP aircraft type: metadata plus NPD/profile access and Doc 29 wiring.
 | `power_parameter` | Name/unit of the NPD power parameter. |
 | `approach_spectral_class_id` | Spectral class of the approach NPD. |
 | `departure_spectral_class_id` | Spectral class of the departure NPD. |
-| `database` | The [`ANPDatabase`](/phonometry/reference/api/aeroacoustics/anp-fleet/#anpdatabase) the aircraft was read from, which its NPD, spectral-class, profile and Doc 29 methods consult. |
+| `database` | The [`ANPDatabase`](/reference/api/aeroacoustics/anp-fleet/#anpdatabase) the aircraft was read from, which its NPD, spectral-class, profile and Doc 29 methods consult. |
 
 ### ANPAircraft.event_level()
 
@@ -97,7 +97,7 @@ ANPAircraft.event_level(
 ) -> FlyoverResult
 ```
 
-Single-event level at a receiver (see [`ANPDatabase.event_level`](/phonometry/reference/api/aeroacoustics/anp-fleet/#anpdatabaseevent_level)).
+Single-event level at a receiver (see [`ANPDatabase.event_level`](/reference/api/aeroacoustics/anp-fleet/#anpdatabaseevent_level)).
 
 **Parameters**
 
@@ -132,7 +132,7 @@ ANPAircraft.noise_contour(
 ) -> NoiseContourResult
 ```
 
-Single-event ground contour (see [`ANPDatabase.noise_contour`](/phonometry/reference/api/aeroacoustics/anp-fleet/#anpdatabasenoise_contour)).
+Single-event ground contour (see [`ANPDatabase.noise_contour`](/reference/api/aeroacoustics/anp-fleet/#anpdatabasenoise_contour)).
 
 **Parameters**
 
@@ -158,7 +158,7 @@ ANPAircraft.npd_curves(
 ) -> ANPNPDCurves
 ```
 
-NPD curves for this aircraft (see [`ANPDatabase.npd_curves`](/phonometry/reference/api/aeroacoustics/anp-fleet/#anpdatabasenpd_curves)).
+NPD curves for this aircraft (see [`ANPDatabase.npd_curves`](/reference/api/aeroacoustics/anp-fleet/#anpdatabasenpd_curves)).
 
 **Parameters**
 
@@ -185,7 +185,7 @@ ANPAircraft.profile(
 ) -> ANPProfile
 ```
 
-Fixed-point profile (see [`ANPDatabase.profile`](/phonometry/reference/api/aeroacoustics/anp-fleet/#anpdatabaseprofile)).
+Fixed-point profile (see [`ANPDatabase.profile`](/reference/api/aeroacoustics/anp-fleet/#anpdatabaseprofile)).
 
 **Parameters**
 
@@ -214,7 +214,7 @@ ANPAircraft.revised_npd_curves(
 ) -> RevisedNPDCurves
 ```
 
-NPD curves for another atmosphere (see [`ANPDatabase.revised_npd_curves`](/phonometry/reference/api/aeroacoustics/anp-fleet/#anpdatabaserevised_npd_curves)).
+NPD curves for another atmosphere (see [`ANPDatabase.revised_npd_curves`](/reference/api/aeroacoustics/anp-fleet/#anpdatabaserevised_npd_curves)).
 
 **Parameters**
 
@@ -247,7 +247,7 @@ Spectral class of this aircraft's NPD for an operation.
 | :--- | :--- |
 | `operation` | `"departure"`/`"D"` or `"arrival"`/`"A"`. |
 
-**Returns:** The [`SpectralClass`](/phonometry/reference/api/aeroacoustics/anp-fleet/#spectralclass) the ANP database assigns.
+**Returns:** The [`SpectralClass`](/reference/api/aeroacoustics/anp-fleet/#spectralclass) the ANP database assigns.
 
 **Raises**
 
@@ -270,7 +270,7 @@ ANPDatabase(
 
 A parsed ANP database (aircraft metadata, NPD curves and default profiles).
 
-Build one with [`load_anp_database`](/phonometry/reference/api/aeroacoustics/anp-fleet/#load_anp_database). NPD curves are available for every
+Build one with [`load_anp_database`](/reference/api/aeroacoustics/anp-fleet/#load_anp_database). NPD curves are available for every
 aircraft; default profiles are available for aircraft that have a fixed-point
 trajectory in the database, and procedural-step profiles for those whose
 coefficient and step tables the export carries.
@@ -281,7 +281,7 @@ coefficient and step tables the export carries.
 ANPDatabase.aircraft(aircraft_id: str) -> ANPAircraft
 ```
 
-The [`ANPAircraft`](/phonometry/reference/api/aeroacoustics/anp-fleet/#anpaircraft) for an identifier.
+The [`ANPAircraft`](/reference/api/aeroacoustics/anp-fleet/#anpaircraft) for an identifier.
 
 **Raises**
 
@@ -316,7 +316,7 @@ ANPDatabase.event_level(
 Doc 29 single-event level of an ANP aircraft at a receiver.
 
 Feeds the aircraft's profile and NPD curves into
-[`phonometry.aircraft.airport_noise.event_level`](/phonometry/reference/api/aeroacoustics/airport-noise/#event_level).
+[`phonometry.aircraft.airport_noise.event_level`](/reference/api/aeroacoustics/airport-noise/#event_level).
 
 **Parameters**
 
@@ -333,7 +333,7 @@ Feeds the aircraft's profile and NPD curves into
 | `relative_humidity_percent` | Relative humidity at the field, in percent. Given, the SEL and LAmax NPD curves are recalculated for that humidity and the temperature and pressure above by ECAC Doc 29 Vol. 2 Appendix D, with the aircraft's spectral class for the operation; left unset they stay in the SAE AIR-1845 atmosphere the database is normalised to. |
 | `absorption` | The Appendix D absorption route, `"arp5534"` (default) or `"arp866a"`; read only with a humidity. |
 
-**Returns:** A [`FlyoverResult`](/phonometry/reference/api/aeroacoustics/airport-noise/#flyoverresult).
+**Returns:** A [`FlyoverResult`](/reference/api/aeroacoustics/airport-noise/#flyoverresult).
 
 **Raises**
 
@@ -368,12 +368,12 @@ which is why one has to be given and why the answer is not a table entry.
 | :--- | :--- |
 | `aircraft_id` | ANP aircraft identifier. |
 | `operation` | `"departure"`/`"D"` or `"arrival"`/`"A"`. |
-| `aerodrome` | The [`Aerodrome`](/phonometry/reference/api/aeroacoustics/flight-performance/#aerodrome) to fly from, carrying its elevation, temperature, pressure and headwind. |
+| `aerodrome` | The [`Aerodrome`](/reference/api/aeroacoustics/flight-performance/#aerodrome) to fly from, carrying its elevation, temperature, pressure and headwind. |
 | `stage_length` | ANP stage length (default 1), which selects the take-off weight of a departure. |
 | `profile_id` | Optional ANP profile identifier. |
 | `weight_lb` | Weight to fly at, lb. `None` (default) takes the ANP default weight for the stage length on a departure, and 90 % of the maximum landing weight on an arrival, as Doc 29 defines it. |
 
-**Returns:** A [`FlightProfile`](/phonometry/reference/api/aeroacoustics/flight-performance/#flightprofile).
+**Returns:** A [`FlightProfile`](/reference/api/aeroacoustics/flight-performance/#flightprofile).
 
 **Raises**
 
@@ -404,7 +404,7 @@ ANPDatabase.noise_contour(
 Doc 29 single-event ground contour of an ANP aircraft.
 
 Feeds the aircraft's profile and NPD curves into
-[`phonometry.aircraft.airport_noise.noise_contour`](/phonometry/reference/api/aeroacoustics/airport-noise/#noise_contour).
+[`phonometry.aircraft.airport_noise.noise_contour`](/reference/api/aeroacoustics/airport-noise/#noise_contour).
 
 **Parameters**
 
@@ -422,7 +422,7 @@ Feeds the aircraft's profile and NPD curves into
 | `relative_humidity_percent` | Relative humidity at the field, in percent. Given, the SEL and LAmax NPD curves are recalculated for that humidity and the temperature and pressure above by ECAC Doc 29 Vol. 2 Appendix D, with the aircraft's spectral class for the operation; left unset they stay in the SAE AIR-1845 atmosphere the database is normalised to. |
 | `absorption` | The Appendix D absorption route, `"arp5534"` (default) or `"arp866a"`; read only with a humidity. |
 
-**Returns:** A [`NoiseContourResult`](/phonometry/reference/api/aeroacoustics/airport-noise/#noisecontourresult).
+**Returns:** A [`NoiseContourResult`](/reference/api/aeroacoustics/airport-noise/#noisecontourresult).
 
 **Raises**
 
@@ -451,7 +451,7 @@ NPD curves for an aircraft, operation and noise metric.
 | `operation` | `"departure"`/`"D"` or `"arrival"`/`"A"`. |
 | `metric` | `"SEL"` (default) or `"LAmax"`. |
 
-**Returns:** An [`ANPNPDCurves`](/phonometry/reference/api/aeroacoustics/anp-fleet/#anpnpdcurves).
+**Returns:** An [`ANPNPDCurves`](/reference/api/aeroacoustics/anp-fleet/#anpnpdcurves).
 
 **Raises**
 
@@ -470,7 +470,7 @@ ANPDatabase.performance_aircraft(aircraft_id: str) -> PerformanceAircraft
 The aeroplane's ECAC Doc 29 Vol. 2 Appendix B coefficient set.
 
 Gathers the engine, aerodynamic and weight tables into the
-[`PerformanceAircraft`](/phonometry/reference/api/aeroacoustics/flight-performance/#performanceaircraft) the
+[`PerformanceAircraft`](/reference/api/aeroacoustics/flight-performance/#performanceaircraft) the
 performance model takes. The engine count, the maximum sea-level static
 thrust and the maximum landing weight come from the aircraft table; the
 approach weight follows from the last of those as Doc 29 defines it.
@@ -481,7 +481,7 @@ approach weight follows from the last of those as Doc 29 defines it.
 | :--- | :--- |
 | `aircraft_id` | ANP aircraft identifier. |
 
-**Returns:** A [`PerformanceAircraft`](/phonometry/reference/api/aeroacoustics/flight-performance/#performanceaircraft).
+**Returns:** A [`PerformanceAircraft`](/reference/api/aeroacoustics/flight-performance/#performanceaircraft).
 
 **Raises**
 
@@ -506,10 +506,10 @@ ANPDatabase.procedural_profile(
 
 A flown procedure as the flight path the Doc 29 noise chain reads.
 
-`flight_profile` converted into the same [`ANPProfile`](/phonometry/reference/api/aeroacoustics/anp-fleet/#anpprofile) the
+`flight_profile` converted into the same [`ANPProfile`](/reference/api/aeroacoustics/anp-fleet/#anpprofile) the
 fixed-point bridge returns, so an aircraft that publishes procedural
 steps and one that publishes fixed points feed
-[`event_level`](/phonometry/reference/api/aeroacoustics/airport-noise/#event_level) and [`noise_contour`](/phonometry/reference/api/aeroacoustics/airport-noise/#noise_contour) alike. The units change on
+[`event_level`](/reference/api/aeroacoustics/airport-noise/#event_level) and [`noise_contour`](/reference/api/aeroacoustics/airport-noise/#noise_contour) alike. The units change on
 the way (Appendix B works in feet, knots and pounds; the noise chain in
 metres and metres per second) and the power setting stays the corrected
 net thrust per engine the NPD tables are indexed on.
@@ -522,7 +522,7 @@ Takes the same arguments as `flight_profile`.
 | :--- | :--- |
 | `operation` | One of `"departure"`, `"D"`, `"arrival"` or `"A"`. |
 
-**Returns:** An [`ANPProfile`](/phonometry/reference/api/aeroacoustics/anp-fleet/#anpprofile).
+**Returns:** An [`ANPProfile`](/reference/api/aeroacoustics/anp-fleet/#anpprofile).
 
 **Raises**
 
@@ -547,7 +547,7 @@ The published procedure for an aircraft, as procedural steps.
 
 The rows of the ANP departure or approach procedural-step table, in step
 order, as the types
-[`flight_performance`](/phonometry/reference/api/aeroacoustics/flight-performance/) flies. Approach
+[`flight_performance`](/reference/api/aeroacoustics/flight-performance/) flies. Approach
 procedures are not tabulated per stage length, so `stage_length` is
 read only for a departure.
 
@@ -599,7 +599,7 @@ none named `"DEFAULT"`) raises listing the identifiers.
 | `stage_length` | ANP stage length (default 1). |
 | `profile_id` | Optional ANP profile identifier (e.g. `"DEFAULT"`, `"3000LB"`); `None` (default) selects as described above. |
 
-**Returns:** An [`ANPProfile`](/phonometry/reference/api/aeroacoustics/anp-fleet/#anpprofile) (a Doc 29 flight path with ground-roll masks).
+**Returns:** An [`ANPProfile`](/reference/api/aeroacoustics/anp-fleet/#anpprofile) (a Doc 29 flight path with ground-roll masks).
 
 **Raises**
 
@@ -628,7 +628,7 @@ NPD curves recalculated for another atmosphere (Doc 29 Vol. 2 Appendix D).
 
 The curves of `npd_curves` revised by the increment of the
 aircraft's own spectral class for the operation, as
-[`revise_npd_curves`](/phonometry/reference/api/aeroacoustics/npd-atmosphere/#revise_npd_curves) computes
+[`revise_npd_curves`](/reference/api/aeroacoustics/npd-atmosphere/#revise_npd_curves) computes
 it.
 
 **Parameters**
@@ -643,7 +643,7 @@ it.
 | `static_pressure_kpa` | Air pressure, in kPa (default 101.325). |
 | `absorption` | `"arp5534"` (default) or `"arp866a"`. |
 
-**Returns:** A [`RevisedNPDCurves`](/phonometry/reference/api/aeroacoustics/npd-atmosphere/#revisednpdcurves).
+**Returns:** A [`RevisedNPDCurves`](/reference/api/aeroacoustics/npd-atmosphere/#revisednpdcurves).
 
 **Raises**
 
@@ -667,7 +667,7 @@ One spectral class of the database (ECAC Doc 29 Vol. 2 G4.3).
 | :--- | :--- |
 | `class_id` | Spectral class identifier, as a number or as the table writes it (`103` or `"103"`). |
 
-**Returns:** A [`SpectralClass`](/phonometry/reference/api/aeroacoustics/anp-fleet/#spectralclass).
+**Returns:** A [`SpectralClass`](/reference/api/aeroacoustics/anp-fleet/#spectralclass).
 
 **Raises**
 
@@ -828,7 +828,7 @@ Load an EASA ANP database (aircraft, NPD curves and default profiles).
 | :--- | :--- |
 | `path` | Directory of an ANP CSV export (the `*Aircraft.csv`, `*NPD_data.csv`, `*fixed_point_profiles.csv` tables, plus the optional performance tables the procedural-step model reads: `*engine_coefficients.csv`, `*Aerodynamic_coefficients.csv`, `*weights.csv` and the two `*procedural_steps.csv`, and the `*Spectral_classes.csv` table ECAC Doc 29 Vol. 2 Appendix D reads to recalculate the NPD curves for another atmosphere). If `None` (default), loads the full EASA ANP database v2.3 shipped with the package (see `aircraft/data/anp/PROVENANCE.md`). Every table is read from a regular file of at most 32 MiB (the copy shipped with a package run from inside a zip archive is read as the archive holds it), and every number in it is a finite one. |
 
-**Returns:** An [`ANPDatabase`](/phonometry/reference/api/aeroacoustics/anp-fleet/#anpdatabase).
+**Returns:** An [`ANPDatabase`](/reference/api/aeroacoustics/anp-fleet/#anpdatabase).
 
 **Raises**
 
@@ -858,7 +858,7 @@ maximum level, at 1 000 ft, normalised to the same SAE AIR-1845 attenuation
 rates as the NPD data and, for historical reasons, to 70 dB in the 1 kHz
 band. Every aircraft is assigned one for approach and one for departure.
 Appendix D recalculates the aircraft's NPD curves for another atmosphere
-from it ([`revise_npd_curves`](/phonometry/reference/api/aeroacoustics/npd-atmosphere/#revise_npd_curves)).
+from it ([`revise_npd_curves`](/reference/api/aeroacoustics/npd-atmosphere/#revise_npd_curves)).
 
 **Attributes**
 

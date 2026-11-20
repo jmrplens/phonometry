@@ -37,7 +37,7 @@ the impedance tube that used to publish it; ISO 10534-2 Clause 7.2 and
 ASTM E2611-19 Clauses 8.2/8.3 both reach for the same product, and so does
 every reflection coefficient in the library.
 
-[`Fluid`](/phonometry/reference/api/fluids/fluids/#fluid) exposes the same quantity as a property, closed from the two
+[`Fluid`](/reference/api/fluids/fluids/#fluid) exposes the same quantity as a property, closed from the two
 it was built with. This function is for a caller who has a density and a
 speed of sound and no fluid to go with them.
 
@@ -88,7 +88,7 @@ One fluid at one state, and the properties its model fixed there.
 | `composition` | What distinguishes this fluid from another at the same temperature and pressure: the relative humidity of air, the salinity and depth of sea water. Read it to know what was assumed. |
 | `model` | What produced the properties, named so a result can cite it. Usually a closed form, an annex or a fit. For a state that was read off a printed table rather than computed, it is that table, written as document, table, PDF page and printed folio: the table is what produced the state, and a reader who wants to check the number needs the page rather than the name of an equation that was never used. |
 | `validity` | The domain the model states for itself, in words, or the empty string where it states none. Prose, because sources state these in prose and reducing them to a box loses the conditions attached to them. |
-| `properties` | The quantities the model determined, in SI. Reached through the named accessors, which raise [`FluidPropertyUnavailableError`](/phonometry/reference/api/fluids/fluids/#fluidpropertyunavailableerror) for a quantity that is absent. |
+| `properties` | The quantities the model determined, in SI. Reached through the named accessors, which raise [`FluidPropertyUnavailableError`](/reference/api/fluids/fluids/#fluidpropertyunavailableerror) for a quantity that is absent. |
 
 ### Fluid.characteristic_impedance
 

@@ -63,7 +63,7 @@ The exterior level follows from the simplified Annex E attenuation `Atot` of
 a finite radiating side and $L_p = L_W - A_\mathrm{tot}$.
 
 Single-number ratings reuse EN ISO 717-1 via
-[`phonometry.building.weighted_rating`](/phonometry/reference/api/building/ratings/#weighted_rating) (exact for
+[`phonometry.building.weighted_rating`](/reference/api/building/ratings/#weighted_rating) (exact for
 $R'_\mathrm{w} + C_\mathrm{tr}$, a good approximation for `R'w`, Part 3
 NOTE 7).
 
@@ -89,7 +89,7 @@ of the façade (gallery, balcony or terrace), as a function of the height
 of the line of sight from the source on the façade plane and the weighted
 sound absorption coefficient `αw` (EN ISO 11654) of the underside of the
 balcony/roof above. The value feeds `delta_l_fs` of
-[`facade_sound_reduction`](/phonometry/reference/api/building/facade/#facade_sound_reduction) (Formula 13). Intermediate `αw` values
+[`facade_sound_reduction`](/reference/api/building/facade/#facade_sound_reduction) (Formula 13). Intermediate `αw` values
 are interpolated linearly between the tabulated 0.3 / 0.6 / 0.9 columns,
 as the annex allows; outside that range the edge column applies. The
 2017 edition tabulates the same values (Tabelle C.1).
@@ -140,14 +140,14 @@ indices (Formulas 11-12) and the standardized level difference (Formula 13).
 
 | Name | Description |
 | :--- | :--- |
-| `elements` | Façade elements (see [`FacadeElement`](/phonometry/reference/api/building/facade/#facadeelement)); per-band arrays must share a common length (5 octave or 16 third-octave bands to get single-number ratings). |
+| `elements` | Façade elements (see [`FacadeElement`](/reference/api/building/facade/#facadeelement)); per-band arrays must share a common length (5 octave or 16 third-octave bands to get single-number ratings). |
 | `area` | Total façade area `S` seen from inside, in m². |
 | `volume` | Receiving-room volume `V`, in m³ (Formula 13). |
 | `delta_l_fs` | Façade-shape term `ΔLfs` in dB (Annex C; 0 for a flat reflecting façade). |
-| `fraction` | The band set of the single-number ratings, passed to [`weighted_rating`](/phonometry/reference/api/building/ratings/#weighted_rating): 3 for one-third octaves, 1 for octaves or `None` (Default) to read it from the number of bands. One of `1` or `3`. |
+| `fraction` | The band set of the single-number ratings, passed to [`weighted_rating`](/reference/api/building/ratings/#weighted_rating): 3 for one-third octaves, 1 for octaves or `None` (Default) to read it from the number of bands. One of `1` or `3`. |
 | `frequencies` | Optional band centre frequencies (Hz), stored on the result for plotting; must match the element band count. |
 
-**Returns:** A [`FacadePredictionResult`](/phonometry/reference/api/building/facade/#facadepredictionresult).
+**Returns:** A [`FacadePredictionResult`](/reference/api/building/facade/#facadepredictionresult).
 
 **Raises**
 
@@ -306,7 +306,7 @@ predicted rating `D2m,nT,w`, the prediction statement and, when a
 requirement is supplied, a PASS/FAIL verdict (the level difference
 passes at or above the requirement), followed by a footer.
 
-The applicable [`ReportMetadata`](/phonometry/reference/api/building/insulation/#reportmetadata) fields describe the
+The applicable [`ReportMetadata`](/reference/api/building/insulation/#reportmetadata) fields describe the
 predicted situation: `specimen` (the façade element set), `area`
 (the exposed façade area `S`), `receiving_volume` (the receiving
 room volume `V`), `test_room` (the traffic / outdoor situation),
@@ -321,7 +321,7 @@ supplies the target `D2m,nT,w`.
 | Name | Description |
 | :--- | :--- |
 | `path` | Destination path of the PDF file. |
-| `metadata` | Optional [`ReportMetadata`](/phonometry/reference/api/building/insulation/#reportmetadata); `None` produces a lightweight fiche (body, rating, statement, disclaimer). |
+| `metadata` | Optional [`ReportMetadata`](/reference/api/building/insulation/#reportmetadata); `None` produces a lightweight fiche (body, rating, statement, disclaimer). |
 | `engine` | Rendering back end; only `"reportlab"` is supported. |
 | `verbose` | When `True`, the element table also shows each element's share of the transmitted sound energy. |
 | `language` | Fiche language: `"en"` (default) or `"es"`. |
@@ -416,7 +416,7 @@ plot_facade_elements(
 
 Draw a composite facade elevation with element areas to scale.
 
-Each element of [`facade_sound_reduction`](/phonometry/reference/api/building/facade/#facade_sound_reduction) is a
+Each element of [`facade_sound_reduction`](/reference/api/building/facade/#facade_sound_reduction) is a
 tile whose drawn area equals its real area (small-area elements without
 an area, such as airbricks rated by `dn_e`, get a nominal 0.1 m2 tile).
 
@@ -424,7 +424,7 @@ an area, such as airbricks rated by `dn_e`, get a nominal 0.1 m2 tile).
 
 | Name | Description |
 | :--- | :--- |
-| `elements` | The [`FacadeElement`](/phonometry/reference/api/building/facade/#facadeelement) sequence. |
+| `elements` | The [`FacadeElement`](/reference/api/building/facade/#facadeelement) sequence. |
 | `ax` | Existing axes, or `None` to create a figure. |
 | `language` | Label language, `"en"` (default) or `"es"`. |
 | `kwargs` | Forwarded to the first element rectangle. |
@@ -456,7 +456,7 @@ Predict the sound power radiated outside by a segment (EN 12354-4).
 `R'` combines the element transmission factors (Formula 3); the radiated
 power level is $L_W = L_{p,\mathrm{in}} + C_\mathrm{d} - R' + 10 \log_{10}(S/S_0)$
 (Formula 2). Openings
-may be included as [`FacadeElement`](/phonometry/reference/api/building/facade/#facadeelement) entries with an `insertion_loss`
+may be included as [`FacadeElement`](/reference/api/building/facade/#facadeelement) entries with an `insertion_loss`
 (0 for a bare opening); see the module docstring for how this differs from
 the standard's separate segment-of-openings Formula (4).
 
@@ -464,14 +464,14 @@ the standard's separate segment-of-openings Formula (4).
 
 | Name | Description |
 | :--- | :--- |
-| `elements` | Segment elements (see [`FacadeElement`](/phonometry/reference/api/building/facade/#facadeelement)). |
+| `elements` | Segment elements (see [`FacadeElement`](/reference/api/building/facade/#facadeelement)). |
 | `lp_in` | Inside sound pressure level `Lp,in` per band, in dB. |
 | `area` | Segment area `S`, in m². |
 | `c_d` | Inside-field diffusivity term `Cd` in dB (Annex B: -6 ideal diffuse, -5 average industrial building). |
 | `r_prime_cap` | Optional practical maximum on `R'` per band, in dB. This cap is **not** part of Formula (2)/(3): it appears only as a footnote of the Annex G worked example ("R' limited to 40 dB" for field situations with unavoidable leaks). Pass `40.0` to reproduce Annex G; the default `None` computes the bare formulas. |
 | `octave_bands` | Optional octave-band centre frequencies (Hz) matching the per-band data; enables the A-weighted single number. |
 
-**Returns:** A [`RadiatedPowerResult`](/phonometry/reference/api/building/facade/#radiatedpowerresult).
+**Returns:** A [`RadiatedPowerResult`](/reference/api/building/facade/#radiatedpowerresult).
 
 **Raises**
 

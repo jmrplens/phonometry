@@ -1,6 +1,6 @@
 <!-- Written by `make llms` from site/src/content/docs/signals/spectra/system-measurement.mdx: edit that page and its Spanish twin, then run `make llms`. -->
 
-← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/signals/spectra/system-measurement/
+← [Documentation index](../../README.md) · Published at https://phonometry.dev/signals/spectra/system-measurement/
 
 # System measurement: Golay, shaped sweeps, inversion
 
@@ -123,7 +123,7 @@ plt.show()
 </details>
 
 The result is the same
-[`ImpulseResponseResult`](https://docs.jmrp.io/phonometry/reference/api/rooms/impulse-response/) the sweep
+[`ImpulseResponseResult`](https://phonometry.dev/reference/api/rooms/impulse-response/) the sweep
 and MLS front ends return, so everything downstream -
 [room parameters](../../buildings/rooms/room-acoustics.md), decay curves,
 [STI](../../perception/speech/speech-transmission.md) - consumes it unchanged.
@@ -564,7 +564,7 @@ and the equalized responses feed the same downstream chain as every
 - [Loudspeakers](../../devices/electroacoustics/loudspeakers.md): the reference axis, distance and free-field conditions the measured response needs.
 - [Calibrated spectral analysis](spectral-analysis.md): the Welch machinery that verifies the shaped sweep, and the smoothing the inversion wants first.
 - [Correlation and delay](correlation-delay.md): the loopback measurement that aligns the two Golay records.
-- API reference: [`signals.inversion`](https://docs.jmrp.io/phonometry/reference/api/signals/inversion/).
+- API reference: [`signals.inversion`](https://phonometry.dev/reference/api/signals/inversion/).
 
 ## References
 

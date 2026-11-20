@@ -1,6 +1,6 @@
 <!-- Written by `make llms` from site/src/content/docs/buildings/design/panel-sound-insulation.mdx: edit that page and its Spanish twin, then run `make llms`. -->
 
-← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/buildings/design/panel-sound-insulation/
+← [Documentation index](../../README.md) · Published at https://phonometry.dev/buildings/design/panel-sound-insulation/
 
 # Predicting Panel Sound Insulation
 
@@ -969,7 +969,7 @@ the frequency rises and $0.3\lambda$ shrinks towards $w$.
   the measured counterpart of the theoretical point mobilities.
 - [Porous and multilayer absorbers](../../materials/absorbers/porous-absorbers.md): the
   cavity-fill models a double wall consumes.
-- API reference: [`building.prediction.panel_transmission`](https://docs.jmrp.io/phonometry/reference/api/building/panel-transmission/), [`building.prediction.masonry_cavity_wall`](https://docs.jmrp.io/phonometry/reference/api/building/masonry-cavity-wall/), [`building.prediction.aperture_transmission`](https://docs.jmrp.io/phonometry/reference/api/building/aperture-transmission/), [`vibration`: radiation efficiency](https://docs.jmrp.io/phonometry/reference/api/vibration/radiation-efficiency/) and [`vibration.structural.point_mobility`](https://docs.jmrp.io/phonometry/reference/api/vibration/point-mobility/).
+- API reference: [`building.prediction.panel_transmission`](https://phonometry.dev/reference/api/building/panel-transmission/), [`building.prediction.masonry_cavity_wall`](https://phonometry.dev/reference/api/building/masonry-cavity-wall/), [`building.prediction.aperture_transmission`](https://phonometry.dev/reference/api/building/aperture-transmission/), [`vibration`: radiation efficiency](https://phonometry.dev/reference/api/vibration/radiation-efficiency/) and [`vibration.structural.point_mobility`](https://phonometry.dev/reference/api/vibration/point-mobility/).
 - Theory: [Sound insulation and absorption, predicted](../../reference/theory/rooms-buildings.md#sound-insulation-and-absorption-predicted-en-12354-1-2-6-bies-cremer-hopkins): the mass law, the coincidence dip and the transmission coefficient the panel models return.
 
 ## References

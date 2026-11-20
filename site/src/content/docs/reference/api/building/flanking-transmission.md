@@ -8,13 +8,13 @@ sidebar:
 Laboratory measurement of flanking sound transmission (ISO 10848:2006/2010).
 
 This is the **measurement** counterpart of the flanking-transmission
-*prediction* in [`phonometry.building.prediction.simplified_model`](/phonometry/reference/api/building/simplified-model/). EN 12354-1 predicts the
+*prediction* in [`phonometry.building.prediction.simplified_model`](/reference/api/building/simplified-model/). EN 12354-1 predicts the
 apparent in-situ performance from, among other inputs, the **vibration
 reduction index** `Kij` of each junction; ISO 10848 is the standard that
 *measures* that `Kij` (and the overall flanking descriptors `Dn,f` /
 `Ln,f`) in a qualified test facility. The measured `Kij` is a
 situation-invariant junction descriptor that feeds straight into the
-[`phonometry.building.flanking_path`](/phonometry/reference/api/building/simplified-model/#flanking_path) model.
+[`phonometry.building.flanking_path`](/reference/api/building/simplified-model/#flanking_path) model.
 
 **Vibration reduction index (Part 1, Clause 3.9).** From the *direction
 averaged* velocity level difference
@@ -50,8 +50,8 @@ tapping machine on the source-room floor the normalized flanking impact level
 is $L_\mathrm{n,f} = L_2 + 10 \log_{10}(A/A_0)$ (Formula (5)), both with
 the reference absorption area $A_0 = 10$ m². Their single-number ratings
 `Dn,f,w (C; Ctr)` and `Ln,f,w (CI)` follow ISO 717-1/-2 through the
-verified [`phonometry.building.weighted_rating`](/phonometry/reference/api/building/ratings/#weighted_rating) /
-[`phonometry.building.weighted_impact_rating`](/phonometry/reference/api/building/ratings/#weighted_impact_rating) engines, reused unchanged.
+verified [`phonometry.building.weighted_rating`](/reference/api/building/ratings/#weighted_rating) /
+[`phonometry.building.weighted_impact_rating`](/reference/api/building/ratings/#weighted_impact_rating) engines, reused unchanged.
 
 **Validity of Kij.** `Kij` rests on a statistical-energy-analysis
 simplification (weak coupling, diffuse vibration fields). This module exposes
@@ -107,7 +107,7 @@ In-band mode count $N = B \cdot n$ (Part 4, Formula (4)).
 
 With the one-third-octave bandwidth approximation
 $B = 0.23 \cdot f$ and the
-modal density `n` from [`modal_density`](/phonometry/reference/api/building/flanking-transmission/#modal_density). $N \ge 5$ modes per
+modal density `n` from [`modal_density`](/reference/api/building/flanking-transmission/#modal_density). $N \ge 5$ modes per
 band is
 "always satisfactory".
 
@@ -161,7 +161,7 @@ does not hold (Part 1, 4.3.3).
 | `critical_frequency_j` | Critical frequency `fcj` of element `j`, in Hz. |
 | `frequencies` | The band centre frequencies of the differences, in Hz, for the plot to name the bands by; `None` (the default) numbers them. |
 
-**Returns:** The verdict, as a [`StrongCouplingCheck`](/phonometry/reference/api/building/flanking-transmission/#strongcouplingcheck); band by band in its [`holds`](/phonometry/reference/api/building/flanking-transmission/#strongcouplingcheckholds).
+**Returns:** The verdict, as a [`StrongCouplingCheck`](/reference/api/building/flanking-transmission/#strongcouplingcheck); band by band in its [`holds`](/reference/api/building/flanking-transmission/#strongcouplingcheckholds).
 
 **Raises**
 
@@ -187,7 +187,7 @@ $f_\mathrm{c} = c_0^2 / (1.8 \, c_\mathrm{L} \, h)$ for a homogeneous
 isotropic element. The constant 1.8 already carries the
 $2\pi/\sqrt{12}$ factor of the thin-plate dispersion relation, so for
 a plate whose bending stiffness and mass are mutually consistent this
-equals [`phonometry.vibration.coincidence_frequency`](/phonometry/reference/api/vibration/radiation-efficiency/#coincidence_frequency) (Hopkins Eq.
+equals [`phonometry.vibration.coincidence_frequency`](/reference/api/vibration/radiation-efficiency/#coincidence_frequency) (Hopkins Eq.
 2.201) to within the rounding of the constant.
 
 :::note
@@ -384,7 +384,7 @@ measurement statement, an optional requirement verdict and a footer.
 | Name | Description |
 | :--- | :--- |
 | `path` | Destination path of the PDF file. |
-| `metadata` | Optional [`ReportMetadata`](/phonometry/reference/api/building/insulation/#reportmetadata); `None` produces a lightweight fiche (body, rating and disclaimer only). |
+| `metadata` | Optional [`ReportMetadata`](/reference/api/building/insulation/#reportmetadata); `None` produces a lightweight fiche (body, rating and disclaimer only). |
 | `engine` | Rendering back end; only `"reportlab"` is supported. |
 | `verbose` | When `True`, the left table shows the ISO 717 evaluation per band (the `Ln,f` value, the shifted reference and the unfavourable deviation) instead of the two-column form. |
 | `language` | Fiche language: `"en"` (default, English) or `"es"` (Spanish, with a comma decimal separator). |
@@ -464,7 +464,7 @@ measurement statement, an optional requirement verdict and a footer.
 | Name | Description |
 | :--- | :--- |
 | `path` | Destination path of the PDF file. |
-| `metadata` | Optional [`ReportMetadata`](/phonometry/reference/api/building/insulation/#reportmetadata); `None` produces a lightweight fiche (body, rating and disclaimer only). |
+| `metadata` | Optional [`ReportMetadata`](/reference/api/building/insulation/#reportmetadata); `None` produces a lightweight fiche (body, rating and disclaimer only). |
 | `engine` | Rendering back end; only `"reportlab"` is supported. |
 | `verbose` | When `True`, the left table shows the ISO 717 evaluation per band (the `Dn,f` value, the shifted reference and the unfavourable deviation) instead of the two-column form. |
 | `language` | Fiche language: `"en"` (default, English) or `"es"` (Spanish, with a comma decimal separator). |
@@ -539,12 +539,12 @@ modal_overlap_factor(
 
 Modal overlap factor $M = 2.2 \cdot n / T_\mathrm{s}$ (Part 4, F. (6)).
 
-With the modal density `n` from [`modal_density`](/phonometry/reference/api/building/flanking-transmission/#modal_density). Part 4 prefers
+With the modal density `n` from [`modal_density`](/reference/api/building/flanking-transmission/#modal_density). Part 4 prefers
 $M \ge 1$ at 250 Hz and above, and requires bands with
 $M < 0.25$ to be
 bracketed in the report and excluded from the single-number rating
 (Clause 9). This function only computes `M`; pass it to
-[`vibration_reduction_index`](/phonometry/reference/api/building/flanking-transmission/#vibration_reduction_index) via `modal_overlap` to apply the
+[`vibration_reduction_index`](/reference/api/building/flanking-transmission/#vibration_reduction_index) via `modal_overlap` to apply the
 bracketing and single-number exclusion.
 
 **Parameters**
@@ -590,9 +590,9 @@ tapping machine on the source-room floor.
 | `receive_level` | Receiving-room average impact SPL `L2` per band, in dB. |
 | `absorption_area` | Receiving-room equivalent absorption area `A` per band, in m². |
 | `reference_area` | `A0`, in m² (default 10 m²). |
-| `fraction` | Band set passed to [`phonometry.building.weighted_impact_rating`](/phonometry/reference/api/building/ratings/#weighted_impact_rating), 3 for one-third octaves or 1 for octaves; read from the number of bands when `None`. One of `1` or `3`. |
+| `fraction` | Band set passed to [`phonometry.building.weighted_impact_rating`](/reference/api/building/ratings/#weighted_impact_rating), 3 for one-third octaves or 1 for octaves; read from the number of bands when `None`. One of `1` or `3`. |
 
-**Returns:** A [`FlankingImpactLevelResult`](/phonometry/reference/api/building/flanking-transmission/#flankingimpactlevelresult); the single-number rating is formed only for 16 (one-third-octave) or 5 (octave) bands.
+**Returns:** A [`FlankingImpactLevelResult`](/reference/api/building/flanking-transmission/#flankingimpactlevelresult); the single-number rating is formed only for 16 (one-third-octave) or 5 (octave) bands.
 
 **Raises**
 
@@ -627,9 +627,9 @@ area $A_0 = 10$ m².
 | `receive_level` | Receiving-room average SPL `L2` per band, in dB. |
 | `absorption_area` | Receiving-room equivalent absorption area `A` per band, in m². |
 | `reference_area` | `A0`, in m² (default 10 m²). |
-| `fraction` | Band set passed to [`phonometry.building.weighted_rating`](/phonometry/reference/api/building/ratings/#weighted_rating), 3 for one-third octaves or 1 for octaves; read from the number of bands when `None`. One of `1` or `3`. |
+| `fraction` | Band set passed to [`phonometry.building.weighted_rating`](/reference/api/building/ratings/#weighted_rating), 3 for one-third octaves or 1 for octaves; read from the number of bands when `None`. One of `1` or `3`. |
 
-**Returns:** A [`FlankingLevelDifferenceResult`](/phonometry/reference/api/building/flanking-transmission/#flankingleveldifferenceresult); the single-number rating is formed only for 16 (one-third-octave) or 5 (octave) bands.
+**Returns:** A [`FlankingLevelDifferenceResult`](/reference/api/building/flanking-transmission/#flankingleveldifferenceresult); the single-number rating is formed only for 16 (one-third-octave) or 5 (octave) bands.
 
 **Raises**
 
@@ -847,7 +847,7 @@ is used.
 
 | Name | Description |
 | :--- | :--- |
-| `velocity_level_difference` | Direction-averaged velocity level difference `D̄v,ij` (see [`direction_averaged_level_difference`](/phonometry/reference/api/building/flanking-transmission/#direction_averaged_level_difference)), in dB, per band. |
+| `velocity_level_difference` | Direction-averaged velocity level difference `D̄v,ij` (see [`direction_averaged_level_difference`](/reference/api/building/flanking-transmission/#direction_averaged_level_difference)), in dB, per band. |
 | `junction_length` | Common-edge junction length `lij`, in m. |
 | `area_i` | Area `Si` of element `i`, in m². |
 | `area_j` | Area `Sj` of element `j`, in m². |
@@ -855,9 +855,9 @@ is used.
 | `structural_reverberation_time_i` | `Ts,i` per band (or a single value), in s. Supply together with `structural_reverberation_time_j` and `frequencies` to use Formula (12); omit for the simplified form. |
 | `structural_reverberation_time_j` | `Ts,j` per band (or a single value), in s. |
 | `speed_of_sound` | Speed of sound in air `c0`, in m/s. |
-| `modal_overlap` | Modal overlap factor `M` per band for the heavier (least-overlapped) of the two elements (see [`modal_overlap_factor`](/phonometry/reference/api/building/flanking-transmission/#modal_overlap_factor)). When supplied, bands with $M < 0.25$ are flagged as bracketed and excluded from the single-number `K̄ij` (ISO 10848-4:2010, Clause 9). |
+| `modal_overlap` | Modal overlap factor `M` per band for the heavier (least-overlapped) of the two elements (see [`modal_overlap_factor`](/reference/api/building/flanking-transmission/#modal_overlap_factor)). When supplied, bands with $M < 0.25$ are flagged as bracketed and excluded from the single-number `K̄ij` (ISO 10848-4:2010, Clause 9). |
 
-**Returns:** A [`VibrationReductionResult`](/phonometry/reference/api/building/flanking-transmission/#vibrationreductionresult).
+**Returns:** A [`VibrationReductionResult`](/reference/api/building/flanking-transmission/#vibrationreductionresult).
 
 **Raises**
 
@@ -940,7 +940,7 @@ Per-band vibration reduction index `Kij` (ISO 10848-1:2006).
 | `single_number` | Arithmetic-mean single-number `K̄ij` over 200 Hz to 1250 Hz (one-third octave) or 125 Hz to 1000 Hz (octave) per Annex A, in dB, or `None` when the frequencies do not cover the corresponding band set. Bands bracketed for poor modal overlap (ISO 10848-4:2010 Clause 9) are excluded from the mean. |
 | `bracketed` | Per-band boolean flags, `True` where the modal overlap factor is below 0.25 so the band is bracketed and excluded from the single-number rating (ISO 10848-4:2010 Clause 9), or `None` when no modal overlap was supplied. |
 | `modal_overlap` | The modal overlap factor `M` per band the bands are bracketed by, or `None` when none was supplied. An octave band carries the smallest of its three one-third-octave bands, since it is bracketed when any of them is. |
-| `fraction` | The band set the caller states for the Annex A range the single number is averaged over, 3 for one-third octaves or 1 for octaves, as `octave_bands` states it (`fraction=1`); `None` (the default, and what [`vibration_reduction_index`](/phonometry/reference/api/building/flanking-transmission/#vibration_reduction_index) leaves) reads it from the spacing of the frequencies each time. One of `1` or `3`. |
+| `fraction` | The band set the caller states for the Annex A range the single number is averaged over, 3 for one-third octaves or 1 for octaves, as `octave_bands` states it (`fraction=1`); `None` (the default, and what [`vibration_reduction_index`](/reference/api/building/flanking-transmission/#vibration_reduction_index) leaves) reads it from the spacing of the frequencies each time. One of `1` or `3`. |
 
 `single_number` and `bracketed` are read from the fields, the
 0.25 of ISO 10848-4 Clause 9 and the Annex A range, so they are not
@@ -971,7 +971,7 @@ supplied; supplied frequencies must group into whole octave triples
 single-number `K̄ij` is averaged over 125 Hz to 1000 Hz (Annex A).
 An octave band is bracketed when any of its one-third-octave bands is.
 
-**Returns:** A new [`VibrationReductionResult`](/phonometry/reference/api/building/flanking-transmission/#vibrationreductionresult) on octave centres.
+**Returns:** A new [`VibrationReductionResult`](/reference/api/building/flanking-transmission/#vibrationreductionresult) on octave centres.
 
 **Raises**
 
@@ -1029,7 +1029,7 @@ excluded from the single number.
 | Name | Description |
 | :--- | :--- |
 | `path` | Destination path of the PDF file. |
-| `metadata` | Optional [`ReportMetadata`](/phonometry/reference/api/building/insulation/#reportmetadata); `None` produces a lightweight fiche (body, result and disclaimer only). |
+| `metadata` | Optional [`ReportMetadata`](/reference/api/building/insulation/#reportmetadata); `None` produces a lightweight fiche (body, result and disclaimer only). |
 | `engine` | Rendering back end; only `"reportlab"` is supported. |
 | `verbose` | When `True`, the per-band table adds a column stating whether each band enters the single-number mean. |
 | `language` | Fiche language: `"en"` (default, English) or `"es"` (Spanish, with a comma decimal separator). |

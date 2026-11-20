@@ -23,7 +23,7 @@ defines a noise that stands in for that programme in a measurement, the
 Table II gives the relative level of each one-third-octave band from 20 Hz to
 20 kHz with its tolerance: 0 dB from 250 Hz to 800 Hz, falling to
 $-13.5$ dB at 20 Hz and $-21.6$ dB at 20 kHz
-([`SIMULATED_PROGRAM_SPECTRUM`](/phonometry/reference/api/electroacoustics/program-signal/#simulated_program_spectrum)). The Note under the clause adds that the
+([`SIMULATED_PROGRAM_SPECTRUM`](/reference/api/electroacoustics/program-signal/#simulated_program_spectrum)). The Note under the clause adds that the
 power of the whole signal is about 12.5 dB above the 0 dB of one band, which is
 the power sum of the 31 relative levels, 12.56 dB.
 
@@ -42,7 +42,7 @@ which includes the source's own output impedance:
   adjusting the value of the 10 kohm resistor", so the 10 kohm is the whole
   shunt the network sees.
 
-[`program_signal_filter`](/phonometry/reference/api/electroacoustics/program-signal/#program_signal_filter) is the exact transfer function of that ladder,
+[`program_signal_filter`](/reference/api/electroacoustics/program-signal/#program_signal_filter) is the exact transfer function of that ladder,
 the voltage across the 10 kohm over the source e.m.f., from its nodal
 equations. The two 2.2 µF capacitors with the resistors behind them make the
 low-frequency roll-off and the 91 nF and 68 nF shunts the high-frequency one;
@@ -58,7 +58,7 @@ realisation within tolerance, not the definition: the definition is Table II.
 The generator
 -------------
 
-[`simulated_program_signal`](/phonometry/reference/api/electroacoustics/program-signal/#simulated_program_signal) synthesises the signal in the frequency
+[`simulated_program_signal`](/reference/api/electroacoustics/program-signal/#simulated_program_signal) synthesises the signal in the frequency
 domain: a white Gaussian spectrum, shaped and transformed back to a record
 that is stationary and Gaussian, as the clause asks, at any sample rate and
 with no bilinear warping near the Nyquist frequency. It offers two shapes.
@@ -85,7 +85,7 @@ inside its tolerance of 3 dB.
 The verdict
 -----------
 
-[`check_program_signal`](/phonometry/reference/api/electroacoustics/program-signal/#check_program_signal) judges one-third-octave band levels against
+[`check_program_signal`](/reference/api/electroacoustics/program-signal/#check_program_signal) judges one-third-octave band levels against
 Table II. The table is a relative spectrum: its 0 dB is not a level the signal
 has to reach, it is where the bands are referred to. The check therefore looks
 for the level that places every band inside its tolerance. Each band allows a
@@ -120,7 +120,7 @@ spectrum conforms when one level places every band inside its tolerance
 (see the module docstring). Only the bands given are judged.
 
 The band levels can come from any one-third-octave analyser, for instance
-[`phonometry.filters.octave_filter`](/phonometry/reference/api/filters/core/#octave_filter) with `fraction=3`, whose exact
+[`phonometry.filters.octave_filter`](/reference/api/filters/core/#octave_filter) with `fraction=3`, whose exact
 band centres (19.95 Hz, 25.12 Hz, ...) are read as the nominal ones of the
 table.
 
@@ -131,7 +131,7 @@ table.
 | `frequencies` | Band centre frequencies, in Hz, nominal or exact, each a band of Table II (20 Hz to 20 kHz) and none repeated. |
 | `band_levels` | The band levels, in dB, on any reference. |
 
-**Returns:** A [`ProgramSignalCheck`](/phonometry/reference/api/electroacoustics/program-signal/#programsignalcheck).
+**Returns:** A [`ProgramSignalCheck`](/reference/api/electroacoustics/program-signal/#programsignalcheck).
 
 **Raises**
 
@@ -333,7 +333,7 @@ continued at the slope of the end segments below 20 Hz and above 20 kHz,
 and its nodes are set so that each band's power, integrated over the band
 in closed form, is the printed level. Every band then has its whole
 tolerance for the random fluctuation of a finite record. `"figure_2"` is
-pink noise through the filter of Figure 2 ([`program_signal_filter`](/phonometry/reference/api/electroacoustics/program-signal/#program_signal_filter)),
+pink noise through the filter of Figure 2 ([`program_signal_filter`](/reference/api/electroacoustics/program-signal/#program_signal_filter)),
 the circuit the clause offers: inside the tolerances, but only 0.18 dB
 inside at its worst band, so a short record can fall outside them.
 

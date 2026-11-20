@@ -39,13 +39,13 @@ import SeeAlso from '../../../../components/SeeAlso.astro';
 import ThemeImage from '../../../../components/ThemeImage.astro';
 
 The Zwicker method of ISO 532-1 is the reference route to loudness in sones
-and lives in [Loudness](/phonometry/perception/psychoacoustics/loudness/), together with the
+and lives in [Loudness](/perception/psychoacoustics/loudness/), together with the
 ISO 226 equal-loudness contours. This page covers the newer model families
 phonometry ships beside it: the **Moore-Glasberg** loudness of
 ISO 532-2/532-3 and the **Sottek Hearing Model** loudness of
 ECMA-418-2:2025, whose shared auditory front-end also powers the tonality
 and roughness metrics of
-[Sound Quality Metrics](/phonometry/perception/psychoacoustics/sound-quality/).
+[Sound Quality Metrics](/perception/psychoacoustics/sound-quality/).
 
 The page opens with the choice: which model fits which measurement, and why
 the sone values of the four methods agree at the 1 kHz / 40 dB anchor yet
@@ -56,7 +56,7 @@ section with a worked example, its figure and its parameter table.
 
 | Model | Standard | Stationary / time-varying | Output | When to use |
 | :--- | :--- | :--- | :--- | :--- |
-| [Zwicker](/phonometry/perception/psychoacoustics/loudness/) | ISO 532-1:2017 | both | sone | Reference method; one-third-octave input; fast and widely cited |
+| [Zwicker](/perception/psychoacoustics/loudness/) | ISO 532-1:2017 | both | sone | Reference method; one-third-octave input; fast and widely cited |
 | Moore-Glasberg | ISO 532-2:2017 | stationary | sone | roex excitation pattern; better for tones and explicit binaural summation |
 | Moore-Glasberg-Schlittenlacher | ISO 532-3:2023 | time-varying | sone (STL/LTL) | Time-varying loudness with short-/long-term traces and the peak $N_\text{max}$ |
 | Sottek (Hearing Model) | ECMA-418-2:2025 | time-varying | sone_HMS | Shares one auditory front-end with the ECMA tonality and roughness metrics |
@@ -465,7 +465,7 @@ restricted to same-block-size neighbours 0.996, and with the full
 cross-group recomputation the standard requires 0.9845. The calibration
 constant $c_\mathrm{N}$ is kept at its verbatim tabulated value rather than retuned,
 which is why the deviation is visible at all; the
-[`psychoacoustics.loudness.ecma` API reference](/phonometry/reference/api/psychoacoustics/ecma/)
+[`psychoacoustics.loudness.ecma` API reference](/reference/api/psychoacoustics/ecma/)
 carries the full account.
 
 ```python
@@ -605,13 +605,13 @@ Resample to 32 kHz first if strict clause-by-clause conformance matters.
 
 ## See also
 
-- [Loudness](/phonometry/perception/psychoacoustics/loudness/): the Zwicker reference method
+- [Loudness](/perception/psychoacoustics/loudness/): the Zwicker reference method
   (ISO 532-1), its accredited fiche and the ISO 226 equal-loudness contours.
-- [Sound Quality Metrics](/phonometry/perception/psychoacoustics/sound-quality/): the tonality,
+- [Sound Quality Metrics](/perception/psychoacoustics/sound-quality/): the tonality,
   roughness and fluctuation strength built on the same ECMA-418-2 front-end.
-- [Theory](/phonometry/reference/theory/perception/): the equations behind the loudness models.
-- API reference: [`psychoacoustics.loudness.moore_glasberg`](/phonometry/reference/api/psychoacoustics/moore-glasberg/), [`psychoacoustics.loudness.moore_glasberg_time`](/phonometry/reference/api/psychoacoustics/moore-glasberg-time/) and [`psychoacoustics.loudness.ecma`](/phonometry/reference/api/psychoacoustics/ecma/).
-- Theory: [Advanced loudness models and sound quality](/phonometry/reference/theory/perception/#advanced-loudness-models--sound-quality): what the Moore-Glasberg and Sottek models change relative to Zwicker, and why the three disagree where they do.
+- [Theory](/reference/theory/perception/): the equations behind the loudness models.
+- API reference: [`psychoacoustics.loudness.moore_glasberg`](/reference/api/psychoacoustics/moore-glasberg/), [`psychoacoustics.loudness.moore_glasberg_time`](/reference/api/psychoacoustics/moore-glasberg-time/) and [`psychoacoustics.loudness.ecma`](/reference/api/psychoacoustics/ecma/).
+- Theory: [Advanced loudness models and sound quality](/reference/theory/perception/#advanced-loudness-models--sound-quality): what the Moore-Glasberg and Sottek models change relative to Zwicker, and why the three disagree where they do.
 
 </SeeAlso>
 

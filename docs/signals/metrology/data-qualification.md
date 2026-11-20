@@ -1,6 +1,6 @@
 <!-- Written by `make llms` from site/src/content/docs/signals/metrology/data-qualification.mdx: edit that page and its Spanish twin, then run `make llms`. -->
 
-← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/signals/metrology/data-qualification/
+← [Documentation index](../../README.md) · Published at https://phonometry.dev/signals/metrology/data-qualification/
 
 # Data qualification: stationarity and peaks
 
@@ -648,7 +648,7 @@ conscience.
 - [Time-frequency analysis](../spectra/time-frequency.md): the short-time view for records that fail the test, and for the glides its mean square cannot see.
 - [GUM uncertainty](gum-uncertainty.md): propagating the remaining random error of a qualified average.
 - [Levels](../levels/levels.md): the $L_\mathrm{eq}$ whose definition assumes one stationary measurement.
-- API reference: [`metrology.data_qualification`](https://docs.jmrp.io/phonometry/reference/api/metrology/data-qualification/).
+- API reference: [`metrology.data_qualification`](https://phonometry.dev/reference/api/metrology/data-qualification/).
 - Theory: [Measurement uncertainty (GUM)](../../reference/theory/signal-analysis.md#measurement-uncertainty-isoiec-guide-98-3-gum-and-supplement-1): the uncertainty framework the qualification criteria of this page feed.
 
 ## References

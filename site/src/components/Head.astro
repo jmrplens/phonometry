@@ -92,7 +92,7 @@ const description = data.description ?? '';
 // the language and the trail below are its English twin's, so the two copies
 // publish the same structured data, as Google asks of duplicate pages, and the
 // one they name is the canonical one src/routeData.ts writes into the head.
-const pathname = Astro.url.pathname; // e.g. /phonometry/signals/levels/levels/
+const pathname = Astro.url.pathname; // e.g. /signals/levels/levels/
 const ownPath = isFallbackRoute(pathname, BASE) ? englishTwin(pathname, BASE) : pathname;
 const canonical = new URL(ownPath, SITE).href;
 const rel = ownPath.startsWith(BASE) ? ownPath.slice(BASE.length) : ownPath;

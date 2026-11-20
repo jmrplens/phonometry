@@ -46,7 +46,7 @@ $$
 K(\phi_i) = \left|\frac{\Delta\alpha}{4\pi} \left[\cos\left(\phi_i - \frac{\Delta\phi}{2}\right) - \cos\left(\phi_i + \frac{\Delta\phi}{2}\right)\right]\right|, \qquad K(0) = K(\pi) = \frac{2\Delta\alpha}{4\pi} \left[1 - \cos\frac{\Delta\phi}{2}\right]
 $$
 
-[`adjustment_factors`](/phonometry/reference/api/metrology/random-incidence/#adjustment_factors) evaluates them for any angular step that divides
+[`adjustment_factors`](/reference/api/metrology/random-incidence/#adjustment_factors) evaluates them for any angular step that divides
 the half circle and any number of planes. Two planes at right angles,
 $\Delta\alpha = \pi/2$, are Formulas (A.1) and (A.2) of Annex A, whose
 factors for 10° steps Table A.1 prints; four planes at 45°, which NOTE 2 of
@@ -54,17 +54,17 @@ A.6 asks for when the reference direction is not normal to the diaphragm,
 halve them.
 
 The directivity factor then follows by one of three routes, each a function
-here returning a [`DirectivityFactor`](/phonometry/reference/api/metrology/random-incidence/#directivityfactor):
+here returning a [`DirectivityFactor`](/reference/api/metrology/random-incidence/#directivityfactor):
 
-* [`directivity_factor`](/phonometry/reference/api/metrology/random-incidence/#directivity_factor), two (or four) planes, Formula (A.3);
-* [`axisymmetric_directivity_factor`](/phonometry/reference/api/metrology/random-incidence/#axisymmetric_directivity_factor), one plane for an instrument with
+* [`directivity_factor`](/reference/api/metrology/random-incidence/#directivity_factor), two (or four) planes, Formula (A.3);
+* [`axisymmetric_directivity_factor`](/reference/api/metrology/random-incidence/#axisymmetric_directivity_factor), one plane for an instrument with
   rotational symmetry about its reference direction, Formula (A.4);
-* [`equal_area_directivity_factor`](/phonometry/reference/api/metrology/random-incidence/#equal_area_directivity_factor), the 38 directions of equal-area
+* [`equal_area_directivity_factor`](/reference/api/metrology/random-incidence/#equal_area_directivity_factor), the 38 directions of equal-area
   elements of the note to A.1.8, Formula (A.5), at the directions
-  [`equal_area_incidence_angles`](/phonometry/reference/api/metrology/random-incidence/#equal_area_incidence_angles) gives.
+  [`equal_area_incidence_angles`](/reference/api/metrology/random-incidence/#equal_area_incidence_angles) gives.
 
-[`random_incidence_sensitivity`](/phonometry/reference/api/metrology/random-incidence/#random_incidence_sensitivity) applies Formula (1) band by band and
-returns a [`RandomIncidenceSensitivity`](/phonometry/reference/api/metrology/random-incidence/#randomincidencesensitivity).
+[`random_incidence_sensitivity`](/reference/api/metrology/random-incidence/#random_incidence_sensitivity) applies Formula (1) band by band and
+returns a [`RandomIncidenceSensitivity`](/reference/api/metrology/random-incidence/#randomincidencesensitivity).
 
 **The diffuse-field method.** The instrument and a reference instrument are
 placed in turn at the same positions in a diffuse field, and the difference of
@@ -73,15 +73,15 @@ level of the reference, known in one of three ways: Formula (9) for a
 reference calibrated by clause 4, Formula (10) for one calibrated in a free
 field with its directivity factor known, and Formula (11) for one calibrated
 in a pressure field with the difference between its diffuse-field and
-pressure sensitivity levels known. [`diffuse_field_sensitivity`](/phonometry/reference/api/metrology/random-incidence/#diffuse_field_sensitivity) takes
-any of the three and returns a [`DiffuseFieldSensitivity`](/phonometry/reference/api/metrology/random-incidence/#diffusefieldsensitivity). Table B.1
+pressure sensitivity levels known. [`diffuse_field_sensitivity`](/reference/api/metrology/random-incidence/#diffuse_field_sensitivity) takes
+any of the three and returns a [`DiffuseFieldSensitivity`](/reference/api/metrology/random-incidence/#diffusefieldsensitivity). Table B.1
 prints both the directivity factor and that difference for a type LS2aP/LS2F
 laboratory standard microphone, one of the two types Annex B
 recommends for the reference (the other is LS2bP);
-[`IEC61183_TABLE_B1`](/phonometry/reference/api/metrology/random-incidence/#iec61183_table_b1) holds it and supplies them by default. The method is
+[`IEC61183_TABLE_B1`](/reference/api/metrology/random-incidence/#iec61183_table_b1) holds it and supplies them by default. The method is
 a sequential comparison calibration without a monitor, so Formula (8) and the
 sum of Formulas (9) to (11) are computed by the level model of IEC 61094-5 D.2
-in [`phonometry.metrology.comparison_calibration`](/phonometry/reference/api/metrology/comparison-calibration/), the one the microphone
+in [`phonometry.metrology.comparison_calibration`](/reference/api/metrology/comparison-calibration/), the one the microphone
 calibrations by comparison use.
 
 Two readings the text leaves to the implementer
@@ -193,7 +193,7 @@ $$
 NOTE 1 of A.4.7: when the instrument is rotationally symmetric about its
 reference direction, the X-Z plane repeats the X-Y plane and one rotation
 (A.4.5) is enough. This is Formula (A.3) with the two planes equal, and
-the factor 2 makes the weights those of [`adjustment_factors`](/phonometry/reference/api/metrology/random-incidence/#adjustment_factors) with
+the factor 2 makes the weights those of [`adjustment_factors`](/reference/api/metrology/random-incidence/#adjustment_factors) with
 one plane.
 
 **Parameters**
@@ -203,7 +203,7 @@ one plane.
 | `levels` | $L(\phi,\mathrm{h})$ in dB, one plane at $\phi = 0, \Delta\phi, \ldots, 360° - \Delta\phi$: 36 readings for Annex A. |
 | `reference_level` | $L_\mathrm{rd}$ in dB (Default: None, the reading at 0°). |
 
-**Returns:** The [`DirectivityFactor`](/phonometry/reference/api/metrology/random-incidence/#directivityfactor).
+**Returns:** The [`DirectivityFactor`](/reference/api/metrology/random-incidence/#directivityfactor).
 
 **Raises**
 
@@ -276,7 +276,7 @@ frequency from 25 Hz to 20 kHz.
 | `reference_pressure_level` | $G_\mathrm{P,ref}$ in dB, for a reference calibrated in a pressure field (Formula (11)). |
 | `reference_diffuse_pressure_difference_db` | $\Delta_\mathrm{DP}$ in dB, with Formula (11) only (Default: None, Table B.1). |
 
-**Returns:** The [`DiffuseFieldSensitivity`](/phonometry/reference/api/metrology/random-incidence/#diffusefieldsensitivity).
+**Returns:** The [`DiffuseFieldSensitivity`](/reference/api/metrology/random-incidence/#diffusefieldsensitivity).
 
 **Raises**
 
@@ -387,7 +387,7 @@ $$
 
 for the 10° steps and two planes of A.4.5 and A.4.6, with the factors of
 Table A.1. The angular step is read off the number of readings in a
-plane, and the factors are [`adjustment_factors`](/phonometry/reference/api/metrology/random-incidence/#adjustment_factors) for that step and
+plane, and the factors are [`adjustment_factors`](/reference/api/metrology/random-incidence/#adjustment_factors) for that step and
 that number of planes: four planes, as NOTE 2 of A.6 asks for when the
 reference direction is not normal to the diaphragm, take half the factors
 of Table A.1.
@@ -403,10 +403,10 @@ instrument and more for a directional one (see the module notes).
 
 | Name | Description |
 | :--- | :--- |
-| `levels` | $L(\phi)$ in dB, one row per plane (the first the X-Y plane, `h`; the second the X-Z plane, `v`), each at $\phi = 0, \Delta\phi, \ldots, 360° - \Delta\phi$ from the reference direction: shape `(2, 36)` for Annex A. An instrument measured in one plane under rotational symmetry goes to [`axisymmetric_directivity_factor`](/phonometry/reference/api/metrology/random-incidence/#axisymmetric_directivity_factor). |
+| `levels` | $L(\phi)$ in dB, one row per plane (the first the X-Y plane, `h`; the second the X-Z plane, `v`), each at $\phi = 0, \Delta\phi, \ldots, 360° - \Delta\phi$ from the reference direction: shape `(2, 36)` for Annex A. An instrument measured in one plane under rotational symmetry goes to [`axisymmetric_directivity_factor`](/reference/api/metrology/random-incidence/#axisymmetric_directivity_factor). |
 | `reference_level` | $L_\mathrm{rd}$ in dB (Default: None, the reading at 0° in the first plane, which A.4.4 takes in the same position). |
 
-**Returns:** The [`DirectivityFactor`](/phonometry/reference/api/metrology/random-incidence/#directivityfactor).
+**Returns:** The [`DirectivityFactor`](/reference/api/metrology/random-incidence/#directivityfactor).
 
 **Raises**
 
@@ -538,11 +538,11 @@ is 1/38 of the sphere (2.6 %) and every reading weighs the same.
 
 | Name | Description |
 | :--- | :--- |
-| `horizontal_levels` | $L(n)$ in the horizontal (X-Y) plane, in dB, 20 readings at the directions of [`equal_area_incidence_angles`](/phonometry/reference/api/metrology/random-incidence/#equal_area_incidence_angles), in the order the note prints them (0°, 32.6°, ..., 180°, ..., 327.4°). |
+| `horizontal_levels` | $L(n)$ in the horizontal (X-Y) plane, in dB, 20 readings at the directions of [`equal_area_incidence_angles`](/reference/api/metrology/random-incidence/#equal_area_incidence_angles), in the order the note prints them (0°, 32.6°, ..., 180°, ..., 327.4°). |
 | `vertical_levels` | $L(n)$ in the vertical (X-Z) plane, in dB, 18 readings at the same directions without 0° and 180°. |
 | `reference_level` | $L_\mathrm{rd}$ in dB (Default: None, the horizontal reading at 0°). |
 
-**Returns:** The [`DirectivityFactor`](/phonometry/reference/api/metrology/random-incidence/#directivityfactor).
+**Returns:** The [`DirectivityFactor`](/reference/api/metrology/random-incidence/#directivityfactor).
 
 **Raises**
 
@@ -574,7 +574,7 @@ which is 32.6°, 50.8°, 65.1°, 77.8° and 90° up to grazing incidence. The
 note prints the same angles to 0.1°, except 77.9° and its mirror 282.1°,
 which are errata (see the module notes).
 
-**Returns:** The two planes, in degrees, read-only, as an [`IncidenceAngles`](/phonometry/reference/api/metrology/random-incidence/#incidenceangles). The horizontal plane holds both poles and runs 0°, $\phi_1, \ldots, \phi_9$, 180°, $360° - \phi_9, \ldots, 360° - \phi_1$: 20 directions in the order the note prints them. The vertical plane holds the same without the poles: 18.
+**Returns:** The two planes, in degrees, read-only, as an [`IncidenceAngles`](/reference/api/metrology/random-incidence/#incidenceangles). The horizontal plane holds both poles and runs 0°, $\phi_1, \ldots, \phi_9$, 180°, $360° - \phi_9, \ldots, 360° - \phi_1$: 20 directions in the order the note prints them. The vertical plane holds the same without the poles: 18.
 
 ## IEC61183_TABLE_B1
 
@@ -591,7 +591,7 @@ IncidenceAngles(
 
 The directions of the 38 equal-area elements of IEC 61183, by plane.
 
-What [`equal_area_incidence_angles`](/phonometry/reference/api/metrology/random-incidence/#equal_area_incidence_angles) returns: the angles of the two
+What [`equal_area_incidence_angles`](/reference/api/metrology/random-incidence/#equal_area_incidence_angles) returns: the angles of the two
 planes, named, where a `(horizontal, vertical)` tuple used to be
 unpacked by position.
 
@@ -636,7 +636,7 @@ symmetry stands for the same two planes and is judged on their division.
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | as [`adjustment_factors`](/phonometry/reference/api/metrology/random-incidence/#adjustment_factors). |
+| ValueError | as [`adjustment_factors`](/reference/api/metrology/random-incidence/#adjustment_factors). |
 | TypeError | if `step_deg` is not a single number, or `n_planes` is a flag, a text or an array where a count goes. |
 
 ## random_incidence_sensitivity
@@ -668,9 +668,9 @@ instrument of that model (4.2).
 | :--- | :--- |
 | `frequencies` | The preferred frequencies, in Hz, increasing. |
 | `free_field_level` | $G_\mathrm{F}$ at each frequency, in dB (A.3). |
-| `directivity_index` | $10\lg\gamma$ at each frequency, in dB: [`DirectivityFactor.directivity_index`](/phonometry/reference/api/metrology/random-incidence/#directivityfactordirectivity_index) of the readings at that frequency. |
+| `directivity_index` | $10\lg\gamma$ at each frequency, in dB: [`DirectivityFactor.directivity_index`](/reference/api/metrology/random-incidence/#directivityfactordirectivity_index) of the readings at that frequency. |
 
-**Returns:** The [`RandomIncidenceSensitivity`](/phonometry/reference/api/metrology/random-incidence/#randomincidencesensitivity).
+**Returns:** The [`RandomIncidenceSensitivity`](/reference/api/metrology/random-incidence/#randomincidencesensitivity).
 
 **Raises**
 

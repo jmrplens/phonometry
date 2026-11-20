@@ -43,7 +43,7 @@ notes, and a rating there is the number and nothing more.
 
 * **EN 1793-5:2016** rates the sound reflection measured in place, the
   index $RI$ of
-  [`barrier_reflection`](/phonometry/reference/api/environment/barrier-reflection/), on the same
+  [`barrier_reflection`](/reference/api/environment/barrier-reflection/), on the same
   spectrum but from the lowest band the size of the sample makes reliable
   (Clause 5.8, Formula (12)):
 
@@ -106,7 +106,7 @@ for a railway one, on the same weighting as the absorption rating above.
 
 | Name | Description |
 | :--- | :--- |
-| `sound_reduction_index` | $R$ in decibels, in the eighteen one-third octave bands of [`TRAFFIC_NOISE_BANDS_HZ`](/phonometry/reference/api/environment/noise-reducing-devices/#traffic_noise_bands_hz). |
+| `sound_reduction_index` | $R$ in decibels, in the eighteen one-third octave bands of [`TRAFFIC_NOISE_BANDS_HZ`](/reference/api/environment/noise-reducing-devices/#traffic_noise_bands_hz). |
 | `spectrum` | `"road"` (EN 1793-3, the default) or `"railway"` (EN 16272-3-1). |
 
 **Returns:** The rating, its reported integer and, for a road device, its Annex A category.
@@ -203,9 +203,9 @@ A noise reducing device rated on a ratio the standard caps.
 
 Emitted when the weighted ratio of a single-number rating is limited to
 0.99, so the rating is that limit rather than the measurement: by
-[`sound_absorption_rating`](/phonometry/reference/api/environment/noise-reducing-devices/#sound_absorption_rating) when the absorption ratio of EN 1793-1
+[`sound_absorption_rating`](/reference/api/environment/noise-reducing-devices/#sound_absorption_rating) when the absorption ratio of EN 1793-1
 Clause 5 and EN 16272-3-1 Clause 5 reaches 0.99, and by
-[`sound_reflection_rating`](/phonometry/reference/api/environment/noise-reducing-devices/#sound_reflection_rating) when the reflection ratio of EN 1793-5
+[`sound_reflection_rating`](/reference/api/environment/noise-reducing-devices/#sound_reflection_rating) when the reflection ratio of EN 1793-5
 Clause 5.8 exceeds it (a reflection ratio of 0.99 itself is not limited).
 
 ## sound_absorption_rating
@@ -229,7 +229,7 @@ print a category ladder, so a railway rating carries none.
 
 | Name | Description |
 | :--- | :--- |
-| `absorption_coefficients` | $\alpha_\mathrm{S}$ in the eighteen one-third octave bands of [`TRAFFIC_NOISE_BANDS_HZ`](/phonometry/reference/api/environment/noise-reducing-devices/#traffic_noise_bands_hz). |
+| `absorption_coefficients` | $\alpha_\mathrm{S}$ in the eighteen one-third octave bands of [`TRAFFIC_NOISE_BANDS_HZ`](/reference/api/environment/noise-reducing-devices/#traffic_noise_bands_hz). |
 | `spectrum` | `"road"` (EN 1793-3, the default) or `"railway"` (EN 16272-3-1). |
 
 **Returns:** The rating, its reported integer and, for a road device, its Annex A category.
@@ -273,7 +273,7 @@ category ladder.
 
 | Name | Description |
 | :--- | :--- |
-| `reflection_indices` | $RI$ in the eighteen one-third octave bands of [`TRAFFIC_NOISE_BANDS_HZ`](/phonometry/reference/api/environment/noise-reducing-devices/#traffic_noise_bands_hz); a band below `lowest_band_hz` may be `nan`. |
+| `reflection_indices` | $RI$ in the eighteen one-third octave bands of [`TRAFFIC_NOISE_BANDS_HZ`](/reference/api/environment/noise-reducing-devices/#traffic_noise_bands_hz); a band below `lowest_band_hz` may be `nan`. |
 | `lowest_band_hz` | The centre of the lowest reliable band, one of the eighteen. |
 
 **Returns:** The rating and its reported integer, category `None`.

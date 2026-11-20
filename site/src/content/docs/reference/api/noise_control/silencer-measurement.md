@@ -32,8 +32,8 @@ air-terminal device, air-terminal unit, damper or valve radiates, in a
 reverberation room to ISO 3741, and hands back the power in the duct behind
 it with the end reflection loss of its Equation (2). That equation is
 Equation (B.3) of ISO 7235 written out again, character for character, and
-its solid-angle table is Table B.1: [`open_end_transmission_loss`](/phonometry/reference/api/noise_control/silencer-measurement/#open_end_transmission_loss) is
-both. What ISO 5135 adds of its own is [`fit_operating_line`](/phonometry/reference/api/noise_control/silencer-measurement/#fit_operating_line), the
+its solid-angle table is Table B.1: [`open_end_transmission_loss`](/reference/api/noise_control/silencer-measurement/#open_end_transmission_loss) is
+both. What ISO 5135 adds of its own is [`fit_operating_line`](/reference/api/noise_control/silencer-measurement/#fit_operating_line), the
 straight line 5.5.2 fits through the test points so that a level can be read
 off at a duty the laboratory did not measure at.
 
@@ -50,7 +50,7 @@ $\mathrm{II}$ the series with the substitution duct. ISO 11691 writes
 the same thing as $D = L_{p1} - L_{p2}$ with the substitution duct
 first, and ISO 7235 6.3 adds the reverberation-time term
 $10 \lg(T_2 / T_1)$ when the receiving room's absorption moved between
-the two series. [`substitution_insertion_loss`](/phonometry/reference/api/noise_control/silencer-measurement/#substitution_insertion_loss) is all three.
+the two series. [`substitution_insertion_loss`](/reference/api/noise_control/silencer-measurement/#substitution_insertion_loss) is all three.
 
 What the subtraction is **not** is a transmission loss. It is measured
 against a particular substitution duct in a particular rig, so it carries
@@ -62,28 +62,28 @@ is why ISO 7235 makes the arrangement reportable.
 
 The rest of the module is the bookkeeping that goes with the subtraction:
 
-* [`octave_insertion_loss`](/phonometry/reference/api/noise_control/silencer-measurement/#octave_insertion_loss) folds three one-third-octave values into
+* [`octave_insertion_loss`](/reference/api/noise_control/silencer-measurement/#octave_insertion_loss) folds three one-third-octave values into
   the octave that contains them, which ISO 11691 does on the transmitted
   energy rather than on the decibels;
-* [`microphone_spread_limit`](/phonometry/reference/api/noise_control/silencer-measurement/#microphone_spread_limit) and
-  [`microphone_positions_required`](/phonometry/reference/api/noise_control/silencer-measurement/#microphone_positions_required) are ISO 7235 Table 6, the rule that
+* [`microphone_spread_limit`](/reference/api/noise_control/silencer-measurement/#microphone_spread_limit) and
+  [`microphone_positions_required`](/reference/api/noise_control/silencer-measurement/#microphone_positions_required) are ISO 7235 Table 6, the rule that
   sends a test duct from three microphone positions to five;
-* [`survey_reproducibility`](/phonometry/reference/api/noise_control/silencer-measurement/#survey_reproducibility), [`measurement_reproducibility`](/phonometry/reference/api/noise_control/silencer-measurement/#measurement_reproducibility) and
-  [`measurement_expanded_uncertainty`](/phonometry/reference/api/noise_control/silencer-measurement/#measurement_expanded_uncertainty) are the two standards' own answers to how
+* [`survey_reproducibility`](/reference/api/noise_control/silencer-measurement/#survey_reproducibility), [`measurement_reproducibility`](/reference/api/noise_control/silencer-measurement/#measurement_reproducibility) and
+  [`measurement_expanded_uncertainty`](/reference/api/noise_control/silencer-measurement/#measurement_expanded_uncertainty) are the two standards' own answers to how
   repeatable any of this is.
 
 The open end of the duct is the other half. A duct radiating into a room does
 not hand the room everything that reaches its mouth: at low frequency the
 mouth is a poor radiator and reflects most of the energy back up the duct.
-[`open_end_transmission_loss`](/phonometry/reference/api/noise_control/silencer-measurement/#open_end_transmission_loss) is Equation (B.3), which is what stands
+[`open_end_transmission_loss`](/reference/api/noise_control/silencer-measurement/#open_end_transmission_loss) is Equation (B.3), which is what stands
 between the level measured in a reverberation room and the level travelling
 in the duct, and it is needed twice over: by the transmission loss of
 Equation (6) and by the flow-noise sound power of Equation (7).
 
 The plane-wave modelling this measurement is compared against lives in
-[`phonometry.noise_control.silencers`](/phonometry/reference/api/noise_control/silencers/), and the cut-on frequency above
+[`phonometry.noise_control.silencers`](/reference/api/noise_control/silencers/), and the cut-on frequency above
 which a duct stops carrying plane waves alone is in
-[`phonometry.noise_control.duct_modes`](/phonometry/reference/api/noise_control/duct-modes/).
+[`phonometry.noise_control.duct_modes`](/reference/api/noise_control/duct-modes/).
 
 > Auto-generated from the source docstrings by `scripts/generate_api_docs.py` (`make api-docs`). Do not edit by hand.
 
@@ -113,15 +113,15 @@ rates and need not even have the same number of points.
 
 Each series is at least five airflow rates spread over the test range
 (6.5.2.2.1). The 10 Pa floor on the lowest rate,
-[`MIN_PRESSURE_DIFFERENCE_PA`](/phonometry/reference/api/noise_control/silencer-measurement/#min_pressure_difference_pa), belongs to the simplified method of
-6.5.2.1, and [`pressure_loss_coefficient`](/phonometry/reference/api/noise_control/silencer-measurement/#pressure_loss_coefficient) is where it is checked.
+[`MIN_PRESSURE_DIFFERENCE_PA`](/reference/api/noise_control/silencer-measurement/#min_pressure_difference_pa), belongs to the simplified method of
+6.5.2.1, and [`pressure_loss_coefficient`](/reference/api/noise_control/silencer-measurement/#pressure_loss_coefficient) is where it is checked.
 
 **Parameters**
 
 | Name | Description |
 | :--- | :--- |
 | `object_static_pressure_pa` | $p_{s1(\mathrm{I})i}$, the upstream static pressures of the series with the test object, in Pa. |
-| `object_dynamic_pressure_pa` | $p_{\mathrm{d}i}$ of that series, in Pa, from [`dynamic_pressure`](/phonometry/reference/api/noise_control/silencer-measurement/#dynamic_pressure). |
+| `object_dynamic_pressure_pa` | $p_{\mathrm{d}i}$ of that series, in Pa, from [`dynamic_pressure`](/reference/api/noise_control/silencer-measurement/#dynamic_pressure). |
 | `substitution_static_pressure_pa` | $p_{s1(\mathrm{II})k}$ of the series with the substitution duct, in Pa. |
 | `substitution_dynamic_pressure_pa` | $p_{\mathrm{d}k}$ of that series, in Pa. |
 
@@ -191,7 +191,7 @@ reverberation room, and what a designer needs is what it puts into the
 duct behind it. The two differ by the end reflection loss of the open
 duct, which is Equation (2) of ISO 5135 and, written out, is exactly
 Equation (B.3) of ISO 7235: the same formula, the same solid-angle table,
-two names. [`open_end_transmission_loss`](/phonometry/reference/api/noise_control/silencer-measurement/#open_end_transmission_loss) is both.
+two names. [`open_end_transmission_loss`](/reference/api/noise_control/silencer-measurement/#open_end_transmission_loss) is both.
 
 The NOTE to Table 1 offers a way out of the correction rather than a
 second formula for it: a transmission element to ISO 7235 may be fitted
@@ -202,7 +202,7 @@ instead, and then no correction is applied at all.
 | Name | Description |
 | :--- | :--- |
 | `room_sound_power_level` | $L_W$, the sound power radiated into the room, in dB, from ISO 3741. |
-| `end_reflection_loss` | $\Delta L_\mathrm{r}$, in dB, from [`open_end_transmission_loss`](/phonometry/reference/api/noise_control/silencer-measurement/#open_end_transmission_loss). |
+| `end_reflection_loss` | $\Delta L_\mathrm{r}$, in dB, from [`open_end_transmission_loss`](/reference/api/noise_control/silencer-measurement/#open_end_transmission_loss). |
 
 **Returns:** $L_{W\mathrm{duct}}$, in dB, one value per band. A `float` when `room_sound_power_level` and `end_reflection_loss` are both numbers, an array when either is a sequence or an array, a zero-dimensional one included.
 
@@ -289,7 +289,7 @@ serves both.
 | `duty` | $q_V$ in m³/s or $\Delta p_\mathrm{t}$ in Pa, one per test point, at least two of them. |
 | `levels` | The level at each of those points, in dB. |
 
-**Returns:** An [`OperatingLine`](/phonometry/reference/api/noise_control/silencer-measurement/#operatingline).
+**Returns:** An [`OperatingLine`](/reference/api/noise_control/silencer-measurement/#operatingline).
 
 **Raises**
 
@@ -358,7 +358,7 @@ room's volume and reverberation time.
 | Name | Description |
 | :--- | :--- |
 | `pressure_level` | $\overline{L_p}$, in dB, per band. |
-| `open_end_loss` | $D_\mathrm{td}$, in dB, from [`open_end_transmission_loss`](/phonometry/reference/api/noise_control/silencer-measurement/#open_end_transmission_loss). |
+| `open_end_loss` | $D_\mathrm{td}$, in dB, from [`open_end_transmission_loss`](/reference/api/noise_control/silencer-measurement/#open_end_transmission_loss). |
 | `room_correction` | $C$, in dB, per band or one value for all. |
 
 **Returns:** $L_W$, in dB, one value per band. A `float` when `pressure_level`, `open_end_loss` and `room_correction` are all numbers, an array when one of them is a sequence or an array, a zero-dimensional one included.
@@ -461,8 +461,8 @@ $D_\mathrm{td}$ goes to zero and the two quantities meet.
 
 | Name | Description |
 | :--- | :--- |
-| `insertion_loss` | $D_\mathrm{i}$, in dB, from [`substitution_insertion_loss`](/phonometry/reference/api/noise_control/silencer-measurement/#substitution_insertion_loss). |
-| `open_end_loss` | $D_\mathrm{td}$, in dB, from [`open_end_transmission_loss`](/phonometry/reference/api/noise_control/silencer-measurement/#open_end_transmission_loss). |
+| `insertion_loss` | $D_\mathrm{i}$, in dB, from [`substitution_insertion_loss`](/reference/api/noise_control/silencer-measurement/#substitution_insertion_loss). |
+| `open_end_loss` | $D_\mathrm{td}$, in dB, from [`open_end_transmission_loss`](/reference/api/noise_control/silencer-measurement/#open_end_transmission_loss). |
 
 **Returns:** $D_\mathrm{t}$, in dB, one value per band. A `float` when `insertion_loss` and `open_end_loss` are both numbers, an array when either is a sequence or an array, a zero-dimensional one included.
 
@@ -495,7 +495,7 @@ figure at 4 kHz within 6.
 | Name | Description |
 | :--- | :--- |
 | `frequency` | The one-third-octave band centre, in Hz. |
-| `quantity` | The column of Table 7, as in [`measurement_reproducibility`](/phonometry/reference/api/noise_control/silencer-measurement/#measurement_reproducibility). One of `"insertion_loss"`, `"transmission_loss"` or `"intensity"`. |
+| `quantity` | The column of Table 7, as in [`measurement_reproducibility`](/reference/api/noise_control/silencer-measurement/#measurement_reproducibility). One of `"insertion_loss"`, `"transmission_loss"` or `"intensity"`. |
 
 **Returns:** The expanded uncertainty, in dB.
 
@@ -503,7 +503,7 @@ figure at 4 kHz within 6.
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | As [`measurement_reproducibility`](/phonometry/reference/api/noise_control/silencer-measurement/#measurement_reproducibility). |
+| ValueError | As [`measurement_reproducibility`](/reference/api/noise_control/silencer-measurement/#measurement_reproducibility). |
 | TypeError | if `quantity` is not a text. |
 
 ## measurement_reproducibility
@@ -660,7 +660,7 @@ is a half wavelength across the larger dimension, so $c / 2H$. The
 circular constant is rounded: the exact value is the first zero of
 $J_1'$, which puts the coefficient at 0.58607 rather than 0.59, so
 Equation (4) sits 0.67 % high. The exact eigenvalues are in
-[`phonometry.noise_control.circular_duct_cut_on`](/phonometry/reference/api/noise_control/duct-modes/#circular_duct_cut_on), which also carries
+[`phonometry.noise_control.circular_duct_cut_on`](/reference/api/noise_control/duct-modes/#circular_duct_cut_on), which also carries
 the mean-flow correction this equation does not have.
 
 **Parameters**
@@ -714,7 +714,7 @@ coefficient is scaled by that one factor rather than shifted, which
 leaves it 0.069 % low. That is far under the uncertainty of a
 pressure-loss test, and using the printed constants is what reproduces a
 result computed to the standard, which is why
-[`ISO7235_ABSOLUTE_ZERO_OFFSET_K`](/phonometry/reference/api/noise_control/silencer-measurement/#iso7235_absolute_zero_offset_k) and [`ISO7235_AIR_GAS_CONSTANT_J_KG_K`](/phonometry/reference/api/noise_control/silencer-measurement/#iso7235_air_gas_constant_j_kg_k)
+[`ISO7235_ABSOLUTE_ZERO_OFFSET_K`](/reference/api/noise_control/silencer-measurement/#iso7235_absolute_zero_offset_k) and [`ISO7235_AIR_GAS_CONSTANT_J_KG_K`](/reference/api/noise_control/silencer-measurement/#iso7235_air_gas_constant_j_kg_k)
 carry them as printed.
 
 **Parameters**
@@ -888,7 +888,7 @@ is called the end reflection loss of the open duct and is added to the
 sound power radiated into the room. The two names are one quantity.
 
 The library also carries a different closed form for the same physics,
-[`phonometry.noise_control.end_reflection_loss_closed_form`](/phonometry/reference/api/noise_control/hvac/#end_reflection_loss_closed_form), which
+[`phonometry.noise_control.end_reflection_loss_closed_form`](/reference/api/noise_control/hvac/#end_reflection_loss_closed_form), which
 is Reynolds' as given by Long and raises the same argument to 1.88
 rather than to 2. For a circular duct in free space the two are
 $10\lg[1 + (c/\pi f d)^2]$ against
@@ -902,7 +902,7 @@ the middle.
 | :--- | :--- |
 | `frequency` | Band centre frequency $f$, in Hz (scalar or array). |
 | `area` | $S$, the cross-sectional area of the duct, in m². |
-| `solid_angle_sr` | $\Omega$, the solid angle of radiation at the duct end, in sr. The five configurations of Table B.1 are in [`RADIATION_SOLID_ANGLES`](/phonometry/reference/api/noise_control/silencer-measurement/#radiation_solid_angles); the default is a duct flush with one surface. |
+| `solid_angle_sr` | $\Omega$, the solid angle of radiation at the duct end, in sr. The five configurations of Table B.1 are in [`RADIATION_SOLID_ANGLES`](/reference/api/noise_control/silencer-measurement/#radiation_solid_angles); the default is a duct flush with one surface. |
 | `speed_of_sound` | $c$, in m/s. |
 
 **Returns:** $D_\mathrm{td}$, in dB, one value per frequency. A `float` for a number, an array for a sequence or an array, a zero-dimensional one included.
@@ -940,7 +940,7 @@ no further.
 
 Two things make the fit reportable. The maximum deviation between the
 measured points and the line has to be within
-[`EXTRAPOLATION_MAX_DEVIATION_DB`](/phonometry/reference/api/noise_control/silencer-measurement/#extrapolation_max_deviation_db); past that the levels are not a
+[`EXTRAPOLATION_MAX_DEVIATION_DB`](/reference/api/noise_control/silencer-measurement/#extrapolation_max_deviation_db); past that the levels are not a
 straight line in this variable and the extrapolation means nothing.
 And clause 8 k) requires the report to say which of the values it gives
 are extrapolated rather than measured directly.
@@ -971,7 +971,7 @@ The fitted level at one duty, in dB.
 | :--- | :--- |
 | `duty` | The volume flow rate or total pressure loss to read the line at, in the unit the fit was made in. |
 
-**Returns:** The level, in dB, rounded to nothing: clause 8 k) asks for half a decibel in the report and [`REPORTING_RESOLUTION_DB`](/phonometry/reference/api/noise_control/silencer-measurement/#reporting_resolution_db) carries that, but rounding here would compound through a chain.
+**Returns:** The level, in dB, rounded to nothing: clause 8 k) asks for half a decibel in the report and [`REPORTING_RESOLUTION_DB`](/reference/api/noise_control/silencer-measurement/#reporting_resolution_db) carries that, but rounding here would compound through a chain.
 
 **Raises**
 
@@ -1326,7 +1326,7 @@ to it: as a rule $S_1 = S_2$, and it vanishes.
 | Name | Description |
 | :--- | :--- |
 | `static_pressure_loss_pa` | $\Delta p_\mathrm{s}$, in Pa. |
-| `inlet_dynamic_pressure_pa` | $p_\mathrm{d1}$ from [`dynamic_pressure`](/phonometry/reference/api/noise_control/silencer-measurement/#dynamic_pressure) at the inlet, in Pa. |
+| `inlet_dynamic_pressure_pa` | $p_\mathrm{d1}$ from [`dynamic_pressure`](/reference/api/noise_control/silencer-measurement/#dynamic_pressure) at the inlet, in Pa. |
 | `inlet_area` | $S_1$, the inlet test duct, in m². |
 | `outlet_area` | $S_2$, the outlet test duct, in m². |
 
@@ -1415,7 +1415,7 @@ in. Equation (8) uses the density upstream of the test object. Equation
 if the flow meter and the test object are far enough apart in temperature
 or static pressure that their density ratio leaves 0.98 to 1.02, the
 meter is no longer measuring the flow the test object sees.
-[`DENSITY_RATIO_RANGE`](/phonometry/reference/api/noise_control/silencer-measurement/#density_ratio_range) carries that window.
+[`DENSITY_RATIO_RANGE`](/reference/api/noise_control/silencer-measurement/#density_ratio_range) carries that window.
 
 **Parameters**
 

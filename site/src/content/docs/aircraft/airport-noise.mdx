@@ -47,9 +47,9 @@ This page covers that chain end to end, from the NPD interpolation to the
 ground-grid contour, and it is validated against the reference workbook of
 Doc 29 5th ed. Vol. 3. The certification metric these tables ultimately come
 from, the EPNL of ICAO Annex 16, is
-[Aircraft noise](/phonometry/aircraft/aircraft-noise/); the physical
+[Aircraft noise](/aircraft/aircraft-noise/); the physical
 propagation ingredients (ground effect, atmospheric absorption, barriers)
-are [Outdoor sound propagation](/phonometry/environment/propagation/outdoor-propagation/).
+are [Outdoor sound propagation](/environment/propagation/outdoor-propagation/).
 
 ## 1. The noise-power-distance engine
 
@@ -126,9 +126,9 @@ degrees Celsius and relative humidity in percent above 500, and wind below
 procedure before this chain reads them. The functions of this page take the NPD
 arrays as given and have no humidity argument: `impedance_adjustment` only
 rescales the levels for the specific acoustic impedance of the air. The
-conversion is [NPD data for the air at the airport](/phonometry/aircraft/npd-atmosphere/),
+conversion is [NPD data for the air at the airport](/aircraft/npd-atmosphere/),
 whose `revise_npd_curves` returns revised tables to pass here, and the ANP
-wiring of [The ANP fleet database](/phonometry/aircraft/anp-fleet/) applies it
+wiring of [The ANP fleet database](/aircraft/anp-fleet/) applies it
 by itself when it is given `relative_humidity_percent=`.
 
 Read the curves accordingly. Between the markers the level falls close to
@@ -167,7 +167,7 @@ than a modelling preference, so pass `"fuselage"` or `"propeller"` explicitly,
 because a propeller takes no installation correction at all and leaving the
 default in place gives it a directivity it does not have. Where a real type's
 mounting and power units come from is
-[The ANP fleet database](/phonometry/aircraft/anp-fleet/).
+[The ANP fleet database](/aircraft/anp-fleet/).
 
 Each segment starts from a baseline level read from the NPD table at that
 segment's power and distance, and is corrected term by term:
@@ -522,10 +522,10 @@ single-event levels. NPD tables themselves are an input, not a prediction: the
 library interpolates the tables supplied for an aircraft type, it does not
 synthesise them from engine data. The EASA/EUROCONTROL ANP database of
 measured tables for real types does ship with phonometry and is read by [The
-ANP fleet database](/phonometry/aircraft/anp-fleet/), which wires it straight
+ANP fleet database](/aircraft/anp-fleet/), which wires it straight
 into the functions of this page, and the Appendix D recalculation of NPD data
 for a site outside the §2.5 envelope is in
-[NPD data for the air at the airport](/phonometry/aircraft/npd-atmosphere/).
+[NPD data for the air at the airport](/aircraft/npd-atmosphere/).
 The acoustically hard ground that SAE AIR 5662 excludes is not implemented: the
 lateral attenuation, and with it the whole single-event chain, assumes soft
 grassy ground.
@@ -536,24 +536,24 @@ grassy ground.
 
 ## See also
 
-- [Aircraft noise: Effective Perceived Noise Level](/phonometry/aircraft/aircraft-noise/):
+- [Aircraft noise: Effective Perceived Noise Level](/aircraft/aircraft-noise/):
   the ICAO Annex 16 certification metric behind the aircraft data.
-- [The ANP fleet database](/phonometry/aircraft/anp-fleet/): the shipped NPD
+- [The ANP fleet database](/aircraft/anp-fleet/): the shipped NPD
   tables and default trajectories for real aircraft types, which run this
   chain without a hand-written table.
-- [Rotorcraft noise: the hemisphere method](/phonometry/aircraft/rotorcraft-noise/):
+- [Rotorcraft noise: the hemisphere method](/aircraft/rotorcraft-noise/):
   the ECAC Doc 32 contour method, where a noise hemisphere plays the role the
   NPD table plays here. Mind the symbols on the way across: Doc 32 uses
   $\varphi$ for the hemisphere azimuth and writes the bank angle $\Phi$, where
   Doc 29 uses $\varphi$ for the depression angle and $\varepsilon$ for the bank.
   Each is its own standard's notation.
-- [Outdoor sound propagation](/phonometry/environment/propagation/outdoor-propagation/): the
+- [Outdoor sound propagation](/environment/propagation/outdoor-propagation/): the
   ISO 9613-2 attenuation terms and the ground effect the lateral attenuation
   condenses into one curve.
-- [Environmental Levels](/phonometry/environment/assessment/environmental-levels/): the
+- [Environmental Levels](/environment/assessment/environmental-levels/): the
   $L_\mathrm{den}$-style long-term indices that a full airport study accumulates
   from single events.
 - API reference:
-  [`aircraft.airport_noise`](/phonometry/reference/api/aeroacoustics/airport-noise/).
+  [`aircraft.airport_noise`](/reference/api/aeroacoustics/airport-noise/).
 
 </SeeAlso>

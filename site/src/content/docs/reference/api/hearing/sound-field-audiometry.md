@@ -39,31 +39,31 @@ with the same signals the audiometry will use (5.1):
   or more, 4.5 dB for 4.5 dB, 4 dB for 4 dB, and a microphone below 4 dB is
   not suitable).
 
-[`check_free_sound_field`](/phonometry/reference/api/hearing/sound-field-audiometry/#check_free_sound_field), [`check_quasi_free_sound_field`](/phonometry/reference/api/hearing/sound-field-audiometry/#check_quasi_free_sound_field) and
-[`check_diffuse_sound_field`](/phonometry/reference/api/hearing/sound-field-audiometry/#check_diffuse_sound_field) judge those conditions band by band. The
+[`check_free_sound_field`](/reference/api/hearing/sound-field-audiometry/#check_free_sound_field), [`check_quasi_free_sound_field`](/reference/api/hearing/sound-field-audiometry/#check_quasi_free_sound_field) and
+[`check_diffuse_sound_field`](/reference/api/hearing/sound-field-audiometry/#check_diffuse_sound_field) judge those conditions band by band. The
 diffuse-field judgement is the same one ISO 4869-3:2007, 5.2.2, asks of the
 random-incidence field of its test site, with its own Table 1;
-[`phonometry.hearing.check_random_incidence_field`](/phonometry/reference/api/hearing/earmuff-insertion-loss/#check_random_incidence_field) runs it with that
-table and returns the same [`DiffuseSoundFieldCheck`](/phonometry/reference/api/hearing/sound-field-audiometry/#diffusesoundfieldcheck).
+[`phonometry.hearing.check_random_incidence_field`](/reference/api/hearing/earmuff-insertion-loss/#check_random_incidence_field) runs it with that
+table and returns the same [`DiffuseSoundFieldCheck`](/reference/api/hearing/sound-field-audiometry/#diffusesoundfieldcheck).
 
 **The ambient noise (Clause 6, Table 2).** The maximum permissible ambient
 sound pressure levels for sound field audiometry, in one-third-octave bands
 from 31.5 Hz to 12.5 kHz, for a lowest test frequency of 125 Hz or 250 Hz,
-are [`SOUND_FIELD_AMBIENT_LIMITS_DB`](/phonometry/reference/api/hearing/sound-field-audiometry/#sound_field_ambient_limits_db). Its footnote a says they are
+are [`SOUND_FIELD_AMBIENT_LIMITS_DB`](/reference/api/hearing/sound-field-audiometry/#sound_field_ambient_limits_db). Its footnote a says they are
 derived from ISO 8253-1 for binaural listening, and prints no offset; laid
 side by side, from 31.5 Hz to 8 kHz each cell is the bone-conduction limit of
 ISO 8253-1:2010 Table 4 less 3 dB, an observation the library makes on the
 two printed tables and not a figure the footnote gives. Footnote b asks for
 lower limits, by an amount it does not print, when narrow-band noise is the
 test signal.
-[`phonometry.hearing.check_audiometric_ambient_noise`](/phonometry/reference/api/hearing/audiometry/#check_audiometric_ambient_noise) judges a measured
+[`phonometry.hearing.check_audiometric_ambient_noise`](/reference/api/hearing/audiometry/#check_audiometric_ambient_noise) judges a measured
 spectrum against them with `presentation="sound field"`.
 
 **Off-axis loudspeakers (Annex B, informative).** No standardized reference
 threshold exists for a loudspeaker away from 0° incidence (4.8, NOTE 1).
 Table B.1 prints how much higher the sound pressure level is at the ear
 closest to the loudspeaker at 45° and 90°, rounded to the nearest 0.5 dB, which
-[`INCIDENCE_CORRECTIONS`](/phonometry/reference/api/hearing/sound-field-audiometry/#incidence_corrections) carries and [`incidence_correction`](/phonometry/reference/api/hearing/sound-field-audiometry/#incidence_correction)
+[`INCIDENCE_CORRECTIONS`](/reference/api/hearing/sound-field-audiometry/#incidence_corrections) carries and [`incidence_correction`](/reference/api/hearing/sound-field-audiometry/#incidence_correction)
 reads. The paragraph above the table announces it from 200 Hz; its rows start
 at 125 Hz, and the library carries every printed row (see `docs/ERRATA.md`).
 
@@ -97,7 +97,7 @@ audiometry will use:
 - b) from 500 Hz up, the levels a directional microphone reads at the
   reference point in the directions of the largest and smallest incident
   energy stay within the variation Table 1 allows for its front-to-random
-  sensitivity index ([`DIFFUSE_FIELD_VARIATION_LIMITS`](/phonometry/reference/api/hearing/sound-field-audiometry/#diffuse_field_variation_limits)).
+  sensitivity index ([`DIFFUSE_FIELD_VARIATION_LIMITS`](/reference/api/hearing/sound-field-audiometry/#diffuse_field_variation_limits)).
 
 The readings of b) are taken in as many directions as the microphone and
 the loudspeakers need, including the two planes where the extremes are
@@ -114,7 +114,7 @@ them.
 | `front_to_random_index` | The microphone's front-to-random sensitivity index, in dB, one number or one per band; required with `directional_levels`. A band where it is below 4 dB, or NaN, is left unjudged, since Table 1 says the microphone is not suitable there. |
 | `frequencies` | The frequencies of the test signals, in hertz, or `None` for the eleven audiometric frequencies from 125 Hz to 8 kHz. |
 
-**Returns:** [`DiffuseSoundFieldCheck`](/phonometry/reference/api/hearing/sound-field-audiometry/#diffusesoundfieldcheck).
+**Returns:** [`DiffuseSoundFieldCheck`](/reference/api/hearing/sound-field-audiometry/#diffusesoundfieldcheck).
 
 **Raises**
 
@@ -173,7 +173,7 @@ to 5.2 says only an anechoic room does.
 | `loudspeaker_distance_m` | $r$, in metres. A distance under 1 m is judged, not refused: the verdict fails a). |
 | `frequencies` | The test frequencies, in hertz, or `None` for the eleven audiometric frequencies from 125 Hz to 8 kHz. |
 
-**Returns:** [`FreeSoundFieldCheck`](/phonometry/reference/api/hearing/sound-field-audiometry/#freesoundfieldcheck).
+**Returns:** [`FreeSoundFieldCheck`](/reference/api/hearing/sound-field-audiometry/#freesoundfieldcheck).
 
 **Raises**
 
@@ -214,7 +214,7 @@ test subject and the chair absent and all other working conditions kept:
   $$
 
 The usable frequency range of the field is the range in which these hold,
-which [`FreeSoundFieldCheck.usable_frequencies`](/phonometry/reference/api/hearing/sound-field-audiometry/#freesoundfieldcheckusable_frequencies) gives.
+which [`FreeSoundFieldCheck.usable_frequencies`](/reference/api/hearing/sound-field-audiometry/#freesoundfieldcheckusable_frequencies) gives.
 
 **Parameters**
 
@@ -227,7 +227,7 @@ which [`FreeSoundFieldCheck.usable_frequencies`](/phonometry/reference/api/heari
 | `loudspeaker_distance_m` | $r$, in metres. A distance under 1 m is judged, not refused: the verdict fails a). |
 | `frequencies` | The test frequencies, in hertz, or `None` for the eleven audiometric frequencies from 125 Hz to 8 kHz. |
 
-**Returns:** [`FreeSoundFieldCheck`](/phonometry/reference/api/hearing/sound-field-audiometry/#freesoundfieldcheck) with `field="quasi-free"`.
+**Returns:** [`FreeSoundFieldCheck`](/reference/api/hearing/sound-field-audiometry/#freesoundfieldcheck) with `field="quasi-free"`.
 
 **Raises**
 
@@ -569,7 +569,7 @@ NOTE 1); how a report uses the increase is left to it.
 
 | Name | Description |
 | :--- | :--- |
-| `frequencies` | Test frequencies in hertz, each one of [`INCIDENCE_CORRECTION_FREQUENCIES_HZ`](/phonometry/reference/api/hearing/sound-field-audiometry/#incidence_correction_frequencies_hz). |
+| `frequencies` | Test frequencies in hertz, each one of [`INCIDENCE_CORRECTION_FREQUENCIES_HZ`](/reference/api/hearing/sound-field-audiometry/#incidence_correction_frequencies_hz). |
 | `incidence_angle_deg` | 45 or 90. |
 
 **Returns:** The increase per frequency, in dB. A `float` for a number, an array for a sequence or an array, a zero-dimensional one included.

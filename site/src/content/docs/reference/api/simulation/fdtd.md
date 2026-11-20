@@ -23,11 +23,11 @@ formulation of Attenborough & Van Renterghem, *Predicting Outdoor Sound*
 * absorbing edges as a graded sponge layer, the simple precursor of the
   perfectly-matched-layer treatment discussed in section 4.2.3.
 
-Two API levels are exposed. [`fdtd_simulation`](/phonometry/reference/api/simulation/fdtd/#fdtd_simulation) is the result-object
-entry point: it takes an [`FDTDRun`](/phonometry/reference/api/simulation/fdtd/#fdtdrun), the record of a simulation that
+Two API levels are exposed. [`fdtd_simulation`](/reference/api/simulation/fdtd/#fdtd_simulation) is the result-object
+entry point: it takes an [`FDTDRun`](/reference/api/simulation/fdtd/#fdtdrun), the record of a simulation that
 checks every argument when it is built, steps it deterministically and
-returns a frozen [`FDTDResult`](/phonometry/reference/api/simulation/fdtd/#fdtdresult) with per-probe pressure histories,
-optional field snapshots and a `.plot()` method. [`FDTD2D`](/phonometry/reference/api/simulation/fdtd/#fdtd2d) is the underlying
+returns a frozen [`FDTDResult`](/reference/api/simulation/fdtd/#fdtdresult) with per-probe pressure histories,
+optional field snapshots and a `.plot()` method. [`FDTD2D`](/reference/api/simulation/fdtd/#fdtd2d) is the underlying
 stepping engine (also used by the documentation animations) for callers that
 need frame-by-frame access to the field.
 
@@ -74,7 +74,7 @@ ContourProbe(
 
 On-the-fly DFT of `p` and `v_n` on a closed rectangular contour.
 
-Created by [`FDTD2D.add_contour_probe`](/phonometry/reference/api/simulation/fdtd/#fdtd2dadd_contour_probe), or by hand: a probe
+Created by [`FDTD2D.add_contour_probe`](/reference/api/simulation/fdtd/#fdtd2dadd_contour_probe), or by hand: a probe
 registers itself with the engine it is built for, so either way the
 engine samples it from its next step, and at every step after for as
 long as the engine lives. To integrate another window, call
@@ -116,7 +116,7 @@ float32 with Neumaier's compensated summation.
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | if `engine` is not an [`FDTD2D`](/phonometry/reference/api/simulation/fdtd/#fdtd2d), `ix0`, `ix1`, `iy0` or `iy1` is a flag, a text or an array where a count goes, or `frequencies` holds a complex number or a text. |
+| TypeError | if `engine` is not an [`FDTD2D`](/reference/api/simulation/fdtd/#fdtd2d), `ix0`, `ix1`, `iy0` or `iy1` is a flag, a text or an array where a count goes, or `frequencies` holds a complex number or a text. |
 
 ### ContourProbe.n_samples
 
@@ -138,7 +138,7 @@ The accumulated contour phasors at one tracked frequency.
 | :--- | :--- |
 | `frequency` | One of the frequencies the probe was created with, in hertz. |
 
-**Returns:** A [`ContourPhasors`](/phonometry/reference/api/simulation/ntff/#contourphasors) ready for [`far_field_from_contour`](/phonometry/reference/api/simulation/ntff/#far_field_from_contour).
+**Returns:** A [`ContourPhasors`](/reference/api/simulation/ntff/#contourphasors) ready for [`far_field_from_contour`](/reference/api/simulation/ntff/#far_field_from_contour).
 
 **Raises**
 
@@ -251,14 +251,14 @@ floats, on every device.
 | `shape` | Grid shape `(ny, nx)`, required only when `c` is a scalar; beside a map it must be the map's own shape. |
 | `edge_impedance` | Locally reacting boundary sides: a mapping from side name to a real specific acoustic impedance [Pa s/m], either a scalar or a per-edge-cell 1D array (length `ny` for `left`/ `right`, `nx` for `top`/`bottom`). Implements Eqs. (4.33)-(4.35); $Z = \rho c$ is a normal-incidence matched (anechoic) edge. A side cannot be both a sponge and an impedance boundary. |
 | `obstacle_mask` | Boolean map, shape `(ny, nx)`, of rigid cells: every face adjacent to a masked cell is closed (zero normal velocity, Eq. 4.32), rasterising arbitrary interior geometry. |
-| `compute` | Where the engine steps ([`Compute`](/phonometry/reference/api/simulation/compute/#compute)); `None` follows [`use`](/phonometry/reference/api/simulation/compute/#use), then `PHONOMETRY_COMPUTE`, then NumPy. |
+| `compute` | Where the engine steps ([`Compute`](/reference/api/simulation/compute/#compute)); `None` follows [`use`](/reference/api/simulation/compute/#use), then `PHONOMETRY_COMPUTE`, then NumPy. |
 
 **Raises**
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | if `cfl`, `dx` or `absorbing_layer_reflection` is not a single real number, `c`, `rho` or `damping` holds a complex number or a text, `absorbing_layer_cells` is a flag, a text or an array where a count goes, `shape` is not a pair or holds a count that is not a number, a side of `absorbing_sides` or `edge_impedance` is not a text, an impedance of `edge_impedance` is not a real number or an array of them (a flag, `None` or a text among them), or `compute` is neither a [`Compute`](/phonometry/reference/api/simulation/compute/#compute) nor `None`. |
-| ValueError | for an argument out of its range, a `dx`, a `cfl` and a fastest speed of `c` that give a time step past a float's range (zero or infinite), a `shape` given beside a map of another shape, a side that is not `"left"`, `"right"`, `"top"` or `"bottom"`, and for a `compute` that names a host: an engine steps in this process, and only [`fdtd_simulation`](/phonometry/reference/api/simulation/fdtd/#fdtd_simulation) and [`write_fdtd_animation`](/phonometry/reference/api/simulation/video/#write_fdtd_animation) run on a node. |
+| TypeError | if `cfl`, `dx` or `absorbing_layer_reflection` is not a single real number, `c`, `rho` or `damping` holds a complex number or a text, `absorbing_layer_cells` is a flag, a text or an array where a count goes, `shape` is not a pair or holds a count that is not a number, a side of `absorbing_sides` or `edge_impedance` is not a text, an impedance of `edge_impedance` is not a real number or an array of them (a flag, `None` or a text among them), or `compute` is neither a [`Compute`](/reference/api/simulation/compute/#compute) nor `None`. |
+| ValueError | for an argument out of its range, a `dx`, a `cfl` and a fastest speed of `c` that give a time step past a float's range (zero or infinite), a `shape` given beside a map of another shape, a side that is not `"left"`, `"right"`, `"top"` or `"bottom"`, and for a `compute` that names a host: an engine steps in this process, and only [`fdtd_simulation`](/reference/api/simulation/fdtd/#fdtd_simulation) and [`write_fdtd_animation`](/reference/api/simulation/video/#write_fdtd_animation) run on a node. |
 | ComputeImportError | when the library of the device `compute` asks for is not installed or does not import, unless `fallback=True`. |
 | ComputeDeviceError | when that device is not present, or fails a first small computation, unless `fallback=True`. |
 
@@ -290,9 +290,9 @@ $y = i_{y0}\,\Delta x$ and $y = (i_{y1}+1)\,\Delta x$. From
 the step after registration the engine
 folds the face pressures (averaged from the two adjacent cell
 centres) and the outward face normal velocities into running DFT
-sums at each requested frequency; see [`ContourProbe`](/phonometry/reference/api/simulation/fdtd/#contourprobe)
+sums at each requested frequency; see [`ContourProbe`](/reference/api/simulation/fdtd/#contourprobe)
 for the steady-state protocol and
-[`far_field_from_contour`](/phonometry/reference/api/simulation/ntff/#far_field_from_contour) for the
+[`far_field_from_contour`](/reference/api/simulation/ntff/#far_field_from_contour) for the
 far-field transformation of the captured phasors.
 
 Place the contour in open air: strictly around the scatterer,
@@ -311,7 +311,7 @@ radiated field itself is the quantity of interest).
 | `iy1` | Last cell row inside the contour. |
 | `frequencies` | Frequencies to track [Hz]. |
 
-**Returns:** The registered [`ContourProbe`](/phonometry/reference/api/simulation/fdtd/#contourprobe).
+**Returns:** The registered [`ContourProbe`](/reference/api/simulation/fdtd/#contourprobe).
 
 **Raises**
 
@@ -353,7 +353,7 @@ cells), as a physical incident wave would be.
 | :--- | :--- |
 | `direction` | Travel direction, one of `"down"`, `"up"`, `"left"`, `"right"`. |
 | `center_m` | Envelope centre along the travel axis [m]. |
-| `half_width_m` | Gaussian envelope half-width $w$ [m], the `1/e` point of $\mathrm{e}^{-((x - x_0)/w)^2}$, as [`GaussianPulse.half_width_s`](/phonometry/reference/api/simulation/fdtd/#gaussianpulse) is in time. |
+| `half_width_m` | Gaussian envelope half-width $w$ [m], the `1/e` point of $\mathrm{e}^{-((x - x_0)/w)^2}$, as [`GaussianPulse.half_width_s`](/reference/api/simulation/fdtd/#gaussianpulse) is in time. |
 | `amplitude` | Peak pressure of the envelope [Pa]. |
 | `wavelength_m` | Optional carrier wavelength [m]; `None` gives the pure Gaussian pulse. |
 
@@ -374,9 +374,9 @@ FDTD2D.add_source(
 
 Register a source: a point injection or a plane-wave line.
 
-Point sources ([`GaussianPulse`](/phonometry/reference/api/simulation/fdtd/#gaussianpulse), [`CWSource`](/phonometry/reference/api/simulation/fdtd/#cwsource),
-[`SignalSource`](/phonometry/reference/api/simulation/fdtd/#signalsource)) inject additively at one cell. A
-[`PlaneWaveSource`](/phonometry/reference/api/simulation/fdtd/#planewavesource) injects a sustained one-way plane wave on
+Point sources ([`GaussianPulse`](/reference/api/simulation/fdtd/#gaussianpulse), [`CWSource`](/reference/api/simulation/fdtd/#cwsource),
+[`SignalSource`](/reference/api/simulation/fdtd/#signalsource)) inject additively at one cell. A
+[`PlaneWaveSource`](/reference/api/simulation/fdtd/#planewavesource) injects a sustained one-way plane wave on
 a full line of cells near its launch edge.
 
 ### FDTD2D.energy()
@@ -435,7 +435,7 @@ time stepping happens. Requires matplotlib
 | Name | Description |
 | :--- | :--- |
 | `ax` | Existing axes, or `None` to create a figure. |
-| `probes` | Optional probe cells as `(ix, iy)` index pairs, the cells [`FDTDRecording`](/phonometry/reference/api/simulation/fdtd/#fdtdrecording) takes. Each is drawn at its cell centre `((ix + 0.5) * dx, (iy + 0.5) * dx)`, where the run records it ([`FDTDResult.probe_positions`](/phonometry/reference/api/simulation/fdtd/#fdtdresult)). |
+| `probes` | Optional probe cells as `(ix, iy)` index pairs, the cells [`FDTDRecording`](/reference/api/simulation/fdtd/#fdtdrecording) takes. Each is drawn at its cell centre `((ix + 0.5) * dx, (iy + 0.5) * dx)`, where the run records it ([`FDTDResult.probe_positions`](/reference/api/simulation/fdtd/#fdtdresult)). |
 | `language` | Label language, `"en"` (default) or `"es"`. |
 | `kwargs` | Forwarded to the obstacle `imshow`. |
 
@@ -472,13 +472,13 @@ every `k`-th step (and one of the initial state), keeping every
 `imshow` update. Without `snapshot_every` an empty array is
 returned and only the final state is kept (read it with
 `numpy_field`). The two counts are taken by name, as
-[`FDTDRecording`](/phonometry/reference/api/simulation/fdtd/#fdtdrecording) takes them.
+[`FDTDRecording`](/reference/api/simulation/fdtd/#fdtdrecording) takes them.
 
 **Raises**
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | if `snapshot_decimation`, `n_steps` or `snapshot_every` is a flag, a text or an array where a count goes, or the waveform of a [`PlaneWaveSource`](/phonometry/reference/api/simulation/fdtd/#planewavesource) returns anything but one real number. |
+| TypeError | if `snapshot_decimation`, `n_steps` or `snapshot_every` is a flag, a text or an array where a count goes, or the waveform of a [`PlaneWaveSource`](/reference/api/simulation/fdtd/#planewavesource) returns anything but one real number. |
 | ValueError | if `n_steps` is not a whole number of 0 or more, `snapshot_every` or `snapshot_decimation` is not a whole number of 1 or more, the frames would take more bytes than a NumPy array can hold, or that waveform returns a number too large for a float. |
 
 ### FDTD2D.step()
@@ -499,7 +499,7 @@ step.
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | if the waveform of a [`PlaneWaveSource`](/phonometry/reference/api/simulation/fdtd/#planewavesource) returns anything but one real number. |
+| TypeError | if the waveform of a [`PlaneWaveSource`](/reference/api/simulation/fdtd/#planewavesource) returns anything but one real number. |
 | ValueError | if that waveform returns a number too large for a float. |
 
 ### FDTD2D.time
@@ -546,16 +546,16 @@ spreading rather than the 3D spherical $1/r$.
 
 | Name | Description |
 | :--- | :--- |
-| `run` | The simulation ([`FDTDRun`](/phonometry/reference/api/simulation/fdtd/#fdtdrun)): the domain, its sources and what it records, every argument checked when the run was built. |
-| `compute` | Where the run steps ([`Compute`](/phonometry/reference/api/simulation/compute/#compute)); `None` follows [`use`](/phonometry/reference/api/simulation/compute/#use), then `PHONOMETRY_COMPUTE`, then NumPy. With a `host` the whole run goes to that node, named in the hosts file, and comes back as this function's record (see the guide on remote nodes). |
+| `run` | The simulation ([`FDTDRun`](/reference/api/simulation/fdtd/#fdtdrun)): the domain, its sources and what it records, every argument checked when the run was built. |
+| `compute` | Where the run steps ([`Compute`](/reference/api/simulation/compute/#compute)); `None` follows [`use`](/reference/api/simulation/compute/#use), then `PHONOMETRY_COMPUTE`, then NumPy. With a `host` the whole run goes to that node, named in the hosts file, and comes back as this function's record (see the guide on remote nodes). |
 
-**Returns:** A [`FDTDResult`](/phonometry/reference/api/simulation/fdtd/#fdtdresult).
+**Returns:** A [`FDTDResult`](/reference/api/simulation/fdtd/#fdtdresult).
 
 **Raises**
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | For a `run` that is not an [`FDTDRun`](/phonometry/reference/api/simulation/fdtd/#fdtdrun), a `compute` that is neither a [`Compute`](/phonometry/reference/api/simulation/compute/#compute) nor `None`, or, when `compute` names a host, a run that cannot travel to a node: a source whose waveform is a callable other than the `value` of a [`GaussianPulse`](/phonometry/reference/api/simulation/fdtd/#gaussianpulse), [`CWSource`](/phonometry/reference/api/simulation/fdtd/#cwsource) or [`SignalSource`](/phonometry/reference/api/simulation/fdtd/#signalsource), a subclass of one of the library's records, a whole number outside the range of an int64, a number or an array of floats wider than 64 bits (a `longdouble`), or a `Fraction` or a `Decimal` the run keeps as given, such as `dx=Fraction(1, 100)`; and, as the run steps, for the waveform of a [`PlaneWaveSource`](/phonometry/reference/api/simulation/fdtd/#planewavesource) that returns anything but one real number. |
+| TypeError | For a `run` that is not an [`FDTDRun`](/reference/api/simulation/fdtd/#fdtdrun), a `compute` that is neither a [`Compute`](/reference/api/simulation/compute/#compute) nor `None`, or, when `compute` names a host, a run that cannot travel to a node: a source whose waveform is a callable other than the `value` of a [`GaussianPulse`](/reference/api/simulation/fdtd/#gaussianpulse), [`CWSource`](/reference/api/simulation/fdtd/#cwsource) or [`SignalSource`](/reference/api/simulation/fdtd/#signalsource), a subclass of one of the library's records, a whole number outside the range of an int64, a number or an array of floats wider than 64 bits (a `longdouble`), or a `Fraction` or a `Decimal` the run keeps as given, such as `dx=Fraction(1, 100)`; and, as the run steps, for the waveform of a [`PlaneWaveSource`](/reference/api/simulation/fdtd/#planewavesource) that returns anything but one real number. |
 | ValueError | For a `PHONOMETRY_COMPUTE` that does not parse, a hosts file that cannot be read or is malformed, or snapshots that would take more bytes than a NumPy array can hold in the run's dtype, refused before the run steps; and, as the run steps, for that waveform returning a number too large for a float. |
 | KeyError | For a `host` the hosts file does not name. |
 | ComputeImportError | When the device's library is not installed or does not import, unless `fallback=True`. |
@@ -566,7 +566,7 @@ spreading rather than the 3D spherical $1/r$.
 
 | Warning | When |
 | :--- | :--- |
-| ComputeFallbackWarning | When `fallback=True` turns a [`ComputeImportError`](/phonometry/reference/api/simulation/compute/#computeimporterror), a [`ComputeDeviceError`](/phonometry/reference/api/simulation/compute/#computedeviceerror) or a [`ComputeRemoteError`](/phonometry/reference/api/simulation/compute/#computeremoteerror) into a run on NumPy here. |
+| ComputeFallbackWarning | When `fallback=True` turns a [`ComputeImportError`](/reference/api/simulation/compute/#computeimporterror), a [`ComputeDeviceError`](/reference/api/simulation/compute/#computedeviceerror) or a [`ComputeRemoteError`](/reference/api/simulation/compute/#computeremoteerror) into a run on NumPy here. |
 
 ## FDTDBoundaries
 
@@ -650,7 +650,7 @@ FDTDResult(
 )
 ```
 
-Frozen result of a [`fdtd_simulation`](/phonometry/reference/api/simulation/fdtd/#fdtd_simulation) run.
+Frozen result of a [`fdtd_simulation`](/reference/api/simulation/fdtd/#fdtd_simulation) run.
 
 **Attributes**
 
@@ -668,7 +668,7 @@ Frozen result of a [`fdtd_simulation`](/phonometry/reference/api/simulation/fdtd
 | `snapshot_times` | Time of each snapshot [s], or `None`. |
 | `obstacle_mask` | Boolean map of rigid cells, or `None`. |
 | `snapshot_decimation` | Every how many cells a snapshot keeps along each axis (1 keeps every cell). |
-| `provenance` | Where the run stepped ([`RunProvenance`](/phonometry/reference/api/simulation/compute/#runprovenance)). |
+| `provenance` | Where the run stepped ([`RunProvenance`](/reference/api/simulation/compute/#runprovenance)). |
 
 ### FDTDResult.plot()
 
@@ -734,7 +734,7 @@ One acoustic FDTD simulation: the domain, its sources and what it records.
 Every argument is checked when the run is built, the grid's included:
 the time step, the density, the sponge and the damping, the impedance
 edges, the obstacle, and the sources and the probes on the grid. A run
-that builds is one [`fdtd_simulation`](/phonometry/reference/api/simulation/fdtd/#fdtd_simulation) can step here; one that
+that builds is one [`fdtd_simulation`](/reference/api/simulation/fdtd/#fdtd_simulation) can step here; one that
 cannot travel to a node is refused when the function is called, and a
 bad argument raises where the run is written, with the class and the
 words the function always raised. The sources are held as a tuple
@@ -748,12 +748,12 @@ changes afterwards reaches a checked run.
 | `c` | Sound-speed map [m/s], shape `(ny, nx)`, or a scalar with an explicit `shape`. |
 | `dx` | Grid spacing [m] (square cells). |
 | `duration_s` | Physical time to simulate [s]. |
-| `sources` | One or more of [`GaussianPulse`](/phonometry/reference/api/simulation/fdtd/#gaussianpulse), [`CWSource`](/phonometry/reference/api/simulation/fdtd/#cwsource), [`SignalSource`](/phonometry/reference/api/simulation/fdtd/#signalsource) or [`PlaneWaveSource`](/phonometry/reference/api/simulation/fdtd/#planewavesource). |
+| `sources` | One or more of [`GaussianPulse`](/reference/api/simulation/fdtd/#gaussianpulse), [`CWSource`](/reference/api/simulation/fdtd/#cwsource), [`SignalSource`](/reference/api/simulation/fdtd/#signalsource) or [`PlaneWaveSource`](/reference/api/simulation/fdtd/#planewavesource). |
 | `shape` | Grid shape `(ny, nx)`, required when `c` is a scalar; beside a map it must be the map's own shape. |
 | `rho` | Density map [kg/m3]; scalar or `(ny, nx)` array. |
 | `cfl` | Courant number in `(0, 1)` (Eqs. 4.13-4.14); the time step is $\Delta t = C_\mathrm{N}\, \Delta x / (c_{\max} \sqrt{2})$. Default 0.6. |
-| `recording` | What the run records ([`FDTDRecording`](/phonometry/reference/api/simulation/fdtd/#fdtdrecording)): the probe cells, and the snapshot cadence and decimation. `None` records nothing but the time axis. |
-| `boundaries` | How the domain edges are terminated ([`FDTDBoundaries`](/phonometry/reference/api/simulation/fdtd/#fdtdboundaries)): the rigid, absorbing and impedance sides, and the sponge thickness of the absorbing ones. `None` is rigid on all four sides. |
+| `recording` | What the run records ([`FDTDRecording`](/reference/api/simulation/fdtd/#fdtdrecording)): the probe cells, and the snapshot cadence and decimation. `None` records nothing but the time axis. |
+| `boundaries` | How the domain edges are terminated ([`FDTDBoundaries`](/reference/api/simulation/fdtd/#fdtdboundaries)): the rigid, absorbing and impedance sides, and the sponge thickness of the absorbing ones. `None` is rigid on all four sides. |
 | `obstacle_mask` | Boolean map, shape `(ny, nx)`, of rigid cells (rasterised interior geometry). |
 | `damping` | Bulk amplitude decay rate [1/s]: a scalar for the whole field or an `(ny, nx)` map. |
 
@@ -761,7 +761,7 @@ changes afterwards reaches a checked run.
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | If an argument is of the wrong type: a `duration_s`, `cfl` or `dx` that is not one number, a `recording` that is neither an [`FDTDRecording`](/phonometry/reference/api/simulation/fdtd/#fdtdrecording) nor `None`, `boundaries` that are neither an [`FDTDBoundaries`](/phonometry/reference/api/simulation/fdtd/#fdtdboundaries) nor `None`, a `shape` that is not a pair or holds a count that is not a number, a medium (`c`, `rho`, `damping`) that holds a complex number or a text, or an `obstacle_mask` that is not boolean. |
+| TypeError | If an argument is of the wrong type: a `duration_s`, `cfl` or `dx` that is not one number, a `recording` that is neither an [`FDTDRecording`](/reference/api/simulation/fdtd/#fdtdrecording) nor `None`, `boundaries` that are neither an [`FDTDBoundaries`](/reference/api/simulation/fdtd/#fdtdboundaries) nor `None`, a `shape` that is not a pair or holds a count that is not a number, a medium (`c`, `rho`, `damping`) that holds a complex number or a text, or an `obstacle_mask` that is not boolean. |
 | ValueError | If an argument is out of its range, a `dx`, a `cfl` and a fastest speed of `c` give a time step past a float's range (zero or infinite), a `shape` is not two whole numbers of one cell or more or is given beside a map of another shape, a source, a probe or the obstacle does not fit the grid, or the `duration_s` covers more steps than the record holds: its time axis or its probe history would take more bytes than a NumPy array can hold. |
 
 ## GaussianPulse
@@ -829,7 +829,7 @@ only toward `direction` and anything scattered back crosses the line
 untouched (and can be absorbed by a sponge behind it).
 
 `direction` is the travel direction (`"down"`, `"up"`,
-`"left"`, `"right"` in the [`FDTD2D.plot_geometry`](/phonometry/reference/api/simulation/fdtd/#fdtd2dplot_geometry) axes) and
+`"left"`, `"right"` in the [`FDTD2D.plot_geometry`](/reference/api/simulation/fdtd/#fdtd2dplot_geometry) axes) and
 the line sits `offset` cells in from the opposite edge (place it just
 inside the sponge layer when one is configured on that side).
 `waveform` maps time in seconds to the incident pressure in pascals

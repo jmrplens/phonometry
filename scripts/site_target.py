@@ -39,7 +39,8 @@ class Target(NamedTuple):
 
     #: The origin, ``https://host``, with no path and no trailing slash.
     site_url: str
-    #: The path the pages are served under: ``/phonometry``, or empty at the root.
+    #: The path the pages are served under: empty at the root, or a path
+    #: such as ``/docs``.
     base_path: str
 
 
@@ -110,7 +111,7 @@ def site_url(name: str | None) -> str:
 
 
 def base_path(name: str | None) -> str:
-    """The base path of the target *name* names: ``/phonometry``, or empty.
+    """The base path of the target *name* names: empty at the root, or a path.
 
     :param name: The value of ``PHONOMETRY_SITE``, or None.
     :return: The base path, without a trailing slash.

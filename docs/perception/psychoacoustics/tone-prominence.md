@@ -1,6 +1,6 @@
 <!-- Written by `make llms` from site/src/content/docs/perception/psychoacoustics/tone-prominence.mdx: edit that page and its Spanish twin, then run `make llms`. -->
 
-← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/perception/psychoacoustics/tone-prominence/
+← [Documentation index](../../README.md) · Published at https://phonometry.dev/perception/psychoacoustics/tone-prominence/
 
 # Prominent Discrete Tones (ECMA-418-1)
 
@@ -369,7 +369,7 @@ other only as supporting evidence.
 - [Impulsive-sound prominence](../../environment/assessment/impulsive-sound.md): the NT ACOU 112
   counterpart for impulsive (rather than tonal) character.
 - [Theory](../../reference/theory/perception.md): the critical-band model and criteria derivation.
-- API reference: [`psychoacoustics.quality.tonality`](https://docs.jmrp.io/phonometry/reference/api/psychoacoustics/tonality/).
+- API reference: [`psychoacoustics.quality.tonality`](https://phonometry.dev/reference/api/psychoacoustics/tonality/).
 - Theory: [Tone prominence: TNR and PR](../../reference/theory/perception.md#tone-prominence-tnr-and-pr-ecma-418-1): the critical-band construction behind TNR and PR, and the criteria that make a tone prominent.
 
 ## References

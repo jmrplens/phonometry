@@ -1,6 +1,6 @@
 <!-- Written by `make llms` from site/src/content/docs/buildings/design/installed-structure-borne.mdx: edit that page and its Spanish twin, then run `make llms`. -->
 
-← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/buildings/design/installed-structure-borne/
+← [Documentation index](../../README.md) · Published at https://phonometry.dev/buildings/design/installed-structure-borne/
 
 # Installed structure-borne sound (EN 12354-5)
 
@@ -623,7 +623,7 @@ Installed structure-borne prediction fiche (InstalledSourceResult.report), an EN
   radiators.
 - [Predicting Sound Insulation (EN 12354)](insulation-prediction.md):
   the airborne and impact members of the same prediction family.
-- API reference: [`building.prediction.installed_structure_borne`](https://docs.jmrp.io/phonometry/reference/api/building/installed-structure-borne/).
+- API reference: [`building.prediction.installed_structure_borne`](https://phonometry.dev/reference/api/building/installed-structure-borne/).
 - Theory: [Point mobilities and radiation efficiency](../../reference/theory/vibration.md#point-mobilities-and-radiation-efficiency-cremer-5-hopkins-29): the mobility and radiation-efficiency theory the installed level is predicted from.
 
 ## References

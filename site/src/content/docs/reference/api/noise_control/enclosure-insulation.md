@@ -7,7 +7,7 @@ sidebar:
 
 What an enclosure is worth, measured rather than predicted (ISO 11546).
 
-[`phonometry.noise_control.enclosures`](/phonometry/reference/api/noise_control/enclosures/) predicts what a box around a
+[`phonometry.noise_control.enclosures`](/reference/api/noise_control/enclosures/) predicts what a box around a
 machine will do from its walls and its lining. This module is the other half:
 the measurement that says what the box built actually does, and the arithmetic
 by which a manufacturer may declare it.
@@ -39,7 +39,7 @@ word; what changes is the environment, the base standard the levels come from
 and, in part 2, an annex that asks whether the room is good enough at all.
 
 Where the machine cannot be run, both parts substitute a source for it, and
-the substitution is what the choice in [`applicable_methods`](/phonometry/reference/api/noise_control/enclosure-insulation/#applicable_methods) is about:
+the substitution is what the choice in [`applicable_methods`](/reference/api/noise_control/enclosure-insulation/#applicable_methods) is about:
 
 * an **actual** source, the machine itself, which is the normal case;
 * the **reciprocity** method of part 1, 7.2, which puts the enclosure in a
@@ -49,7 +49,7 @@ the substitution is what the choice in [`applicable_methods`](/phonometry/refere
 
 Clause 1 draws the scope around the first of those: the part applies without
 restriction to a free-standing enclosure smaller than
-[`UNRESTRICTED_ENCLOSURE_VOLUME_M3`](/phonometry/reference/api/noise_control/enclosure-insulation/#unrestricted_enclosure_volume_m3), and a larger one may still be
+[`UNRESTRICTED_ENCLOSURE_VOLUME_M3`](/reference/api/noise_control/enclosure-insulation/#unrestricted_enclosure_volume_m3), and a larger one may still be
 measured **with its actual source**, provided the base standard's own limit on
 volume is met.
 
@@ -57,9 +57,9 @@ What this module computes, and what it refuses to
 -------------------------------------------------
 
 Every equation of clauses 6 and 7 is here, with the weighted rating of
-ISO 717-1 delegated to [`phonometry.building.weighted_rating`](/phonometry/reference/api/building/ratings/#weighted_rating) rather than
+ISO 717-1 delegated to [`phonometry.building.weighted_rating`](/reference/api/building/ratings/#weighted_rating) rather than
 re-derived, and the A-weighted estimate of the annexes written so that it
-cannot disagree with its own inputs: [`estimated_a_weighted_enclosure_insulation`](/phonometry/reference/api/noise_control/enclosure-insulation/#estimated_a_weighted_enclosure_insulation)
+cannot disagree with its own inputs: [`estimated_a_weighted_enclosure_insulation`](/reference/api/noise_control/enclosure-insulation/#estimated_a_weighted_enclosure_insulation)
 reduces algebraically to the difference of the two A-weighted totals computed
 from the same assumed spectrum, which is the only exact oracle either part
 offers.
@@ -68,12 +68,12 @@ Annex A is a hardware drawing and Annex B an illustration; their numbers are
 constants here and nothing more. Clause 5 is instrumentation, clause 8 hands
 its uncertainty to the base standard and to ISO 4871, and clauses 9 and 10 are
 a report. The one piece of clause 9 that computes is the rounding of
-9.4, which is [`EnclosureInsulationResult.rounded`](/phonometry/reference/api/noise_control/enclosure-insulation/#enclosureinsulationresultrounded).
+9.4, which is [`EnclosureInsulationResult.rounded`](/reference/api/noise_control/enclosure-insulation/#enclosureinsulationresultrounded).
 
 Neither part prints a worked example, so the tests are anchored where the
 documents allow: the algebraic identities of the subtraction, the closed form
 behind Figure C.1 of part 2, which is cross-checked against
-[`phonometry.emission.environmental_correction`](/phonometry/reference/api/power/sound-power/#environmental_correction), and the printed
+[`phonometry.emission.environmental_correction`](/reference/api/power/sound-power/#environmental_correction), and the printed
 thresholds and tables.
 
 > Auto-generated from the source docstrings by `scripts/generate_api_docs.py` (`make api-docs`). Do not edit by hand.
@@ -102,7 +102,7 @@ and the reciprocity method exists only in the laboratory.
 | `condition` | `"laboratory"` (default) or `"in-situ"`. |
 | `source_kind` | `"actual"` (default), `"reciprocity"` or `"artificial"`. |
 
-**Returns:** The rows, as [`MethodEntry`](/phonometry/reference/api/noise_control/enclosure-insulation/#methodentry) values.
+**Returns:** The rows, as [`MethodEntry`](/reference/api/noise_control/enclosure-insulation/#methodentry) values.
 
 **Raises**
 
@@ -185,7 +185,7 @@ $$
 
 which is Figure C.1 in closed form, the curve the annex asks the reader to
 read off by eye. Take $\alpha$ from
-[`ROOM_ABSORPTION_ESTIMATES`](/phonometry/reference/api/noise_control/enclosure-insulation/#room_absorption_estimates) when nobody measured it.
+[`ROOM_ABSORPTION_ESTIMATES`](/reference/api/noise_control/enclosure-insulation/#room_absorption_estimates) when nobody measured it.
 
 A standard that works by comparison with a reference sound source, ISO
 3743-1 and ISO 3747, states no $K_2$ requirement at all; for those
@@ -199,12 +199,12 @@ rather than a number the annex does not give.
 
 | Name | Description |
 | :--- | :--- |
-| `base_standard` | One of the columns of Table C.1, as [`TEST_ENVIRONMENT_REQUIREMENTS`](/phonometry/reference/api/noise_control/enclosure-insulation/#test_environment_requirements) keys them. One of `"ISO 3743-1"`, `"ISO 3744"`, `"ISO 3746"`, `"ISO 3747"`, `"ISO 9614-1"`, `"ISO 9614-2"`, `"ISO 11201"`, `"ISO 11202"` or `"ISO 11204"`. |
+| `base_standard` | One of the columns of Table C.1, as [`TEST_ENVIRONMENT_REQUIREMENTS`](/reference/api/noise_control/enclosure-insulation/#test_environment_requirements) keys them. One of `"ISO 3743-1"`, `"ISO 3744"`, `"ISO 3746"`, `"ISO 3747"`, `"ISO 9614-1"`, `"ISO 9614-2"`, `"ISO 11201"`, `"ISO 11202"` or `"ISO 11204"`. |
 | `mean_absorption_coefficient` | $\alpha$ of the room, dimensionless. |
 | `room_surface_area_m2` | $S_V$, the total area of the room's boundary surfaces, in square metres. |
 | `measurement_surface_area_m2` | $S$, the area of the measurement surface around the source, in square metres. |
 
-**Returns:** The verdict, as an [`EnclosureTestEnvironmentCheck`](/phonometry/reference/api/noise_control/enclosure-insulation/#enclosuretestenvironmentcheck).
+**Returns:** The verdict, as an [`EnclosureTestEnvironmentCheck`](/reference/api/noise_control/enclosure-insulation/#enclosuretestenvironmentcheck).
 
 **Raises**
 
@@ -251,7 +251,7 @@ $D_p$ and 9.4 e) reports whichever it was. That is `quantity`.
 | `condition` | `"laboratory"` for part 1, `"in-situ"` for part 2. |
 | `fraction` | The band set, 3 for one-third octaves (default) or 1 for octaves. One of `1` or `3`. |
 
-**Returns:** The averaged insertion loss, as an [`EnclosureInsulationResult`](/phonometry/reference/api/noise_control/enclosure-insulation/#enclosureinsulationresult).
+**Returns:** The averaged insertion loss, as an [`EnclosureInsulationResult`](/reference/api/noise_control/enclosure-insulation/#enclosureinsulationresult).
 
 **Raises**
 
@@ -290,7 +290,7 @@ at all.
 | `frequencies` | Nominal band centres, in hertz. |
 | `fraction` | The band set, 3 for one-third octaves (default) or 1 for octaves. One of `1` or `3`. |
 
-**Returns:** The insertion loss, as an [`EnclosureInsulationResult`](/phonometry/reference/api/noise_control/enclosure-insulation/#enclosureinsulationresult) whose quantity is `"reciprocity"`.
+**Returns:** The insertion loss, as an [`EnclosureInsulationResult`](/reference/api/noise_control/enclosure-insulation/#enclosureinsulationresult) whose quantity is `"reciprocity"`.
 
 **Raises**
 
@@ -337,7 +337,7 @@ the ISO 3744 Annex E table, which is what the note to clause 6.2 prefers.
 | `source_kind` | `"actual"`, `"reciprocity"` or `"artificial"`. |
 | `fraction` | The band set, 3 for one-third octaves (default) or 1 for octaves. One of `1` or `3`. |
 
-**Returns:** The insertion loss, as an [`EnclosureInsulationResult`](/phonometry/reference/api/noise_control/enclosure-insulation/#enclosureinsulationresult).
+**Returns:** The insertion loss, as an [`EnclosureInsulationResult`](/reference/api/noise_control/enclosure-insulation/#enclosureinsulationresult).
 
 **Raises**
 
@@ -386,7 +386,7 @@ different numbers about the same enclosure.
 | `source_kind` | `"actual"`, `"reciprocity"` or `"artificial"`. |
 | `fraction` | The band set, 3 for one-third octaves (default) or 1 for octaves. One of `1` or `3`. |
 
-**Returns:** The insertion loss, as an [`EnclosureInsulationResult`](/phonometry/reference/api/noise_control/enclosure-insulation/#enclosureinsulationresult).
+**Returns:** The insertion loss, as an [`EnclosureInsulationResult`](/reference/api/noise_control/enclosure-insulation/#enclosureinsulationresult).
 
 **Raises**
 
@@ -484,7 +484,7 @@ stored beside them: an answer cannot be built against another limit.
 
 | Name | Description |
 | :--- | :--- |
-| `base_standard` | The standard asked about, one of the keys of [`TEST_ENVIRONMENT_REQUIREMENTS`](/phonometry/reference/api/noise_control/enclosure-insulation/#test_environment_requirements). One of `"ISO 3743-1"`, `"ISO 3744"`, `"ISO 3746"`, `"ISO 3747"`, `"ISO 9614-1"`, `"ISO 9614-2"`, `"ISO 11201"`, `"ISO 11202"` or `"ISO 11204"`. |
+| `base_standard` | The standard asked about, one of the keys of [`TEST_ENVIRONMENT_REQUIREMENTS`](/reference/api/noise_control/enclosure-insulation/#test_environment_requirements). One of `"ISO 3743-1"`, `"ISO 3744"`, `"ISO 3746"`, `"ISO 3747"`, `"ISO 9614-1"`, `"ISO 9614-2"`, `"ISO 11201"`, `"ISO 11202"` or `"ISO 11204"`. |
 | `actual_area_ratio` | The $S_V/S$ of the room and the measurement surface given. |
 | `mean_absorption_coefficient` | The $\alpha$ the answer was read at. |
 
@@ -581,7 +581,7 @@ How much of the enclosure the source fills, 3.15 of part 1 and 3.13 of part 2.
 
 $\phi = V_S / V_E$. The artificial source of Annex A is
 representative only up to
-[`ARTIFICIAL_SOURCE_MAX_FILL_RATIO`](/phonometry/reference/api/noise_control/enclosure-insulation/#artificial_source_max_fill_ratio); past that it is changing the
+[`ARTIFICIAL_SOURCE_MAX_FILL_RATIO`](/reference/api/noise_control/enclosure-insulation/#artificial_source_max_fill_ratio); past that it is changing the
 interior field it is supposed to be measuring through.
 
 **Parameters**
@@ -778,7 +778,7 @@ The single-number rating of an insertion loss, 7.4 of part 1 and 7.3 of part 2.
 Both parts say the same thing: rate the spectrum by ISO 717-1, putting
 $D_W$ or $D_{p\mathrm{r}}$ where that standard writes $R$. The
 reference curve, the shift and the adaptation terms come from
-[`phonometry.building.weighted_rating`](/phonometry/reference/api/building/ratings/#weighted_rating), which has its own conformance
+[`phonometry.building.weighted_rating`](/reference/api/building/ratings/#weighted_rating), which has its own conformance
 rows; what is done here is the trim to the rating bands.
 
 **Parameters**
@@ -789,7 +789,7 @@ rows; what is done here is the trim to the rating bands.
 | `quantity` | `"sound_power"` (default) or `"reciprocity"`. |
 | `fraction` | The band set, 3 for one-third octaves (default) or 1 for octaves. One of `1` or `3`. |
 
-**Returns:** The rating, as a [`WeightedEnclosureInsulation`](/phonometry/reference/api/noise_control/enclosure-insulation/#weightedenclosureinsulation).
+**Returns:** The rating, as a [`WeightedEnclosureInsulation`](/reference/api/noise_control/enclosure-insulation/#weightedenclosureinsulation).
 
 **Raises**
 

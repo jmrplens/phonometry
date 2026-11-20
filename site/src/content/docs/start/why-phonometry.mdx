@@ -153,9 +153,9 @@ slices, against the same steady-tone reference the procedure above defines.*
 
 - If you need **standard-compliant Fast/Slow/Impulse envelopes** (sound level
   meter behavior, one level per sample), use phonometry's
-  [`time_weighting`](/phonometry/signals/levels/time-weighting/).
+  [`time_weighting`](/signals/levels/time-weighting/).
 - If you need **block-averaged $L_\mathrm{eq}$ per interval**, that is a different, equally
-  valid metric; you can compute it with [`leq`](/phonometry/signals/levels/levels/) over consecutive
+  valid metric; you can compute it with [`leq`](/signals/levels/levels/) over consecutive
   slices.
 - Both approaches are useful; they just answer different questions. The
   discrepancy reported in issue #38 comes from comparing a continuous envelope
@@ -202,7 +202,7 @@ rotorcraft and underwater noise, electroacoustics, broadcast loudness,
 industrial noise control, calibrated signal analysis and the FDTD wave solver.
 The full numerical report (the expected value and the value the
 library computes for every check, regenerated on every pull request) is
-published as [the conformance report](/phonometry/reference/conformance/).
+published as [the conformance report](/reference/conformance/).
 
 The same standards-first habit shows up below the level of whole metrics, in
 the numerics. Filter banks place their −3 dB points on the **ANSI S1.11 /
@@ -211,13 +211,13 @@ allows it, Butterworth, Chebyshev II and Bessel, the last two through
 corrections scipy's raw parametrization would not apply; Chebyshev I and
 elliptic read the same edges as their equiripple passband edge instead, which
 is stated with its measured cost on [Filter
-Banks](/phonometry/signals/filters/filter-banks/). The default Butterworth bank
+Banks](/signals/filters/filter-banks/). The default Butterworth bank
 is checked against the stricter class 0 of the withdrawn IEC 61260:1995 /
 ANSI S1.11-2004 edition as well as the current class 1. And A/C weighting
 earns class 1 at each of the eight rates the suite grades it at, from 8 to
 192 kHz, at every Table 3 frequency below that rate's Nyquist, because the
 analog prototype is fitted at the sample rate rather than transformed blind (see
-[Frequency Weighting](/phonometry/signals/levels/weighting/)).
+[Frequency Weighting](/signals/levels/weighting/)).
 
 ## When the source is what is wrong
 
@@ -229,7 +229,7 @@ constant with a digit lost in typesetting, a cross-reference pointing at the
 wrong equation.
 
 Those cases are not quietly patched. Each confirmed one is written down in the
-[standards errata](/phonometry/reference/errata/) with the printed edition and
+[standards errata](/reference/errata/) with the printed edition and
 the exact location, what the document says, why it cannot be right, the
 independent evidence and the reading the library implements. Where that reading
 changes a number the library reports, the entry names the check or test that
@@ -294,5 +294,5 @@ Where the standard also fixes how the result is to be reported, the result
 object renders that one-page fiche itself with `.report()`, in English or
 Spanish, so the document you hand over carries the same numbers the check does.
 The sources behind all of it are collected in the
-[Bibliography](/phonometry/reference/bibliography/), every entry with the pages
+[Bibliography](/reference/bibliography/), every entry with the pages
 that cite it and its DOI or official publisher link where it has one.

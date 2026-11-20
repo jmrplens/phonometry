@@ -36,13 +36,13 @@ measurement of your site.
 
 Into the outdoor models
 -----------------------
-[`GroundSurface.medium`](/phonometry/reference/api/environment/ground-surfaces/#groundsurfacemedium) turns a row's resistivity into the porous
-half-space [`ground_effect`](/phonometry/reference/api/environment/ground-barriers/#ground_effect),
-[`barrier_insertion_loss`](/phonometry/reference/api/environment/ground-barriers/#barrier_insertion_loss) and
-[`atmospheric_parabolic_equation`](/phonometry/reference/api/environment/refraction/#atmospheric_parabolic_equation) take as their
+[`GroundSurface.medium`](/reference/api/environment/ground-surfaces/#groundsurfacemedium) turns a row's resistivity into the porous
+half-space [`ground_effect`](/reference/api/environment/ground-barriers/#ground_effect),
+[`barrier_insertion_loss`](/reference/api/environment/ground-barriers/#barrier_insertion_loss) and
+[`atmospheric_parabolic_equation`](/reference/api/environment/refraction/#atmospheric_parabolic_equation) take as their
 ground impedance, through the Delany and Bazley or the
 Miki model those functions offer themselves. It reads the resistivity through
-[`printed`](/phonometry/reference/api/io/io/#cataloguerowprinted), so a range, a bound or an empty
+[`printed`](/reference/api/io/io/#cataloguerowprinted), so a range, a bound or an empty
 cell is refused in the page's terms rather than collapsed to one number, and
 a row whose page names the model it was fitted with is taken into that model
 only.
@@ -54,7 +54,7 @@ A to H the propagation models define, with the ground factor G that ISO
 9613-2 and NMPB-2008 take and the representative resistivity Harmonoise
 assigns each class. Class H is water, and its resistivity is an acoustically
 hard stand-in rather than anything anybody measured. Those rows carry
-[`GroundSurface.harmonoise_class`](/phonometry/reference/api/environment/ground-surfaces/#groundsurface) and the two ground factors; a model
+[`GroundSurface.harmonoise_class`](/reference/api/environment/ground-surfaces/#groundsurface) and the two ground factors; a model
 that wants a class takes the class, and a model that wants a resistivity
 takes the resistivity.
 
@@ -83,15 +83,15 @@ Every row for a surface name, across the tables.
 | Name | Description |
 | :--- | :--- |
 | `name` | The surface as a table prints it, matched without regard to case. |
-| `catalogue` | The rows to search in place of [`PUBLISHED_GROUND_SURFACES`](/phonometry/reference/api/environment/ground-surfaces/#published_ground_surfaces): a catalogue of your own that [`phonometry.io.read_catalogue`](/phonometry/reference/api/io/io/#read_catalogue) returns, `PUBLISHED_GROUND_SURFACES \| mine` to search both at once, or any mapping of key to row (Default: `None`, which searches [`PUBLISHED_GROUND_SURFACES`](/phonometry/reference/api/environment/ground-surfaces/#published_ground_surfaces)). |
+| `catalogue` | The rows to search in place of [`PUBLISHED_GROUND_SURFACES`](/reference/api/environment/ground-surfaces/#published_ground_surfaces): a catalogue of your own that [`phonometry.io.read_catalogue`](/reference/api/io/io/#read_catalogue) returns, `PUBLISHED_GROUND_SURFACES \| mine` to search both at once, or any mapping of key to row (Default: `None`, which searches [`PUBLISHED_GROUND_SURFACES`](/reference/api/environment/ground-surfaces/#published_ground_surfaces)). |
 
-**Returns:** The rows whose [`GroundSurface.name`](/phonometry/reference/api/environment/ground-surfaces/#groundsurface) matches, in catalogue order, which is empty when no row names it.
+**Returns:** The rows whose [`GroundSurface.name`](/reference/api/environment/ground-surfaces/#groundsurface) matches, in catalogue order, which is empty when no row names it.
 
 **Raises**
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | for a *catalogue* that is not a mapping, or that holds a row that is not a [`GroundSurface`](/phonometry/reference/api/environment/ground-surfaces/#groundsurface), naming its key. |
+| TypeError | for a *catalogue* that is not a mapping, or that holds a row that is not a [`GroundSurface`](/reference/api/environment/ground-surfaces/#groundsurface), naming its key. |
 
 ## GroundSurface
 
@@ -133,7 +133,7 @@ One ground surface as one table prints it.
 
 Every quantity is optional, because the three tables print three different
 sets of columns, and a quantity the page did not print answers `None`
-with [`why_missing`](/phonometry/reference/api/io/io/#cataloguerowwhy_missing)
+with [`why_missing`](/reference/api/io/io/#cataloguerowwhy_missing)
 saying what the cell held instead.
 
 **Attributes**
@@ -141,7 +141,7 @@ saying what the cell held instead.
 | Name | Description |
 | :--- | :--- |
 | `flow_resistivity_pa_s_m2` | Effective flow resistivity `R_1` or `sigma_e`, in Pa s/m2. Bies prints it in kPa s/m2 and Cox in rayl/m, which is this unit under another name; the conversion is pinned in the data file's `about`. |
-| `porosity` | Open porosity, where the fit that produced the resistivity also produced one, as the fraction of the volume that is open, from 0 to 1. Cox's Table 6.7 prints six of its porosities as 26.9 to 58.1 in a column that prints a fraction on every other row and states no unit; a porosity of 36.5 is not a porosity, so those six cells are empty, and [`why_missing`](/phonometry/reference/api/io/io/#cataloguerowwhy_missing) quotes the figure the page prints. |
+| `porosity` | Open porosity, where the fit that produced the resistivity also produced one, as the fraction of the volume that is open, from 0 to 1. Cox's Table 6.7 prints six of its porosities as 26.9 to 58.1 in a column that prints a fraction on every other row and states no unit; a porosity of 36.5 is not a porosity, so those six cells are empty, and [`why_missing`](/reference/api/io/io/#cataloguerowwhy_missing) quotes the figure the page prints. |
 | `water_content_percent` | Water content of the specimen, per cent, for the sands Cox tabulates wet and dry. The resistivity of a sand is not monotonic in it, which is the point of printing it. |
 | `porosity_decay_rate_per_m` | The rate `zeta` at which porosity falls with depth in the variable-porosity model, in 1/m. It is negative for several surfaces, which is what the page prints. |
 | `iso9613_ground_factor` | The ground factor `G` of ISO 9613-2 for a ground class: 0 for hard ground, 1 for porous ground. |
@@ -151,7 +151,7 @@ saying what the cell held instead.
 | `variant` | Which specimen or condition this row is, when the page prints several under one name: `"chemically pure"`, `"direction x"`, `"0.68 mm diameter"`. Empty when the page prints one. |
 | `source` | Document, table, PDF page and printed folio. |
 | `table` | The data file this row was read from, without the extension, which is also the first half of its key in the catalogue that holds it. |
-| `basis` | What the source says a value is: a field name, or `"row"` for the whole row, to one of [`CATALOGUE_BASES`](/phonometry/reference/api/io/io/#catalogue_bases). Hopkins marks most of his Poisson ratios "Estimate", and those cells hold `"estimated"`; a datasheet that declares a class under a product standard would hold `"declared"`. A field with no entry takes the row's, and a row with neither is one whose source does not say, which is a different answer from any of the five. `basis_of` reads it. Independent of `derived`: this is what the source claims for a cell, that is what this library computed. |
+| `basis` | What the source says a value is: a field name, or `"row"` for the whole row, to one of [`CATALOGUE_BASES`](/reference/api/io/io/#catalogue_bases). Hopkins marks most of his Poisson ratios "Estimate", and those cells hold `"estimated"`; a datasheet that declares a class under a product standard would hold `"declared"`. A field with no entry takes the row's, and a row with neither is one whose source does not say, which is a different answer from any of the five. `basis_of` reads it. Independent of `derived`: this is what the source claims for a cell, that is what this library computed. |
 | `approximate` | Fields the page prints with a `~`. Not an estimate and not an interval: a number the author rounded on purpose. |
 | `derived` | Field to how it was computed, for the ones this library worked out from the cells the page did print. A derived value is never stored as if it had been read, and on every row the library builds it follows again from the row's own cells: `from_printed` writes it, and nothing else in the library does. One a caller passes to the literal constructor is the caller's word, which the row keeps and `printed_fields` leaves out with its value, as it leaves out every derived one. When the printed cells a value rests on do not all have one `basis`, the text names the basis of each, so a modulus worked out from a plate speed and a Poisson ratio Hopkins marks as an estimate says it rests on that estimate. A value converted from the unit the page prints is not derived (`converted` holds it), and neither is one the page gives by reference to another of its rows (`carried` does). |
 | `converted` | Field to `(figure, unit)`, the page's figure and the unit it is in, for a value this row holds in a unit the page does not use. Ver and Beranek print their damping materials in degrees Fahrenheit and pounds per square inch, and the row holds degrees Celsius and pascals, so `("3e5", "psi")` sits beside a modulus in pascals. The figure is kept as the page writes it, so the cell can always be read back in the page's own terms. The unit is the one the page prints with the figure or over its column. Long prints the figures of his musician bare, and the sabins recorded for them are a reading of the table, which is set in inches and pounds and names sabins on the next row; that row's note says so. A figure written in another unit of the same kind as the field's (`thickness_m` for `thickness_mm`, `flow_resistivity_kpa_s_m2` for `flow_resistivity_pa_s_m2`) is converted by `from_printed` and recorded here, whether it is a value, the end of a range or one of several readings; for a range the figure is the printed end of a bound, or both ends as `"5 to 10"`, and for readings the list as the page gives it. A packaged table transcribed in the base unit with only its SI prefix changed, such as the megapascals of Rossing Table 15.5, holds no entry here, and the table's `about` says so. |
@@ -175,7 +175,7 @@ saying what the cell held instead.
 GroundSurface.basis_of(field_name: str) -> str
 ```
 
-What the source says this field is, one of [`CATALOGUE_BASES`](/phonometry/reference/api/io/io/#catalogue_bases).
+What the source says this field is, one of [`CATALOGUE_BASES`](/reference/api/io/io/#catalogue_bases).
 
 The five are `measured`, `declared`, `calculated`, `estimated`
 and `extended`.
@@ -205,7 +205,7 @@ unit of the same kind as its field (`thickness_m` for
 `thickness_mm`, `flow_resistivity_kpa_s_m2` for
 `flow_resistivity_pa_s_m2`), or in a unit the class takes as an
 alias of its own (an
-[`AbsorptionAreaSpectrum`](/phonometry/reference/api/materials/measured/#absorptionareaspectrum) takes
+[`AbsorptionAreaSpectrum`](/reference/api/materials/measured/#absorptionareaspectrum) takes
 `absorption_area_125_ft2` for `absorption_area_125_m2`), is
 converted on its digits with an exact factor and rounded once,
 whether it is a value or stands as the key of a hedge (the ends of a
@@ -302,10 +302,10 @@ of a locally reacting half-space, which is the characteristic
 impedance of its porous medium; this is that medium, worked out from
 the row's effective flow resistivity with the Delany and Bazley or
 the Miki model, and it goes into
-[`ground_effect`](/phonometry/reference/api/environment/ground-barriers/#ground_effect) as `impedance`,
-[`barrier_insertion_loss`](/phonometry/reference/api/environment/ground-barriers/#barrier_insertion_loss) as
+[`ground_effect`](/reference/api/environment/ground-barriers/#ground_effect) as `impedance`,
+[`barrier_insertion_loss`](/reference/api/environment/ground-barriers/#barrier_insertion_loss) as
 `ground_impedance` and
-[`atmospheric_parabolic_equation`](/phonometry/reference/api/environment/refraction/#atmospheric_parabolic_equation) as
+[`atmospheric_parabolic_equation`](/reference/api/environment/refraction/#atmospheric_parabolic_equation) as
 `impedance`, unchanged. Those functions work out the same medium from a bare
 `flow_resistivity_pa_s_m2`; this is the path for a row, which keeps the
 refusal of a cell the page did not print as a number.
@@ -313,7 +313,7 @@ refusal of a cell the page did not print as a number.
 An effective flow resistivity is the parameter of the model it was
 fitted with, and Cox and D'Antonio name that model for some of their
 rows. Where they print a surface once per fit, a footnote marks each
-line, and the row's [`variant`](/phonometry/reference/api/io/io/#cataloguerow)
+line, and the row's [`variant`](/reference/api/io/io/#cataloguerow)
 quotes it; for the two sands Horoshenkov and Mohamed measured at four
 water contents, the text beside the table says the parameters are
 those of the two-parameter model of Attenborough. A row fitted with
@@ -330,9 +330,9 @@ into both.
 | :--- | :--- |
 | `frequency` | Frequency `f`, in hertz (scalar or array). |
 | `model` | `"delany_bazley"` (Default) or `"miki"`, the two ground models the outdoor functions take. |
-| `fluid` | The air above the ground, a [`Fluid`](/phonometry/reference/api/fluids/fluids/#fluid) (Default: [`ABSORBER_AIR`](/phonometry/reference/api/materials/porous/#absorber_air), dry air at 20 degC at textbook values, as the outdoor functions default to). |
+| `fluid` | The air above the ground, a [`Fluid`](/reference/api/fluids/fluids/#fluid) (Default: [`ABSORBER_AIR`](/reference/api/materials/porous/#absorber_air), dry air at 20 degC at textbook values, as the outdoor functions default to). |
 
-**Returns:** A [`PorousMediumResult`](/phonometry/reference/api/materials/porous/#porousmediumresult), in the materials domain's time convention, which the outdoor functions convert themselves.
+**Returns:** A [`PorousMediumResult`](/reference/api/materials/porous/#porousmediumresult), in the materials domain's time convention, which the outdoor functions convert themselves.
 
 **Raises**
 

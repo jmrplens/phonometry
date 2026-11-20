@@ -35,8 +35,8 @@ corrigendum of OJ L 5, 10.1.2018 and amended by Commission Delegated Directive
 
 Each shipped table records in its comment which instrument it comes from. The
 superseded 2015/996 coefficients are not shipped, but any coefficient set can be
-supplied through [`RoadEmissionCoefficients`](/phonometry/reference/api/environment/cnossos-road/#roademissioncoefficients) and
-[`RoadSurfaceCoefficients`](/phonometry/reference/api/environment/cnossos-road/#roadsurfacecoefficients), which is also how a Member State substitutes
+supplied through [`RoadEmissionCoefficients`](/reference/api/environment/cnossos-road/#roademissioncoefficients) and
+[`RoadSurfaceCoefficients`](/reference/api/environment/cnossos-road/#roadsurfacecoefficients), which is also how a Member State substitutes
 its own national database (the reason Appendix F is called a *database* and not
 a table of constants).
 
@@ -45,9 +45,9 @@ Scope
 This is the **emission** stage only. It produces the source power that the
 propagation stage consumes; splitting the source line into point sources is
 explicitly outside the scope of the method (2.5.3), so
-[`line_source_segment_power`](/phonometry/reference/api/environment/cnossos-road/#line_source_segment_power) is offered as plain arithmetic, clearly
+[`line_source_segment_power`](/reference/api/environment/cnossos-road/#line_source_segment_power) is offered as plain arithmetic, clearly
 labelled as such. The CNOSSOS propagation model itself is *not* ISO 9613-2; the
-hand-off to [`predicted_receiver_level`](/phonometry/reference/api/environment/outdoor-propagation/#predicted_receiver_level)
+hand-off to [`predicted_receiver_level`](/reference/api/environment/outdoor-propagation/#predicted_receiver_level)
 mixes two methods and is a convenience, not a normative chain.
 
 > Auto-generated from the source docstrings by `scripts/generate_api_docs.py` (`make api-docs`). Do not edit by hand.
@@ -153,7 +153,7 @@ propulsion noise, a noisy one does not increase it.
 | :--- | :--- |
 | `category` | Vehicle category (Table [2.2.a]). One of `"1"`, `"2"`, `"3"`, `"4a"` or `"4b"`. |
 | `speed_kmh` | Average speed `v_m`, in km/h; values below 20 km/h are raised to 20 km/h (2.2.1). |
-| `surface` | Road surface, as a [`RoadSurface`](/phonometry/reference/api/environment/cnossos-road/#roadsurface), its description or an explicit [`RoadSurfaceCoefficients`](/phonometry/reference/api/environment/cnossos-road/#roadsurfacecoefficients). One of `"reference road surface"`, `"1-layer ZOAB"`, `"2-layer ZOAB"`, `"2-layer ZOAB (fine)"`, `"SMA-NL5"`, `"SMA-NL8"`, `"brushed down concrete"`, `"optimised brushed down concrete"`, `"fine broomed concrete"`, `"worked surface"`, `"hard elements in herringbone"`, `"hard elements not in herringbone"`, `"quiet hard elements"`, `"thin layer A"` or `"thin layer B"`. |
+| `surface` | Road surface, as a [`RoadSurface`](/reference/api/environment/cnossos-road/#roadsurface), its description or an explicit [`RoadSurfaceCoefficients`](/reference/api/environment/cnossos-road/#roadsurfacecoefficients). One of `"reference road surface"`, `"1-layer ZOAB"`, `"2-layer ZOAB"`, `"2-layer ZOAB (fine)"`, `"SMA-NL5"`, `"SMA-NL8"`, `"brushed down concrete"`, `"optimised brushed down concrete"`, `"fine broomed concrete"`, `"worked surface"`, `"hard elements in herringbone"`, `"hard elements not in herringbone"`, `"quiet hard elements"`, `"thin layer A"` or `"thin layer B"`. |
 | `road_slope_percent` | Road slope `s`, in per cent, positive uphill in the direction of travel. For a bidirectional flow, split the flow in two and correct one half uphill and the other downhill. |
 | `junction_distance` | Distance `x` to the junction, in m. |
 | `junction_type` | Junction type `k` (Table F-3). |
@@ -215,7 +215,7 @@ and their total power is the propulsion term alone (2.2.3).
 | :--- | :--- |
 | `category` | Vehicle category (Table [2.2.a]). One of `"1"`, `"2"`, `"3"`, `"4a"` or `"4b"`. |
 | `speed_kmh` | Average speed `v_m`, in km/h; values below 20 km/h are raised to 20 km/h (2.2.1). |
-| `surface` | Road surface, as a [`RoadSurface`](/phonometry/reference/api/environment/cnossos-road/#roadsurface), its description or an explicit [`RoadSurfaceCoefficients`](/phonometry/reference/api/environment/cnossos-road/#roadsurfacecoefficients). One of `"reference road surface"`, `"1-layer ZOAB"`, `"2-layer ZOAB"`, `"2-layer ZOAB (fine)"`, `"SMA-NL5"`, `"SMA-NL8"`, `"brushed down concrete"`, `"optimised brushed down concrete"`, `"fine broomed concrete"`, `"worked surface"`, `"hard elements in herringbone"`, `"hard elements not in herringbone"`, `"quiet hard elements"`, `"thin layer A"` or `"thin layer B"`. |
+| `surface` | Road surface, as a [`RoadSurface`](/reference/api/environment/cnossos-road/#roadsurface), its description or an explicit [`RoadSurfaceCoefficients`](/reference/api/environment/cnossos-road/#roadsurfacecoefficients). One of `"reference road surface"`, `"1-layer ZOAB"`, `"2-layer ZOAB"`, `"2-layer ZOAB (fine)"`, `"SMA-NL5"`, `"SMA-NL8"`, `"brushed down concrete"`, `"optimised brushed down concrete"`, `"fine broomed concrete"`, `"worked surface"`, `"hard elements in herringbone"`, `"hard elements not in herringbone"`, `"quiet hard elements"`, `"thin layer A"` or `"thin layer B"`. |
 | `temperature_c` | Air temperature `tau`, in degrees Celsius. |
 | `studded_fraction` | `Q_stud,ratio` of (2.2.7). |
 | `studded_months` | `T_s` of (2.2.7), the months per year over which studded tyres are in use. |
@@ -272,7 +272,7 @@ temperature, the gradient, the studded-tyre season and the junction.
 
 | Name | Description |
 | :--- | :--- |
-| `traffic` | One [`RoadTraffic`](/phonometry/reference/api/environment/cnossos-road/#roadtraffic) or a sequence of them, at most one per vehicle category. |
+| `traffic` | One [`RoadTraffic`](/reference/api/environment/cnossos-road/#roadtraffic) or a sequence of them, at most one per vehicle category. |
 | `surface` | Road surface (Table F-4). One of `"reference road surface"`, `"1-layer ZOAB"`, `"2-layer ZOAB"`, `"2-layer ZOAB (fine)"`, `"SMA-NL5"`, `"SMA-NL8"`, `"brushed down concrete"`, `"optimised brushed down concrete"`, `"fine broomed concrete"`, `"worked surface"`, `"hard elements in herringbone"`, `"hard elements not in herringbone"`, `"quiet hard elements"`, `"thin layer A"` or `"thin layer B"`. |
 | `temperature_c` | Yearly average air temperature `tau`, in degrees Celsius (the reference condition is 20 degC). |
 | `road_slope_percent` | Road slope `s`, in per cent, positive uphill. |
@@ -281,7 +281,7 @@ temperature, the gradient, the studded-tyre season and the junction.
 | `junction_type` | Junction type `k` (Table F-3). |
 | `coefficients` | The Appendix F database to use. |
 
-**Returns:** A [`RoadEmissionResult`](/phonometry/reference/api/environment/cnossos-road/#roademissionresult).
+**Returns:** A [`RoadEmissionResult`](/reference/api/environment/cnossos-road/#roademissionresult).
 
 **Raises**
 
@@ -304,9 +304,9 @@ Look up a Table F-4 row.
 
 | Name | Description |
 | :--- | :--- |
-| `surface` | A [`RoadSurface`](/phonometry/reference/api/environment/cnossos-road/#roadsurface) member or its description string. One of `"reference road surface"`, `"1-layer ZOAB"`, `"2-layer ZOAB"`, `"2-layer ZOAB (fine)"`, `"SMA-NL5"`, `"SMA-NL8"`, `"brushed down concrete"`, `"optimised brushed down concrete"`, `"fine broomed concrete"`, `"worked surface"`, `"hard elements in herringbone"`, `"hard elements not in herringbone"`, `"quiet hard elements"`, `"thin layer A"` or `"thin layer B"`. |
+| `surface` | A [`RoadSurface`](/reference/api/environment/cnossos-road/#roadsurface) member or its description string. One of `"reference road surface"`, `"1-layer ZOAB"`, `"2-layer ZOAB"`, `"2-layer ZOAB (fine)"`, `"SMA-NL5"`, `"SMA-NL8"`, `"brushed down concrete"`, `"optimised brushed down concrete"`, `"fine broomed concrete"`, `"worked surface"`, `"hard elements in herringbone"`, `"hard elements not in herringbone"`, `"quiet hard elements"`, `"thin layer A"` or `"thin layer B"`. |
 
-**Returns:** The [`RoadSurfaceCoefficients`](/phonometry/reference/api/environment/cnossos-road/#roadsurfacecoefficients) of that surface.
+**Returns:** The [`RoadSurfaceCoefficients`](/reference/api/environment/cnossos-road/#roadsurfacecoefficients) of that surface.
 
 **Raises**
 
@@ -383,7 +383,7 @@ Appendix F coefficient database for the road source.
 
 Holds Tables F-1, F-2 and F-3 together with the temperature coefficients
 `K_m` of (2.2.10). The default instance,
-[`ROAD_COEFFICIENTS`](/phonometry/reference/api/environment/cnossos-road/#road_coefficients), carries the tables of the consolidated
+[`ROAD_COEFFICIENTS`](/reference/api/environment/cnossos-road/#road_coefficients), carries the tables of the consolidated
 Directive; supplying another instance is how a Member State substitutes a
 national database, and how the superseded 2015/996 coefficients can be
 reproduced for comparison with pre-2021 studies.
@@ -439,7 +439,7 @@ Directional sound power per metre of a CNOSSOS-EU road source line.
 A-weighted total line power, in dB(A) re 1 pW per metre.
 
 Uses the octave-band weighting `AWC_f,i` printed in 2.5.5 as amended
-by (EU) 2021/1226, i.e. [`CNOSSOS_A_WEIGHTING`](/phonometry/reference/api/environment/cnossos-road/#cnossos_a_weighting).
+by (EU) 2021/1226, i.e. [`CNOSSOS_A_WEIGHTING`](/reference/api/environment/cnossos-road/#cnossos_a_weighting).
 
 ### RoadEmissionResult.plot()
 
@@ -509,7 +509,7 @@ The traffic of one vehicle category on a source line.
 
 | Name | Description |
 | :--- | :--- |
-| `category` | The [`RoadVehicleCategory`](/phonometry/reference/api/environment/cnossos-road/#roadvehiclecategory) of the flow. |
+| `category` | The [`RoadVehicleCategory`](/reference/api/environment/cnossos-road/#roadvehiclecategory) of the flow. |
 | `flow_rate` | Hourly flow `Q_m`, in vehicles per hour. |
 | `speed_kmh` | Average speed `v_m`, in km/h. Sound powers are frozen at 20 km/h below that speed (2.2.1); the flow term still uses the true speed. |
 | `studded_fraction` | `Q_stud,ratio` of (2.2.7), the fraction of the light-vehicle flow fitted with studded tyres over the studded period. Ignored for every category other than category 1 (2.2.9). |

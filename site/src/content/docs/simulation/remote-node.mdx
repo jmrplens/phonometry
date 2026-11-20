@@ -24,17 +24,17 @@ to set up a Docker node or a Python node, what can go wrong and what each
 error says, how to follow a run, what each side trusts of the other, and when
 a run there gives the numbers a run here gives. The device itself, NumPy,
 CuPy or torch, is chosen as
-[Where a simulation runs](/phonometry/simulation/compute/) explains, and it
+[Where a simulation runs](/simulation/compute/) explains, and it
 holds on a node that has that library: section 3 says what the image holds,
 and section 4 what a Python node needs.
-[Where heavy work runs](/phonometry/simulation/where-it-runs/) maps the
+[Where heavy work runs](/simulation/where-it-runs/) maps the
 devices, the nodes and the encoders in one place.
 
 ## 1. What happens when a run goes to a node
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_compute_map.svg" alt="Map in two lanes. Upper lane, where a simulation steps: a run record, FDTDRun or ElasticRun, and a Compute record with device, dtype and host go into one of four functions, fdtd_simulation, elastic_fdtd_simulation, write_fdtd_animation or write_elastic_fdtd_animation. With host None the run steps here on the device asked for, one of cpu (NumPy, the default), cupy (an NVIDIA GPU through CuPy), torch:cpu, torch:cuda or torch:mps (Apple's GPU, in float32 only). With a host it goes to a node of the hosts file in numbered steps: the hosts file says where the node is and how it runs a job; one ssh process carries the run, as data and never as code; phonometry is sent once per version and kept under a digest; the node builds the run again and steps it on the device asked for; and the probes and the snapshots, or the bytes of a video, come back. Both branches end in result.provenance, whose device, dtype and gpu say where the run stepped and whose host and package_sha256 name the node and the package it ran. A dashed arrow from the node branch back to the branch that runs here is labelled fallback=True: a device that cannot be used, or a node or a connection that fails, warns with ComputeFallbackWarning and the run steps on NumPy here. Lower lane, where a video is encoded: the encoder auto, the default, tries NVENC, Quick Sync, VAAPI, VideoToolbox and then the CPU, each with a real encode of one frame, and the first that passes writes the video; on the CPU that is SVT-AV1 or, without it, VP9 in a WebM and x265 or x264 in an MP4; a GIF is always written on the CPU, and an animation you draw yourself is encoded here only." width="92%" />
 
-*The map of [Where heavy work runs](/phonometry/simulation/where-it-runs/).
+*The map of [Where heavy work runs](/simulation/where-it-runs/).
 This section walks its right-hand branch, the numbered steps and the
 provenance they end in; the dashed arrow is the fallback of section 5.*
 
@@ -53,7 +53,7 @@ field, never as code, and the node builds it again with the library's
 constructors, so it checks itself again there. The video writers travel too,
 called as `write_fdtd_animation(path, run, compute=...)`, their run, frame and
 video options as records: see section 5 of
-[Writing animations and FDTD runs to video](/phonometry/io/videos/).
+[Writing animations and FDTD runs to video](/io/videos/).
 
 The node runs your own phonometry, as installed here, whatever is installed
 there. The client sends its files, those a wheel of it would hold, once per
@@ -70,7 +70,7 @@ snapshots, which are read here into arrays sized from your request and
 allocated before the connection opens. On a large grid the snapshots are most
 of what crosses the link and of the memory this machine needs:
 `snapshot_decimation`, section 7 of
-[Where a simulation runs](/phonometry/simulation/compute/), and
+[Where a simulation runs](/simulation/compute/), and
 `dtype="float32"` shrink them, while the probe histories stay float64. A video
 writer sends its video's bytes instead of snapshots.
 
@@ -80,7 +80,7 @@ writer sends its video's bytes instead of snapshots.
 carries: from its cache the node cannot name the package it runs.
 `device_index` is the one you asked for, and the rest of the provenance is the
 node's: its NumPy, its array library, its CUDA, its GPU. Section 5 of
-[Where a simulation runs](/phonometry/simulation/compute/) lists every field.
+[Where a simulation runs](/simulation/compute/) lists every field.
 
 ## 2. Naming a node: the hosts file
 
@@ -183,7 +183,7 @@ print(res.provenance.host, res.provenance.gpu)   # nas, and the card's name
 the same way. A whole script can name the node once, with a
 `simulation.use()` block or with the `PHONOMETRY_COMPUTE` environment
 variable; section 3 of
-[Where a simulation runs](/phonometry/simulation/compute/) says which wins
+[Where a simulation runs](/simulation/compute/) says which wins
 when more than one names a placement. A `use()` block holds its request for
 every call inside it that passes no `compute=`:
 
@@ -257,7 +257,7 @@ libraries its figures need, the DejaVu fonts the figures are drawn with, and
 ffmpeg, a static build the Dockerfile pins by URL and SHA-256, with SVT-AV1,
 NVENC, VP9 and dav1d, so a node needs no ffmpeg of its own. The GPU build
 adds the CUDA runtime and CuPy 14.2.0, the release the GPU proof of
-[Where a simulation runs](/phonometry/simulation/compute/) ran on. Neither
+[Where a simulation runs](/simulation/compute/) ran on. Neither
 build holds torch, and the CPU build holds no CuPy: a torch device takes a
 Python node or an image of your own. Each base image is pinned by digest.
 
@@ -289,7 +289,7 @@ the command through `cmd.exe`, which reads the quoting another way.
 The environment needs Python 3.12 or later, with NumPy 2.0.2 or later and
 SciPy 1.14.0 or later, the library's floors on its oldest Python, which the
 node checks whatever its own, and CuPy or torch for a GPU,
-installed as [Where a simulation runs](/phonometry/simulation/compute/) says.
+installed as [Where a simulation runs](/simulation/compute/) says.
 phonometry need not be installed there, and an installed one is not used: the
 interpreter runs isolated (`-I`), on the package the client sent, and the node
 checks that the phonometry it imported is that one. An environment below a
@@ -307,7 +307,7 @@ home directory or the absolute path. The client runs that `python` directly,
 with no activation script first, so the environment must work without one.
 
 A node that writes videos
-([Writing animations and FDTD runs to video](/phonometry/io/videos/)) needs two things more:
+([Writing animations and FDTD runs to video](/io/videos/)) needs two things more:
 matplotlib in that environment, 3.10.7 or later as the library's `plot`
 extra asks (`~/venvs/node/bin/pip install "matplotlib>=3.10.7"`), and ffmpeg
 on the `PATH` the command ssh runs there sees. The Docker image of section 3
@@ -432,7 +432,7 @@ same kind of processor and C library. A CI job proves it on every pull
 request, against a node on the same machine. Between two machines, NumPy's
 vectorised functions, such as the exponential of the sponge profile, may round
 differently by one unit in the last place, each CPU taking the instructions it
-has. On a GPU, [Where a simulation runs](/phonometry/simulation/compute/)
+has. On a GPU, [Where a simulation runs](/simulation/compute/)
 states what the proof on the GPU shows.
 
 ## 9. For library developers
@@ -489,21 +489,21 @@ encodes the video of a run it steps, but no animation drawn here:
 
 ## See also
 
-- [Where a simulation runs: NumPy, CuPy and torch](/phonometry/simulation/compute/):
+- [Where a simulation runs: NumPy, CuPy and torch](/simulation/compute/):
   the devices a run steps on, here or on a node, and what is promised about
   the numbers on each.
-- [Where heavy work runs: CPU or GPU, here or on a node](/phonometry/simulation/where-it-runs/):
+- [Where heavy work runs: CPU or GPU, here or on a node](/simulation/where-it-runs/):
   the devices, the nodes and the encoders in one place.
-- [2D FDTD wave simulation](/phonometry/simulation/fdtd-simulation/): the
+- [2D FDTD wave simulation](/simulation/fdtd-simulation/): the
   acoustic run, its sources, probes and boundaries.
-- [Elastic waves and fluid-solid coupling](/phonometry/simulation/elastic-waves/):
+- [Elastic waves and fluid-solid coupling](/simulation/elastic-waves/):
   the elastic run, which goes to a node the same way.
-- [Writing animations and FDTD runs to video](/phonometry/io/videos/): the two
+- [Writing animations and FDTD runs to video](/io/videos/): the two
   writers, and in section 5 the video of a run made on a node.
-- API reference: [`simulation.compute`](/phonometry/reference/api/simulation/compute/),
-  [`simulation.fdtd`](/phonometry/reference/api/simulation/fdtd/),
-  [`simulation.elastic_fdtd`](/phonometry/reference/api/simulation/elastic-fdtd/),
-  [`simulation.video`](/phonometry/reference/api/simulation/video/).
+- API reference: [`simulation.compute`](/reference/api/simulation/compute/),
+  [`simulation.fdtd`](/reference/api/simulation/fdtd/),
+  [`simulation.elastic_fdtd`](/reference/api/simulation/elastic-fdtd/),
+  [`simulation.video`](/reference/api/simulation/video/).
 
 </SeeAlso>
 

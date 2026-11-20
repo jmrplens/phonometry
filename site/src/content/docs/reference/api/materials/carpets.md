@@ -17,12 +17,12 @@ concrete, 0.40 to 0.70 on the pad.
 
 What the number is
 ------------------
-The noise reduction coefficient, [`Carpet.noise_reduction_coefficient`](/phonometry/reference/api/materials/carpets/#carpet), is
+The noise reduction coefficient, [`Carpet.noise_reduction_coefficient`](/reference/api/materials/carpets/#carpet), is
 the arithmetic mean of the sound absorption coefficients at 250, 500, 1000 and
 2000 Hz rounded to the nearest 0.05. It is one number for four bands, so no
 band can be recovered from it, and a carpet rated 0.50 may absorb very little
 at 125 Hz. The measured absorption of materials band by band is in
-[`PUBLISHED_ABSORPTION`](/phonometry/reference/api/materials/measured/#published_absorption).
+[`PUBLISHED_ABSORPTION`](/reference/api/materials/measured/#published_absorption).
 
 What the page got wrong
 -----------------------
@@ -79,9 +79,9 @@ Carpet(
 
 One carpet as a page printed it: its pile, what it is laid on, and its NRC.
 
-The [`name`](/phonometry/reference/api/io/io/#cataloguerow) is the
+The [`name`](/reference/api/io/io/#cataloguerow) is the
 construction the page prints, woven, knitted or knotted, and the
-[`variant`](/phonometry/reference/api/io/io/#cataloguerow) is the pile
+[`variant`](/reference/api/io/io/#cataloguerow) is the pile
 surface and the fibre, which is what tells two rows of one construction
 apart.
 
@@ -99,7 +99,7 @@ apart.
 | `variant` | Which specimen or condition this row is, when the page prints several under one name: `"chemically pure"`, `"direction x"`, `"0.68 mm diameter"`. Empty when the page prints one. |
 | `source` | Document, table, PDF page and printed folio. |
 | `table` | The data file this row was read from, without the extension, which is also the first half of its key in the catalogue that holds it. |
-| `basis` | What the source says a value is: a field name, or `"row"` for the whole row, to one of [`CATALOGUE_BASES`](/phonometry/reference/api/io/io/#catalogue_bases). Hopkins marks most of his Poisson ratios "Estimate", and those cells hold `"estimated"`; a datasheet that declares a class under a product standard would hold `"declared"`. A field with no entry takes the row's, and a row with neither is one whose source does not say, which is a different answer from any of the five. `basis_of` reads it. Independent of `derived`: this is what the source claims for a cell, that is what this library computed. |
+| `basis` | What the source says a value is: a field name, or `"row"` for the whole row, to one of [`CATALOGUE_BASES`](/reference/api/io/io/#catalogue_bases). Hopkins marks most of his Poisson ratios "Estimate", and those cells hold `"estimated"`; a datasheet that declares a class under a product standard would hold `"declared"`. A field with no entry takes the row's, and a row with neither is one whose source does not say, which is a different answer from any of the five. `basis_of` reads it. Independent of `derived`: this is what the source claims for a cell, that is what this library computed. |
 | `approximate` | Fields the page prints with a `~`. Not an estimate and not an interval: a number the author rounded on purpose. |
 | `derived` | Field to how it was computed, for the ones this library worked out from the cells the page did print. A derived value is never stored as if it had been read, and on every row the library builds it follows again from the row's own cells: `from_printed` writes it, and nothing else in the library does. One a caller passes to the literal constructor is the caller's word, which the row keeps and `printed_fields` leaves out with its value, as it leaves out every derived one. When the printed cells a value rests on do not all have one `basis`, the text names the basis of each, so a modulus worked out from a plate speed and a Poisson ratio Hopkins marks as an estimate says it rests on that estimate. A value converted from the unit the page prints is not derived (`converted` holds it), and neither is one the page gives by reference to another of its rows (`carried` does). |
 | `converted` | Field to `(figure, unit)`, the page's figure and the unit it is in, for a value this row holds in a unit the page does not use. Ver and Beranek print their damping materials in degrees Fahrenheit and pounds per square inch, and the row holds degrees Celsius and pascals, so `("3e5", "psi")` sits beside a modulus in pascals. The figure is kept as the page writes it, so the cell can always be read back in the page's own terms. The unit is the one the page prints with the figure or over its column. Long prints the figures of his musician bare, and the sabins recorded for them are a reading of the table, which is set in inches and pounds and names sabins on the next row; that row's note says so. A figure written in another unit of the same kind as the field's (`thickness_m` for `thickness_mm`, `flow_resistivity_kpa_s_m2` for `flow_resistivity_pa_s_m2`) is converted by `from_printed` and recorded here, whether it is a value, the end of a range or one of several readings; for a range the figure is the printed end of a bound, or both ends as `"5 to 10"`, and for readings the list as the page gives it. A packaged table transcribed in the base unit with only its SI prefix changed, such as the megapascals of Rossing Table 15.5, holds no entry here, and the table's `about` says so. |
@@ -123,7 +123,7 @@ apart.
 Carpet.basis_of(field_name: str) -> str
 ```
 
-What the source says this field is, one of [`CATALOGUE_BASES`](/phonometry/reference/api/io/io/#catalogue_bases).
+What the source says this field is, one of [`CATALOGUE_BASES`](/reference/api/io/io/#catalogue_bases).
 
 The five are `measured`, `declared`, `calculated`, `estimated`
 and `extended`.
@@ -153,7 +153,7 @@ unit of the same kind as its field (`thickness_m` for
 `thickness_mm`, `flow_resistivity_kpa_s_m2` for
 `flow_resistivity_pa_s_m2`), or in a unit the class takes as an
 alias of its own (an
-[`AbsorptionAreaSpectrum`](/phonometry/reference/api/materials/measured/#absorptionareaspectrum) takes
+[`AbsorptionAreaSpectrum`](/reference/api/materials/measured/#absorptionareaspectrum) takes
 `absorption_area_125_ft2` for `absorption_area_125_m2`), is
 converted on its digits with an exact factor and rounded once,
 whether it is a value or stands as the key of a hedge (the ends of a
@@ -343,7 +343,7 @@ Every carpet whose construction, surface or fibre contains *name*.
 | Name | Description |
 | :--- | :--- |
 | `name` | Part of what the page prints, in Spanish, matched without regard to case: `"nylon"` answers with every nylon carpet of both tables, and `"de nudo"` with every knotted one. |
-| `catalogue` | The rows to search in place of [`PUBLISHED_CARPETS`](/phonometry/reference/api/materials/carpets/#published_carpets): a catalogue of your own that [`phonometry.io.read_catalogue`](/phonometry/reference/api/io/io/#read_catalogue) returns, `PUBLISHED_CARPETS \| mine` to search both at once, or any mapping of key to row (Default: `None`, which searches [`PUBLISHED_CARPETS`](/phonometry/reference/api/materials/carpets/#published_carpets)). |
+| `catalogue` | The rows to search in place of [`PUBLISHED_CARPETS`](/reference/api/materials/carpets/#published_carpets): a catalogue of your own that [`phonometry.io.read_catalogue`](/reference/api/io/io/#read_catalogue) returns, `PUBLISHED_CARPETS \| mine` to search both at once, or any mapping of key to row (Default: `None`, which searches [`PUBLISHED_CARPETS`](/reference/api/materials/carpets/#published_carpets)). |
 
 **Returns:** The matching rows, in catalogue order. Empty when nothing matches, which is not an error.
 
@@ -351,7 +351,7 @@ Every carpet whose construction, surface or fibre contains *name*.
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | for a *catalogue* that is not a mapping, or that holds a row that is not a [`Carpet`](/phonometry/reference/api/materials/carpets/#carpet), naming its key. |
+| TypeError | for a *catalogue* that is not a mapping, or that holds a row that is not a [`Carpet`](/reference/api/materials/carpets/#carpet), naming its key. |
 
 ## PUBLISHED_CARPETS
 

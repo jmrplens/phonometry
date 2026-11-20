@@ -120,7 +120,7 @@ measurements go in a catalogue file of yours, a JSON document or a spreadsheet
 saved as CSV. `io.read_catalogue` reads it into the same row classes as the
 published tables, and every lookup by name searches it with `catalogue=`,
 alone or joined with a published catalogue. [Your own
-catalogues](/phonometry/io/material-catalogues/) shows how, from a published
+catalogues](/io/material-catalogues/) shows how, from a published
 table written out as a template to the refusal that points at a cell.
 
 The published catalogues hold what the library has read from a book or a
@@ -134,10 +134,10 @@ A data sheet's practical absorption coefficients, a test report's
 one-third-octave coefficients, a laboratory's sound reduction index and a
 covering's impact improvement have row classes of their own that no published
 table uses, and [Reading a material
-datasheet](/phonometry/materials/reading-a-datasheet/) says which number on a
+datasheet](/materials/reading-a-datasheet/) says which number on a
 sheet is which. The JSON Schema of a catalogue file, for every row class the
 library publishes, is served at
-[`schemas/phonometry-catalogue-1.json`](https://docs.jmrp.io/phonometry/schemas/phonometry-catalogue-1.json),
+[`schemas/phonometry-catalogue-1.json`](https://phonometry.dev/schemas/phonometry-catalogue-1.json),
 so an editor completes a file of yours as you type it.
 
 <CatalogueRouter lang="en" />

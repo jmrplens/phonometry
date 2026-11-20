@@ -1,6 +1,6 @@
 <!-- Written by `make llms` from site/src/content/docs/materials/absorbers/suspended-ceilings.mdx: edit that page and its Spanish twin, then run `make llms`. -->
 
-← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/materials/absorbers/suspended-ceilings/
+← [Documentation index](../../README.md) · Published at https://phonometry.dev/materials/absorbers/suspended-ceilings/
 
 # Suspended Ceilings: the EN 16487 Test Code
 
@@ -216,7 +216,7 @@ raft or a free-hanging unit is outside them.
   what an absorbing ceiling is bought for, measured in the finished hall.
 - [Room Noise Criteria](../../buildings/rooms/room-noise.md): the target the
   absorption is chosen against.
-- API reference: [`materials.absorbers.suspended_ceilings`](https://docs.jmrp.io/phonometry/reference/api/materials/suspended-ceilings/).
+- API reference: [`materials.absorbers.suspended_ceilings`](https://phonometry.dev/reference/api/materials/suspended-ceilings/).
 
 ## References
 

@@ -40,7 +40,7 @@ guía cubre la corrección por ruido de fondo posición a posición con sus
 reglas de 6 dB y 15 dB, las formas con una y con varias ubicaciones, la vía
 de suceso aislado, el grado de la Tabla 2, la incertidumbre del apartado 9 y
 las condiciones de referencia del Anexo C. Qué vía encaja con qué trabajo se
-sopesa en [Potencia acústica](/phonometry/es/devices/emission/sound-power/).
+sopesa en [Potencia acústica](/es/devices/emission/sound-power/).
 
 ## 1. La comparación in situ (ISO 3747)
 
@@ -308,7 +308,7 @@ cobertura y probabilidad.
 | :--- | :--- | :--- | :--- | :--- |
 | `levels` | array 2D | dB | `(n, bandas)` | $L'_{pi(\mathrm{ST})}$ medidos, una fila por posición de micrófono, tres o cuatro posiciones (7.4.1) |
 | `reference_levels` | array 2D o 3D | dB | `(n, bandas)` o `(m, n, bandas)` | La fuente de referencia en las mismas posiciones, una rejilla por ubicación, corregida según su fabricante por velocidad, temperatura y presión pero no por ruido de fondo |
-| `reference_sound_power_levels` | array 1D o 2D, o `ReferenceSourceCalibration` | dB | `(bandas,)` o `(m, bandas)` | $L_{W(\mathrm{RSS})}$ calibrada, por ubicación cuando cada una se calibró en su propia posición similar (Ec. 12); una [`ReferenceSourceCalibration`](/phonometry/es/devices/emission/free-field-qualification/) se suma de sus bandas de tercio de octava a las octavas de `frequencies` |
+| `reference_sound_power_levels` | array 1D o 2D, o `ReferenceSourceCalibration` | dB | `(bandas,)` o `(m, bandas)` | $L_{W(\mathrm{RSS})}$ calibrada, por ubicación cuando cada una se calibró en su propia posición similar (Ec. 12); una [`ReferenceSourceCalibration`](/es/devices/emission/free-field-qualification/) se suma de sus bandas de tercio de octava a las octavas de `frequencies` |
 | `frequencies` | array 1D | Hz | octavas de 63 Hz a 8 kHz | Frecuencias centrales nominales de octava de la Tabla D.1; obligatorio. El apartado 3.11 fija el rango de uso general en 125 Hz a 8 kHz; la fila de 63 Hz de la Tabla D.1 lleva la nota a, que solo la admite donde el entorno de ensayo, la fuente sonora de referencia y la instrumentación sean satisfactorios en esa frecuencia |
 | `background_levels` | array 1D o 2D | dB | `(bandas,)` o `(n, bandas)` | $L_{pi(\mathrm{B})}$; un espectro sirve para todas las posiciones. `None` avisa y deja `background_requirement_met` a `False` en todas las bandas, porque el 7.5 lo mide en cada posición y el 8.1 necesita el margen |
 | `reference_background_levels` | array 1D o 2D | dB | mismas formas | Ruido de fondo de la lectura de la fuente de referencia; `None` reutiliza `background_levels` (7.5) |
@@ -535,8 +535,8 @@ biblioteca toma los niveles y los dos indicadores que necesita el grado.
 Las correcciones propias de la fuente de referencia por velocidad,
 temperatura y presión estática son las de su fabricante, aplicadas antes de
 que lleguen los niveles. Las otras vías in situ son sus propias guías:
-[Potencia acústica por métodos de presión](/phonometry/es/devices/emission/sound-power-pressure/)
-para la superficie envolvente, [Potencia acústica por barrido de intensidad](/phonometry/es/devices/emission/sound-power-intensity/)
+[Potencia acústica por métodos de presión](/es/devices/emission/sound-power-pressure/)
+para la superficie envolvente, [Potencia acústica por barrido de intensidad](/es/devices/emission/sound-power-intensity/)
 para la sonda.
 </ScopeClaim>
 </Scope>
@@ -545,20 +545,20 @@ para la sonda.
 
 ## Véase también
 
-- [Potencia acústica](/phonometry/es/devices/emission/sound-power/): elegir
+- [Potencia acústica](/es/devices/emission/sound-power/): elegir
   entre las vías de determinación, los grados de exactitud y la declaración
   de emisión sonora de ISO 4871.
-- [Potencia acústica en cámara reverberante](/phonometry/es/devices/emission/sound-power-reverberation/):
+- [Potencia acústica en cámara reverberante](/es/devices/emission/sound-power-reverberation/):
   la comparación de precisión de ISO 3741 en una cámara cualificada, cuya
   $C_2$ comparte esta guía.
-- [Potencia acústica por métodos de presión (ISO 3744 / ISO 3746 / ISO 3745)](/phonometry/es/devices/emission/sound-power-pressure/):
+- [Potencia acústica por métodos de presión (ISO 3744 / ISO 3746 / ISO 3745)](/es/devices/emission/sound-power-pressure/):
   la superficie envolvente para una fuente que puede medirse en su campo
   directo.
-- [Potencia acústica por barrido de intensidad (ISO 9614)](/phonometry/es/devices/emission/sound-power-intensity/):
+- [Potencia acústica por barrido de intensidad (ISO 9614)](/es/devices/emission/sound-power-intensity/):
   las vías que toleran un ruido de fondo estacionario sin fuente de
   referencia.
-- [Niveles](/phonometry/es/signals/levels/levels/): el promedio energético,
+- [Niveles](/es/signals/levels/levels/): el promedio energético,
   el nivel de suceso aislado y la ponderación A detrás de $L_{W\mathrm{A}}$.
-- Referencia de la API: [`emission`: sound power in situ](/phonometry/es/reference/api/power/sound-power-in-situ/).
+- Referencia de la API: [`emission`: sound power in situ](/es/reference/api/power/sound-power-in-situ/).
 
 </SeeAlso>

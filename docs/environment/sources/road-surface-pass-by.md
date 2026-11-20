@@ -1,6 +1,6 @@
 <!-- Written by `make llms` from site/src/content/docs/environment/sources/road-surface-pass-by.mdx: edit that page and its Spanish twin, then run `make llms`. -->
 
-← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/environment/sources/road-surface-pass-by/
+← [Documentation index](../../README.md) · Published at https://phonometry.dev/environment/sources/road-surface-pass-by/
 
 # Road-surface noise: the statistical pass-by method
 
@@ -354,7 +354,7 @@ sound levels depend on neither.
 - [In-situ road-surface absorption](../../materials/surfaces/road-absorption.md): the ISO 13472 absorption of the surface itself, the other half of what a porous surface does to the noise.
 - [Environmental noise levels](../assessment/environmental-levels.md): what the traffic on the surface adds up to at a dwelling.
 - [Errata in published sources](../../ERRATA.md): the two ISO 11819-1 entries, the speed spreads of Annex E that do not fit its own regression and the table of Annex D numbered after Annex E.
-- API reference: [`environment`: statistical pass-by](https://docs.jmrp.io/phonometry/reference/api/environment/statistical-pass-by/).
+- API reference: [`environment`: statistical pass-by](https://phonometry.dev/reference/api/environment/statistical-pass-by/).
 
 ## References
 

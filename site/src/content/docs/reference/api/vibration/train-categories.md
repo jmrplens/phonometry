@@ -47,7 +47,7 @@ E DIN 45672-3:2023-02, the draft prediction method for railways, takes the
 sum of Formula (6) as its Formula (11) and the same factors as its Annex E,
 though it prints the sum without the sentence that zeroes a category at or
 below 0.1, so the functions here serve both; the prediction chain that leads
-up to them is in [`phonometry.vibration.immission.railway_prediction`](/phonometry/reference/api/vibration/railway-prediction/).
+up to them is in [`phonometry.vibration.immission.railway_prediction`](/reference/api/vibration/railway-prediction/).
 
 Every example of Annex B that the draft works with these formulae is a
 conformance row: the 47 passages of Table B.1 and their eight derived values,
@@ -100,10 +100,10 @@ not one of them, as the clause is printed.
 | `kb_fmax_after` | The same with the project. |
 | `kb_ftr_before` | $KB_\mathrm{FTr}$ of Formula (6) without the project. |
 | `kb_ftr_after` | The same with the project. |
-| `guide` | The guide values of the planned case, from [`railway_guide_values`](/phonometry/reference/api/vibration/train-categories/#railway_guide_values) for the night-time $A_\mathrm{o}$ of 6.5.3.6 b); they must be of the 2023 edition and of the same period. |
+| `guide` | The guide values of the planned case, from [`railway_guide_values`](/reference/api/vibration/train-categories/#railway_guide_values) for the night-time $A_\mathrm{o}$ of 6.5.3.6 b); they must be of the 2023 edition and of the same period. |
 | `time_of_day` | `"day"` (default) or `"night"`. |
 
-**Returns:** The verdict, as a [`RailwayChange`](/phonometry/reference/api/vibration/train-categories/#railwaychange).
+**Returns:** The verdict, as a [`RailwayChange`](/reference/api/vibration/train-categories/#railwaychange).
 
 **Raises**
 
@@ -144,11 +144,11 @@ an altered or extended line (6.5.3.6 b)).
 
 | Name | Description |
 | :--- | :--- |
-| `area` | The row of Table 1, as [`GUIDE_VALUES`](/phonometry/reference/api/vibration/people/#guide_values) keys it. One of `"industrial"`, `"commercial"`, `"mixed"`, `"residential"` or `"sensitive"`. |
+| `area` | The row of Table 1, as [`GUIDE_VALUES`](/reference/api/vibration/people/#guide_values) keys it. One of `"industrial"`, `"commercial"`, `"mixed"`, `"residential"` or `"sensitive"`. |
 | `time_of_day` | `"day"` (default) or `"night"`. |
 | `alignment` | `"surface"` (default) or `"underground"`. |
 
-**Returns:** The three values, as a [`GuideValues`](/phonometry/reference/api/vibration/people/#guidevalues) of the 2023 edition.
+**Returns:** The three values, as a [`GuideValues`](/reference/api/vibration/people/#guidevalues) of the 2023 edition.
 
 **Raises**
 
@@ -290,9 +290,9 @@ two tracks can each carry a train in the same interval.
 
 | Name | Description |
 | :--- | :--- |
-| `kb_ftm_zug` | $KB_\mathrm{FTm,Zug}$ of each category, as [`train_category_rms`](/phonometry/reference/api/vibration/train-categories/#train_category_rms) gives them. |
+| `kb_ftm_zug` | $KB_\mathrm{FTm,Zug}$ of each category, as [`train_category_rms`](/reference/api/vibration/train-categories/#train_category_rms) gives them. |
 | `trains` | $n_\mathrm{Zug}$, the trains of each category in the period, from the timetable. |
-| `alpha` | $\alpha_\mathrm{Zug}$ of each category, from [`train_weighting_factor`](/phonometry/reference/api/vibration/train-categories/#train_weighting_factor), or one value for all. |
+| `alpha` | $\alpha_\mathrm{Zug}$ of each category, from [`train_weighting_factor`](/reference/api/vibration/train-categories/#train_weighting_factor), or one value for all. |
 | `time_of_day` | `"day"` (default) or `"night"`. |
 
 **Returns:** $KB_\mathrm{FTr}$.
@@ -403,7 +403,7 @@ The weighting factor $\alpha_\mathrm{Zug}$ of Table 2 for one category.
 
 | Name | Description |
 | :--- | :--- |
-| `kind` | The kind of train, as [`TRAIN_KINDS`](/phonometry/reference/api/vibration/train-categories/#train_kinds) lists them. One of `"tram_metro"`, `"s_bahn"`, `"passenger"`, `"freight"` or `"freight_long"`. |
+| `kind` | The kind of train, as [`TRAIN_KINDS`](/reference/api/vibration/train-categories/#train_kinds) lists them. One of `"tram_metro"`, `"s_bahn"`, `"passenger"`, `"freight"` or `"freight_long"`. |
 | `alignment` | `"surface"` (default) or `"underground"`. |
 
 **Returns:** $\alpha_\mathrm{Zug}$, dimensionless.

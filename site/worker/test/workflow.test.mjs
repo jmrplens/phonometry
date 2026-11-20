@@ -69,9 +69,9 @@ function checkedOut(path, directories) {
 	);
 }
 
-test('the workflow runs the four scripts it is meant to', () => {
+test('the workflow runs the five scripts it is meant to', () => {
 	const scripts = nodeScripts(readFileSync(WORKFLOW, 'utf8'));
-	for (const script of ['site/worker/scripts/site-address.mjs', 'site/worker/stage.mjs', 'site/worker/scripts/apply-rules.mjs', 'site/worker/scripts/check-clip.mjs']) {
+	for (const script of ['site/worker/scripts/site-address.mjs', 'site/worker/stage.mjs', 'site/worker/scripts/apply-rules.mjs', 'site/worker/scripts/check-clip.mjs', 'site/worker/scripts/check-clip-host.mjs']) {
 		assert.ok(scripts.includes(script), `site-deploy.yml no longer runs ${script}`);
 	}
 });
@@ -247,6 +247,57 @@ describe('called by docs.yml, or run by hand on a docs.yml run', () => {
 			['.mdx', '.md', '/index.mdx', '/index.md'].some((ending) => existsSync(join(docs, `${route}${ending}`))),
 			`${page[1]} is no page of site/src/content/docs`,
 		);
+	});
+});
+
+describe('the checks after a deploy hold the site served at the root', () => {
+	const text = readFileSync(WORKFLOW, 'utf8');
+	const steps = stepsByName(text);
+	const named = (start) => [...steps.entries()].find(([name]) => name.startsWith(start))?.[1] ?? '';
+	const assets = named('Check what the assets answer');
+	const rules = named('Check what the zone rules answer');
+
+	test('the pages carry no noindex when the build is indexable, and the llms files keep theirs', () => {
+		assert.match(assets, /INDEXABLE: \$\{\{ steps\.site\.outputs\.indexable \}\}/);
+		const script = runBlock(assets);
+		assert.match(script, /if \[ "\$INDEXABLE" = true \]; then/);
+		assert.match(script, /absent "a page carries no noindex" '\^x-robots-tag:' "\$base\/signals\/"/);
+		assert.match(script, /expect "a page, kept out of search indexes" "\$base\/signals\/" 200 '\^x-robots-tag: noindex'/);
+		assert.match(script, /expect "llms\.txt stays out of search indexes" "\$base\/llms\.txt" 200 '\^x-robots-tag: noindex'/);
+	});
+
+	test('the home page answers itself at the root, with no redirect to a base path', () => {
+		const script = runBlock(assets);
+		assert.match(script, /expect "the home page answers" "\$base\/" 200/);
+		assert.match(runBlock(rules), /if \[ -n "\$BASE" \]; then\n\s+check "the root goes to the base path"/);
+	});
+
+	test('the old base path answers one 301 to the same page at the root, its query kept', () => {
+		assert.match(rules, /LEGACY_BASE: \$\{\{ steps\.site\.outputs\.legacy_base \}\}/);
+		const script = runBlock(rules);
+		assert.match(script, /if \[ -n "\$LEGACY_BASE" \]; then/);
+		assert.match(script, /check "a page under the old base path goes to the root" 301 "\$ORIGIN\/signals\/\\\?q=1" "\$ORIGIN\$LEGACY_BASE\/signals\/\?q=1"/);
+		assert.match(script, /check "the old base path itself goes to the home page" 301 "\$ORIGIN\/\[\[:space:\]\]\*\$" "\$ORIGIN\$LEGACY_BASE"/);
+	});
+
+	test('robots.txt names a sitemap the stage holds', () => {
+		const step = named('Check robots.txt names a sitemap the stage holds');
+		assert.ok(step, 'no step holds the robots.txt sitemap to the stage');
+		assert.match(step, /ORIGIN: \$\{\{ steps\.site\.outputs\.origin \}\}/);
+		const script = runBlock(step);
+		assert.match(script, /site\/worker\/stage\/robots\.txt/);
+		assert.match(script, /\[ -f "site\/worker\/stage\$\{path\}" \]/);
+	});
+
+	test('every staged clip answers at the clip host with its size, before the rules point there', () => {
+		const step = named('Check every staged clip answers at the clip host');
+		assert.ok(step, 'no step holds the staged clips to the clip host');
+		assert.match(step, /CLIP_BASE: \$\{\{ steps\.site\.outputs\.clip_base \}\}/);
+		assert.match(step, /node site\/worker\/scripts\/check-clip-host\.mjs --stage "site\/worker\/stage\$BASE" --clip-base "\$CLIP_BASE"/);
+		const order = stepTexts(text);
+		const at = (part) => order.findIndex((one) => one.includes(part));
+		assert.ok(at('check-clip-host.mjs') < at('apply-rules.mjs --apply'), 'the rules point at the clip host before its clips are checked');
+		assert.ok(at('check-clip-host.mjs') > at('stage.mjs --from'), 'the clips are checked before they are staged');
 	});
 });
 

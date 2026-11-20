@@ -10,7 +10,7 @@ Higher-order acoustic modes in ducts, with the mean-flow cut-on shift.
 Every plane-wave duct method has the same expiry date: the frequency at which
 the first higher-order mode cuts on. Below it a duct carries only plane waves,
 the four-pole (transfer-matrix) silencer algebra of
-[`phonometry.noise_control.silencers`](/phonometry/reference/api/noise_control/silencers/) is exact and a single sound pressure
+[`phonometry.noise_control.silencers`](/reference/api/noise_control/silencers/) is exact and a single sound pressure
 describes the whole cross section. Above it several modes propagate at once,
 each with its own axial wavenumber, and a plane-wave prediction quietly stops
 being right.
@@ -36,9 +36,9 @@ of Noise and Vibration Analysis for Engineers* 2nd ed., section 7.3:
 
 The practical consequence in a ventilation duct is blunt: a 0.65 m x 0.4 m
 air-conditioning duct cuts on at 264 Hz, so plane-wave silencer algebra is
-valid only in the 63 Hz to 250 Hz octaves. [`plane_wave_limit`](/phonometry/reference/api/noise_control/duct-modes/#plane_wave_limit) returns
+valid only in the 63 Hz to 250 Hz octaves. [`plane_wave_limit`](/reference/api/noise_control/duct-modes/#plane_wave_limit) returns
 that frequency, and the silencer and duct-path results raise
-[`PlaneWaveWarning`](/phonometry/reference/api/noise_control/duct-modes/#planewavewarning) on the caller's behalf above it.
+[`PlaneWaveWarning`](/reference/api/noise_control/duct-modes/#planewavewarning) on the caller's behalf above it.
 
 > Auto-generated from the source docstrings by `scripts/generate_api_docs.py` (`make api-docs`). Do not edit by hand.
 
@@ -82,7 +82,7 @@ tabulated by Norton, so `n_modes` cannot exceed twelve.
 | `speed_of_sound` | Speed of sound `c` in the duct fluid, m/s. |
 | `n_modes` | How many higher-order modes to return, 1 to 12. |
 
-**Returns:** A [`DuctModeResult`](/phonometry/reference/api/noise_control/duct-modes/#ductmoderesult).
+**Returns:** A [`DuctModeResult`](/reference/api/noise_control/duct-modes/#ductmoderesult).
 
 **Raises**
 
@@ -166,8 +166,8 @@ plane_wave_limit(
 
 The first cut-on frequency of a duct: plane waves only below it.
 
-A convenience over [`circular_duct_cut_on`](/phonometry/reference/api/noise_control/duct-modes/#circular_duct_cut_on) and
-[`rectangular_duct_cut_on`](/phonometry/reference/api/noise_control/duct-modes/#rectangular_duct_cut_on) that takes whichever description of the
+A convenience over [`circular_duct_cut_on`](/reference/api/noise_control/duct-modes/#circular_duct_cut_on) and
+[`rectangular_duct_cut_on`](/reference/api/noise_control/duct-modes/#rectangular_duct_cut_on) that takes whichever description of the
 cross section is at hand. Give either `diameter_m`, or both `width_m` and
 `height_m`, or `area` (treated as a circular duct of the equivalent
 diameter $\sqrt{4S/\pi}$).
@@ -239,7 +239,7 @@ wavelength across the wider side.
 | `speed_of_sound` | Speed of sound `c` in the duct fluid, m/s. |
 | `n_modes` | How many higher-order modes to return (at least 1). |
 
-**Returns:** A [`DuctModeResult`](/phonometry/reference/api/noise_control/duct-modes/#ductmoderesult).
+**Returns:** A [`DuctModeResult`](/reference/api/noise_control/duct-modes/#ductmoderesult).
 
 **Raises**
 

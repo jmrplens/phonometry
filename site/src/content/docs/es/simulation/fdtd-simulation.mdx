@@ -71,7 +71,7 @@ mismas entradas producen salidas idénticas bit a bit en la misma plataforma,
 y con CuPy en float64 los campos salieron idénticos bit a bit a los de NumPy
 en los escenarios medidos en una GPU, un controlador y una versión de CuPy
 concretos ([lo que se promete en cada
-dispositivo](/phonometry/es/simulation/compute/#que-se-promete-en-cada-dispositivo)).
+dispositivo](/es/simulation/compute/#que-se-promete-en-cada-dispositivo)).
 Es el motor de las animaciones FDTD de esta documentación, elevado a API
 pública con fuentes, sondas de presión, obstáculos rasterizados, condiciones
 de contorno por lado y un objeto de resultado congelado.
@@ -186,7 +186,7 @@ res.plot()                       # historias de presión en las sondas (figura d
 La ejecución se calculó con NumPy en float64, y `res.provenance` lo registra.
 La misma llamada calcula en una GPU de NVIDIA con CuPy, o con PyTorch, con un
 argumento más; [Dónde se calcula una
-simulación](/phonometry/es/simulation/compute/) trata los dispositivos, qué
+simulación](/es/simulation/compute/) trata los dispositivos, qué
 hay que instalar para cada uno, cómo elige uno todo un script y qué se promete
 sobre los números en cada uno.
 
@@ -196,8 +196,8 @@ print(on_gpu.provenance.device, on_gpu.provenance.gpu)   # cupy, y el nombre de 
 ```
 
 Con un `host`, la misma ejecución va a otra máquina: véase
-[Enviar una simulación a un nodo remoto](/phonometry/es/simulation/remote-node/).
-[Dónde se ejecuta el trabajo pesado](/phonometry/es/simulation/where-it-runs/)
+[Enviar una simulación a un nodo remoto](/es/simulation/remote-node/).
+[Dónde se ejecuta el trabajo pesado](/es/simulation/where-it-runs/)
 reúne en un sitio los dispositivos, los nodos y los codificadores.
 
 El paso temporal no es una entrada. Sale de `cfl` y de la mayor velocidad
@@ -437,7 +437,7 @@ los arrays del campo y la energía, para quien necesite acceso fotograma a
 fotograma (las animaciones de la documentación lo usan directamente). Admite
 el mismo `compute=` que `fdtd_simulation` y, sin él, sigue a `use()` y a
 `PHONOMETRY_COMPUTE` ([Dónde se calcula una
-simulación](/phonometry/es/simulation/compute/)); avanza en este proceso, así
+simulación](/es/simulation/compute/)); avanza en este proceso, así
 que una ubicación que nombra un host lanza `ValueError`. Fuera de NumPy,
 `sim.p`, `sim.vx` y `sim.vy` son arrays propios de ese dispositivo. Los
 bloques de esta página avanzan con NumPy y pasan los campos a NumPy tal
@@ -595,7 +595,7 @@ Un dominio de tres filas con paredes rígidas es un tubo de onda plana, y con
 el mapa de `damping` por celda una muestra porosa se convierte en un fluido
 equivalente, lo que convierte a la propia simulación en una probeta medible: la
 [guía del tubo de
-impedancia](/phonometry/es/materials/absorbers/impedance-tube/) ejecuta
+impedancia](/es/materials/absorbers/impedance-tube/) ejecuta
 las mediciones ISO 10534-2 y ASTM E2611 de forma virtual sobre exactamente
 ese dominio, animaciones incluidas, y recupera la absorción y la pérdida por
 transmisión analíticas de la muestra modelada con las propias cadenas de
@@ -782,7 +782,7 @@ círculo del metadifusor: el panel de la Tabla 1 del artículo, con cada
 ranura, cuello y cavidad mallados a 0,5 mm, llevado al régimen
 estacionario por una onda plana, capturado sobre un contorno y
 transformado, frente al modelo
-[`metadiffuser_polar_response`](/phonometry/es/reference/api/materials/metadiffuser/)
+[`metadiffuser_polar_response`](/es/reference/api/materials/metadiffuser/)
 (TMM + Fraunhofer) del módulo de materiales. Es la réplica en la biblioteca
 del contraste TMM frente a FEM que documenta el propio artículo de los
 metadifusores, pequeñas discrepancias incluidas: el modelo de matrices de
@@ -999,7 +999,7 @@ que nadie nombra: cada una son otros 8 bytes por celda en float64, así que
 `snapshot_every=1` sobre esa escena pediría del orden de 38 GB. Una
 ejecución en float32 lo reduce a la mitad, y `snapshot_decimation=d`, el
 tercer campo de un `FDTDRecording`, guarda una celda de cada $d^2$
-([Dónde se calcula una simulación](/phonometry/es/simulation/compute/),
+([Dónde se calcula una simulación](/es/simulation/compute/),
 secciones 1 y 7). Elige la cadencia a partir del número de fotogramas que
 quieres de verdad; las animaciones de esta documentación usan unos
 centenares. Para un vídeo, `write_fdtd_animation` dibuja cada fotograma a
@@ -1199,7 +1199,7 @@ superficies libres por imagen de esfuerzos con ondas de Rayleigh, y el
 acoplamiento fluido-sólido con conversión de modo, ondas de interfase de
 Scholte y transmisión de placas sumergidas. Ese esquema tiene su
 propia guía,
-[Ondas elásticas y acoplamiento fluido-sólido](/phonometry/es/simulation/elastic-waves/).
+[Ondas elásticas y acoplamiento fluido-sólido](/es/simulation/elastic-waves/).
 
 <span id="escribir-la-simulacion-en-un-video"></span>
 
@@ -1211,7 +1211,7 @@ ejecución sin él, como la de la sección 1, se rechaza con `ValueError`.
 `simulation.write_fdtd_animation` hace avanzar esa ejecución y dibuja su
 campo de presión en un WebM, un MP4 o un GIF a medida que se calcula, un
 fotograma cada `snapshot_every` pasos, sin guardar las instantáneas.
-[Escribir animaciones y simulaciones FDTD en vídeo](/phonometry/es/io/videos/)
+[Escribir animaciones y simulaciones FDTD en vídeo](/es/io/videos/)
 explica cómo se dibuja un fotograma y se encuentra su escala de color, qué
 codificador escribe el archivo y cómo la misma llamada avanza en una GPU o va
 a un nodo.
@@ -1278,7 +1278,7 @@ viento o flujo, y el único contorno de impedancia es el real independiente de
 la frecuencia de las Ecs. 4.33-4.35. Los medios elásticos no se cubren aquí:
 el esquema compañero P-SV, sus superficies libres y su física fluido-sólido
 tienen su propia guía, [Ondas elásticas y acoplamiento
-fluido-sólido](/phonometry/es/simulation/elastic-waves/).
+fluido-sólido](/es/simulation/elastic-waves/).
 </ScopeClaim>
 </Scope>
 
@@ -1286,23 +1286,23 @@ fluido-sólido](/phonometry/es/simulation/elastic-waves/).
 
 ## Véase también
 
-- [Ondas elásticas y acoplamiento fluido-sólido](/phonometry/es/simulation/elastic-waves/):
+- [Ondas elásticas y acoplamiento fluido-sólido](/es/simulation/elastic-waves/):
   el esquema compañero P-SV sobre la misma malla escalonada, con ondas
   de Rayleigh y de Scholte, conversión de modo y placas sumergidas.
-- [Dónde se calcula una simulación](/phonometry/es/simulation/compute/): la
+- [Dónde se calcula una simulación](/es/simulation/compute/): la
   misma ejecución en una GPU de NVIDIA con CuPy o con PyTorch, y lo que se
   promete sobre sus números.
-- [Escribir animaciones y simulaciones FDTD en vídeo](/phonometry/es/io/videos/):
+- [Escribir animaciones y simulaciones FDTD en vídeo](/es/io/videos/):
   el fotograma, su escala de color y el codificador de
   `write_fdtd_animation`.
-- [Informe de conformidad](/phonometry/es/reference/conformance/): ahí se
+- [Informe de conformidad](/es/reference/conformance/): ahí se
   ejecutan el modo de la caja y la llegada en campo libre de la sección 6, y
   el rizado y el nivel del monopolo de campo cercano a lejano de la
   sección 4.
-- Referencia de la API: [`simulation.fdtd`](/phonometry/es/reference/api/simulation/fdtd/),
-  [`simulation.ntff`](/phonometry/es/reference/api/simulation/ntff/),
-  [`simulation.compute`](/phonometry/es/reference/api/simulation/compute/),
-  [`simulation.video`](/phonometry/es/reference/api/simulation/video/).
+- Referencia de la API: [`simulation.fdtd`](/es/reference/api/simulation/fdtd/),
+  [`simulation.ntff`](/es/reference/api/simulation/ntff/),
+  [`simulation.compute`](/es/reference/api/simulation/compute/),
+  [`simulation.video`](/es/reference/api/simulation/video/).
 
 </SeeAlso>
 

@@ -73,7 +73,7 @@ $$
 
 $\alpha$ is Annex A (normative), which is ISO 9613-1 written in nepers
 rather than decibels and evaluated up to 22.4 kHz, where ISO 9613-1 stops at
-10 kHz; [`air_absorption_np_per_m`](/phonometry/reference/api/power/sound-power-high-frequency/#air_absorption_np_per_m) evaluates it with the library's
+10 kHz; [`air_absorption_np_per_m`](/reference/api/power/sound-power-high-frequency/#air_absorption_np_per_m) evaluates it with the library's
 ISO 9613-1 implementation. Tables 1 and 2 print it for 18 °C to 27 °C, 40 %
 to 60 % relative humidity and 10 000 Hz to 22 400 Hz.
 
@@ -93,7 +93,7 @@ L_W = L_{W(\mathrm{FAR})} - \overline{L_{p(\mathrm{FAR})}} + \overline{L_{p(\mat
 $$
 
 **Method with a free field over a reflecting plane** (clause 9) is ISO 3744
-([`sound_power_pressure`](/phonometry/reference/api/power/sound-power/#sound_power_pressure)) with the three
+([`sound_power_pressure`](/reference/api/power/sound-power/#sound_power_pressure)) with the three
 one-third octave bands of the 16 kHz octave; beyond a measurement radius of
 2 m the surface level takes the absorption correction $K_\alpha$ of
 Formula (10), with $\alpha$ in decibels per metre:
@@ -111,7 +111,7 @@ source, exactly as ISO 3741 Formulae (20) and (21) apply them.
 
 **What to determine.** Table 3 says which sound power levels a report
 carries for each type of noise, in the octave bands from 125 Hz to 8 kHz and
-in the 16 kHz octave: [`high_frequency_levels_to_determine`](/phonometry/reference/api/power/sound-power-high-frequency/#high_frequency_levels_to_determine) reads it.
+in the 16 kHz octave: [`high_frequency_levels_to_determine`](/reference/api/power/sound-power-high-frequency/#high_frequency_levels_to_determine) reads it.
 
 Formulae (4) to (10) carry no worked example in the standard and are pinned
 in closed form; Tables 1 and 2 are the numeric oracle of Annex A.
@@ -154,7 +154,7 @@ unit Formula (7) takes, so this is the library's ISO 9613-1 evaluation
 without its factor 8.686 (Annex A: "multiplicando el valor de
 $\alpha$ en Np/m por 8,686 para obtener el valor de $\alpha$
 en dB/m"). The difference from
-[`air_attenuation`](/phonometry/reference/api/environment/air-absorption/#air_attenuation)
+[`air_attenuation`](/reference/api/environment/air-absorption/#air_attenuation)
 is the range: Annex A evaluates the same formula up to 22.4 kHz, the top
 of the 16 kHz octave band, so no advisory is raised between 10 kHz and
 22.4 kHz, where ISO 9613-1 stops tabulating.
@@ -164,7 +164,7 @@ of the 16 kHz octave band, so no advisory is raised between 10 kHz and
 | Name | Description |
 | :--- | :--- |
 | `frequencies` | Frequency or frequencies `f`, in hertz. |
-| `temperature_c` | Air temperature, in degrees Celsius. Outside -20 °C to +50 °C emits an [`AtmosphericAbsorptionWarning`](/phonometry/reference/api/environment/air-absorption/#atmosphericabsorptionwarning). |
+| `temperature_c` | Air temperature, in degrees Celsius. Outside -20 °C to +50 °C emits an [`AtmosphericAbsorptionWarning`](/reference/api/environment/air-absorption/#atmosphericabsorptionwarning). |
 | `relative_humidity_percent` | Relative humidity `h_r`, in percent. |
 | `static_pressure_kpa` | Static pressure `p_s`, in kilopascals (default 101.325 kPa, the pressure Tables 1 and 2 are printed at). |
 
@@ -217,7 +217,7 @@ determined, and only when the measurement radius exceeds 2 m; at 2 m
 or less the clause asks for no correction and this returns zero. The
 surface level and the sound power level differ by the constant
 $10 \lg(S/S_0)$, so adding $K_\alpha$ to the band levels
-[`sound_power_pressure`](/phonometry/reference/api/power/sound-power/#sound_power_pressure) returns
+[`sound_power_pressure`](/reference/api/power/sound-power/#sound_power_pressure) returns
 is the same thing.
 
 **Parameters**
@@ -236,7 +236,7 @@ is the same thing.
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | for a non-positive radius or the atmospheric inputs [`air_absorption_np_per_m`](/phonometry/reference/api/power/sound-power-high-frequency/#air_absorption_np_per_m) refuses. |
+| ValueError | for a non-positive radius or the atmospheric inputs [`air_absorption_np_per_m`](/reference/api/power/sound-power-high-frequency/#air_absorption_np_per_m) refuses. |
 | TypeError | if `radius` is not a single number. |
 
 ## high_frequency_levels_to_determine
@@ -262,13 +262,13 @@ identifiers, in the order the table names them:
   of that range be given as well);
 - `"one_third_octave_band_levels"`: the sound power level in each
   one-third octave band of the 16 kHz octave, by this standard
-  ([`high_frequency_sound_power`](/phonometry/reference/api/power/sound-power-high-frequency/#high_frequency_sound_power) or
-  [`high_frequency_sound_power_comparison`](/phonometry/reference/api/power/sound-power-high-frequency/#high_frequency_sound_power_comparison));
+  ([`high_frequency_sound_power`](/reference/api/power/sound-power-high-frequency/#high_frequency_sound_power) or
+  [`high_frequency_sound_power_comparison`](/reference/api/power/sound-power-high-frequency/#high_frequency_sound_power_comparison));
 - `"tone_level_and_frequency"`: the level and the frequency of the
   discrete tone in the 16 kHz octave;
 - `"tone_levels_within_10_db"`: the levels and frequencies of every tone
   in the 16 kHz octave within 10 dB of the highest tonal level, the tones
-  [`HighFrequencySoundPowerResult.within_10_db_of_max`](/phonometry/reference/api/power/sound-power-high-frequency/#highfrequencysoundpowerresultwithin_10_db_of_max) marks.
+  [`HighFrequencySoundPowerResult.within_10_db_of_max`](/reference/api/power/sound-power-high-frequency/#highfrequencysoundpowerresultwithin_10_db_of_max) marks.
 
 With no significant noise from 125 Hz to 8 kHz, footnote b notes that
 the noise lies outside the scope of ISO 3741 and ISO 3744, so only this
@@ -311,8 +311,8 @@ per band: Formula (6), carried to the reference meteorological conditions
 by the $C_1$ and $C_2$ of ISO 3741:2010 clause 9.1.4, which
 clause 10.1 points to. The same formula serves both direct methods; only
 the room constant differs, from the measured reverberation time
-([`room_constant_from_reverberation_time`](/phonometry/reference/api/power/sound-power-high-frequency/#room_constant_from_reverberation_time), clause 6) or from the
-calculated air absorption ([`room_constant_from_air_absorption`](/phonometry/reference/api/power/sound-power-high-frequency/#room_constant_from_air_absorption),
+([`room_constant_from_reverberation_time`](/reference/api/power/sound-power-high-frequency/#room_constant_from_reverberation_time), clause 6) or from the
+calculated air absorption ([`room_constant_from_air_absorption`](/reference/api/power/sound-power-high-frequency/#room_constant_from_air_absorption),
 clause 7).
 
 **Parameters**
@@ -320,13 +320,13 @@ clause 7).
 | Name | Description |
 | :--- | :--- |
 | `pressure_levels` | $\overline{L_{p(\mathrm{ST})}}$ per band, in dB re 20 µPa, or an `(N, bands)` array of the time-averaged levels of the four orientations ($N = 4$) or three boom revolutions ($N = 3$), energy-averaged by Formula (1). |
-| `frequencies` | Band centre or tone frequencies, in hertz, one per band. A frequency outside 11.2 kHz to 22.4 kHz emits a [`SoundPowerWarning`](/phonometry/reference/api/power/sound-power/#soundpowerwarning). |
+| `frequencies` | Band centre or tone frequencies, in hertz, one per band. A frequency outside 11.2 kHz to 22.4 kHz emits a [`SoundPowerWarning`](/reference/api/power/sound-power/#soundpowerwarning). |
 | `room_constant` | Room constant `R`, in square metres, a scalar or one value per band. |
 | `temperature_c` | Air temperature in the room, in degrees Celsius (default 23.0 °C, the reference temperature). |
 | `static_pressure_kpa` | Static pressure in the room, in kilopascals (default 101.325 kPa, the reference pressure). |
 | `tonal` | `True` when the bands are the narrow bands of discrete tones (clause 6.5), which changes how the result is drawn and read. |
 
-**Returns:** A [`HighFrequencySoundPowerResult`](/phonometry/reference/api/power/sound-power-high-frequency/#highfrequencysoundpowerresult) with `method='direct'`.
+**Returns:** A [`HighFrequencySoundPowerResult`](/reference/api/power/sound-power-high-frequency/#highfrequencysoundpowerresult) with `method='direct'`.
 
 **Raises**
 
@@ -368,12 +368,12 @@ comparison method.
 | `pressure_levels` | $\overline{L_{p(\mathrm{ST})}}$ per band, in dB re 20 µPa, or an `(N, bands)` array averaged by Formula (1). |
 | `frequencies` | Band centre or tone frequencies, in hertz, one per band. |
 | `reference_pressure_levels` | $\overline{L_{p(\mathrm{FAR})}}$ per band, in dB re 20 µPa, measured with the same bandwidth at the same location (clauses 8.3, 8.4); a 2-D input is averaged by Formula (1) as well. |
-| `reference_sound_power_levels` | $L_{W(\mathrm{FAR})}$ of the calibrated reference source, in dB re 1 pW, a scalar or one value per band: per band for broadband noise, per hertz for tones. For broadband noise it may be the [`ReferenceSourceCalibration`](/phonometry/reference/api/power/reference-sound-source/#referencesourcecalibration) of ISO 6926, read in the one-third octave bands at `frequencies` and carried from the reference conditions to those of the test by its own `C2`, since clause 10.1 corrects the result as ISO 3741 does. |
-| `noise_bandwidth_hz` | $\Delta F$, the noise bandwidth of the analyser, in hertz, which selects Formula (9); `None` (default) selects Formula (8). Clause 8.5.2 allows 1 Hz for a constant percentage analyser, and holds an FFT to 112 Hz or less: a wider one emits a [`SoundPowerWarning`](/phonometry/reference/api/power/sound-power/#soundpowerwarning). |
+| `reference_sound_power_levels` | $L_{W(\mathrm{FAR})}$ of the calibrated reference source, in dB re 1 pW, a scalar or one value per band: per band for broadband noise, per hertz for tones. For broadband noise it may be the [`ReferenceSourceCalibration`](/reference/api/power/reference-sound-source/#referencesourcecalibration) of ISO 6926, read in the one-third octave bands at `frequencies` and carried from the reference conditions to those of the test by its own `C2`, since clause 10.1 corrects the result as ISO 3741 does. |
+| `noise_bandwidth_hz` | $\Delta F$, the noise bandwidth of the analyser, in hertz, which selects Formula (9); `None` (default) selects Formula (8). Clause 8.5.2 allows 1 Hz for a constant percentage analyser, and holds an FFT to 112 Hz or less: a wider one emits a [`SoundPowerWarning`](/reference/api/power/sound-power/#soundpowerwarning). |
 | `temperature_c` | Air temperature in the room, in degrees Celsius (default 23.0 °C). |
 | `static_pressure_kpa` | Static pressure in the room, in kilopascals (default 101.325 kPa). |
 
-**Returns:** A [`HighFrequencySoundPowerResult`](/phonometry/reference/api/power/sound-power-high-frequency/#highfrequencysoundpowerresult) with `method='comparison'`, `tonal` set when `noise_bandwidth_hz` is given.
+**Returns:** A [`HighFrequencySoundPowerResult`](/reference/api/power/sound-power-high-frequency/#highfrequencysoundpowerresult) with `method='comparison'`, `tonal` set when `noise_bandwidth_hz` is given.
 
 **Raises**
 
@@ -492,7 +492,7 @@ $\Delta f = 2 f v / c$, ISO 9295:2015 Formula (2). The moving
 microphone spreads the energy of a discrete tone over sidebands either
 side of its frequency, and an analyser at least this wide collects the
 whole tone in one band; a narrower one (an FFT) needs its sidebands
-summed with [`tone_level_from_sidebands`](/phonometry/reference/api/power/sound-power-high-frequency/#tone_level_from_sidebands).
+summed with [`tone_level_from_sidebands`](/reference/api/power/sound-power-high-frequency/#tone_level_from_sidebands).
 
 **Parameters**
 
@@ -599,12 +599,12 @@ Room constant from the calculated air absorption (ISO 9295 Formula (7)).
 
 $R = 8 \alpha V / (1 - 8 \alpha V / S)$, the room constant of the
 method of clause 7, with $\alpha$ in nepers per metre from
-[`air_absorption_np_per_m`](/phonometry/reference/api/power/sound-power-high-frequency/#air_absorption_np_per_m) (Annex A). The method takes all of the
+[`air_absorption_np_per_m`](/reference/api/power/sound-power-high-frequency/#air_absorption_np_per_m) (Annex A). The method takes all of the
 room absorption to be in the air, which clause 7.2 holds at 10 kHz and
 above; a band below 10 kHz emits a
-[`SoundPowerWarning`](/phonometry/reference/api/power/sound-power/#soundpowerwarning), since the walls are no
+[`SoundPowerWarning`](/reference/api/power/sound-power/#soundpowerwarning), since the walls are no
 longer negligible there and the measured reverberation time of
-[`room_constant_from_reverberation_time`](/phonometry/reference/api/power/sound-power-high-frequency/#room_constant_from_reverberation_time) is the method to use.
+[`room_constant_from_reverberation_time`](/reference/api/power/sound-power-high-frequency/#room_constant_from_reverberation_time) is the method to use.
 
 **Parameters**
 
@@ -623,7 +623,7 @@ longer negligible there and the measured reverberation time of
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | for a non-positive or non-finite volume or surface, for the atmospheric inputs [`air_absorption_np_per_m`](/phonometry/reference/api/power/sound-power-high-frequency/#air_absorption_np_per_m) refuses, or where $8 \alpha V / S \ge 1$: the air alone would then absorb more than the room surface can, and Formula (7) has no finite room constant. |
+| ValueError | for a non-positive or non-finite volume or surface, for the atmospheric inputs [`air_absorption_np_per_m`](/reference/api/power/sound-power-high-frequency/#air_absorption_np_per_m) refuses, or where $8 \alpha V / S \ge 1$: the air alone would then absorb more than the room surface can, and Formula (7) has no finite room constant. |
 | TypeError | if `surface_area` or `volume` is not a single number, or `frequencies` holds a text or a value that is not a real number. |
 
 ## room_constant_from_reverberation_time
@@ -654,9 +654,9 @@ room_constant_from_reverberation_time(
 Room constant from the measured reverberation time (ISO 9295 Formulae (4), (5)).
 
 $R = S \alpha_\mathrm{room} / (1 - \alpha_\mathrm{room})$ with
-$\alpha_\mathrm{room}$ from [`room_absorption_coefficient`](/phonometry/reference/api/power/sound-power-high-frequency/#room_absorption_coefficient),
+$\alpha_\mathrm{room}$ from [`room_absorption_coefficient`](/reference/api/power/sound-power-high-frequency/#room_absorption_coefficient),
 the room constant of the method of clause 6. It goes into
-[`high_frequency_sound_power`](/phonometry/reference/api/power/sound-power-high-frequency/#high_frequency_sound_power) as `room_constant`.
+[`high_frequency_sound_power`](/reference/api/power/sound-power-high-frequency/#high_frequency_sound_power) as `room_constant`.
 
 Formula (5) makes $1 - \alpha_\mathrm{room} = \mathrm{e}^{-0.16 \, V / (S T)}$, so the two read together are
 $R = S \, (\mathrm{e}^{0.16 \, V / (S T)} - 1)$, which is how
@@ -692,7 +692,7 @@ Total level of a tone from its sideband levels (ISO 9295 Formula (3)).
 $L_\mathrm{tot} = 10 \lg \sum_{i=1}^{N_\mathrm{sb}} 10^{0.1 L_i}$,
 the energy sum of the bands adjacent to the tone frequency that carry
 its energy when the analyser is narrower than
-[`min_analyzer_bandwidth`](/phonometry/reference/api/power/sound-power-high-frequency/#min_analyzer_bandwidth).
+[`min_analyzer_bandwidth`](/reference/api/power/sound-power-high-frequency/#min_analyzer_bandwidth).
 
 **Parameters**
 

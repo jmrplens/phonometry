@@ -150,7 +150,7 @@ limits fall out, and every downstream standard is built on one of them.
 - When $|Y_\text{source}| \ll |Y_\text{receiver}|$ it behaves as a **force
   source**, delivering its **blocked force**. That is the idealisation
   ISO 10846 and EN 15657 are written around, and it is why
-  [transfer stiffness](/phonometry/vibration/structural/transfer-stiffness/)
+  [transfer stiffness](/vibration/structural/transfer-stiffness/)
   can characterise an isolator by a blocking force at all.
 - Maximum power transfer sits between them, at matched mobilities. Which is
   the useful way to read a resilient mount: it works by making the source side
@@ -209,7 +209,7 @@ excitation with an exciter that is not attached to the structure, in
 practice usually an instrumented hammer: it trades the attached exciter's
 controlled spectrum for speed, with an excitation spectrum set by the
 impactor mass and tip stiffness, and it has [a page of its
-own](/phonometry/vibration/structural/impact-mobility/).
+own](/vibration/structural/impact-mobility/).
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_mobility_rig.svg" alt="ISO 7626 mobility measurement: a free-free beam on soft suspension driven by an exciter through a drive rod and an impedance head at the driving point, an accelerometer at a transfer point, and an impact hammer as the alternative excitation. Below, a three-panel inset shows the accelerometer routed through the drive rod marked invalid, the force transducer at the structure marked valid, and the force transducer at the exciter end marked with caution, with the ten-times mobility criteria for the exciter attachment and the suspension stated underneath." width="92%" />
 
@@ -342,7 +342,7 @@ estimator $\hat{H} = G(\text{response}, \text{force})/G(\text{force}, \text{forc
 and the ordinary coherence $\gamma^2 = |G_{xy}|^2/(G_{xx}\,G_{yy})$ used for
 its data-quality checks are the library's
 existing spectral estimators [`transfer_function` and
-`coherence`](/phonometry/devices/electroacoustics/electroacoustics/) (H1 is their default).
+`coherence`](/devices/electroacoustics/electroacoustics/) (H1 is their default).
 
 ### Reading the coherence, and the one bias H1 has (Annex A.1)
 
@@ -641,10 +641,10 @@ beam.plot()
 ```
 
 Where do these numbers go? Into
-[panel sound insulation](/phonometry/buildings/design/panel-sound-insulation/),
+[panel sound insulation](/buildings/design/panel-sound-insulation/),
 which uses the same functions to price a panel's radiation, and into the
 EN 12354-5 receiver mobility of
-[installed structure-borne sound](/phonometry/buildings/design/installed-structure-borne/).
+[installed structure-borne sound](/buildings/design/installed-structure-borne/).
 
 ### Test-report fiche
 
@@ -704,7 +704,7 @@ acceptance criteria: the 7.5.2 rigid-mass operational calibration
 
 <ScopeClaim status="not-covered" label="Not covered">
 Impact-hammer excitation (ISO 7626-5) is not processed on this page but on
-[its own](/phonometry/vibration/structural/impact-mobility/). The *blocked*
+[its own](/vibration/structural/impact-mobility/). The *blocked*
 matrix quantities of Table 1, needed for multi-coordinate systems, are not
 built.
 `convert_frf` returns only the element-wise *free* reciprocals of ISO 7626-1,
@@ -715,7 +715,7 @@ criterion, the clause 7.3 mass-cancellation trigger and the A.2 to A.4
 linearity, reciprocity and driving-point tests are described here and left to
 the operator, in the same way the linearity test of ISO 10846 (clause 7.7 of
 Parts 2, 4 and 5, clause 7.6 of Part 3) is described but not computed on the [transfer-stiffness
-page](/phonometry/vibration/structural/transfer-stiffness/).
+page](/vibration/structural/transfer-stiffness/).
 </ScopeClaim>
 </Scope>
 
@@ -723,22 +723,22 @@ page](/phonometry/vibration/structural/transfer-stiffness/).
 
 ## See also
 
-- [Mobility by impact excitation (ISO 7626-5)](/phonometry/vibration/structural/impact-mobility/):
+- [Mobility by impact excitation (ISO 7626-5)](/vibration/structural/impact-mobility/):
   the same FRFs measured with an impact hammer, with the windows, the average
   over impacts and the Annex A correction that measurement needs.
-- [Transfer stiffness of resilient elements (ISO 10846)](/phonometry/vibration/structural/transfer-stiffness/):
+- [Transfer stiffness of resilient elements (ISO 10846)](/vibration/structural/transfer-stiffness/):
   the blocked-force limit of section 1, applied to characterise an isolator.
-- [Structure-borne sound power of equipment (EN 15657)](/phonometry/buildings/design/structure-borne-power/):
+- [Structure-borne sound power of equipment (EN 15657)](/buildings/design/structure-borne-power/):
   where a source's mobility and free velocity become an installed power.
-- [Installed structure-borne sound (EN 12354-5)](/phonometry/buildings/design/installed-structure-borne/):
+- [Installed structure-borne sound (EN 12354-5)](/buildings/design/installed-structure-borne/):
   the prediction that consumes a receiver mobility, measured or taken from
   section 5.
-- [Bending-wave transmission at plate junctions](/phonometry/vibration/structural/junction-transmission/):
+- [Bending-wave transmission at plate junctions](/vibration/structural/junction-transmission/):
   what the plate mobilities of section 5 become at a junction between two of
   them.
-- [Frequency response and coherence](/phonometry/devices/electroacoustics/electroacoustics/):
+- [Frequency response and coherence](/devices/electroacoustics/electroacoustics/):
   the `transfer_function` and `coherence` estimators section 3 runs on.
-- API reference: [`vibration.structural.mechanical_mobility`](/phonometry/reference/api/vibration/mechanical-mobility/).
-- Theory: [Point mobilities and radiation efficiency](/phonometry/reference/theory/vibration/#point-mobilities-and-radiation-efficiency-cremer-5-hopkins-29): the infinite-structure point mobilities and the radiation efficiency, and why they are averages a finite structure oscillates about.
+- API reference: [`vibration.structural.mechanical_mobility`](/reference/api/vibration/mechanical-mobility/).
+- Theory: [Point mobilities and radiation efficiency](/reference/theory/vibration/#point-mobilities-and-radiation-efficiency-cremer-5-hopkins-29): the infinite-structure point mobilities and the radiation efficiency, and why they are averages a finite structure oscillates about.
 
 </SeeAlso>

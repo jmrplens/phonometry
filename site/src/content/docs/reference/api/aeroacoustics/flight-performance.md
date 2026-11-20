@@ -15,18 +15,18 @@ and the aeroplane's own aerodynamic and engine coefficients. **ECAC Doc 29
 into the other: a *flight profile*, an ordered list of profile points carrying
 distance along the ground track, height above the aerodrome, true airspeed and
 corrected net thrust per engine. Corrected net thrust is what the NPD tables of
-[`phonometry.aircraft.airport_noise`](/phonometry/reference/api/aeroacoustics/airport-noise/) are indexed on, so this model is what
+[`phonometry.aircraft.airport_noise`](/reference/api/aeroacoustics/airport-noise/) are indexed on, so this model is what
 stands between a published procedure and a noise contour.
 
-* [`Aerodrome`](/phonometry/reference/api/aeroacoustics/flight-performance/#aerodrome): the aerodrome and its weather, and the five atmosphere
+* [`Aerodrome`](/reference/api/aeroacoustics/flight-performance/#aerodrome): the aerodrome and its weather, and the five atmosphere
   ratios of B3 that every equation below reads.
-* [`PerformanceAircraft`](/phonometry/reference/api/aeroacoustics/flight-performance/#performanceaircraft) with [`JetEngineCoefficients`](/phonometry/reference/api/aeroacoustics/flight-performance/#jetenginecoefficients),
-  [`PropellerEngineCoefficients`](/phonometry/reference/api/aeroacoustics/flight-performance/#propellerenginecoefficients) and [`AerodynamicCoefficients`](/phonometry/reference/api/aeroacoustics/flight-performance/#aerodynamiccoefficients):
+* [`PerformanceAircraft`](/reference/api/aeroacoustics/flight-performance/#performanceaircraft) with [`JetEngineCoefficients`](/reference/api/aeroacoustics/flight-performance/#jetenginecoefficients),
+  [`PropellerEngineCoefficients`](/reference/api/aeroacoustics/flight-performance/#propellerenginecoefficients) and [`AerodynamicCoefficients`](/reference/api/aeroacoustics/flight-performance/#aerodynamiccoefficients):
   the ANP coefficient tables the equations take their constants from.
-* [`DepartureStep`](/phonometry/reference/api/aeroacoustics/flight-performance/#departurestep) and [`ApproachStep`](/phonometry/reference/api/aeroacoustics/flight-performance/#approachstep): one row each of a
+* [`DepartureStep`](/reference/api/aeroacoustics/flight-performance/#departurestep) and [`ApproachStep`](/reference/api/aeroacoustics/flight-performance/#approachstep): one row each of a
   published procedure.
-* [`departure_profile`](/phonometry/reference/api/aeroacoustics/flight-performance/#departure_profile) and [`approach_profile`](/phonometry/reference/api/aeroacoustics/flight-performance/#approach_profile): the model, returning
-  a [`FlightProfile`](/phonometry/reference/api/aeroacoustics/flight-performance/#flightprofile) of [`ProfilePoint`](/phonometry/reference/api/aeroacoustics/flight-performance/#profilepoint).
+* [`departure_profile`](/reference/api/aeroacoustics/flight-performance/#departure_profile) and [`approach_profile`](/reference/api/aeroacoustics/flight-performance/#approach_profile): the model, returning
+  a [`FlightProfile`](/reference/api/aeroacoustics/flight-performance/#flightprofile) of [`ProfilePoint`](/reference/api/aeroacoustics/flight-performance/#profilepoint).
 
 Units are the standard's and they are English throughout (B2): feet, knots,
 pounds, pounds of thrust per engine, degrees Celsius in the thrust equations and
@@ -223,7 +223,7 @@ forwards from the same anchor, so touchdown is where the two sweeps meet.
 | `weight_lb` | Approach weight, lb. `None` (default) takes Doc 29's own rule, 90 % of the aeroplane's maximum landing weight (folio B-31). |
 | `procedure_id` | Identifier of the procedure, carried into the result. |
 
-**Returns:** A [`FlightProfile`](/phonometry/reference/api/aeroacoustics/flight-performance/#flightprofile) with `operation="A"`.
+**Returns:** A [`FlightProfile`](/reference/api/aeroacoustics/flight-performance/#flightprofile) with `operation="A"`.
 
 **Raises**
 
@@ -313,7 +313,7 @@ by an inserted transition point (B6.1.6).
 | `aerodrome` | Aerodrome, weather and runway gradient. |
 | `procedure_id` | Identifier of the procedure, carried into the result. |
 
-**Returns:** A [`FlightProfile`](/phonometry/reference/api/aeroacoustics/flight-performance/#flightprofile) with `operation="D"`.
+**Returns:** A [`FlightProfile`](/reference/api/aeroacoustics/flight-performance/#flightprofile) with `operation="D"`.
 
 **Raises**
 
@@ -458,7 +458,7 @@ True airspeed per point, kt.
 
 A procedure whose steps disagree with the notes of Doc 29 B7.1.4.
 
-Emitted by [`approach_profile`](/phonometry/reference/api/aeroacoustics/flight-performance/#approach_profile) for a Level-Idle step whose start
+Emitted by [`approach_profile`](/reference/api/aeroacoustics/flight-performance/#approach_profile) for a Level-Idle step whose start
 altitude differs from that of the step after it, when that step is a
 Level-Idle step (Case 1) or neither a Level-Idle nor a Descend-Idle step
 (Case 2): the inconsistency B7.1.4 says "the system should warn the user"

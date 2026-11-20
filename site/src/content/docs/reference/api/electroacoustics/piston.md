@@ -138,7 +138,7 @@ Far-field directivity pattern of one or more baffled circular pistons.
 Samples the directivity
 $D(\theta) = 2 J_1(ka \sin\theta) / (ka \sin\theta)$
 (Beranek & Mellow Eq. (4.42)) at every `ka` over a polar-angle grid and
-bundles it into a [`PistonDirectivity`](/phonometry/reference/api/electroacoustics/piston/#pistondirectivity) that exposes `.plot()`. The
+bundles it into a [`PistonDirectivity`](/reference/api/electroacoustics/piston/#pistondirectivity) that exposes `.plot()`. The
 main lobe narrows as `ka` grows; its first null appears once `ka` passes
 the first zero of `J1` ($ka \sin\theta = 3.8317$).
 
@@ -149,7 +149,7 @@ the first zero of `J1` ($ka \sin\theta = 3.8317$).
 | `ka` | Wavenumber-radius product(s) `ka` (scalar or 1-D array), each non-negative. |
 | `angles_rad` | Polar angles `theta` from the axis, rad (1-D). `None` (default) uses 361 points spanning the front hemisphere `-90 deg` to `+90 deg`, 0.5 deg apart. |
 
-**Returns:** A [`PistonDirectivity`](/phonometry/reference/api/electroacoustics/piston/#pistondirectivity).
+**Returns:** A [`PistonDirectivity`](/reference/api/electroacoustics/piston/#pistondirectivity).
 
 **Raises**
 
@@ -242,7 +242,7 @@ $D(\theta) = 2 J_1(ka \sin\theta) / (ka \sin\theta)$ (Beranek &
 Mellow
 Eq. (4.42)) of one or more baffled circular pistons over a shared
 polar-angle grid, so the classic beam pattern can be drawn with
-`plot`. The maths is [`piston_directivity`](/phonometry/reference/api/electroacoustics/piston/#piston_directivity); this is a thin,
+`plot`. The maths is [`piston_directivity`](/reference/api/electroacoustics/piston/#piston_directivity); this is a thin,
 plottable bundle around it.
 
 **Attributes**
@@ -372,7 +372,7 @@ the far-field directivity pattern $D(\theta)$.
 | `density` | Air density $\rho$, kg/m3 (default 1.206). |
 | `angles_rad` | Optional polar angles `theta` from the axis, rad, at which to sample the directivity pattern. |
 
-**Returns:** A [`RadiatingPistonResult`](/phonometry/reference/api/electroacoustics/piston/#radiatingpistonresult).
+**Returns:** A [`RadiatingPistonResult`](/reference/api/electroacoustics/piston/#radiatingpistonresult).
 
 **Raises**
 

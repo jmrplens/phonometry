@@ -43,28 +43,28 @@ para obtenerlo, repartidas en siete guías: una superficie envolvente de
 *presión* en campo (ISO 3744/3746) y el grado de precisión en
 *cámara anecoica* (ISO 3745), cubiertas en
 [Potencia acústica por métodos de
-presión](/phonometry/es/devices/emission/sound-power-pressure/);
+presión](/es/devices/emission/sound-power-pressure/);
 el campo difuso de una *cámara reverberante* (ISO 3741), cubierto en
 [Potencia acústica en cámara
-reverberante](/phonometry/es/devices/emission/sound-power-reverberation/);
+reverberante](/es/devices/emission/sound-power-reverberation/);
 una *sala de ensayo pequeña* para una fuente pequeña y transportable, de
 paredes rígidas con una fuente sonora de referencia (ISO 3743-1) o
 especialmente reverberante (ISO 3743-2), cubierta en
-[Potencia acústica en salas de ensayo pequeñas](/phonometry/es/devices/emission/sound-power-test-rooms/);
+[Potencia acústica en salas de ensayo pequeñas](/es/devices/emission/sound-power-test-rooms/);
 la misma comparación con una fuente sonora de referencia llevada a la sala
 en la que trabaja la máquina (ISO 3747), cubierta en
-[Potencia acústica in situ por comparación](/phonometry/es/devices/emission/sound-power-in-situ/);
+[Potencia acústica in situ por comparación](/es/devices/emission/sound-power-in-situ/);
 la *intensidad* leída en puntos discretos sobre una superficie (ISO 9614-1),
 cubierta en [Intensidad
-acústica](/phonometry/es/devices/emission/intensity/); esa misma intensidad
+acústica](/es/devices/emission/intensity/); esa misma intensidad
 *barrida* sobre la superficie (ISO 9614-2), con su
 homólogo de precisión (ISO 9614-3), cubierto en
 [Potencia acústica por barrido de
-intensidad](/phonometry/es/devices/emission/sound-power-intensity/);
+intensidad](/es/devices/emission/sound-power-intensity/);
 y la *velocidad superficial* de la propia carcasa de la máquina (ISO/TS 7849-1
 y -2), la única vía que no necesita medición acústica alguna, cubierta en
 [Potencia acústica a partir de la
-vibración](/phonometry/es/devices/emission/vibration-sound-power/).
+vibración](/es/devices/emission/vibration-sound-power/).
 Esta página es la puerta de entrada: cómo elegir entre ellas, qué prometen
 realmente los grados de precisión y cómo un $L_W$ medido se convierte en la
 declaración de emisión sonora ISO 4871 que imprime una hoja de características.
@@ -112,14 +112,14 @@ recorre sus vías por turno.
 
 **Las dos partes de ISO 3743** alcanzan el grado de ingeniería con fuentes
 *pequeñas y transportables* y comparten guía,
-[Potencia acústica en salas de ensayo pequeñas](/phonometry/es/devices/emission/sound-power-test-rooms/):
+[Potencia acústica en salas de ensayo pequeñas](/es/devices/emission/sound-power-test-rooms/):
 la Parte 1 compara la fuente con una fuente sonora de referencia en una sala
 corriente de paredes rígidas, y la Parte 2 lee la potencia a partir de una
 sala construida para que su tiempo de reverberación siga una curva prescrita.
 Su pariente in situ, la ISO 3747, tiene su propia guía,
-[Potencia acústica in situ por comparación](/phonometry/es/devices/emission/sound-power-in-situ/):
+[Potencia acústica in situ por comparación](/es/devices/emission/sound-power-in-situ/):
 la fórmula de comparación de la
-[página de ISO 3741](/phonometry/es/devices/emission/sound-power-reverberation/#2-el-metodo-de-comparacion-ec-21)
+[página de ISO 3741](/es/devices/emission/sound-power-reverberation/#2-el-metodo-de-comparacion-ec-21)
 aplicada a la sala en la que trabaja la máquina en lugar de a una cámara
 cualificada, con el ruido de fondo corregido en cada posición de micrófono y
 el grado leído del exceso de nivel de presión acústica. La lámina de abajo
@@ -222,9 +222,9 @@ lista dibuja el recorrido.
    peritaje (grado 3). El grado 1 solo existe en una sala de laboratorio
    cualificada (ISO 3741, ISO 3745) o mediante los métodos de intensidad de
    precisión, y aquí están los dos: ISO 9614-1 en puntos discretos en
-   [Intensidad acústica](/phonometry/es/devices/emission/intensity/), e
+   [Intensidad acústica](/es/devices/emission/intensity/), e
    ISO 9614-3 por barrido en [Potencia acústica por barrido de
-   intensidad](/phonometry/es/devices/emission/sound-power-intensity/).
+   intensidad](/es/devices/emission/sound-power-intensity/).
 2. **¿Puede la fuente viajar al laboratorio?** ISO 3741 quiere la fuente
    pequeña frente a la cámara (volumen no mayor de aproximadamente el 2 % del
    volumen de la cámara) y su ruido estacionario; ISO 3745 la quiere dentro de
@@ -247,7 +247,7 @@ lista dibuja el recorrido.
    al menos 7 dB en todas las posiciones y la fuente no es muy directiva, y
    en grado de peritaje en caso contrario, como desarrolla [Potencia
    acústica in situ por
-   comparación](/phonometry/es/devices/emission/sound-power-in-situ/).
+   comparación](/es/devices/emission/sound-power-in-situ/).
 4. **¿Es el fondo el problema?** Cuando las máquinas vecinas no se pueden
    apagar, o el margen es directamente negativo, los métodos de presión
    quedan descartados. La intensidad (ISO 9614-1 en puntos discretos,
@@ -321,14 +321,14 @@ prensa, un portazo), el descriptor no es $L_W$ sino el **nivel de energía
 acústica $L_J$**, la misma integral de superficie tomada sobre el suceso en vez
 de por segundo, definido en los mismos apartados de la ISO 3741, la ISO 3744 y
 la ISO 3746 y determinado por `sound_energy_pressure` sobre la [superficie
-envolvente](/phonometry/es/devices/emission/sound-power-pressure/#4-nivel-de-energia-acustica-de-una-rafaga-apartado-83),
+envolvente](/es/devices/emission/sound-power-pressure/#4-nivel-de-energia-acustica-de-una-rafaga-apartado-83),
 por `sound_energy_reverberation`, o por `sound_energy_comparison` contra una
 fuente de referencia, en la [cámara
-reverberante](/phonometry/es/devices/emission/sound-power-reverberation/#4-nivel-de-energia-acustica-de-un-suceso-aislado-apartado-92),
+reverberante](/es/devices/emission/sound-power-reverberation/#4-nivel-de-energia-acustica-de-un-suceso-aislado-apartado-92),
 por `sound_energy_hard_walled` en la sala de paredes rígidas de ISO 3743-1, en
-[Potencia acústica en salas de ensayo pequeñas](/phonometry/es/devices/emission/sound-power-test-rooms/#rafagas-el-nivel-de-energia-acustica-ec-15-a-20),
+[Potencia acústica en salas de ensayo pequeñas](/es/devices/emission/sound-power-test-rooms/#rafagas-el-nivel-de-energia-acustica-ec-15-a-20),
 y por `sound_energy_in_situ` allí donde la máquina trabaja, en [Potencia
-acústica in situ por comparación](/phonometry/es/devices/emission/sound-power-in-situ/#2-fuentes-impulsivas-el-nivel-de-energia-acustica-ec-13-a-20).
+acústica in situ por comparación](/es/devices/emission/sound-power-in-situ/#2-fuentes-impulsivas-el-nivel-de-energia-acustica-ec-13-a-20).
 La prueba práctica: si el nivel
 ponderado A en un micrófono fijo se mueve más de unos pocos decibelios durante
 el tiempo de promediado, la fuente no es estacionaria para estos métodos.
@@ -399,7 +399,7 @@ la dispersión de producción; para una sola máquina $K = 1{,}645\,\sigma_\math
 (anexo A.2.2), donde 1,645 es el cuantil unilateral del 95 % de la distribución
 normal: el valor declarado es un límite superior, así que solo se está cubriendo
 una cola. Un
-[`NoiseEmissionDeclaration`](/phonometry/es/reference/api/power/sound-power/)
+[`NoiseEmissionDeclaration`](/es/reference/api/power/sound-power/)
 contiene una o varias declaraciones por modo de funcionamiento y genera la
 ficha ISO 4871 mediante `.report()`. La vía más rápida es `declare()`
 directamente a partir de una potencia acústica medida:
@@ -519,20 +519,20 @@ ficha de declaración mediante `.report()`.
 <ScopeClaim status="not-covered" label="No cubierto">
 Las diez determinaciones viven en sus guías de método: la superficie
 envolvente y la malla anecoica en [Potencia acústica por métodos de
-presión](/phonometry/es/devices/emission/sound-power-pressure/), el método de
+presión](/es/devices/emission/sound-power-pressure/), el método de
 campo difuso en [Potencia acústica en cámara
-reverberante](/phonometry/es/devices/emission/sound-power-reverberation/), los
+reverberante](/es/devices/emission/sound-power-reverberation/), los
 dos métodos de barrido en [Potencia acústica por barrido de
-intensidad](/phonometry/es/devices/emission/sound-power-intensity/), la suma
+intensidad](/es/devices/emission/sound-power-intensity/), la suma
 por puntos discretos de ISO 9614-1 en [Intensidad
-acústica](/phonometry/es/devices/emission/intensity/), junto a los indicadores
+acústica](/es/devices/emission/intensity/), junto a los indicadores
 de campo del Anexo A que presta a las partes de barrido, y la vía
 de velocidad superficial en [Potencia acústica a partir de la
-vibración](/phonometry/es/devices/emission/vibration-sound-power/), las salas
+vibración](/es/devices/emission/vibration-sound-power/), las salas
 de ensayo pequeñas de ISO 3743-1 e ISO 3743-2 en [Potencia acústica en salas
-de ensayo pequeñas](/phonometry/es/devices/emission/sound-power-test-rooms/), y la
+de ensayo pequeñas](/es/devices/emission/sound-power-test-rooms/), y la
 comparación in situ de ISO 3747 en [Potencia acústica in situ por
-comparación](/phonometry/es/devices/emission/sound-power-in-situ/). El nivel
+comparación](/es/devices/emission/sound-power-in-situ/). El nivel
 de *energía* acústica $L_J$ de un suceso aislado está cubierto para la
 ISO 3744, la ISO 3746, la ISO 3741, la ISO 3743-1 y la ISO 3747, cada una en
 su propia página; la ISO 3745 y la ISO 3743-2 no definen ninguno.
@@ -550,39 +550,39 @@ enuncia, no se deriva.
 
 ## Véase también
 
-- [Potencia acústica por métodos de presión (ISO 3744 / ISO 3746 / ISO 3745)](/phonometry/es/devices/emission/sound-power-pressure/):
+- [Potencia acústica por métodos de presión (ISO 3744 / ISO 3746 / ISO 3745)](/es/devices/emission/sound-power-pressure/):
   la superficie envolvente con sus correcciones $K_1$/$K_2$ y la malla
   anecoica de precisión.
-- [Potencia acústica en cámara reverberante (ISO 3741)](/phonometry/es/devices/emission/sound-power-reverberation/):
+- [Potencia acústica en cámara reverberante (ISO 3741)](/es/devices/emission/sound-power-reverberation/):
   el método de precisión en campo difuso con las correcciones de Waterhouse
   y meteorológicas.
-- [Potencia acústica en salas de ensayo pequeñas (ISO 3743)](/phonometry/es/devices/emission/sound-power-test-rooms/):
+- [Potencia acústica en salas de ensayo pequeñas (ISO 3743)](/es/devices/emission/sound-power-test-rooms/):
   una fuente pequeña y transportable en una sala de paredes rígidas frente a
   una fuente sonora de referencia, o en una sala reverberante especial leída
   directamente o frente a otra.
-- [Potencia acústica in situ por comparación (ISO 3747)](/phonometry/es/devices/emission/sound-power-in-situ/):
+- [Potencia acústica in situ por comparación (ISO 3747)](/es/devices/emission/sound-power-in-situ/):
   la comparación con una fuente de referencia donde trabaja la máquina, con
   el nivel de energía acústica de una fuente impulsiva.
-- [Potencia acústica por barrido de intensidad (ISO 9614-2 / ISO 9614-3)](/phonometry/es/devices/emission/sound-power-intensity/):
+- [Potencia acústica por barrido de intensidad (ISO 9614-2 / ISO 9614-3)](/es/devices/emission/sound-power-intensity/):
   las vías que toleran el ruido de fondo estacionario, cualificadas por sus
   indicadores de campo.
-- [Potencia acústica a partir de la vibración (ISO/TS 7849)](/phonometry/es/devices/emission/vibration-sound-power/):
+- [Potencia acústica a partir de la vibración (ISO/TS 7849)](/es/devices/emission/vibration-sound-power/):
   la vía de velocidad superficial, para una máquina a la que no puede acercarse un micrófono.
-- [Intensidad acústica (p-p)](/phonometry/es/devices/emission/intensity/): la sonda de
+- [Intensidad acústica (p-p)](/es/devices/emission/intensity/): la sonda de
   dos micrófonos detrás de todas las vías de intensidad, y la determinación de
   ISO 9614-1 en puntos discretos.
-- [Acústica de salas](/phonometry/es/buildings/rooms/room-acoustics/): el tiempo de
+- [Acústica de salas](/es/buildings/rooms/room-acoustics/): el tiempo de
   reverberación y el área de absorción equivalente que alimentan las
   correcciones de sala.
-- [Predicción del aislamiento acústico (EN 12354)](/phonometry/es/buildings/design/insulation-prediction/): los
+- [Predicción del aislamiento acústico (EN 12354)](/es/buildings/design/insulation-prediction/): los
   índices de aislamiento a ruido aéreo y a impactos y las predicciones de emisión
   de EN 12354 que consumen una $L_W$ de fuente.
-- [Niveles](/phonometry/es/signals/levels/levels/): el promediado en energía y la ponderación A
+- [Niveles](/es/signals/levels/levels/): el promediado en energía y la ponderación A
   que sustentan $L_{W\mathrm{A}}$.
-- [Teoría](/phonometry/es/reference/theory/environment-transport/): las derivaciones de Waterhouse, $K_1$/$K_2$ y
+- [Teoría](/es/reference/theory/environment-transport/): las derivaciones de Waterhouse, $K_1$/$K_2$ y
   $C_1$/$C_2$.
-- Referencia de la API: [`emission.sound_power`](/phonometry/es/reference/api/power/sound-power/), [`emission`: sound power in a reverberation room](/phonometry/es/reference/api/power/sound-power-reverberation/) y [`emission`: sound power by intensity scanning](/phonometry/es/reference/api/power/sound-power-intensity/).
-- Teoría: [Determinación de la potencia acústica](/phonometry/es/reference/theory/environment-transport/#determinacion-de-la-potencia-acustica-iso-374437453746-iso-3741-iso-9614-123): las derivaciones de superficie envolvente, cámara reverberante e intensidad que hay detrás de las seis vías acústicas.
+- Referencia de la API: [`emission.sound_power`](/es/reference/api/power/sound-power/), [`emission`: sound power in a reverberation room](/es/reference/api/power/sound-power-reverberation/) y [`emission`: sound power by intensity scanning](/es/reference/api/power/sound-power-intensity/).
+- Teoría: [Determinación de la potencia acústica](/es/reference/theory/environment-transport/#determinacion-de-la-potencia-acustica-iso-374437453746-iso-3741-iso-9614-123): las derivaciones de superficie envolvente, cámara reverberante e intensidad que hay detrás de las seis vías acústicas.
 
 </SeeAlso>
 

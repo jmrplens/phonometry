@@ -73,9 +73,9 @@ hoja resuelta sobre la que se construye esta guía, con el *HVAC Applications
 Handbook* de ASHRAE, capítulo 49, para las unidades terminales y con Bies,
 Hansen y Howard para los silenciadores de láminas paralelas y los plenums. Los
 silenciadores reactivos de cuatro polos de
-[Silenciadores](/phonometry/es/devices/noise-control/silencers/) y el resto de métodos de
+[Silenciadores](/es/devices/noise-control/silencers/) y el resto de métodos de
 instalación de
-[Control de ruido industrial](/phonometry/es/devices/noise-control/noise-control/) son las
+[Control de ruido industrial](/es/devices/noise-control/noise-control/) son las
 páginas complementarias.
 
 ## 1. La hoja y cómo suma
@@ -398,7 +398,7 @@ revestimiento es la mitad del espesor de la lámina, combinados por la media
 energética de la Ec. 8.241 de modo que domina el paso más permeable.
 `plenum_attenuation` es el método de Wells para una cámara plenum revestida
 (Ec. (8.275) de Bies), cuyo término reverberante usa la
-[constante de sala](/phonometry/es/buildings/rooms/room-image-sources/) del plenum.
+[constante de sala](/es/buildings/rooms/room-image-sources/) del plenum.
 
 ```python
 from phonometry import noise_control
@@ -419,7 +419,7 @@ verdad el trayecto de retorno de Long es un diseño de baja frecuencia que
 vale 16 y 21 dB a 63 y 125 Hz, donde este modelo puramente geométrico da 6 y
 9. La pérdida por inserción dinámica publicada por el fabricante, medida con
 el caudal de diseño y en el sentido de diseño según la
-[ISO 7235](/phonometry/es/devices/noise-control/silencers/#como-se-mide-un-silenciador-iso-7235),
+[ISO 7235](/es/devices/noise-control/silencers/#como-se-mide-un-silenciador-iso-7235),
 es lo que corresponde poner en la hoja; el modelo sirve para dimensionar el paso
 de aire antes de que haya fabricante.
 
@@ -721,7 +721,7 @@ acordada de antemano; y el procedimiento de valoración aplicado al espectro por
 bandas de octava medido, en vez de leído por tangencia. Escribe en la
 especificación el veredicto que se va a medir (banda a banda contra la curva, o
 la valoración de la S12.2), y no uno para el diseño y otro para el ensayo.
-[Criterios de ruido de fondo (NC / RC Mark II)](/phonometry/es/buildings/rooms/room-noise/)
+[Criterios de ruido de fondo (NC / RC Mark II)](/es/buildings/rooms/room-noise/)
 tiene el procedimiento de valoración en sí.
 
 ### El mismo paso según la VDI 2081
@@ -1006,7 +1006,7 @@ ambos sin preocuparse de cuál es cuál, que es justo la idea.
 ## 8. El límite de onda plana
 
 Todos los modelos de elemento anteriores, y todos los silenciadores de cuatro
-polos de [Silenciadores](/phonometry/es/devices/noise-control/silencers/), son
+polos de [Silenciadores](/es/devices/noise-control/silencers/), son
 unidimensionales. Suponen que una única presión acústica describe toda la
 sección del conducto, lo que solo es cierto por debajo de la frecuencia a la
 que empieza a propagarse el primer modo acústico de orden superior. Por
@@ -1080,7 +1080,7 @@ Por eso un modelo de silenciador por matriz de transferencia tiene una
 **frecuencia techo** y no un margen de exactitud: por debajo del corte el
 segundo modo no es pequeño, es que no está, y por encima el modelo describe una
 de varias ondas que están todas ahí. El álgebra de cuatro polos de
-[Silenciadores](/phonometry/es/devices/noise-control/silencers/) hereda el mismo
+[Silenciadores](/es/devices/noise-control/silencers/) hereda el mismo
 límite.
 
 A 15 m/s la corrección por flujo es invisible: $M = 0{,}044$ da
@@ -1216,7 +1216,7 @@ cumple y un local que no suelan ser uno de ellos:
 - **La transmisión estructural de la vibración del ventilador** por colgadores,
   bancadas y forjado, que ninguna hoja de vía aérea puede ver y que se trata con
   aisladores, y cuya rigidez dinámica de transferencia se mide en
-  [Rigidez de transferencia (ISO 10846)](/phonometry/es/vibration/structural/transfer-stiffness/).
+  [Rigidez de transferencia (ISO 10846)](/es/vibration/structural/transfer-stiffness/).
 - **La propia resolución por bandas de octava**, que promedia un tono de paso de
   álabes dentro de su banda y por tanto subestima cómo se juzgará un tono puro.
 </ScopeClaim>
@@ -1226,22 +1226,22 @@ cumple y un local que no suelan ser uno de ellos:
 
 ## Véase también
 
-- [Silenciadores](/phonometry/es/devices/noise-control/silencers/): los elementos reactivos
+- [Silenciadores](/es/devices/noise-control/silencers/): los elementos reactivos
   de cuatro polos (cámaras de expansión, resonadores de Helmholtz, de cuarto
   de onda y de tubo extendido) cuya validez acaba en la misma frecuencia de
   corte.
-- [Control de ruido industrial](/phonometry/es/devices/noise-control/noise-control/): el
+- [Control de ruido industrial](/es/devices/noise-control/noise-control/): el
   resto de la instalación, los métodos individuales de conductos HVAC y la
   pérdida por inserción de un cerramiento de máquina.
-- [Criterios de ruido de fondo (NC / RC Mark II)](/phonometry/es/buildings/rooms/room-noise/):
+- [Criterios de ruido de fondo (NC / RC Mark II)](/es/buildings/rooms/room-noise/):
   las familias de la ANSI/ASA S12.2-2019 contra las que se juzga el espectro
   recibido.
-- [Campo estacionario de la sala](/phonometry/es/buildings/rooms/room-image-sources/):
+- [Campo estacionario de la sala](/es/buildings/rooms/room-image-sources/):
   la constante de sala que hay detrás del efecto de sala y del término
   reverberante del plenum.
 - Referencia de la API:
-  [`noise_control`: duct path](/phonometry/es/reference/api/noise_control/duct-path/),
-  [`noise_control.duct_modes`](/phonometry/es/reference/api/noise_control/duct-modes/),
-  [`noise_control.hvac`](/phonometry/es/reference/api/noise_control/hvac/).
+  [`noise_control`: duct path](/es/reference/api/noise_control/duct-path/),
+  [`noise_control.duct_modes`](/es/reference/api/noise_control/duct-modes/),
+  [`noise_control.hvac`](/es/reference/api/noise_control/hvac/).
 
 </SeeAlso>

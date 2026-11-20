@@ -8,12 +8,12 @@ sidebar:
 Predicted airborne sound reduction index of panels (Bies, Hansen & Howard
 2017, Engineering Noise Control 5e, Section 7.2; Sharp 1973).
 
-Where EN 12354-1 ([`phonometry.building.prediction.simplified_model`](/phonometry/reference/api/building/simplified-model/)) takes the
+Where EN 12354-1 ([`phonometry.building.prediction.simplified_model`](/reference/api/building/simplified-model/)) takes the
 element sound reduction index `R` as a *measured* input, this module
 **predicts** `R(f)` from the physical properties of the construction: the mass
 per unit area, bending stiffness (through the coincidence frequency) and loss
 factor. The prediction feeds the same ISO 717-1 weighting
-([`phonometry.building.weighted_rating`](/phonometry/reference/api/building/ratings/#weighted_rating)) as the measured quantities,
+([`phonometry.building.weighted_rating`](/reference/api/building/ratings/#weighted_rating)) as the measured quantities,
 closing the chain from panel physics to the single-number `Rw`.
 
 **Mass law (Bies Eq. 7.40/7.42).** A non-stiff panel transmits by forced motion;
@@ -68,8 +68,8 @@ $$
 
 The cavity stiffness `s''` is $\rho_0 c_0^{2} / d$ for an empty
 (adiabatic) air gap; a porous fill (a
-[`PorousMediumResult`](/phonometry/reference/api/materials/porous/#porousmediumresult) from
-[`phonometry.materials.absorbers.porous`](/phonometry/reference/api/materials/porous/)) lowers the resonance through its
+[`PorousMediumResult`](/reference/api/materials/porous/#porousmediumresult) from
+[`phonometry.materials.absorbers.porous`](/reference/api/materials/porous/)) lowers the resonance through its
 softer, near-isothermal effective bulk modulus and damps the cavity so the
 mid-band slope is realised without standing-wave dips.
 
@@ -84,9 +84,9 @@ depends on the azimuth `theta` as well as the incidence angle `phi`
 double integral (Vigran Eq. 6.111 = Bies Eq. 7.38). The consequence is the
 whole point of the model: over one to two decades the resonant transmission
 dominates and `R` flattens far below the mass law of a flat plate of the same
-mass. See [`orthotropic_transmission_loss`](/phonometry/reference/api/building/panel-transmission/#orthotropic_transmission_loss),
-[`orthotropic_critical_frequencies`](/phonometry/reference/api/building/panel-transmission/#orthotropic_critical_frequencies), [`corrugated_plate_stiffness`](/phonometry/reference/api/building/panel-transmission/#corrugated_plate_stiffness)
-and [`orthotropic_plate_resonance`](/phonometry/reference/api/building/panel-transmission/#orthotropic_plate_resonance).
+mass. See [`orthotropic_transmission_loss`](/reference/api/building/panel-transmission/#orthotropic_transmission_loss),
+[`orthotropic_critical_frequencies`](/reference/api/building/panel-transmission/#orthotropic_critical_frequencies), [`corrugated_plate_stiffness`](/reference/api/building/panel-transmission/#corrugated_plate_stiffness)
+and [`orthotropic_plate_resonance`](/reference/api/building/panel-transmission/#orthotropic_plate_resonance).
 
 > Auto-generated from the source docstrings by `scripts/generate_api_docs.py` (`make api-docs`). Do not edit by hand.
 
@@ -170,10 +170,10 @@ Eq. (3.113) needs. Vigran's footnote records that the same equations appear
 in Blevins (1979) "unfortunately, with a misprint in the expression for
 `Bz`".
 
-Feed `(Bx, Bz)` to [`orthotropic_critical_frequencies`](/phonometry/reference/api/building/panel-transmission/#orthotropic_critical_frequencies) for the
-coincidence range and all three to [`orthotropic_plate_resonance`](/phonometry/reference/api/building/panel-transmission/#orthotropic_plate_resonance) for
+Feed `(Bx, Bz)` to [`orthotropic_critical_frequencies`](/reference/api/building/panel-transmission/#orthotropic_critical_frequencies) for the
+coincidence range and all three to [`orthotropic_plate_resonance`](/reference/api/building/panel-transmission/#orthotropic_plate_resonance) for
 the eigenfrequencies. Remember to scale the surface density by
-[`corrugated_plate_mass_factor`](/phonometry/reference/api/building/panel-transmission/#corrugated_plate_mass_factor).
+[`corrugated_plate_mass_factor`](/reference/api/building/panel-transmission/#corrugated_plate_mass_factor).
 
 **Parameters**
 
@@ -185,7 +185,7 @@ the eigenfrequencies. Remember to scale the surface density by
 | `youngs_modulus` | Young's modulus `E`, in Pa (> 0). |
 | `poisson_ratio` | Poisson's ratio `nu` (Default: 0.3). |
 
-**Returns:** The three stiffnesses, in N.m, as a [`CorrugatedPlateStiffness`](/phonometry/reference/api/building/panel-transmission/#corrugatedplatestiffness) (`b_x_n_m`, `b_z_n_m`, `b_xz_n_m`).
+**Returns:** The three stiffnesses, in N.m, as a [`CorrugatedPlateStiffness`](/reference/api/building/panel-transmission/#corrugatedplatestiffness) (`b_x_n_m`, `b_z_n_m`, `b_xz_n_m`).
 
 **Raises**
 
@@ -202,7 +202,7 @@ CorrugatedPlateStiffness(b_x_n_m: float, b_z_n_m: float, b_xz_n_m: float)
 
 The equivalent orthotropic stiffnesses of a corrugated plate (Vigran Eq. 3.115).
 
-What [`corrugated_plate_stiffness`](/phonometry/reference/api/building/panel-transmission/#corrugated_plate_stiffness) returns: the three stiffnesses,
+What [`corrugated_plate_stiffness`](/reference/api/building/panel-transmission/#corrugated_plate_stiffness) returns: the three stiffnesses,
 named, where a `(Bx, Bz, Bxz)` tuple used to be unpacked by position.
 
 **Attributes**
@@ -241,7 +241,7 @@ continuous at `f_l` ($20 \log_{10}(2 k d) = 6$ there).
 Ties or mounts bridging the cavity stiffen it (Hopkins Eq. 4.89), pushing
 `f0` up and extending the combined-mass branch; pass their stiffness per
 unit area as *tie_stiffness_per_area* (see
-[`phonometry.building.wall_tie_stiffness_per_area`](/phonometry/reference/api/building/masonry-cavity-wall/#wall_tie_stiffness_per_area)).
+[`phonometry.building.wall_tie_stiffness_per_area`](/reference/api/building/masonry-cavity-wall/#wall_tie_stiffness_per_area)).
 
 **Parameters**
 
@@ -252,12 +252,12 @@ unit area as *tie_stiffness_per_area* (see
 | `mass2` | Surface density of leaf 2 `m2`, in kg/m^2 (> 0). |
 | `gap_m` | Cavity depth `d`, in m (> 0). |
 | `loss_factor` | Leaf loss factor `eta` (> 0, Default: 0.1); reserved for the coincidence extension and reported for reference. |
-| `cavity_medium` | Optional porous fill; see [`mass_spring_mass_resonance`](/phonometry/reference/api/building/panel-transmission/#mass_spring_mass_resonance). |
+| `cavity_medium` | Optional porous fill; see [`mass_spring_mass_resonance`](/reference/api/building/panel-transmission/#mass_spring_mass_resonance). |
 | `tie_stiffness_per_area` | Stiffness per unit area $N k / S$ of a connection array bridging the cavity, in N/m^3 (>= 0, Default: 0). |
 | `fraction` | The band set of the field correction, 3 for one-third octaves or 1 for octaves. One of `1` or `3`. |
-| `fluid` | The medium, a [`Fluid`](/phonometry/reference/api/fluids/fluids/#fluid) (Default: [`ABSORBER_AIR`](/phonometry/reference/api/materials/porous/#absorber_air), dry air at 20 degC at textbook values). |
+| `fluid` | The medium, a [`Fluid`](/reference/api/fluids/fluids/#fluid) (Default: [`ABSORBER_AIR`](/reference/api/materials/porous/#absorber_air), dry air at 20 degC at textbook values). |
 
-**Returns:** A [`SoundReductionResult`](/phonometry/reference/api/building/panel-transmission/#soundreductionresult) (model `"double-wall"`).
+**Returns:** A [`SoundReductionResult`](/reference/api/building/panel-transmission/#soundreductionresult) (model `"double-wall"`).
 
 **Raises**
 
@@ -328,9 +328,9 @@ mass_law_transmission_loss(
 Mass-law transmission loss of a limp panel (Bies Eq. 7.40/7.42).
 
 $\mathrm{TL}_{\mathrm{normal}} = 10 \log_{10}[1 + (\pi f m'' / \rho_0 c_0)^{2}]$; the field-incidence value subtracts the
-band correction of [`field_incidence_correction`](/phonometry/reference/api/building/panel-transmission/#field_incidence_correction),
+band correction of [`field_incidence_correction`](/reference/api/building/panel-transmission/#field_incidence_correction),
 or the explicit *field_correction* when one is given (Norton & Karczub
-Eq. 3.106 uses a flat 5 dB, the line [`plateau_transmission_loss`](/phonometry/reference/api/building/panel-transmission/#plateau_transmission_loss)
+Eq. 3.106 uses a flat 5 dB, the line [`plateau_transmission_loss`](/reference/api/building/panel-transmission/#plateau_transmission_loss)
 builds its estimate on).
 
 **Parameters**
@@ -342,7 +342,7 @@ builds its estimate on).
 | `incidence` | `"normal"` or `"field"` (Default: `"field"`). |
 | `fraction` | The band set of the field correction, 3 for one-third octaves or 1 for octaves. One of `1` or `3`. |
 | `field_correction` | Explicit field-incidence correction, in dB (>= 0), overriding the band table (Default: `None`). |
-| `fluid` | The medium, a [`Fluid`](/phonometry/reference/api/fluids/fluids/#fluid) (Default: [`ABSORBER_AIR`](/phonometry/reference/api/materials/porous/#absorber_air), dry air at 20 degC at textbook values). |
+| `fluid` | The medium, a [`Fluid`](/reference/api/fluids/fluids/#fluid) (Default: [`ABSORBER_AIR`](/reference/api/materials/porous/#absorber_air), dry air at 20 degC at textbook values). |
 
 **Returns:** The transmission loss `TL`, in dB. A `float` for a number, an array for a sequence or an array, a zero-dimensional one included.
 
@@ -380,7 +380,7 @@ An array of mechanical connections across the cavity (wall ties in a
 masonry cavity wall, resilient mounts under a floating floor) acts as a
 spring **in parallel** with the cavity, adding $N k / S$ to `s''`
 (Hopkins Eq. 4.89). Pass that term as *tie_stiffness_per_area*; the helper
-[`phonometry.building.wall_tie_stiffness_per_area`](/phonometry/reference/api/building/masonry-cavity-wall/#wall_tie_stiffness_per_area) builds it from a
+[`phonometry.building.wall_tie_stiffness_per_area`](/reference/api/building/masonry-cavity-wall/#wall_tie_stiffness_per_area) builds it from a
 tie density and Hopkins' Table A4.
 
 **Parameters**
@@ -390,9 +390,9 @@ tie density and Hopkins' Table A4.
 | `mass1` | Surface density of leaf 1 `m1`, in kg/m^2 (> 0). |
 | `mass2` | Surface density of leaf 2 `m2`, in kg/m^2 (> 0). |
 | `gap_m` | Cavity depth `d`, in m (> 0). |
-| `cavity_medium` | Optional porous fill (a [`PorousMediumResult`](/phonometry/reference/api/materials/porous/#porousmediumresult)) whose effective bulk modulus sets the cavity stiffness. |
+| `cavity_medium` | Optional porous fill (a [`PorousMediumResult`](/reference/api/materials/porous/#porousmediumresult)) whose effective bulk modulus sets the cavity stiffness. |
 | `tie_stiffness_per_area` | Stiffness per unit area $N k / S$ of a connection array bridging the cavity, in N/m^3 (>= 0, Default: 0). |
-| `fluid` | The medium, a [`Fluid`](/phonometry/reference/api/fluids/fluids/#fluid) (Default: [`ABSORBER_AIR`](/phonometry/reference/api/materials/porous/#absorber_air), dry air at 20 degC at textbook values). |
+| `fluid` | The medium, a [`Fluid`](/reference/api/fluids/fluids/#fluid) (Default: [`ABSORBER_AIR`](/reference/api/materials/porous/#absorber_air), dry air at 20 degC at textbook values). |
 
 **Returns:** The mass-spring-mass resonance `f0`, in hertz.
 
@@ -420,7 +420,7 @@ Coincidence range `(fc1, fc2)` of orthotropic panels (Vigran 6.107).
 $f_\mathrm{c} = \frac{c_0^{2}}{2 \pi} \sqrt{m'' / B}$ evaluated for both
 principal bending stiffnesses (Vigran Eq. (6.107), printed p. 252; the
 same closed form as the isotropic
-[`coincidence_frequency`](/phonometry/reference/api/vibration/radiation-efficiency/#coincidence_frequency)).
+[`coincidence_frequency`](/reference/api/vibration/radiation-efficiency/#coincidence_frequency)).
 The stiffest direction gives the **lowest** coincidence frequency, so the
 returned pair is sorted: `fc1` from the larger stiffness, `fc2` from the
 smaller. For a corrugated sheet `fc1` can sit at a few hundred hertz while
@@ -431,7 +431,7 @@ dominates over most of the useful frequency range.
 
 | Name | Description |
 | :--- | :--- |
-| `mass_per_area` | Mass per unit area `m''`, in kg/m^2 (> 0), including the developed-length increase of a corrugated sheet (see [`corrugated_plate_mass_factor`](/phonometry/reference/api/building/panel-transmission/#corrugated_plate_mass_factor)). |
+| `mass_per_area` | Mass per unit area `m''`, in kg/m^2 (> 0), including the developed-length increase of a corrugated sheet (see [`corrugated_plate_mass_factor`](/reference/api/building/panel-transmission/#corrugated_plate_mass_factor)). |
 | `bending_stiffness_1` | One principal bending stiffness, in N.m (> 0). |
 | `bending_stiffness_2` | The other principal bending stiffness, in N.m (> 0). The argument order does not matter. |
 | `speed_of_sound` | Speed of sound in air `c0` (Default: 343 m/s). |
@@ -473,8 +473,8 @@ $B_x = B_z = B$ and $B_{xz} = B\,(\nu + 2 (1 - \nu)/2) = B$.
 
 The lowest eigenfrequency $f_{1,1}$ matters to the transmission-loss
 prediction because the infinite-panel models of
-[`orthotropic_transmission_loss`](/phonometry/reference/api/building/panel-transmission/#orthotropic_transmission_loss) and
-[`single_panel_transmission_loss`](/phonometry/reference/api/building/panel-transmission/#single_panel_transmission_loss) are only valid above about
+[`orthotropic_transmission_loss`](/reference/api/building/panel-transmission/#orthotropic_transmission_loss) and
+[`single_panel_transmission_loss`](/reference/api/building/panel-transmission/#single_panel_transmission_loss) are only valid above about
 $1.5 f_{1,1}$ (Bies, Sect. 7.2.4).
 
 **Parameters**
@@ -521,7 +521,7 @@ Orthotropic-panel sound reduction index (Vigran 6.5.3, Bies 7.2.4.5).
 
 A ribbed or corrugated sheet is stiff along the corrugations and limp across
 them, so instead of one coincidence dip it has a whole **coincidence range**
-`fc1` to `fc2` (see [`orthotropic_critical_frequencies`](/phonometry/reference/api/building/panel-transmission/#orthotropic_critical_frequencies)). Over that
+`fc1` to `fc2` (see [`orthotropic_critical_frequencies`](/reference/api/building/panel-transmission/#orthotropic_critical_frequencies)). Over that
 range the resonant transmission dominates and `R` flattens well below the
 mass law of a flat plate of the same surface density, which is the price
 paid for the strength-to-weight ratio.
@@ -562,7 +562,7 @@ approximation and stays a few decibels above the integral even at
 $\eta \to 0$, as Vigran's Figure 6.27 shows for its own worked case.
 
 Both models are infinite-panel models, valid above roughly
-$1.5 f_{1,1}$ ([`orthotropic_plate_resonance`](/phonometry/reference/api/building/panel-transmission/#orthotropic_plate_resonance)). Bies also
+$1.5 f_{1,1}$ ([`orthotropic_plate_resonance`](/reference/api/building/panel-transmission/#orthotropic_plate_resonance)). Bies also
 notes two systematic departures of the Heckl branch from measurement:
 below about $0.7 f_{\mathrm{c}1}$ it underestimates `R` on small panels,
 and real corrugated panels show a dip of up to 5 dB between 2 kHz and
@@ -582,9 +582,9 @@ no smooth model predicts.
 | `area` | Panel area `S`, in m^2 (> 0), selecting the size-dependent limiting angle of Bies Eq. (7.36) (Default: `None`); used only by `method="integral"`, but validated on both routes. |
 | `limiting_angle_deg` | Fixed limiting angle `theta_L`, in degrees ($0 < \theta_\mathrm{L} < 90$, Default: 78.0), used when *area* is `None` and only by `method="integral"`, but validated on both routes. |
 | `fraction` | The band set of the field correction of the Heckl mass-law branch, 3 for one-third octaves or 1 for octaves. One of `1` or `3`. |
-| `fluid` | The medium, a [`Fluid`](/phonometry/reference/api/fluids/fluids/#fluid) (Default: [`ABSORBER_AIR`](/phonometry/reference/api/materials/porous/#absorber_air), dry air at 20 degC at textbook values). |
+| `fluid` | The medium, a [`Fluid`](/reference/api/fluids/fluids/#fluid) (Default: [`ABSORBER_AIR`](/reference/api/materials/porous/#absorber_air), dry air at 20 degC at textbook values). |
 
-**Returns:** A [`SoundReductionResult`](/phonometry/reference/api/building/panel-transmission/#soundreductionresult) (model `"orthotropic-integral"` or `"orthotropic-heckl"`) carrying `fc1` in [`critical_frequency`](/phonometry/reference/api/building/flanking-transmission/#critical_frequency) and `fc2` in [`critical_frequency_upper`](/phonometry/reference/api/building/panel-transmission/#soundreductionresult).
+**Returns:** A [`SoundReductionResult`](/reference/api/building/panel-transmission/#soundreductionresult) (model `"orthotropic-integral"` or `"orthotropic-heckl"`) carrying `fc1` in [`critical_frequency`](/reference/api/building/flanking-transmission/#critical_frequency) and `fc2` in [`critical_frequency_upper`](/reference/api/building/panel-transmission/#soundreductionresult).
 
 **Raises**
 
@@ -643,7 +643,7 @@ Plateau-method estimate of a single panel's TL (Norton 3.9.1).
 The plateau (Watters) construction is the empirical shortcut practitioners
 draw by hand, and it approximates the whole curve from three numbers per
 material (Norton & Karczub Table 3.1, tabulated in
-[`PLATEAU_MATERIALS`](/phonometry/reference/api/building/panel-transmission/#plateau_materials)):
+[`PLATEAU_MATERIALS`](/reference/api/building/panel-transmission/#plateau_materials)):
 
 1. the **field-incidence mass law**
    $\mathrm{TL} = 10 \log_{10}[1 + (\pi f m''/\rho_0 c_0)^{2}] - 5$
@@ -653,7 +653,7 @@ material (Norton & Karczub Table 3.1, tabulated in
 3. point **B** at `frequency_ratio x fA`, above which the estimate
    recovers at **10 dB per octave**.
 
-Unlike the physical model of [`single_panel_transmission_loss`](/phonometry/reference/api/building/panel-transmission/#single_panel_transmission_loss) it
+Unlike the physical model of [`single_panel_transmission_loss`](/reference/api/building/panel-transmission/#single_panel_transmission_loss) it
 needs neither the bending stiffness nor the loss factor: the material's
 tabulated plateau absorbs both. The price is that it is only an estimate,
 and it assumes a diffuse field on both sides of a panel whose length and
@@ -662,10 +662,10 @@ width are at least twenty times its thickness.
 Give a *material* with its *thickness_mm* (the surface density then
 follows from the material's), or give *mass_per_area* together with
 *plateau_height* and *frequency_ratio*. The material is a name the table
-tabulates, or a [`PlateauMaterial`](/phonometry/reference/api/solids/plateau/#plateaumaterial) row: one of
-[`PUBLISHED_PLATEAU_DATA`](/phonometry/reference/api/solids/plateau/#published_plateau_data), or one of your own
-that [`phonometry.io.read_catalogue`](/phonometry/reference/api/io/io/#read_catalogue) read from a file. A row gives
-its three numbers through [`printed`](/phonometry/reference/api/io/io/#cataloguerowprinted), so
+tabulates, or a [`PlateauMaterial`](/reference/api/solids/plateau/#plateaumaterial) row: one of
+[`PUBLISHED_PLATEAU_DATA`](/reference/api/solids/plateau/#published_plateau_data), or one of your own
+that [`phonometry.io.read_catalogue`](/reference/api/io/io/#read_catalogue) read from a file. A row gives
+its three numbers through [`printed`](/reference/api/io/io/#cataloguerowprinted), so
 a cell it holds as a range, a bound or a word is refused with what it
 holds, never read as a number. An explicit *mass_per_area*,
 *plateau_height* or *frequency_ratio* always overrides the material's,
@@ -676,22 +676,22 @@ and the material's own is then not read at all.
 | Name | Description |
 | :--- | :--- |
 | `frequency` | Band centre frequency `f`, in hertz (scalar or array, > 0). |
-| `material` | A key into [`PLATEAU_MATERIALS`](/phonometry/reference/api/building/panel-transmission/#plateau_materials), or a [`PlateauMaterial`](/phonometry/reference/api/solids/plateau/#plateaumaterial) row (Default: `None`). One of `"aluminium"`, `"brick"`, `"concrete"`, `"glass"`, `"lead"`, `"plaster"`, `"plywood"` or `"steel"`. |
+| `material` | A key into [`PLATEAU_MATERIALS`](/reference/api/building/panel-transmission/#plateau_materials), or a [`PlateauMaterial`](/reference/api/solids/plateau/#plateaumaterial) row (Default: `None`). One of `"aluminium"`, `"brick"`, `"concrete"`, `"glass"`, `"lead"`, `"plaster"`, `"plywood"` or `"steel"`. |
 | `thickness_mm` | Panel thickness, in **millimetres** (> 0), used with *material* to get the surface density. |
 | `mass_per_area` | Mass per unit area `m''`, in kg/m^2 (> 0). |
 | `plateau_height_db` | Coincidence plateau height, in dB (> 0). |
 | `frequency_ratio` | Ratio $B/A$ locating the 10 dB/octave recovery (> 1). |
 | `field_correction` | Field-incidence correction of the mass-law line, in dB (Default: 5.0, Norton Eq. 3.106). |
-| `fluid` | The medium, a [`Fluid`](/phonometry/reference/api/fluids/fluids/#fluid) (Default: [`ABSORBER_AIR`](/phonometry/reference/api/materials/porous/#absorber_air), dry air at 20 degC at textbook values). |
+| `fluid` | The medium, a [`Fluid`](/reference/api/fluids/fluids/#fluid) (Default: [`ABSORBER_AIR`](/reference/api/materials/porous/#absorber_air), dry air at 20 degC at textbook values). |
 
-**Returns:** A [`SoundReductionResult`](/phonometry/reference/api/building/panel-transmission/#soundreductionresult) (model `"plateau"`) carrying [`plateau_height_db`](/phonometry/reference/api/building/panel-transmission/#soundreductionresult), [`plateau_start`](/phonometry/reference/api/building/panel-transmission/#soundreductionresult) (point A) and [`plateau_end`](/phonometry/reference/api/building/panel-transmission/#soundreductionresult) (point B).
+**Returns:** A [`SoundReductionResult`](/reference/api/building/panel-transmission/#soundreductionresult) (model `"plateau"`) carrying [`plateau_height_db`](/reference/api/building/panel-transmission/#soundreductionresult), [`plateau_start`](/reference/api/building/panel-transmission/#soundreductionresult) (point A) and [`plateau_end`](/reference/api/building/panel-transmission/#soundreductionresult) (point B).
 
 **Raises**
 
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a non-positive input, an unknown material name, a row that does not print a number the construction reads, or an under-specified panel. |
-| TypeError | for a *material* that is neither a name nor a [`PlateauMaterial`](/phonometry/reference/api/solids/plateau/#plateaumaterial), or a `thickness_mm`, `mass_per_area`, `plateau_height_db`, `frequency_ratio` or `field_correction` that is not one number, or `frequency` holds a text or a value that is not a real number. |
+| TypeError | for a *material* that is neither a name nor a [`PlateauMaterial`](/reference/api/solids/plateau/#plateaumaterial), or a `thickness_mm`, `mass_per_area`, `plateau_height_db`, `frequency_ratio` or `field_correction` that is not one number, or `frequency` holds a text or a value that is not a real number. |
 
 ## plot_double_wall_geometry
 
@@ -781,7 +781,7 @@ and a transmission coefficient above one.
 
 Provide the coincidence frequency directly through *critical_frequency*, or
 let it be computed from *bending_stiffness* and *mass_per_area* through
-[`coincidence_frequency`](/phonometry/reference/api/vibration/radiation-efficiency/#coincidence_frequency).
+[`coincidence_frequency`](/reference/api/vibration/radiation-efficiency/#coincidence_frequency).
 
 **Parameters**
 
@@ -795,9 +795,9 @@ let it be computed from *bending_stiffness* and *mass_per_area* through
 | `fraction` | The band set of the field correction, 3 for one-third octaves or 1 for octaves. One of `1` or `3`. |
 | `coincidence_model` | `"sharp"` (Default, Bies Eq. 7.44 above `fc` with the interpolated bridge from $f_\mathrm{c}/2$) or `"cremer"` (Norton Eq. 3.110, mass law right up to `fc`). |
 | `field_correction` | Explicit field-incidence correction of the mass-law region, in dB (>= 0), overriding the band table (Default: `None`; Norton's Eq. 3.106 uses a flat 5 dB). |
-| `fluid` | The medium, a [`Fluid`](/phonometry/reference/api/fluids/fluids/#fluid) (Default: [`ABSORBER_AIR`](/phonometry/reference/api/materials/porous/#absorber_air), dry air at 20 degC at textbook values). |
+| `fluid` | The medium, a [`Fluid`](/reference/api/fluids/fluids/#fluid) (Default: [`ABSORBER_AIR`](/reference/api/materials/porous/#absorber_air), dry air at 20 degC at textbook values). |
 
-**Returns:** A [`SoundReductionResult`](/phonometry/reference/api/building/panel-transmission/#soundreductionresult) (model `"sharp-single"` or `"cremer-single"`).
+**Returns:** A [`SoundReductionResult`](/reference/api/building/panel-transmission/#soundreductionresult) (model `"sharp-single"` or `"cremer-single"`).
 
 **Raises**
 
@@ -905,7 +905,7 @@ SoundReductionResult.rating(
 
 Single-number weighted rating `Rw` of the predicted `R(f)`.
 
-Delegates to [`phonometry.building.weighted_rating`](/phonometry/reference/api/building/ratings/#weighted_rating) (ISO 717-1);
+Delegates to [`phonometry.building.weighted_rating`](/reference/api/building/ratings/#weighted_rating) (ISO 717-1);
 requires the spectrum to be on the 16 one-third-octave bands (100 Hz to
 3150 Hz) or the 5 octave bands (125 Hz to 2000 Hz).
 
@@ -913,9 +913,9 @@ requires the spectrum to be on the 16 one-third-octave bands (100 Hz to
 
 | Name | Description |
 | :--- | :--- |
-| `fraction` | Band set forwarded to [`phonometry.building.weighted_rating`](/phonometry/reference/api/building/ratings/#weighted_rating), 3 for one-third octaves or 1 for octaves (Default: `None`, read from the number of values). One of `1` or `3`. |
+| `fraction` | Band set forwarded to [`phonometry.building.weighted_rating`](/reference/api/building/ratings/#weighted_rating), 3 for one-third octaves or 1 for octaves (Default: `None`, read from the number of values). One of `1` or `3`. |
 
-**Returns:** The [`WeightedRatingResult`](/phonometry/reference/api/building/ratings/#weightedratingresult).
+**Returns:** The [`WeightedRatingResult`](/reference/api/building/ratings/#weightedratingresult).
 
 **Raises**
 
@@ -938,7 +938,7 @@ SoundReductionResult.report(
 Render the ISO 717-1 Annex C rating fiche of `R(f)` to a PDF.
 
 Convenience wrapper delegating to
-[`report`](/phonometry/reference/api/building/ratings/#weightedratingresultreport)
+[`report`](/reference/api/building/ratings/#weightedratingresultreport)
 on `rating`; requires the predicted spectrum to be on the 16
 one-third-octave bands (100 Hz to 3150 Hz) or the 5 octave bands
 (125 Hz to 2000 Hz).
@@ -948,9 +948,9 @@ one-third-octave bands (100 Hz to 3150 Hz) or the 5 octave bands
 | Name | Description |
 | :--- | :--- |
 | `path` | Destination path of the PDF file. |
-| `metadata` | The laboratory, client and specimen block, a [`ReportMetadata`](/phonometry/reference/api/building/insulation/#reportmetadata); `None` leaves it blank. |
+| `metadata` | The laboratory, client and specimen block, a [`ReportMetadata`](/reference/api/building/insulation/#reportmetadata); `None` leaves it blank. |
 | `language` | `"en"` (default) or `"es"` for the fiche. |
-| `kwargs` | Forwarded to [`report`](/phonometry/reference/api/building/ratings/#weightedratingresultreport) (e.g. `engine`). |
+| `kwargs` | Forwarded to [`report`](/reference/api/building/ratings/#weightedratingresultreport) (e.g. `engine`). |
 
 **Returns:** The written `path` as a `str`.
 

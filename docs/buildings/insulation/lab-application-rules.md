@@ -1,6 +1,6 @@
 <!-- Written by `make llms` from site/src/content/docs/buildings/insulation/lab-application-rules.mdx: edit that page and its Spanish twin, then run `make llms`. -->
 
-← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/buildings/insulation/lab-application-rules/
+← [Documentation index](../../README.md) · Published at https://phonometry.dev/buildings/insulation/lab-application-rules/
 
 # Linings, Floor Coverings, Joints and Rain (ISO 10140-1)
 
@@ -978,10 +978,10 @@ defined for large roofs (ISO 10140-5:2021 I.3).
 - [Sound Insulation by Intensity (ISO 15186)](insulation-intensity.md):
   the intensity method K.4.3 allows for rain.
 - API reference:
-  [`building.measurement.laboratory_improvement`](https://docs.jmrp.io/phonometry/reference/api/building/laboratory-improvement/),
-  [`building.measurement.joint_insulation`](https://docs.jmrp.io/phonometry/reference/api/building/joint-insulation/),
-  [`building`: rainfall sound](https://docs.jmrp.io/phonometry/reference/api/building/rainfall-sound/)
-  and [`building.measurement.ratings`](https://docs.jmrp.io/phonometry/reference/api/building/ratings/).
+  [`building.measurement.laboratory_improvement`](https://phonometry.dev/reference/api/building/laboratory-improvement/),
+  [`building.measurement.joint_insulation`](https://phonometry.dev/reference/api/building/joint-insulation/),
+  [`building`: rainfall sound](https://phonometry.dev/reference/api/building/rainfall-sound/)
+  and [`building.measurement.ratings`](https://phonometry.dev/reference/api/building/ratings/).
 
 ## References
 

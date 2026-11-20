@@ -1,6 +1,6 @@
 <!-- Written by `make llms` from site/src/content/docs/environment/propagation/barrier-reflection.mdx: edit that page and its Spanish twin, then run `make llms`. -->
 
-← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/environment/propagation/barrier-reflection/
+← [Documentation index](../../README.md) · Published at https://phonometry.dev/environment/propagation/barrier-reflection/
 
 # Sound reflection of a noise barrier in situ
 
@@ -507,7 +507,7 @@ says which it is.
 - [Spherical ground effect and advanced barriers](ground-barriers.md): the declaration of a road device, $DL_\alpha$ and $DL_R$ over the same spectrum, and what a barrier does to a receiver behind it.
 - [In-situ Road-Surface Absorption](../../materials/surfaces/road-absorption.md): ISO 13472-1, the same subtraction and Adrienne window pointed at a road surface.
 - [Errata found in published sources](../../ERRATA.md): the gain factor of Formula (1), Table B.2 and the other defects of EN 1793-5.
-- API reference: [`environment.propagation.barrier_reflection`](https://docs.jmrp.io/phonometry/reference/api/environment/barrier-reflection/).
+- API reference: [`environment.propagation.barrier_reflection`](https://phonometry.dev/reference/api/environment/barrier-reflection/).
 
 ## References
 

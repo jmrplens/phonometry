@@ -40,7 +40,7 @@ tono prominente, la **audibilidad** $\Delta L$: cuántos decibelios supera el ni
 del tono al umbral de enmascaramiento del ruido circundante. (Que un tono sea
 *molesto* es un juicio de valoración posterior e independiente.) Es el método
 detallado al que remite **ISO 1996-2:2017** (la vía simplificada del Anexo C
-está en [medición ambiental](/phonometry/es/environment/assessment/environmental-levels/)); la audibilidad
+está en [medición ambiental](/es/environment/assessment/environmental-levels/)); la audibilidad
 media $\Delta L$ que produce alimenta el ajuste tonal $K_\mathrm{t}$ de ISO 1996-2.
 
 <ThemeImage
@@ -538,7 +538,7 @@ descargo fijo.
 
 Usa el mismo contenedor `ReportMetadata` y el mismo motor de renderizado que la
 [ficha de sonoridad ISO
-532-1](/phonometry/es/perception/psychoacoustics/loudness/#informe-de-iso-532-1-report);
+532-1](/es/perception/psychoacoustics/loudness/#informe-de-iso-532-1-report);
 un `requirement` indicado se interpreta como la audibilidad decisiva
 $\Delta L_\mathrm{ta}$ máxima admisible en dB (un tono más silencioso cumple). La
 generación necesita reportlab y, para la figura que incrusta la ficha,
@@ -598,7 +598,7 @@ el ajuste tonal $K_\mathrm{t}$ (Tabla J.1).
 El criterio de distinción de pendiente de flanco sigue la lectura de DIN
 45681:2005-03 (su programa de referencia ejecutable), no las fórmulas
 asimétricas impresas en el texto de ISO/PAS 20065, que la contradicen,
-recogido en el [registro de erratas](/phonometry/es/reference/errata/).
+recogido en el [registro de erratas](/es/reference/errata/).
 Construir el propio espectro FFT de banda estrecha a partir de una grabación
 en el dominio temporal no forma parte de este módulo: todas las funciones aquí
 parten de un espectro ya calculado (niveles y frecuencias), y el §0 dice cómo
@@ -611,19 +611,19 @@ aplica quien llama porque el módulo es agnóstico a la ponderación.
 
 ## Véase también
 
-- [Medición de ruido ambiental](/phonometry/es/environment/assessment/environmental-levels/):
+- [Medición de ruido ambiental](/es/environment/assessment/environmental-levels/):
   el nivel de evaluación de ISO 1996-1 al que alimenta esta audibilidad, y la
   vía más sencilla del Anexo C de ISO 1996-2 para un solo espectro.
-- [Prominencia tonal: TNR y PR](/phonometry/es/perception/psychoacoustics/tone-prominence/):
+- [Prominencia tonal: TNR y PR](/es/perception/psychoacoustics/tone-prominence/):
   la pregunta de prominencia de ECMA-418-1 que se le hace al ruido de un
   producto, con la tabla que elige entre las cuatro métricas tonales de la
   biblioteca.
-- [Ruido de aerogeneradores](/phonometry/es/environment/sources/wind-turbine-noise/):
+- [Ruido de aerogeneradores](/es/environment/sources/wind-turbine-noise/):
   la audibilidad por bin de la IEC 61400-11, la misma fórmula aplicada a una
   campaña de velocidad de viento bin a bin.
-- [Teoría](/phonometry/es/reference/theory/perception/#prominencia-tonal-tnr-y-pr-ecma-418-1):
+- [Teoría](/es/reference/theory/perception/#prominencia-tonal-tnr-y-pr-ecma-418-1):
   la familia vecina de métricas tonales, el TNR y el PR, deducida del mismo
   modelo de bandas críticas.
-- Referencia de la API: [`psychoacoustics`: tone audibility](/phonometry/es/reference/api/psychoacoustics/tone-audibility/).
+- Referencia de la API: [`psychoacoustics`: tone audibility](/es/reference/api/psychoacoustics/tone-audibility/).
 
 </SeeAlso>

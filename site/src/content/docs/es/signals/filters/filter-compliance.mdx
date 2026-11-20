@@ -66,11 +66,11 @@ la banda atenuada, balance de incertidumbre), los ensayos periódicos que un
 laboratorio le hace a un instrumento y cómo se califican sus resultados, y la
 ficha acreditada de una página que convierte el veredicto en documento. La mitad
 de diseño, las matemáticas de banda y la referencia de parámetros, es
-[Bancos de filtros](/phonometry/es/signals/filters/filter-banks/), y las cinco
+[Bancos de filtros](/es/signals/filters/filter-banks/), y las cinco
 arquitecturas con sus respuestas comparadas son la
-[Galería de arquitecturas de filtro](/phonometry/es/signals/filters/filter-gallery/);
+[Galería de arquitecturas de filtro](/es/signals/filters/filter-gallery/);
 la misma maquinaria aplicada a las ponderaciones frecuenciales es la
-sección 6 de [Ponderación frecuencial](/phonometry/es/signals/levels/weighting/).
+sección 6 de [Ponderación frecuencial](/es/signals/levels/weighting/).
 
 ## 1. Verificar la clase frente a IEC 61260-1:2014
 
@@ -322,7 +322,7 @@ Fórmula (3) impresa y el texto de 7.2.4.3 y de 5.16 toman la diferencia en
 sentidos opuestos, lo que con unos límites tan asimétricos no es el mismo
 ensayo; el verificador aplica los límites a la fórmula tal como está impresa,
 como indica el 7.2.4.5, y el
-[registro de erratas](/phonometry/es/reference/errata/) recoge el conflicto.
+[registro de erratas](/es/reference/errata/) recoge el conflicto.
 
 ```python
 from phonometry import filters
@@ -509,7 +509,7 @@ print(result.points_per_bandwidth)   # 36: el 5.3.3 subió S desde 24
 ```
 
 Dos defectos de la edición impresa están en el
-[registro de erratas](/phonometry/es/reference/errata/): la constante de
+[registro de erratas](/es/reference/errata/): la constante de
 normalización del 3.15 lleva un factor diez de más, y el texto del 4.9 y del
 5.8.3 toma la diferencia de la suma en el sentido contrario a la ecuación (19),
 que la biblioteca sigue como indica el 5.8.5.
@@ -702,8 +702,8 @@ página lo heredan todas las medidas hechas con los filtros de la biblioteca, y
 una cadena de hardware añade un veredicto propio. Nombra los dos. El régimen
 equivalente para los *sonómetros* (los ensayos periódicos de IEC 61672-3, y la
 IEC 60942 para el calibrador) está en
-[Ensayos periódicos de un sonómetro](/phonometry/es/signals/metrology/sound-level-meter-periodic-tests/)
-y [Calibración y dBFS](/phonometry/es/signals/metrology/calibration/).
+[Ensayos periódicos de un sonómetro](/es/signals/metrology/sound-level-meter-periodic-tests/)
+y [Calibración y dBFS](/es/signals/metrology/calibration/).
 
 **Calificar un ensayo periódico.** Los ensayos los hace el laboratorio; el
 veredicto sobre lo que midió es aritmética, y lo hace `verify_filter_periodic`.
@@ -918,22 +918,22 @@ mantén el borde de banda superior holgadamente por debajo de Nyquist o sube
 
 ## Véase también
 
-- [Bancos de filtros](/phonometry/es/signals/filters/filter-banks/): las matemáticas
+- [Bancos de filtros](/es/signals/filters/filter-banks/): las matemáticas
   de banda y las arquitecturas cuya clase se verifica aquí.
-- [Ponderación frecuencial](/phonometry/es/signals/levels/weighting/): la
+- [Ponderación frecuencial](/es/signals/levels/weighting/): la
   verificación complementaria de las curvas A, C y Z frente a las tablas de
   tolerancia de IEC 61672-1, con las curvas G, B, D y AU tratadas en
-  [Ponderaciones especiales](/phonometry/es/signals/levels/special-weightings/).
-- [Sonómetro](/phonometry/es/signals/sound-level-meter/): la cadena de
+  [Ponderaciones especiales](/es/signals/levels/special-weightings/).
+- [Sonómetro](/es/signals/sound-level-meter/): la cadena de
   instrumento a cuya etapa de espectro se aplica esta clase.
-- [Informe de conformidad](/phonometry/es/reference/conformance/):
+- [Informe de conformidad](/es/reference/conformance/):
   las configuraciones verificadas detrás de las afirmaciones de clase de esta
   página.
 - Referencia de la API:
-  [`filters.compliance`](/phonometry/es/reference/api/filters/compliance/),
-  [`filters.time_invariance`](/phonometry/es/reference/api/filters/time-invariance/)
-  y [`filters.periodic_tests`](/phonometry/es/reference/api/filters/periodic-tests/).
-- Teoría: [Frecuencias de banda de octava](/phonometry/es/reference/theory/signal-analysis/#frecuencias-de-banda-de-octava-ansi-s111--iec-61260): las definiciones de bordes de banda alrededor de las cuales se traza la máscara de IEC 61260-1.
+  [`filters.compliance`](/es/reference/api/filters/compliance/),
+  [`filters.time_invariance`](/es/reference/api/filters/time-invariance/)
+  y [`filters.periodic_tests`](/es/reference/api/filters/periodic-tests/).
+- Teoría: [Frecuencias de banda de octava](/es/reference/theory/signal-analysis/#frecuencias-de-banda-de-octava-ansi-s111--iec-61260): las definiciones de bordes de banda alrededor de las cuales se traza la máscara de IEC 61260-1.
 
 </SeeAlso>
 

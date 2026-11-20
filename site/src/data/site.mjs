@@ -18,13 +18,11 @@ import targets from './site-targets.json' with { type: 'json' };
  * generators that write site links (the API reference, the errata pages, the
  * llms files), so no copy of a base path can lag another.
  *
- * docs.jmrp.io is the canonical site and the build with nothing set.
- * phonometry.dev is the preview served from Cloudflare (site/worker/README.md):
- * `PHONOMETRY_SITE=phonometry.dev pnpm build` names it in every canonical URL,
- * `og:url`, structured data `@id`, sitemap, Markdown copy and llms file, and in
- * robots.txt (scripts/site-origin.mjs). It keeps the base
- * path for now, so every link the pages write is the same in both builds; the
- * move to the root is a later change.
+ * phonometry.dev is the one target, the build with nothing set, and its pages
+ * are served at the root (base path ''): every canonical URL, `og:url`,
+ * structured data `@id`, sitemap, Markdown copy and llms file names it, and
+ * the pages link each other root-relative (`/signals/levels/`). The variable
+ * PHONOMETRY_SITE stays, with that one value, so a typo still stops the build.
  */
 export const SITE_TARGETS = Object.freeze(
   Object.fromEntries(Object.entries(targets.targets).map(([name, target]) => [name, checkedTarget(target, `target ${name}`)])),
@@ -36,7 +34,8 @@ export const DEFAULT_SITE = targets.default;
 /**
  * Where the site was published before, each an origin and the base path it
  * served the pages under. Nothing is built for them: the redirect map reads
- * them to send each old address to the same page on the current target.
+ * them to send each old address to the same page on the current target
+ * (site/scripts/cloudflare-redirects.mjs --legacy).
  */
 export const LEGACY_ORIGINS = Object.freeze(targets.legacy.map((legacy, i) => checkedTarget(legacy, `legacy origin ${i}`)));
 
@@ -108,16 +107,16 @@ export const basePath = target.basePath;
 /**
  * The origins besides the page's own that may answer a clip (`<video>`).
  *
- * The phonometry.dev preview answers a clip with a redirect to docs.jmrp.io,
- * which serves byte ranges (site/worker/lib/rules.mjs, rule
- * clips-to-range-host), and a browser checks the Content-Security-Policy of
- * the page against the address a media load is redirected to. Both policies
- * every page carries, the meta tag in astro.config.mjs and the header in
- * site/worker/lib/headers.mjs, list these in `media-src`. On docs.jmrp.io the
- * entry is the page's own origin, so the build it serves behaves as before.
- * A new clip host is added here first: the staging step refuses a build whose
- * pages do not allow every origin listed, and apply-rules.mjs refuses a clip
- * host that is not listed.
+ * phonometry.dev answers a clip with a redirect to a host that serves byte
+ * ranges (site/worker/lib/rules.mjs, rule clips-to-range-host), and a browser
+ * checks the Content-Security-Policy of the page against the address a media
+ * load is redirected to. Both policies every page carries, the meta tag in
+ * astro.config.mjs and the header in site/worker/lib/headers.mjs, list these
+ * in `media-src`. A new clip host is added here first: the staging step
+ * refuses a build whose pages do not allow every origin listed, and
+ * apply-rules.mjs refuses a clip host that is not listed. The clip host and
+ * `clipBase` change together, in site-targets.json; site/worker/README.md
+ * ("Where the clips are served from") names the two values for each host.
  */
 export const mediaOrigins = Object.freeze([...targets.mediaOrigins]);
 

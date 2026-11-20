@@ -42,9 +42,9 @@ guide covers the acquisition itself, per ISO 18233: the exponential sine
 sweep and its deconvolution, the MLS correlation method, and where to place
 sources and microphones so the averaged result means something. Turning the
 measured IR into room parameters lives in
-[Room Acoustics](/phonometry/buildings/rooms/room-acoustics/); the same IR measured
+[Room Acoustics](/buildings/rooms/room-acoustics/); the same IR measured
 either side of a partition becomes sound insulation in
-[Field Insulation Measurement (ISO 16283)](/phonometry/buildings/insulation/insulation-field/).
+[Field Insulation Measurement (ISO 16283)](/buildings/insulation/insulation-field/).
 
 ## Two deterministic excitations (ISO 18233)
 
@@ -338,7 +338,7 @@ unchanged) that also carries the sample rate and method and adds a `.plot()`.
 Two more excitations from the transfer-function literature (complementary
 Golay pairs, whose deconvolution is exact and noise-free, and sweeps shaped to
 an arbitrary target spectrum) live in the
-[system-measurement guide](/phonometry/signals/spectra/system-measurement/) and
+[system-measurement guide](/signals/spectra/system-measurement/) and
 return the same result types.
 
 **The two excitations.** The exponential sweep sweeps its energy up the
@@ -383,7 +383,7 @@ broadband IR: the direct sound, discrete early reflections and the decaying
 diffuse tail. Its `.plot()` shows the waveform above and the log-magnitude
 envelope with the Schroeder energy-decay curve below: the straight decay
 whose slope becomes the reverberation time in the
-[Room Acoustics guide](/phonometry/buildings/rooms/room-acoustics/).
+[Room Acoustics guide](/buildings/rooms/room-acoustics/).
 
 <Video
   name="anim_sweep_deconvolution"
@@ -518,7 +518,7 @@ from the nearest reflecting surface **including the floor**.
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_room_measurement_section.svg" alt="Section through a 10 by 6 by 3.5 metre room: a dodecahedron on a stand with its acoustic centre dimensioned 1.5 metres above the floor and its 2.0 metre d_min exclusion circle clipped to the room, two microphones on stands at 1.2 metres with the 2 metre minimum spacing and the 1 metre clearances to the ceiling, the floor and the end wall, and beneath the section the ISO 3382-1 Table 1 omnidirectionality tolerances of plus or minus 1, 1, 1, 3, 5 and 6 decibels from 125 Hz to 4 kHz together with the level and receiving-chain requirements" width="94%" />
 
 The same 45 dB is what the T30 validity flag checks downstream: the
-[Room Acoustics guide](/phonometry/buildings/rooms/room-acoustics/) rejects a
+[Room Acoustics guide](/buildings/rooms/room-acoustics/) rejects a
 band whose decay range does not clear the evaluation window by 15 dB, and that
 rejection is usually a source-level problem, not a processing one.
 
@@ -572,7 +572,7 @@ Four placement mistakes bias the mean itself:
   (2.0 m for the 10 × 6 × 3.5 m room of the drawings above, V = 210 m³, with
   an expected 0.6 s).
 - **Low-frequency luck.** Below the Schroeder frequency (see the
-[Room Acoustics guide](/phonometry/buildings/rooms/room-acoustics/)) each band
+[Room Acoustics guide](/buildings/rooms/room-acoustics/)) each band
   holds only a handful of room modes, and a microphone on a node of one of
   them sees a different decay than a microphone on an antinode. The spread
   of the 63-125 Hz bands across positions is structurally larger; the cure
@@ -687,7 +687,7 @@ preferably shown on that plan together with their heights; the measuring
 apparatus and microphones; the evaluation method for the decay curves; how the
 result was averaged in each position and over positions; the results table;
 and the date and the measuring organisation. The fiche of the
-[Room Acoustics guide](/phonometry/buildings/rooms/room-acoustics/) carries
+[Room Acoustics guide](/buildings/rooms/room-acoustics/) carries
 most of these as `ReportMetadata` fields, but the scaled plan with the
 positions on it has to be supplied alongside it.
 
@@ -696,16 +696,16 @@ positions on it has to be supplied alongside it.
 The IR leaves this page in several directions. Band-filtered and
 backward-integrated it becomes the decay curve whose slope is the
 reverberation time: the
-[Room Acoustics guide](/phonometry/buildings/rooms/room-acoustics/) picks up exactly
+[Room Acoustics guide](/buildings/rooms/room-acoustics/) picks up exactly
 there, and its open-plan sibling walks the
-[ISO 3382-3 line of workstations](/phonometry/buildings/rooms/open-plan-acoustics/).
+[ISO 3382-3 line of workstations](/buildings/rooms/open-plan-acoustics/).
 Measured either side of a partition, the same sweeps feed the level
 differences of
-[field sound insulation](/phonometry/buildings/insulation/insulation-field/). And the
+[field sound insulation](/buildings/insulation/insulation-field/). And the
 harmonic distortion that the exponential sweep pushes to negative arrival
 times is not always discarded: read deliberately, it becomes the THD
 analysis of the
-[swept-sine distortion guide](/phonometry/devices/electroacoustics/swept-sine-distortion/).
+[swept-sine distortion guide](/devices/electroacoustics/swept-sine-distortion/).
 
 ## What this guide covers
 
@@ -732,7 +732,7 @@ chain) are outside the library. ISO 18233's time-variance and distortion
 diagnostics are not implemented: the guide explains how the sweep separates
 distortion, but no helper quantifies it (that reading lives in the [swept-sine
 distortion
-guide](/phonometry/devices/electroacoustics/swept-sine-distortion/)). The
+guide](/devices/electroacoustics/swept-sine-distortion/)). The
 position rules are guidance prose: nothing checks how many positions were
 measured or where.
 </ScopeClaim>
@@ -742,26 +742,26 @@ measured or where.
 
 ## See also
 
-- [Room Acoustics](/phonometry/buildings/rooms/room-acoustics/): the decay analysis
+- [Room Acoustics](/buildings/rooms/room-acoustics/): the decay analysis
   and ISO 3382 parameters computed from the IR this page acquires.
-- [Open-Plan Office Acoustics (ISO 3382-3)](/phonometry/buildings/rooms/open-plan-acoustics/):
+- [Open-Plan Office Acoustics (ISO 3382-3)](/buildings/rooms/open-plan-acoustics/):
   the speech-privacy line measured with the same acquisition.
-- [System Measurement](/phonometry/signals/spectra/system-measurement/):
+- [System Measurement](/signals/spectra/system-measurement/):
   complementary Golay pairs and spectrally shaped sweeps, returning the same
   result types.
-- [Swept-Sine Distortion & Phase](/phonometry/devices/electroacoustics/swept-sine-distortion/):
+- [Swept-Sine Distortion & Phase](/devices/electroacoustics/swept-sine-distortion/):
   the Farina reading of the distortion the sweep separates.
-- [Field Insulation Measurement (ISO 16283)](/phonometry/buildings/insulation/insulation-field/):
+- [Field Insulation Measurement (ISO 16283)](/buildings/insulation/insulation-field/):
   the same measurement either side of a partition.
-- [Image Sources & Steady-State Field](/phonometry/buildings/rooms/room-image-sources/):
+- [Image Sources & Steady-State Field](/buildings/rooms/room-image-sources/):
   simulated impulse responses to rehearse the processing chain on.
-- [Theory](/phonometry/reference/theory/rooms-buildings/): the Schroeder
+- [Theory](/reference/theory/rooms-buildings/): the Schroeder
   integration the decay analysis applies to this IR.
-- [Conformance report](/phonometry/reference/conformance/):
+- [Conformance report](/reference/conformance/):
   the closed-form deconvolution check this acquisition is validated against, a
   sweep that recovers a known response.
-- API reference: [`room`: impulse response](/phonometry/reference/api/rooms/impulse-response/).
-- Theory: [Impulse response and room-acoustic parameters](/phonometry/reference/theory/rooms-buildings/#impulse-response-and-room-acoustic-parameters-iso-18233-iso-3382-1-2-3): the Schroeder backward integration and the deconvolution the sweep method rests on.
+- API reference: [`room`: impulse response](/reference/api/rooms/impulse-response/).
+- Theory: [Impulse response and room-acoustic parameters](/reference/theory/rooms-buildings/#impulse-response-and-room-acoustic-parameters-iso-18233-iso-3382-1-2-3): the Schroeder backward integration and the deconvolution the sweep method rests on.
 
 </SeeAlso>
 

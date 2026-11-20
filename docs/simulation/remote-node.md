@@ -1,6 +1,6 @@
 <!-- Written by `make llms` from site/src/content/docs/simulation/remote-node.mdx: edit that page and its Spanish twin, then run `make llms`. -->
 
-← [Documentation index](../README.md) · Published at https://docs.jmrp.io/phonometry/simulation/remote-node/
+← [Documentation index](../README.md) · Published at https://phonometry.dev/simulation/remote-node/
 
 # Sending a simulation to a remote node
 
@@ -488,10 +488,10 @@ publish too.
   the elastic run, which goes to a node the same way.
 - [Writing animations and FDTD runs to video](../io/videos.md): the two
   writers, and in section 5 the video of a run made on a node.
-- API reference: [`simulation.compute`](https://docs.jmrp.io/phonometry/reference/api/simulation/compute/),
-  [`simulation.fdtd`](https://docs.jmrp.io/phonometry/reference/api/simulation/fdtd/),
-  [`simulation.elastic_fdtd`](https://docs.jmrp.io/phonometry/reference/api/simulation/elastic-fdtd/),
-  [`simulation.video`](https://docs.jmrp.io/phonometry/reference/api/simulation/video/).
+- API reference: [`simulation.compute`](https://phonometry.dev/reference/api/simulation/compute/),
+  [`simulation.fdtd`](https://phonometry.dev/reference/api/simulation/fdtd/),
+  [`simulation.elastic_fdtd`](https://phonometry.dev/reference/api/simulation/elastic-fdtd/),
+  [`simulation.video`](https://phonometry.dev/reference/api/simulation/video/).
 
 ## Quick answers
 

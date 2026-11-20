@@ -1,6 +1,6 @@
 <!-- Written by `make llms` from site/src/content/docs/vibration/immission/railway-prediction.mdx: edit that page and its Spanish twin, then run `make llms`. -->
 
-← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/vibration/immission/railway-prediction/
+← [Documentation index](../../README.md) · Published at https://phonometry.dev/vibration/immission/railway-prediction/
 
 # Predicting railway vibration (E DIN 45672-3)
 
@@ -327,7 +327,7 @@ normative on one page and informative on its own.
 - [Predicting vibration before measuring (DIN 4150-1)](vibration-prediction.md):
   the general decay law this method's Formula (5) is a case of.
 - API reference:
-  [`vibration.immission.railway_prediction`](https://docs.jmrp.io/phonometry/reference/api/vibration/railway-prediction/).
+  [`vibration.immission.railway_prediction`](https://phonometry.dev/reference/api/vibration/railway-prediction/).
 
 ## References
 

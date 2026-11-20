@@ -19,12 +19,12 @@ This module computes the families set out in M. P. Norton and D. G. Karczub,
 8.4.7 pumps, 8.4.8 electrical equipment), and hands them to the signal chain
 that already exists in `phonometry.signals`: band-pass the structural
 resonance the defect impacts ring, detect its envelope and transform it
-([`envelope_spectrum`](/phonometry/reference/api/signals/envelope/#envelope_spectrum)), average
+([`envelope_spectrum`](/reference/api/signals/envelope/#envelope_spectrum)), average
 synchronously with the shaft
-([`time_synchronous_average`](/phonometry/reference/api/signals/synchronous-average/#time_synchronous_average))
+([`time_synchronous_average`](/reference/api/signals/synchronous-average/#time_synchronous_average))
 or collapse the harmonic families in the cepstrum
-([`cepstrum`](/phonometry/reference/api/signals/cepstrum/#cepstrum)). The result object's
-[`FaultFrequencyResult.plot`](/phonometry/reference/api/vibration/diagnostics/#faultfrequencyresultplot) draws the predicted lines **on top of a
+([`cepstrum`](/reference/api/signals/cepstrum/#cepstrum)). The result object's
+[`FaultFrequencyResult.plot`](/reference/api/vibration/diagnostics/#faultfrequencyresultplot) draws the predicted lines **on top of a
 measured envelope spectrum**, which is the working view.
 
 **Rolling-contact bearings** (Eqs. 8.4 to 8.14, after Shahan & Kamperman).
@@ -95,8 +95,8 @@ sets up rotating pressure patterns with $m_\mathrm{L} = n N \pm k V$ lobes for
 `V` vanes (Eq. 8.16), turning at $n N N_\mathrm{rpm} / m_\mathrm{L}$ r/min
 (Eq. 8.17). That is a speed of rotation, not a tone: the noise of every pattern
 is at the blade-passing harmonic it comes from (Norton, p. 525), so the
-patterns come back as [`LobePattern`](/phonometry/reference/api/vibration/diagnostics/#lobepattern) records beside the lines of a
-[`BladePassResult`](/phonometry/reference/api/vibration/diagnostics/#bladepassresult), never as lines, and the sign of $m_\mathrm{L}$
+patterns come back as [`LobePattern`](/reference/api/vibration/diagnostics/#lobepattern) records beside the lines of a
+[`BladePassResult`](/reference/api/vibration/diagnostics/#bladepassresult), never as lines, and the sign of $m_\mathrm{L}$
 is kept, because it is the sense in which the pattern turns. The faster a
 pattern turns, the more sound power it radiates, the reason a careful choice of
 `N` and `V` matters.
@@ -151,7 +151,7 @@ both are independent of which race turns (Norton's Eqs. 8.8 and 8.14, and
 | `contact_angle_deg` | Contact angle `phi` between element and raceway, in degrees (Default: 0, a radial ball bearing); `0 <= phi < 90`. |
 | `rotating_race` | Which race turns with the shaft, `"inner"` (Default) or `"outer"`. |
 
-**Returns:** A [`FaultFrequencyResult`](/phonometry/reference/api/vibration/diagnostics/#faultfrequencyresult) (source `"rolling-contact bearing"`).
+**Returns:** A [`FaultFrequencyResult`](/reference/api/vibration/diagnostics/#faultfrequencyresult) (source `"rolling-contact bearing"`).
 
 **Raises**
 
@@ -192,9 +192,9 @@ pattern is at the blade-passing harmonic it comes from (Norton, p. 525).
 The lobe count is what a duct sees, since a pattern can set up a
 higher-order duct mode with the same pressure distribution, and the faster
 a pattern turns, the more sound power it radiates. Give *n_vanes* and the
-patterns come back in [`BladePassResult.lobe_patterns`](/phonometry/reference/api/vibration/diagnostics/#bladepassresult), one
-[`LobePattern`](/phonometry/reference/api/vibration/diagnostics/#lobepattern) per `(n, k)`, never among the lines, so neither
-[`plot`](/phonometry/reference/api/vibration/diagnostics/#faultfrequencyresultplot) nor [`combine_fault_lines`](/phonometry/reference/api/vibration/diagnostics/#combine_fault_lines) marks
+patterns come back in [`BladePassResult.lobe_patterns`](/reference/api/vibration/diagnostics/#bladepassresult), one
+[`LobePattern`](/reference/api/vibration/diagnostics/#lobepattern) per `(n, k)`, never among the lines, so neither
+[`plot`](/reference/api/vibration/diagnostics/#faultfrequencyresultplot) nor [`combine_fault_lines`](/reference/api/vibration/diagnostics/#combine_fault_lines) marks
 one on a spectrum. A negative $m_\mathrm{L}$, which Eq. (8.16) gives
 when $k\, N_{\text{vanes}}$ exceeds $n\, N_{\text{blades}}$, is
 a pattern turning against the rotor, and its speed keeps that sign.
@@ -209,7 +209,7 @@ a pattern turning against the rotor, and its speed keeps that sign.
 | `n_vanes` | Number of stator vanes `V` (integer >= 1) to include the lobed interaction patterns (Default: `None`, blade tones only and no patterns). |
 | `n_lobe_orders` | Highest `\|k\|` in $m_\mathrm{L} = n\, N_{\text{blades}} \pm k\, N_{\text{vanes}}$ (integer >= 1, Default: 1). |
 
-**Returns:** A [`BladePassResult`](/phonometry/reference/api/vibration/diagnostics/#bladepassresult) (source `"bladed rotor"`): the shaft and blade-passing lines, and the lobe patterns apart from them.
+**Returns:** A [`BladePassResult`](/reference/api/vibration/diagnostics/#bladepassresult) (source `"bladed rotor"`): the shaft and blade-passing lines, and the lobe patterns apart from them.
 
 **Raises**
 
@@ -232,9 +232,9 @@ BladePassResult(
 
 The blade-passing lines of a bladed rotor and its interaction patterns.
 
-A [`FaultFrequencyResult`](/phonometry/reference/api/vibration/diagnostics/#faultfrequencyresult) whose lines are the shaft rate and the
+A [`FaultFrequencyResult`](/reference/api/vibration/diagnostics/#faultfrequencyresult) whose lines are the shaft rate and the
 blade-passing harmonics alone, so that `plot`,
-[`within`](/phonometry/reference/api/vibration/diagnostics/#faultfrequencyresultwithin) and [`combine_fault_lines`](/phonometry/reference/api/vibration/diagnostics/#combine_fault_lines) treat
+[`within`](/reference/api/vibration/diagnostics/#faultfrequencyresultwithin) and [`combine_fault_lines`](/reference/api/vibration/diagnostics/#combine_fault_lines) treat
 it as any other family of lines. The lobe patterns of a ducted fan are
 speeds of rotation, not lines, and are held apart in
 `lobe_patterns`: no plot marks them on a spectrum and no merge
@@ -244,8 +244,8 @@ carries them as frequencies.
 
 | Name | Description |
 | :--- | :--- |
-| `lobe_patterns` | The [`LobePattern`](/phonometry/reference/api/vibration/diagnostics/#lobepattern) records of Eqs. (8.16) and (8.17), by blade harmonic, then by $\vert k\vert $, the minus sign first; empty when no vane count was given. |
-| `lines` | The predicted [`FaultLine`](/phonometry/reference/api/vibration/diagnostics/#faultline) entries, in the order the generating function produced them. |
+| `lobe_patterns` | The [`LobePattern`](/reference/api/vibration/diagnostics/#lobepattern) records of Eqs. (8.16) and (8.17), by blade harmonic, then by $\vert k\vert $, the minus sign first; empty when no vane count was given. |
+| `lines` | The predicted [`FaultLine`](/reference/api/vibration/diagnostics/#faultline) entries, in the order the generating function produced them. |
 | `shaft_rate` | Shaft rotational frequency `fs`, in hertz. |
 | `source` | Description of the element (`"rolling-contact bearing"`, `"gear pair"`, ...), used as the plot title. |
 
@@ -264,17 +264,17 @@ A gearbox bearing carries its own bearing lines, the mesh family of the
 gear it supports and the shaft harmonics; this puts them on one axes.
 Duplicate names are disambiguated by appending the source of the family
 they came from. Only lines are merged: the lobe patterns of a
-[`BladePassResult`](/phonometry/reference/api/vibration/diagnostics/#bladepassresult) are speeds of rotation, not frequencies, and are
+[`BladePassResult`](/reference/api/vibration/diagnostics/#bladepassresult) are speeds of rotation, not frequencies, and are
 not carried into the merged family.
 
 **Parameters**
 
 | Name | Description |
 | :--- | :--- |
-| `results` | Two or more [`FaultFrequencyResult`](/phonometry/reference/api/vibration/diagnostics/#faultfrequencyresult) objects. |
+| `results` | Two or more [`FaultFrequencyResult`](/reference/api/vibration/diagnostics/#faultfrequencyresult) objects. |
 | `source` | Label for the merged family (Default: the sources joined by `" + "`). |
 
-**Returns:** A [`FaultFrequencyResult`](/phonometry/reference/api/vibration/diagnostics/#faultfrequencyresult) holding every line.
+**Returns:** A [`FaultFrequencyResult`](/reference/api/vibration/diagnostics/#faultfrequencyresult) holding every line.
 
 **Raises**
 
@@ -299,7 +299,7 @@ A family of predicted fault lines for one machine element.
 
 | Name | Description |
 | :--- | :--- |
-| `lines` | The predicted [`FaultLine`](/phonometry/reference/api/vibration/diagnostics/#faultline) entries, in the order the generating function produced them. |
+| `lines` | The predicted [`FaultLine`](/reference/api/vibration/diagnostics/#faultline) entries, in the order the generating function produced them. |
 | `shaft_rate` | Shaft rotational frequency `fs`, in hertz. |
 | `source` | Description of the element (`"rolling-contact bearing"`, `"gear pair"`, ...), used as the plot title. |
 
@@ -371,7 +371,7 @@ FaultFrequencyResult.plot(
 Overlay the predicted lines on a measured envelope spectrum.
 
 Pass the measurement as `spectrum=` (an
-[`EnvelopeSpectrumResult`](/phonometry/reference/api/signals/envelope/#envelopespectrumresult), or any
+[`EnvelopeSpectrumResult`](/reference/api/signals/envelope/#envelopespectrumresult), or any
 object exposing `frequencies` and `amplitude`); without it the
 predicted lines are drawn alone as a labelled stem plot.
 
@@ -432,7 +432,7 @@ One predicted discrete line of a machine's kinematic signature.
 
 | Name | Description |
 | :--- | :--- |
-| `name` | Short label, unique within a result (`"BPFO"`, `"2xGMF"`, `"GMF-1x"`, ...). Acronyms are language neutral and are what the [`FaultFrequencyResult.plot`](/phonometry/reference/api/vibration/diagnostics/#faultfrequencyresultplot) overlay annotates. |
+| `name` | Short label, unique within a result (`"BPFO"`, `"2xGMF"`, `"GMF-1x"`, ...). Acronyms are language neutral and are what the [`FaultFrequencyResult.plot`](/reference/api/vibration/diagnostics/#faultfrequencyresultplot) overlay annotates. |
 | `frequency` | Predicted frequency, in hertz. |
 | `order` | Frequency expressed in shaft orders, `frequency / fs`. |
 | `family` | One of `"shaft"`, `"bearing"`, `"gear"`, `"motor"` or `"blade"`. |
@@ -475,7 +475,7 @@ Only positive sideband frequencies are returned.
 | `n_sidebands` | Sideband order per harmonic (integer >= 0, Default: 0, no sidebands). |
 | `sideband_rate` | Modulation rate `f_mod`, in hertz (> 0, Default: the wheel's own shaft rate). |
 
-**Returns:** A [`FaultFrequencyResult`](/phonometry/reference/api/vibration/diagnostics/#faultfrequencyresult) (source `"gear pair"`).
+**Returns:** A [`FaultFrequencyResult`](/reference/api/vibration/diagnostics/#faultfrequencyresult) (source `"gear pair"`).
 
 **Raises**
 
@@ -539,7 +539,7 @@ it by the pole count.
 | `n_slot_harmonics` | Number of slot-harmonic orders `n` (integer >= 1, Default: 1, the fundamental `R fs` alone). |
 | `n_sidebands` | Sideband order around the fundamental slot harmonic at +/- the shaft rate and +/- the slip frequency (integer >= 0, Default: 0). |
 
-**Returns:** A [`FaultFrequencyResult`](/phonometry/reference/api/vibration/diagnostics/#faultfrequencyresult) (source `"induction motor"`).
+**Returns:** A [`FaultFrequencyResult`](/reference/api/vibration/diagnostics/#faultfrequencyresult) (source `"induction motor"`).
 
 **Raises**
 

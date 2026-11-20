@@ -10,7 +10,7 @@ The dynamic modulus of resilient materials, as a textbook tabulates it.
 A floating floor is a mass on a spring, and the spring is a layer of mineral
 wool, foam or cork. What a designer needs of that layer is its dynamic
 stiffness per unit area `s'`, which `phonometry.materials.resilient`
-measures by EN 29052-1 and which [`PUBLISHED_RESILIENT_LAYERS`](/phonometry/reference/api/materials/dynamic-stiffness/#published_resilient_layers) holds for
+measures by EN 29052-1 and which [`PUBLISHED_RESILIENT_LAYERS`](/reference/api/materials/dynamic-stiffness/#published_resilient_layers) holds for
 fifteen measured specimens of known thickness. A table of materials cannot
 give `s'`, because `s'` belongs to a layer of one thickness; what it can
 give is the modulus the layer is made of, from which
@@ -27,7 +27,7 @@ The dynamic modulus of a fibrous or cellular layer is not a constant of the
 material. It rises with the static load the layer carries, because the fibres
 or the cell walls are pressed together, and the table says so in its heading:
 every value is measured under a static load of about 2 kPa, which is on every
-row as [`ResilientMaterial.static_load_pa`](/phonometry/reference/api/materials/moduli/#resilientmaterial). The text above the table puts
+row as [`ResilientMaterial.static_load_pa`](/reference/api/materials/moduli/#resilientmaterial). The text above the table puts
 numbers on it: rock wool of 150 to 175 kg/m3 is about 0.3 MPa at 2 kPa, about
 20 per cent lower at 1 kPa and about 30 per cent higher at 4 kPa. A screed of
 50 mm of concrete is about 1.2 kPa; a caller with a much heavier or lighter
@@ -66,7 +66,7 @@ Every resilient material whose name contains *name*.
 | Name | Description |
 | :--- | :--- |
 | `name` | Part of a material name as the page prints it, matched without regard to case: `"rock wool"` answers with both of Vigran's rock wools, which only their densities tell apart. |
-| `catalogue` | The rows to search in place of [`PUBLISHED_RESILIENT_MODULI`](/phonometry/reference/api/materials/moduli/#published_resilient_moduli): a catalogue of your own that [`phonometry.io.read_catalogue`](/phonometry/reference/api/io/io/#read_catalogue) returns, `PUBLISHED_RESILIENT_MODULI \| mine` to search both at once, or any mapping of key to row (Default: `None`, which searches [`PUBLISHED_RESILIENT_MODULI`](/phonometry/reference/api/materials/moduli/#published_resilient_moduli)). |
+| `catalogue` | The rows to search in place of [`PUBLISHED_RESILIENT_MODULI`](/reference/api/materials/moduli/#published_resilient_moduli): a catalogue of your own that [`phonometry.io.read_catalogue`](/reference/api/io/io/#read_catalogue) returns, `PUBLISHED_RESILIENT_MODULI \| mine` to search both at once, or any mapping of key to row (Default: `None`, which searches [`PUBLISHED_RESILIENT_MODULI`](/reference/api/materials/moduli/#published_resilient_moduli)). |
 
 **Returns:** The matching rows, in catalogue order. Empty when nothing matches, which is not an error.
 
@@ -74,7 +74,7 @@ Every resilient material whose name contains *name*.
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | for a *catalogue* that is not a mapping, or that holds a row that is not a [`ResilientMaterial`](/phonometry/reference/api/materials/moduli/#resilientmaterial), naming its key. |
+| TypeError | for a *catalogue* that is not a mapping, or that holds a row that is not a [`ResilientMaterial`](/reference/api/materials/moduli/#resilientmaterial), naming its key. |
 
 ## ResilientMaterial
 
@@ -114,14 +114,14 @@ One resilient material's dynamic modulus, as a page printed it.
 
 | Name | Description |
 | :--- | :--- |
-| `density_kg_m3` | Density, in kg/m3. Printed as a range on most rows, which [`ranges`](/phonometry/reference/api/io/io/#cataloguerow) holds. |
+| `density_kg_m3` | Density, in kg/m3. Printed as a range on most rows, which [`ranges`](/reference/api/io/io/#cataloguerow) holds. |
 | `dynamic_youngs_modulus_pa` | The dynamic modulus of elasticity of the material under `static_load_pa`, in pascals. Printed as a range on every row. Divided by a layer's thickness it is that layer's dynamic stiffness per unit area `s'`. |
 | `static_load_pa` | The static load the modulus was measured under, in pascals. The page prints it once, in the heading, as about 2 kPa. |
 | `name` | The material as the table names it, attribution stripped. |
 | `variant` | Which specimen or condition this row is, when the page prints several under one name: `"chemically pure"`, `"direction x"`, `"0.68 mm diameter"`. Empty when the page prints one. |
 | `source` | Document, table, PDF page and printed folio. |
 | `table` | The data file this row was read from, without the extension, which is also the first half of its key in the catalogue that holds it. |
-| `basis` | What the source says a value is: a field name, or `"row"` for the whole row, to one of [`CATALOGUE_BASES`](/phonometry/reference/api/io/io/#catalogue_bases). Hopkins marks most of his Poisson ratios "Estimate", and those cells hold `"estimated"`; a datasheet that declares a class under a product standard would hold `"declared"`. A field with no entry takes the row's, and a row with neither is one whose source does not say, which is a different answer from any of the five. `basis_of` reads it. Independent of `derived`: this is what the source claims for a cell, that is what this library computed. |
+| `basis` | What the source says a value is: a field name, or `"row"` for the whole row, to one of [`CATALOGUE_BASES`](/reference/api/io/io/#catalogue_bases). Hopkins marks most of his Poisson ratios "Estimate", and those cells hold `"estimated"`; a datasheet that declares a class under a product standard would hold `"declared"`. A field with no entry takes the row's, and a row with neither is one whose source does not say, which is a different answer from any of the five. `basis_of` reads it. Independent of `derived`: this is what the source claims for a cell, that is what this library computed. |
 | `approximate` | Fields the page prints with a `~`. Not an estimate and not an interval: a number the author rounded on purpose. |
 | `derived` | Field to how it was computed, for the ones this library worked out from the cells the page did print. A derived value is never stored as if it had been read, and on every row the library builds it follows again from the row's own cells: `from_printed` writes it, and nothing else in the library does. One a caller passes to the literal constructor is the caller's word, which the row keeps and `printed_fields` leaves out with its value, as it leaves out every derived one. When the printed cells a value rests on do not all have one `basis`, the text names the basis of each, so a modulus worked out from a plate speed and a Poisson ratio Hopkins marks as an estimate says it rests on that estimate. A value converted from the unit the page prints is not derived (`converted` holds it), and neither is one the page gives by reference to another of its rows (`carried` does). |
 | `converted` | Field to `(figure, unit)`, the page's figure and the unit it is in, for a value this row holds in a unit the page does not use. Ver and Beranek print their damping materials in degrees Fahrenheit and pounds per square inch, and the row holds degrees Celsius and pascals, so `("3e5", "psi")` sits beside a modulus in pascals. The figure is kept as the page writes it, so the cell can always be read back in the page's own terms. The unit is the one the page prints with the figure or over its column. Long prints the figures of his musician bare, and the sabins recorded for them are a reading of the table, which is set in inches and pounds and names sabins on the next row; that row's note says so. A figure written in another unit of the same kind as the field's (`thickness_m` for `thickness_mm`, `flow_resistivity_kpa_s_m2` for `flow_resistivity_pa_s_m2`) is converted by `from_printed` and recorded here, whether it is a value, the end of a range or one of several readings; for a range the figure is the printed end of a bound, or both ends as `"5 to 10"`, and for readings the list as the page gives it. A packaged table transcribed in the base unit with only its SI prefix changed, such as the megapascals of Rossing Table 15.5, holds no entry here, and the table's `about` says so. |
@@ -145,7 +145,7 @@ One resilient material's dynamic modulus, as a page printed it.
 ResilientMaterial.basis_of(field_name: str) -> str
 ```
 
-What the source says this field is, one of [`CATALOGUE_BASES`](/phonometry/reference/api/io/io/#catalogue_bases).
+What the source says this field is, one of [`CATALOGUE_BASES`](/reference/api/io/io/#catalogue_bases).
 
 The five are `measured`, `declared`, `calculated`, `estimated`
 and `extended`.
@@ -175,7 +175,7 @@ unit of the same kind as its field (`thickness_m` for
 `thickness_mm`, `flow_resistivity_kpa_s_m2` for
 `flow_resistivity_pa_s_m2`), or in a unit the class takes as an
 alias of its own (an
-[`AbsorptionAreaSpectrum`](/phonometry/reference/api/materials/measured/#absorptionareaspectrum) takes
+[`AbsorptionAreaSpectrum`](/reference/api/materials/measured/#absorptionareaspectrum) takes
 `absorption_area_125_ft2` for `absorption_area_125_m2`), is
 converted on its digits with an exact factor and rounded once,
 whether it is a value or stands as the key of a hedge (the ends of a

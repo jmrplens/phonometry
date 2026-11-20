@@ -1,6 +1,6 @@
 <!-- Written by `make llms` from site/src/content/docs/materials/index.mdx: edit that page and its Spanish twin, then run `make llms`. -->
 
-← [Documentation index](../README.md) · Published at https://docs.jmrp.io/phonometry/materials/
+← [Documentation index](../README.md) · Published at https://phonometry.dev/materials/
 
 # Materials and surfaces
 
@@ -168,7 +168,7 @@ quantities, the in-situ subtraction and the scattering and diffusion
 coefficients.
 
 If you came here for a number rather than for a method, the
-[published catalogues](https://docs.jmrp.io/phonometry/reference/catalogues/) page holds every
+[published catalogues](https://phonometry.dev/reference/catalogues/) page holds every
 value this library reads from a printed page, one table per catalogue, with
 the book and the page each row was read on.
 

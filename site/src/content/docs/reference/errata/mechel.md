@@ -8,7 +8,7 @@ corrects:
 
 <!-- Generated from docs/ERRATA.md by scripts/generate_site_reports.py (`make site-reports`). Edit the source document, never this page. -->
 
-This is the entry of the [errata registry](/phonometry/reference/errata/) on Mechel (2008). The registry's introduction says how each claim is checked against the printed page and what the status of an entry means.
+This is the entry of the [errata registry](/reference/errata/) on Mechel (2008). The registry's introduction says how each claim is checked against the printed page and what the status of an entry means.
 
 ## Mechel (2008), Table 3 (a wall impedance its own Equation (11) does not give)
 

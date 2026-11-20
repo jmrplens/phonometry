@@ -47,7 +47,7 @@ structural-vibroacoustics chain: the source is described by its characteristic
 structure-borne sound power level $L_\mathrm{Ws,c}$, derived from the EN 15657
 reception-plate measurement through the Formula (15)/(17) conversion and a
 mobility correction (**not** the raw plate-injected level;
-see [EN 15657](/phonometry/buildings/design/structure-borne-power/)); the source and
+see [EN 15657](/buildings/design/structure-borne-power/)); the source and
 receiver point mobilities set how much power is actually coupled into the
 structure, and the building transmission carries it to the receiving room. The
 Annex I mobility correction `installed_power_from_reception_plate` refers the
@@ -138,7 +138,7 @@ $L_\mathrm{Ws,n} + 10\log_{10}(Y_{\infty,i}/Y_{\infty,\mathrm{rec}})$ when it is
 On the Annex I.3 cistern both give 68.2 dB at 63 Hz, from
 $L_\mathrm{Ws,c} = 84.4$ dB and $D_\mathrm{C} = 16.2$ dB. Note which quantity you are handed:
 $L_\mathrm{Ws,c}$ is the input this page takes, and it is *not* the 68.2 dB the
-[EN 15657 page](/phonometry/buildings/design/structure-borne-power/) prints as
+[EN 15657 page](/buildings/design/structure-borne-power/) prints as
 its installed level because feeding that in subtracts $D_\mathrm{C}$ twice.
 
 The physics behind $D_\mathrm{C}$ is the classical power input of a point-excited
@@ -146,9 +146,9 @@ plate: only the real part of the receiver's driving-point mobility absorbs
 power, and the mismatch between $Y_\mathrm{s}$ and $Y_i$ decides how much of the
 source's capability ever enters the structure (Hopkins 2007, Section 2.8).
 The mobilities themselves come from the
-[mechanical-mobility chain](/phonometry/vibration/structural/mechanical-mobility/): measured
+[mechanical-mobility chain](/vibration/structural/mechanical-mobility/): measured
 per ISO 7626, or from the infinite-plate closed forms of
-[panel theory](/phonometry/buildings/design/panel-sound-insulation/) when no measurement
+[panel theory](/buildings/design/panel-sound-insulation/) when no measurement
 exists. A pump on a concrete slab is the textbook force source: its casing
 mobility is orders of magnitude above the slab's, so $D_\mathrm{C}$ collapses to
 Formula 19c and the injected power no longer depends on the receiver at all.
@@ -323,7 +323,7 @@ print(round(float(-10 * np.log10(1 - j0(2 * k_b * a))), 1))    # 11.9 dB less
 
 The transfer mobility $Y_k$ of Formula (19e) is not a plate quantity at all: it
 is the dynamic transfer stiffness of the mount, measured on the
-[ISO 10846 rig](/phonometry/vibration/structural/transfer-stiffness/). The fixing
+[ISO 10846 rig](/vibration/structural/transfer-stiffness/). The fixing
 position and the mount's data sheet both belong in the report's `notes`, because
 they are the two things that make a repeat prediction reproducible.
 
@@ -347,7 +347,7 @@ about 1000 Hz": it gives 157 dB and 160 dB at 2 kHz and 4 kHz where the table
 flattens at 156 dB, so read the table where the table exists and the closed
 form only for the one-third-octave bands it does not tabulate. And the levels
 are re $10^{-6}$ N despite the "re 1 pN" the caption prints; see the
-[errata registry](/phonometry/reference/errata/).
+[errata registry](/reference/errata/).
 
 Clause D.1.3 then treats the machine as a force source with the mass-like
 mobility of its 0.5 kg hammers, which turns the table into the two inputs this
@@ -486,7 +486,7 @@ raised.
 :::
 
 Every input of Formula (F.3) is already available:
-[`in_situ_element`](/phonometry/buildings/design/detailed-prediction/#in_situ_element-parameters)
+[`in_situ_element`](/buildings/design/detailed-prediction/#in_situ_element-parameters)
 returns the in-situ structural reverberation time, the radiation factor and $R$
 for the element, and `structure_to_airborne_adjustment` is Formula (F.3)
 itself.
@@ -581,7 +581,7 @@ states Formulae 18a/17 and the prediction disclaimer. Rendering needs reportlab 
 Two numbers in the snippet below are the standard's, not invented: `16.2` is the
 coupling term of the Annex I.3 cistern at its wall contact, and the `lwc` array is
 that cistern's characteristic power level, the 84.4 dB the
-[EN 15657 page](/phonometry/buildings/design/structure-borne-power/) derives at
+[EN 15657 page](/buildings/design/structure-borne-power/) derives at
 63 Hz. `requirement` is compared against `overall_level`, so the 45 dB below is an
 *unweighted* band-sum limit; a regulation stated in dB(A) has to be checked
 against the A-weighted sum of the previous section instead, and against this
@@ -661,17 +661,17 @@ revision.
 
 ## See also
 
-- [Structure-borne sound power of equipment (EN 15657)](/phonometry/buildings/design/structure-borne-power/):
+- [Structure-borne sound power of equipment (EN 15657)](/buildings/design/structure-borne-power/):
   the reception-plate characterisation that supplies $L_\mathrm{Ws,c}$ and the source
   mobility this prediction consumes.
-- [Mechanical mobility and the FRF family (ISO 7626-1)](/phonometry/vibration/structural/mechanical-mobility/):
+- [Mechanical mobility and the FRF family (ISO 7626-1)](/vibration/structural/mechanical-mobility/):
   the measured $Y_\mathrm{s}$ and $Y_i$ behind the coupling term.
-- [Bending-wave transmission at plate junctions](/phonometry/vibration/structural/junction-transmission/):
+- [Bending-wave transmission at plate junctions](/vibration/structural/junction-transmission/):
   the junction physics that carries the installed power to the flanking
   radiators.
-- [Predicting Sound Insulation (EN 12354)](/phonometry/buildings/design/insulation-prediction/):
+- [Predicting Sound Insulation (EN 12354)](/buildings/design/insulation-prediction/):
   the airborne and impact members of the same prediction family.
-- API reference: [`building.prediction.installed_structure_borne`](/phonometry/reference/api/building/installed-structure-borne/).
-- Theory: [Point mobilities and radiation efficiency](/phonometry/reference/theory/vibration/#point-mobilities-and-radiation-efficiency-cremer-5-hopkins-29): the mobility and radiation-efficiency theory the installed level is predicted from.
+- API reference: [`building.prediction.installed_structure_borne`](/reference/api/building/installed-structure-borne/).
+- Theory: [Point mobilities and radiation efficiency](/reference/theory/vibration/#point-mobilities-and-radiation-efficiency-cremer-5-hopkins-29): the mobility and radiation-efficiency theory the installed level is predicted from.
 
 </SeeAlso>

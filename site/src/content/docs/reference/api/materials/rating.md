@@ -110,7 +110,7 @@ Weighted sound absorption rating (ISO 11654:1997).
 | `measured` | Practical absorption coefficients `alpha_p` used for the rating (snapped to the 0.05 grid of Clause 4.1). |
 | `shifted_reference` | Reference curve of Figure 1 after the final shift. |
 | `third_octave_alpha_s` | The fifteen one-third-octave sound absorption coefficients `alpha_s` (200 Hz to 5000 Hz, ISO 354) the rating was built from, as given; `None` when the rating was formed from octave practical coefficients only. Carried so the fiche can show the full one-third-octave table every accredited ISO 354 certificate reports. |
-| `third_octave_bands` | The one-third-octave centre frequencies, in Hz, that pair with `third_octave_alpha_s` (the module [`RATING_THIRD_OCTAVE_BANDS_HZ`](/phonometry/reference/api/materials/rating/#rating_third_octave_bands_hz)); `None` when `third_octave_alpha_s` is. |
+| `third_octave_bands` | The one-third-octave centre frequencies, in Hz, that pair with `third_octave_alpha_s` (the module [`RATING_THIRD_OCTAVE_BANDS_HZ`](/reference/api/materials/rating/#rating_third_octave_bands_hz)); `None` when `third_octave_alpha_s` is. |
 
 ### AbsorptionRatingResult.plot()
 
@@ -163,7 +163,7 @@ line, an optional metadata header block, an absorption table beside the
 practical-versus-shifted-reference plot (the result's own `plot`),
 the boxed `alpha_w` result with its absorption class, an optional
 verdict row and a footer with the fixed disclaimer. When the rating was
-built by [`weighted_absorption_from_third_octave`](/phonometry/reference/api/materials/rating/#weighted_absorption_from_third_octave), the table is the
+built by [`weighted_absorption_from_third_octave`](/reference/api/materials/rating/#weighted_absorption_from_third_octave), the table is the
 full ISO 354 one-third-octave `alpha_s` table with the octave
 `alpha_p` on the matching rows, as accredited certificates print it.
 
@@ -172,7 +172,7 @@ full ISO 354 one-third-octave `alpha_s` table with the octave
 | Name | Description |
 | :--- | :--- |
 | `path` | Destination path of the PDF file. |
-| `metadata` | Optional [`ReportMetadata`](/phonometry/reference/api/building/insulation/#reportmetadata); `None` produces a prediction fiche (body, result and disclaimer only). A supplied `requirement` is read as the minimum `alpha_w`. |
+| `metadata` | Optional [`ReportMetadata`](/reference/api/building/insulation/#reportmetadata); `None` produces a prediction fiche (body, result and disclaimer only). A supplied `requirement` is read as the minimum `alpha_w`. |
 | `engine` | Rendering back end; only `"reportlab"` is supported. |
 | `verbose` | When `True`, the table adds the ISO 11654 evaluation columns (practical coefficient, shifted reference, unfavourable deviation) instead of the two-column `f \| alpha_p` table. |
 | `language` | Fiche language: `"en"` (default, English) or `"es"` (Spanish, with a comma decimal separator). |
@@ -254,9 +254,9 @@ unfavourable deviations (measured below the shifted curve) is at most
 
 | Name | Description |
 | :--- | :--- |
-| `alpha_p` | The five octave practical coefficients for 250, 500, 1000, 2000 and 4000 Hz (e.g. from [`practical_absorption_coefficient`](/phonometry/reference/api/materials/rating/#practical_absorption_coefficient)), as a sequence ordered low to high or a mapping keyed by band centre frequency (Hz). Inputs are snapped to the 0.05 grid of Clause 4.1. |
+| `alpha_p` | The five octave practical coefficients for 250, 500, 1000, 2000 and 4000 Hz (e.g. from [`practical_absorption_coefficient`](/reference/api/materials/rating/#practical_absorption_coefficient)), as a sequence ordered low to high or a mapping keyed by band centre frequency (Hz). Inputs are snapped to the 0.05 grid of Clause 4.1. |
 
-**Returns:** A frozen [`AbsorptionRatingResult`](/phonometry/reference/api/materials/rating/#absorptionratingresult) with `alpha_w`, the shape indicators, the applied shift, the fitted reference curve and the absorption class.
+**Returns:** A frozen [`AbsorptionRatingResult`](/reference/api/materials/rating/#absorptionratingresult) with `alpha_w`, the shape indicators, the applied shift, the fitted reference curve and the absorption class.
 
 **Raises**
 
@@ -275,11 +275,11 @@ weighted_absorption_from_third_octave(
 
 Weighted absorption rating from one-third-octave `alpha_s` (ISO 11654).
 
-Convenience wrapper over [`practical_absorption_coefficient`](/phonometry/reference/api/materials/rating/#practical_absorption_coefficient) and
-[`weighted_absorption`](/phonometry/reference/api/materials/rating/#weighted_absorption): it forms the octave practical coefficients
+Convenience wrapper over [`practical_absorption_coefficient`](/reference/api/materials/rating/#practical_absorption_coefficient) and
+[`weighted_absorption`](/reference/api/materials/rating/#weighted_absorption): it forms the octave practical coefficients
 `alpha_p` (Clause 4.1) from the fifteen one-third-octave coefficients,
 rates them (Clause 4.2) and returns the same
-[`AbsorptionRatingResult`](/phonometry/reference/api/materials/rating/#absorptionratingresult) as [`weighted_absorption`](/phonometry/reference/api/materials/rating/#weighted_absorption) would, but
+[`AbsorptionRatingResult`](/reference/api/materials/rating/#absorptionratingresult) as [`weighted_absorption`](/reference/api/materials/rating/#weighted_absorption) would, but
 with the input `alpha_s` and its band centres retained on the result so a
 fiche can print the full one-third-octave table that every accredited
 ISO 354 certificate carries.
@@ -290,7 +290,7 @@ ISO 354 certificate carries.
 | :--- | :--- |
 | `third_octave_alpha_s` | The fifteen one-third-octave coefficients `alpha_s` from 200 Hz to 5000 Hz (ISO 354), as a sequence ordered low to high or a mapping keyed by band centre frequency (Hz). Values may exceed 1.00 (reverberation-room measurement); the octave coefficient is capped at 1.00. |
 
-**Returns:** A frozen [`AbsorptionRatingResult`](/phonometry/reference/api/materials/rating/#absorptionratingresult) identical to [`weighted_absorption`](/phonometry/reference/api/materials/rating/#weighted_absorption) on the derived `alpha_p`, additionally carrying `third_octave_alpha_s` (the input as given) and `third_octave_bands` ([`RATING_THIRD_OCTAVE_BANDS_HZ`](/phonometry/reference/api/materials/rating/#rating_third_octave_bands_hz)).
+**Returns:** A frozen [`AbsorptionRatingResult`](/reference/api/materials/rating/#absorptionratingresult) identical to [`weighted_absorption`](/reference/api/materials/rating/#weighted_absorption) on the derived `alpha_p`, additionally carrying `third_octave_alpha_s` (the input as given) and `third_octave_bands` ([`RATING_THIRD_OCTAVE_BANDS_HZ`](/reference/api/materials/rating/#rating_third_octave_bands_hz)).
 
 **Raises**
 

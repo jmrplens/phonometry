@@ -1,6 +1,6 @@
 <!-- Written by `make llms` from site/src/content/docs/perception/psychoacoustics/sound-quality.mdx: edit that page and its Spanish twin, then run `make llms`. -->
 
-← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/perception/psychoacoustics/sound-quality/
+← [Documentation index](../../README.md) · Published at https://phonometry.dev/perception/psychoacoustics/sound-quality/
 
 # Sound Quality Metrics
 
@@ -602,7 +602,7 @@ STI/STIPA, and [Theory](../../reference/theory/perception.md) for the underlying
 
 ## See also
 
-- API reference: [`psychoacoustics.quality.sharpness`](https://docs.jmrp.io/phonometry/reference/api/psychoacoustics/sharpness/), [`psychoacoustics`: tonality (Sottek model)](https://docs.jmrp.io/phonometry/reference/api/psychoacoustics/tonality-ecma/), [`psychoacoustics`: roughness (Sottek model)](https://docs.jmrp.io/phonometry/reference/api/psychoacoustics/roughness-ecma/) and [`psychoacoustics`: fluctuation strength (Sottek model)](https://docs.jmrp.io/phonometry/reference/api/psychoacoustics/fluctuation-strength-ecma/).
+- API reference: [`psychoacoustics.quality.sharpness`](https://phonometry.dev/reference/api/psychoacoustics/sharpness/), [`psychoacoustics`: tonality (Sottek model)](https://phonometry.dev/reference/api/psychoacoustics/tonality-ecma/), [`psychoacoustics`: roughness (Sottek model)](https://phonometry.dev/reference/api/psychoacoustics/roughness-ecma/) and [`psychoacoustics`: fluctuation strength (Sottek model)](https://phonometry.dev/reference/api/psychoacoustics/fluctuation-strength-ecma/).
 - Theory: [Advanced loudness models and sound quality](../../reference/theory/perception.md#advanced-loudness-models--sound-quality): the specific-loudness pattern the sharpness, roughness and fluctuation-strength metrics are all built on.
 
 ## Quick answers

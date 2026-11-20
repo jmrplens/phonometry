@@ -14,6 +14,11 @@
  *   site search, never shown), or a mode change that left the content as it
  *   was; a frontmatter key in no class stops the build, named, so that a key
  *   added for machines is classed before it can move a date;
+ * - every change it made took the base path or the host the site was
+ *   published under before out of a link and put the site's own in its
+ *   place (`linksMovedOnly`): the move of the site to the root of
+ *   phonometry.dev rewrote 12 144 links in 952 files, and no reader of a
+ *   page saw a word of it change;
  * - it moved the file without changing it: the page reached its new address
  *   with the same blob, and its history carries on at the old one;
  * - or it is listed in `site/date-ignore-revs.txt`, which names the
@@ -51,6 +56,7 @@
  */
 import { existsSync, readFileSync } from 'node:fs';
 
+import { LEGACY_ORIGINS, basePath, siteUrl } from '../data/site.mjs';
 import { domainIds } from '../data/topics.mjs';
 import { keysOfClass, refuseUnclassifiedKeys, topLevelKey } from './frontmatter-keys.mjs';
 
@@ -143,6 +149,72 @@ export function frontmatterOnly(before, after) {
   if (a.body !== b.body) return false;
   // A frontmatter added or taken away counts: null is no string.
   return datedA === datedB;
+}
+
+/** A string as a regular expression matches it, character for character. */
+const literal = (text) => text.replace(/[.*+?^${}()|[\]\\/]/g, '\\$&');
+
+/**
+ * What follows a base path that ends where a link's path starts: a path, a
+ * quote, a closing bracket, a fragment, a query, a space or the end.
+ */
+const BASE_END = String.raw`(?=[/'"\x60)\s#?]|$)`;
+
+/**
+ * One rewrite of a page's links: what it finds, and what it puts in place of
+ * each match, given the match, where it starts and the whole text.
+ *
+ * @typedef {[RegExp, (match: string, offset: number, text: string) => string]} LinkMove
+ */
+
+/**
+ * The rewrites that take each origin the site was published under before
+ * (site-targets.json `legacy`) out of a page's links and put the site's own
+ * in its place: an absolute link on the old host and base names the site's
+ * host and base, and a root-relative link loses the old base path, which is
+ * read where a link's path starts (after a bracket, a quote, a space or the
+ * line's start, never inside another path such as `src/phonometry` or a
+ * longer name such as `/phonometry-assets`), as site/scripts/base-path.mjs
+ * reads it.
+ *
+ * @param {readonly {siteUrl: string, basePath: string}[]} legacy
+ * @param {{siteUrl: string, basePath: string}} target
+ * @returns {LinkMove[]}
+ */
+function linkMoves(legacy, target) {
+  return legacy.flatMap(({ siteUrl: oldOrigin, basePath: oldBase }) => {
+    const absolute = [new RegExp(`${literal(`${oldOrigin}${oldBase}`)}${BASE_END}`, 'gm'), () => `${target.siteUrl}${target.basePath}`];
+    if (oldBase === '') return [absolute];
+    const relative = [
+      new RegExp(`(?<![\\w.\\-/])${literal(oldBase)}${BASE_END}`, 'gm'),
+      (match, offset, text) => (text[offset + match.length] === '/' ? target.basePath : target.basePath || '/'),
+    ];
+    return [absolute, relative];
+  });
+}
+
+const MOVES = linkMoves(LEGACY_ORIGINS, { siteUrl, basePath });
+
+/**
+ * Whether going from `before` to `after` changed nothing a reader sees but
+ * the address the links are written with: `after` is `before` with every
+ * link through a base path or host the site was published under before
+ * rewritten for the site's own (`linkMoves`), give or take the dateless keys
+ * of the frontmatter. The rewrite runs on the old side alone, so a commit
+ * that gave a link the base path it lacked, a link that had sent its reader
+ * nowhere, still counts, as does one that sent a link to another page under
+ * the old base. A commit `frontmatterOnly` passes over passes here too.
+ * Throws as `frontmatterOnly` does.
+ *
+ * @param {string} before The page as it was.
+ * @param {string} after The page as the commit left it.
+ * @param {LinkMove[]} [moves] The rewrites; the site's own unless a test says otherwise.
+ * @returns {boolean}
+ */
+export function linksMovedOnly(before, after, moves = MOVES) {
+  if (frontmatterOnly(before, after)) return true;
+  const moved = moves.reduce((text, [pattern, replace]) => text.replace(pattern, replace), before);
+  return moved !== before && frontmatterOnly(moved, after);
 }
 
 /**

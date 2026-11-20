@@ -46,8 +46,8 @@ concatenated block outputs match a single full-signal pass. Streaming costs
 the weighting filters nothing: their accurate `high_accuracy` design is a
 plain cascade of second-order sections at the input rate, so a streamed
 A-weighting is the same filter an offline call runs, at any sample rate (see
-[Frequency Weighting](/phonometry/signals/levels/weighting/) and
-[Special Weightings](/phonometry/signals/levels/special-weightings/)). It used
+[Frequency Weighting](/signals/levels/weighting/) and
+[Special Weightings](/signals/levels/special-weightings/)). It used
 to reach its sections through an interpolation and a decimation stage, which
 cannot be split across blocks, so streaming had to fall back to the plain
 bilinear design.
@@ -173,7 +173,7 @@ per-block mean squares) is only correct when every block has the same length,
 and the last one usually does not; accumulate the sum and the count separately,
 as above, and the arithmetic takes care of it. And never average the per-block
 *decibel* readings: that is the arithmetic-mean error of
-[Integrated and Statistical Levels](/phonometry/signals/levels/levels/), it is
+[Integrated and Statistical Levels](/signals/levels/levels/), it is
 one-sided, and it always under-reads.
 
 The band version is the same accumulator with a vector on the left:
@@ -205,7 +205,7 @@ for block in audio_blocks:
 ```
 
 Or manage the state yourself with the functional API; see
-[Time Weighting](/phonometry/signals/levels/time-weighting/#6-block-processing).
+[Time Weighting](/signals/levels/time-weighting/#6-block-processing).
 
 ## Multichannel state
 
@@ -232,7 +232,7 @@ stopped and the next started: the concatenated output equals the
 single-pass output exactly, not approximately. The `TimeWeighting` detector
 carries even less, just its last envelope value $y[n-1]$, which is the same
 value the functional API hands back as `initial_state` (see
-[Time Weighting](/phonometry/signals/levels/time-weighting/#6-block-processing)).
+[Time Weighting](/signals/levels/time-weighting/#6-block-processing)).
 
 ### Streaming pitfalls
 
@@ -252,7 +252,7 @@ value the functional API hands back as `initial_state` (see
   a few times $1/B$, and with $B = 0.231\,f_\mathrm{m}$ for one-third octaves that is
   about a second at 12.5 Hz, a tenth of a second at 125 Hz and thirteen
   milliseconds at 1 kHz (the record-length rule of
-  [Filter Banks](/phonometry/signals/filters/filter-banks/#how-long-must-the-record-be)).
+  [Filter Banks](/signals/filters/filter-banks/#how-long-must-the-record-be)).
   An exponential detector adds its own $5\tau$ on top: 0.6 s on Fast, 5 s on
   Slow. `steady_ic=True` starts the sections in the steady state of a *step*,
   which removes the DC-related transient but not a band-pass ring-in, so for
@@ -370,7 +370,7 @@ and now it means the same thing either way.
 | `detrend` | must be `False` | Per-block detrending creates boundary discontinuities |
 | `resample` | must be `False` | The resampler is not stateful |
 | `zero_phase` | unsupported | Forward-backward filtering needs the whole signal |
-| `high_accuracy` (weighting) | no constraint: defaults to `True` as everywhere else (see [Frequency Weighting](/phonometry/signals/levels/weighting/)) | The accurate design is a plain cascade of second-order sections at the input rate, so it carries state like any other |
+| `high_accuracy` (weighting) | no constraint: defaults to `True` as everywhere else (see [Frequency Weighting](/signals/levels/weighting/)) | The accurate design is a plain cascade of second-order sections at the input rate, so it carries state like any other |
 | `steady_ic` | optional | Starts the filters in step-response steady state |
 
 ## What this guide covers
@@ -378,9 +378,9 @@ and now it means the same thing either way.
 <Scope>
 <ScopeClaim status="covered" label="Covered">
 IEC 61260-1:2014 and IEC 61672-1:2013 exactly as far as [Filter
-Banks](/phonometry/signals/filters/filter-banks/), [Frequency
-Weighting](/phonometry/signals/levels/weighting/) and [Time
-Weighting](/phonometry/signals/levels/time-weighting/) already implement them:
+Banks](/signals/filters/filter-banks/), [Frequency
+Weighting](/signals/levels/weighting/) and [Time
+Weighting](/signals/levels/time-weighting/) already implement them:
 `stateful=True` on `OctaveFilterBank`, `WeightingFilter` and `TimeWeighting`
 carries the direct-form-II-transposed section state ($z_1$, $z_2$), or the
 envelope's last value for `TimeWeighting`, across block boundaries, so the
@@ -392,13 +392,13 @@ equivalence.
 <ScopeClaim status="not-covered" label="Not covered">
 `zero_phase` forward-backward filtering needs the whole signal, so it is
 unsupported in stateful mode; use the offline path of [Filter
-Banks](/phonometry/signals/filters/filter-banks/) instead. What the accurate
+Banks](/signals/filters/filter-banks/) instead. What the accurate
 weighting design itself costs, and the band it is fitted over, belong to
-[Frequency Weighting](/phonometry/signals/levels/weighting/) rather than here:
+[Frequency Weighting](/signals/levels/weighting/) rather than here:
 this page only shows that streaming reproduces it. Rank statistics such as
 $L_{90}$ do not stream either:
 stream the envelope and compute percentiles once on the pooled result, as
-[Integrated and Statistical Levels](/phonometry/signals/levels/levels/)
+[Integrated and Statistical Levels](/signals/levels/levels/)
 describes.
 </ScopeClaim>
 </Scope>
@@ -407,11 +407,11 @@ describes.
 
 ## See also
 
-- [Filter Banks](/phonometry/signals/filters/filter-banks/): the offline bank streaming reproduces bit for bit, and the `zero_phase` mode streaming cannot use.
-- [Multichannel and Performance](/phonometry/signals/filters/multichannel/): one state per channel, and where the computation time actually goes.
-- [Time Weighting](/phonometry/signals/levels/time-weighting/#6-block-processing): the functional detector API with the state passed by hand.
-- [Integrated and Statistical Levels](/phonometry/signals/levels/levels/): which metrics accumulate across blocks and which must be recomputed on the pooled envelope.
-- API reference: [`filters.weighting`](/phonometry/reference/api/filters/weighting/) and [`filters.core`](/phonometry/reference/api/filters/core/).
-- Theory: [Filter Bank Design and Numerical Stability](/phonometry/reference/theory/signal-analysis/#filter-bank-design--numerical-stability): why a bank is designed as second-order sections and decimated per band, which is what makes streaming state possible at all.
+- [Filter Banks](/signals/filters/filter-banks/): the offline bank streaming reproduces bit for bit, and the `zero_phase` mode streaming cannot use.
+- [Multichannel and Performance](/signals/filters/multichannel/): one state per channel, and where the computation time actually goes.
+- [Time Weighting](/signals/levels/time-weighting/#6-block-processing): the functional detector API with the state passed by hand.
+- [Integrated and Statistical Levels](/signals/levels/levels/): which metrics accumulate across blocks and which must be recomputed on the pooled envelope.
+- API reference: [`filters.weighting`](/reference/api/filters/weighting/) and [`filters.core`](/reference/api/filters/core/).
+- Theory: [Filter Bank Design and Numerical Stability](/reference/theory/signal-analysis/#filter-bank-design--numerical-stability): why a bank is designed as second-order sections and decimated per band, which is what makes streaming state possible at all.
 
 </SeeAlso>

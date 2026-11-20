@@ -215,13 +215,13 @@ references:
 **Do**
 
 ```markdown
-[train categories](/phonometry/reference/api/vibration/train-categories/)
+[train categories](/reference/api/vibration/train-categories/)
 ```
 
 **Don't**
 
 ```markdown
-[train categories](/phonometry/reference/api/vibration/train_categories/)
+[train categories](/reference/api/vibration/train_categories/)
 ```
 
 **Enforced by:** review
@@ -236,7 +236,7 @@ references:
 **Do**
 
 ```markdown
-[Documentation](https://docs.jmrp.io/phonometry/)
+[Documentation](https://phonometry.dev/)
 ```
 
 **Don't**
@@ -1803,7 +1803,7 @@ build prints "LaTeX-incompatible input and strict mode is set to 'warn'"
 
 ```markdown
 - Bendat, J. S., & Piersol, A. G. (2010). *Random data*. Wiley.
-  Cited by [Calibrated spectral analysis](/phonometry/signals/spectra/spectral-analysis/).
+  Cited by [Calibrated spectral analysis](/signals/spectra/spectral-analysis/).
 ```
 
 **Enforced by:** `site/src/lib/remark-bibliography.mjs`, `CI: docs.yml:build/build`, `site/scripts/check-structured-data.mjs`, `CI: docs.yml:build/structured-data`, `site/scripts/agent-md.mjs`, `CI: guards-prose/llms`, `site/scripts/bibliography-entries.test.mjs`, `site/scripts/check-structured-data.test.mjs`, `CI: docs.yml:build/script-tests`
@@ -1914,3 +1914,26 @@ and attribution in `tests/data/audio/README.md`).
 **Enforced by:** `tests/test_data_attribution.py::test_every_page_that_reads_a_data_folder_prints_its_attribution`, `tests/test_data_attribution.py::test_every_folder_of_measured_data_is_attributed_in_the_readme`
 
 **Exceptions.** The README words each folder's string once, after `Attribution:` for the English pages and after `Atribución:` for the Spanish pages; a page prints it in its prose, never only in a code comment, a comment, the frontmatter, a code span or a tag's attribute, none of which the page shows as prose, and may wrap it and set a link on a run of its words, and nothing else. A page reads a folder when it names a path inside it or builds one in a Python fence from string literals, put side by side with `/` or `joinpath`, glued with `+`, joined by `"/".join` or given to one call together, wherever that call stands in the path; a path built from a name is not followed, so a page writes the folder it reads as a literal. Every guide the README's table of files names as reading a folder is seen reading it in both languages, or the test fails, so a page whose path the test stops following does not pass in silence. The GitHub copy of a guide is left to its generator ([F74](#f74)): `make llms` writes it from the English page, which carries the string. The API reference, which the generator writes from the docstrings, and this guide, which quotes paths in its examples, are not read. A new folder takes its strings in the README, in each language a page reads it in, before the page that reads it.
+
+<a id="f76"></a>
+### F76. Write a site link root-relative, with no base path and no old host
+
+**Why.** The site moved from `docs.jmrp.io/phonometry/` to the root of `phonometry.dev`. Its 12 000 links had written the base path by hand, `](/phonometry/signals/)`, and the absolute ones the old host: a link written either way now reaches its page only through a redirect, or leaves the site for the host it was published on before. The links validator of the build fails on a leftover in a Markdown link, but not on a quoted `href`, a `src=`, a string in a component or a data file, or a link to the old host, which it takes for an outside link.
+
+**Do**
+
+```markdown
+See [sound levels](/signals/levels/levels/) and the
+[conformance report](https://phonometry.dev/reference/conformance/).
+```
+
+**Don't**
+
+```markdown
+See [sound levels](/phonometry/signals/levels/levels/) and the
+[conformance report](https://docs.jmrp.io/phonometry/reference/conformance/).
+```
+
+**Enforced by:** `site/scripts/base-path.mjs`, `CI: docs.yml:build/base-path-guard`, `site/scripts/base-path.test.mjs`, `CI: docs.yml:build/script-tests`
+
+**Exceptions.** The check reads every text file of the site's source: everything under `site/src` (the pages, the data files, the components, the library modules, the routes, the utilities and the styles) and `site/astro.config.mjs`, and it fails when one of those paths is not there. Two lines of `site/src/data/site-targets.json` may write the old host and base path, each allowance naming its line and its reason: the legacy origin, which the redirect list for the old host is written from, and which fails the check once it is gone; and the clip host to fall back on, `"clipBase": "https://docs.jmrp.io/phonometry/media/"`, which the file holds only while the clips are served from the old host, so the check lets it through when it is there and does not ask for it when it is not. A name that only contains the word is no link and passes: `github.com/jmrplens/phonometry`, `src/phonometry/...`, `phonometry-assets`. The redirect generator and its tests, which have to name the old addresses, live in `site/scripts/`, outside what the check reads; so do the Worker's tests, which pass a base path to the code as a fixture. The hand-written files outside `site/` that name the site (README.md, SECURITY.md, the `.github` templates) move to the new host once it answers, and the check reaches them then.

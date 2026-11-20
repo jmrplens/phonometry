@@ -1,6 +1,6 @@
 <!-- Written by `make llms` from site/src/content/docs/signals/levels/special-weightings.mdx: edit that page and its Spanish twin, then run `make llms`. -->
 
-← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/signals/levels/special-weightings/
+← [Documentation index](../../README.md) · Published at https://phonometry.dev/signals/levels/special-weightings/
 
 # Special Weightings (G, B, D, AU)
 
@@ -347,7 +347,7 @@ conformance report instead).
 - [Frequency Weighting](weighting.md): the A, C and Z
   curves, the `high_accuracy` design and the IEC 61672-1 Table 3 class
   verification these curves build on.
-- API reference: [`filters.weighting`](https://docs.jmrp.io/phonometry/reference/api/filters/weighting/) and [`filters.compliance`](https://docs.jmrp.io/phonometry/reference/api/filters/compliance/).
+- API reference: [`filters.weighting`](https://phonometry.dev/reference/api/filters/weighting/) and [`filters.compliance`](https://phonometry.dev/reference/api/filters/compliance/).
 - Theory: [G-weighting (ISO 7196)](../../reference/theory/signal-analysis.md#g-weighting-iso-7196): the G curve of ISO 7196 and where its normalisation comes from.
 
 ## Quick answers

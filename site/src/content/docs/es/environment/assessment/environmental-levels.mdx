@@ -55,7 +55,7 @@ Una comunidad no oye un único $L_\mathrm{Aeq}$: oye un día cuyas tardes y noch
 más, una fuente cuyos tonos o impulsos molestan más allá de su energía, y
 una medición tomada sobre un fondo residual con una confianza finita. La mitad
 tonal de esa frase es esta página; la mitad impulsiva pertenece a
-[Prominencia de sonidos impulsivos](/phonometry/es/environment/assessment/impulsive-sound/),
+[Prominencia de sonidos impulsivos](/es/environment/assessment/impulsive-sound/),
 que mide el ajuste que la Tabla A.1 de ISO 1996-1 solo tabula. Esta
 página es la cadena de evaluación regulatoria construida sobre los niveles
 por periodo medidos: los descriptores de jornada completa $L_\mathrm{den}$/$L_\mathrm{dn}$ y
@@ -67,7 +67,7 @@ de medida.
 El cálculo de niveles en sí, las integrales de
 $L_\mathrm{eq}$/$L_\mathrm{Aeq}$, los niveles percentiles $L_N$, el SEL y la dosis de
 ruido que producen los niveles por periodo que esta página consume, es
-[Niveles integrados y estadísticos](/phonometry/es/signals/levels/levels/); todo lo
+[Niveles integrados y estadísticos](/es/signals/levels/levels/); todo lo
 de aquí supone que esos valores por periodo ya están calculados.
 
 ## Ruido ambiental: Lden, Ldn y niveles de evaluación (ISO 1996-1)
@@ -285,9 +285,9 @@ para incluir la reflexión, no debe corregirse en absoluto.
 Combínalo con `laeq()` por periodo para ir de grabaciones a $L_\mathrm{den}$. El propio
 ajuste tonal se justifica por la vía de audibilidad tonal de la sección
 siguiente (alimentada, para el método de ISO/PAS 20065, por
-[Audibilidad objetiva de tonos en ruido](/phonometry/es/perception/psychoacoustics/tone-audibility/));
+[Audibilidad objetiva de tonos en ruido](/es/perception/psychoacoustics/tone-audibility/));
 los veredictos `tone_to_noise_ratio()` / `prominence_ratio()` de
-[Tonos discretos prominentes](/phonometry/es/perception/psychoacoustics/tone-prominence/) son un
+[Tonos discretos prominentes](/es/perception/psychoacoustics/tone-prominence/) son un
 cribado de emisión complementario, no la base del $K_\mathrm{t}$.
 
 ## Determinación de niveles: ajuste tonal, ruido residual e incertidumbre (ISO 1996-2)
@@ -455,7 +455,7 @@ varias de sus celdas es el funcionamiento de la fuente lo que fija el mínimo.
 
 La edición
 de 2017 abandonó el algoritmo autocontenido y remite en su lugar a ISO/PAS 20065
-([Audibilidad objetiva de tonos en ruido](/phonometry/es/perception/psychoacoustics/tone-audibility/));
+([Audibilidad objetiva de tonos en ruido](/es/perception/psychoacoustics/tone-audibility/));
 lo que conserva es la tabla del Anexo J que convierte una audibilidad *media* en
 un ajuste entero. El algoritmo de 2007 es el implementado aquí, porque funciona
 sobre un único espectro. A partir del nivel tonal
@@ -475,8 +475,8 @@ $\Delta L_\mathrm{ta}$ a partir de la Fórmula (C.3), `tonal_adjustment(dLta)` l
 $K_\mathrm{t}$ por las Fórmulas (C.4)-(C.6), y `assess_tonal_audibility(...)` combina las
 dos con `critical_bandwidth` en el resultado representable que usan los
 fragmentos de abajo. Las dos funciones de nivel más bajo son las que la
-[guía de la normativa española](/phonometry/es/environment/assessment/spanish-noise-regulation/)
-y la [guía de aerogeneradores](/phonometry/es/environment/sources/wind-turbine-noise/)
+[guía de la normativa española](/es/environment/assessment/spanish-noise-regulation/)
+y la [guía de aerogeneradores](/es/environment/sources/wind-turbine-noise/)
 citan por su nombre, así que merece la pena llamarlas directamente cuando solo
 se quiere un paso.
 
@@ -606,14 +606,14 @@ clasifica la meteorología ni obtiene el radio de curvatura del anexo A.
 
 ## Véase también
 
-- [Niveles integrados y estadísticos](/phonometry/es/signals/levels/levels/): los niveles $L_\mathrm{eq}$/$L_\mathrm{Aeq}$, percentiles y de suceso con los que se componen los indicadores de esta página.
-- [Prominencia de sonidos impulsivos (NT ACOU 112)](/phonometry/es/environment/assessment/impulsive-sound/): el ajuste por impulsividad medido $K_\mathrm{I}$, y `rating_level`, que combina subintervalos ya ajustados por impulso sobre un tiempo de referencia, la contraparte subdiaria del `composite_rating_level` de aquí, que combina periodos completos con sus ajustes por franja horaria y por carácter (apartado 6.5 de ISO 1996-1).
-- [Normativa española de ruido (RD 1367/2007)](/phonometry/es/environment/assessment/spanish-noise-regulation/): una aplicación nacional de exactamente esta cadena, con sus propias correcciones tonal, de baja frecuencia e impulsiva.
-- [Audibilidad objetiva de tonos en ruido (ISO/PAS 20065)](/phonometry/es/perception/psychoacoustics/tone-audibility/): la audibilidad tonal cuyo valor medio se traduce en el ajuste $K_\mathrm{t}$ (Tabla J.1).
-- [Tonos discretos prominentes](/phonometry/es/perception/psychoacoustics/tone-prominence/): los veredictos de relación tono-ruido y de prominencia de ECMA-418-1, cribado de emisión complementario para la cuestión tonal.
-- [Exposición laboral (ISO 9612)](/phonometry/es/perception/hearing/occupational-exposure/): la contraparte en el puesto de trabajo, de las muestras por tarea al nivel de exposición diario con su balance de incertidumbre.
-- Referencia de la API: [`environment.assessment.measurement`](/phonometry/es/reference/api/environment/measurement/) y [`environment.assessment.rating`](/phonometry/es/reference/api/environment/rating/).
-- Teoría: [Descriptores ambientales (ISO 1996-1)](/phonometry/es/reference/theory/environment-transport/#descriptores-ambientales-iso-1996-1): las definiciones de ISO 1996-1 del nivel de evaluación y de los indicadores día-tarde-noche, y qué les hacen las correcciones.
+- [Niveles integrados y estadísticos](/es/signals/levels/levels/): los niveles $L_\mathrm{eq}$/$L_\mathrm{Aeq}$, percentiles y de suceso con los que se componen los indicadores de esta página.
+- [Prominencia de sonidos impulsivos (NT ACOU 112)](/es/environment/assessment/impulsive-sound/): el ajuste por impulsividad medido $K_\mathrm{I}$, y `rating_level`, que combina subintervalos ya ajustados por impulso sobre un tiempo de referencia, la contraparte subdiaria del `composite_rating_level` de aquí, que combina periodos completos con sus ajustes por franja horaria y por carácter (apartado 6.5 de ISO 1996-1).
+- [Normativa española de ruido (RD 1367/2007)](/es/environment/assessment/spanish-noise-regulation/): una aplicación nacional de exactamente esta cadena, con sus propias correcciones tonal, de baja frecuencia e impulsiva.
+- [Audibilidad objetiva de tonos en ruido (ISO/PAS 20065)](/es/perception/psychoacoustics/tone-audibility/): la audibilidad tonal cuyo valor medio se traduce en el ajuste $K_\mathrm{t}$ (Tabla J.1).
+- [Tonos discretos prominentes](/es/perception/psychoacoustics/tone-prominence/): los veredictos de relación tono-ruido y de prominencia de ECMA-418-1, cribado de emisión complementario para la cuestión tonal.
+- [Exposición laboral (ISO 9612)](/es/perception/hearing/occupational-exposure/): la contraparte en el puesto de trabajo, de las muestras por tarea al nivel de exposición diario con su balance de incertidumbre.
+- Referencia de la API: [`environment.assessment.measurement`](/es/reference/api/environment/measurement/) y [`environment.assessment.rating`](/es/reference/api/environment/rating/).
+- Teoría: [Descriptores ambientales (ISO 1996-1)](/es/reference/theory/environment-transport/#descriptores-ambientales-iso-1996-1): las definiciones de ISO 1996-1 del nivel de evaluación y de los indicadores día-tarde-noche, y qué les hacen las correcciones.
 
 </SeeAlso>
 

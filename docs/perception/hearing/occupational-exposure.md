@@ -1,6 +1,6 @@
 <!-- Written by `make llms` from site/src/content/docs/perception/hearing/occupational-exposure.mdx: edit that page and its Spanish twin, then run `make llms`. -->
 
-← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/perception/hearing/occupational-exposure/
+← [Documentation index](../../README.md) · Published at https://phonometry.dev/perception/hearing/occupational-exposure/
 
 # Occupational Noise Exposure (ISO 9612)
 
@@ -465,7 +465,7 @@ Occupational noise-exposure fiche (ExposureResult.report), the ISO 9612 Annex D 
   combined and expanded uncertainties.
 - [Theory](../../reference/theory/environment-transport.md): the derivation of the strategy formulas and the
   Annex C budget.
-- API reference: [`hearing.occupational_exposure`](https://docs.jmrp.io/phonometry/reference/api/hearing/occupational-exposure/).
+- API reference: [`hearing.occupational_exposure`](https://phonometry.dev/reference/api/hearing/occupational-exposure/).
 
 ## References
 

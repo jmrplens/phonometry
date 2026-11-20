@@ -49,7 +49,7 @@ engineering theory of Bies, Hansen & Howard: the ASHRAE tables and closed forms
 for bends, end reflection, plenums and flow noise, and an enclosure model that
 combines a panel transmission loss you supply with the reverberant build-up
 inside the enclosure. The first, the reactive four-pole silencer, has its own
-guide, [Silencers](/phonometry/devices/noise-control/silencers/), which covers
+guide, [Silencers](/devices/noise-control/silencers/), which covers
 the closed-form expansion chamber, the Helmholtz, quarter-wave and
 extended-tube resonators, the independent FDTD cross-check and the trade-off
 against dissipative linings.
@@ -210,7 +210,7 @@ run before an occupied room. Hence the rule that oversizing ductwork is
 the cheapest silencer there is. What the model returns is a **sound power
 level for one element**: it has to be entered into a path calculation and
 combined on a power basis with everything else, which is what
-[Duct-Borne Noise](/phonometry/devices/noise-control/duct-path/) does.
+[Duct-Borne Noise](/devices/noise-control/duct-path/) does.
 
 Wells' plenum formula takes only two truly geometric inputs, the
 inlet-to-outlet line of sight $r$ and the outlet area, plus the lined wall
@@ -226,7 +226,7 @@ numbers has the same predicted attenuation.*
 The formula, Bies Equation (8.275), is a sum of two terms inside one
 logarithm, a direct term $\cos\theta/\pi r^2$ and a reverberant term
 $(1-\alpha)/S_\mathrm{w}\alpha$, which is the reciprocal of the plenum's
-[room constant](/phonometry/buildings/rooms/room-image-sources/), and which of
+[room constant](/buildings/rooms/room-image-sources/), and which of
 them dominates decides which design move is worth making. For the plenum
 drawn above ($r = 1.2$ m, $S_\mathrm{w} = 6$ m², $\alpha = 0.2$) the two are 0.221 and
 0.667, so the reverberant term rules: doubling the line of sight to 2.4 m buys
@@ -333,7 +333,7 @@ $$
 
 with the external area $S_\mathrm{E}$ and the interior **room constant**
 $R_\mathrm{i} = S_\mathrm{i} \alpha_\mathrm{i}/(1-\alpha_\mathrm{i})$ (the same
-[`room_constant`](/phonometry/buildings/rooms/room-image-sources/) as the steady-state
+[`room_constant`](/buildings/rooms/room-image-sources/) as the steady-state
 room field).
 
 $C$ is not a fudge factor: it is the reverberant build-up. Shut a source inside
@@ -509,10 +509,10 @@ elements with their own $R$ and not details. Cooling openings cannot simply be
 sealed either: an enclosed machine has to breathe, so the inlet and the outlet
 become short lined ducts or splitter silencers whose own insertion loss must
 exceed the panel's; the models are in section 1 and in
-[Silencers](/phonometry/devices/noise-control/silencers/). The slit and
+[Silencers](/devices/noise-control/silencers/). The slit and
 circular-aperture transmission models that give a gap its own frequency-
 dependent $R$ are in
-[Panel sound insulation](/phonometry/buildings/design/panel-sound-insulation/).
+[Panel sound insulation](/buildings/design/panel-sound-insulation/).
 
 The last bypass is not airborne at all. A machine bolted to the shell, or
 standing on the same slab, drives the enclosure as a radiating extension of
@@ -534,7 +534,7 @@ $D_W = L_W(\text{without}) - L_W(\text{with})$, ISO 11546-1 Equation (1), over
 at least 100 Hz to 5 kHz in third octaves or 125 Hz to 4 kHz in octaves, 50 Hz
 to 10 kHz and 63 Hz to 8 kHz being preferred (clause 6.2). The library computes
 that measurement as well:
-[Enclosures and Cabins Measured](/phonometry/devices/noise-control/enclosure-cabin-insulation/)
+[Enclosures and Cabins Measured](/devices/noise-control/enclosure-cabin-insulation/)
 takes the two series of levels through `enclosure_sound_power_insulation` and
 its siblings, checks the test environment against Table C.1 and says, step by
 step, how the measurement goes.
@@ -595,7 +595,7 @@ doors and openings that feeds it (`composite_transmission_loss`).
 <ScopeClaim status="not-covered" label="Not covered">
 The reactive silencer elements (expansion chambers, side branches, extended
 tubes) have moved to
-[Silencers](/phonometry/devices/noise-control/silencers/), and dissipative
+[Silencers](/devices/noise-control/silencers/), and dissipative
 duct-lining silencers are not modelled from liner properties anywhere: the
 lined-elbow figure here is a table lookup (Bies Table 8.11) and the plenum is
 Wells' closed form driven by a declared mean absorption: neither is a liner
@@ -605,7 +605,7 @@ itself; you supply it measured or from another model, and the module only
 combines it with the interior correction. Nothing on this page is a
 measurement: the ISO 11546 procedure of section 2.2 is described here so that
 a declared figure can be read, and it is computed in
-[Enclosures and Cabins Measured](/phonometry/devices/noise-control/enclosure-cabin-insulation/)
+[Enclosures and Cabins Measured](/devices/noise-control/enclosure-cabin-insulation/)
 (`enclosure_sound_power_insulation` and its siblings). Structure-borne
 transmission from a machine into its enclosure or its slab is outside every
 model on the page.
@@ -616,29 +616,29 @@ model on the page.
 
 ## See also
 
-- [Silencers](/phonometry/devices/noise-control/silencers/): the reactive four-pole
+- [Silencers](/devices/noise-control/silencers/): the reactive four-pole
   elements and the reactive-versus-dissipative selection.
-- [Duct-Borne Noise: Fan to Room](/phonometry/devices/noise-control/duct-path/): the
+- [Duct-Borne Noise: Fan to Room](/devices/noise-control/duct-path/): the
   end-to-end calculation that chains these element models from the fan to the
   room criterion.
-- [Loudspeaker Characterisation (IEC 60268-5)](/phonometry/devices/electroacoustics/loudspeakers/):
+- [Loudspeaker Characterisation (IEC 60268-5)](/devices/electroacoustics/loudspeakers/):
   the radiating piston (radiation impedance and directivity), the companion
   radiator model.
-- [Sound Power](/phonometry/devices/emission/sound-power/): the source $L_W$ that feeds a
+- [Sound Power](/devices/emission/sound-power/): the source $L_W$ that feeds a
   duct or an enclosure.
-- [Enclosures and Cabins Measured](/phonometry/devices/noise-control/enclosure-cabin-insulation/):
+- [Enclosures and Cabins Measured](/devices/noise-control/enclosure-cabin-insulation/):
   the ISO 11546 substitution measurement of section 2.2 computed, with its
   test-environment check and its set-up drawn.
-- [Room image sources and steady field](/phonometry/buildings/rooms/room-image-sources/):
+- [Room image sources and steady field](/buildings/rooms/room-image-sources/):
   the `room_constant` reused by the enclosure interior correction.
-- [Panel sound insulation](/phonometry/buildings/design/panel-sound-insulation/):
+- [Panel sound insulation](/buildings/design/panel-sound-insulation/):
   the panel transmission loss this page asks you to supply, and the slit and
   circular-aperture models behind the composite of section 2.1.
-- [Conformance report](/phonometry/reference/conformance/):
+- [Conformance report](/reference/conformance/):
   the closed forms and worked anchors these implementations are validated
   against.
 - API reference:
-  [`noise_control.hvac`](/phonometry/reference/api/noise_control/hvac/) and
-  [`noise_control.enclosures`](/phonometry/reference/api/noise_control/enclosures/).
+  [`noise_control.hvac`](/reference/api/noise_control/hvac/) and
+  [`noise_control.enclosures`](/reference/api/noise_control/enclosures/).
 
 </SeeAlso>

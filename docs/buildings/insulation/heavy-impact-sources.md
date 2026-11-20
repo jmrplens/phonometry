@@ -1,6 +1,6 @@
 <!-- Written by `make llms` from site/src/content/docs/buildings/insulation/heavy-impact-sources.mdx: edit that page and its Spanish twin, then run `make llms`. -->
 
-← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/buildings/insulation/heavy-impact-sources/
+← [Documentation index](../../README.md) · Published at https://phonometry.dev/buildings/insulation/heavy-impact-sources/
 
 # Heavy and Soft Impact Sources (ISO 16283-2)
 
@@ -442,7 +442,7 @@ where the A-weighting has already discarded the energy.
   engine that rates the tapping-machine quantities.
 - [Floor-Covering Impact Improvement (ISO 16251-1)](../design/impact-improvement.md):
   the improvement a soft covering gives against the light source.
-- API reference: [`building.measurement.heavy_impact`](https://docs.jmrp.io/phonometry/reference/api/building/heavy-impact/).
+- API reference: [`building.measurement.heavy_impact`](https://phonometry.dev/reference/api/building/heavy-impact/).
 - Theory: [Sound insulation and absorption, measured](../../reference/theory/rooms-buildings.md#sound-insulation-and-absorption-measured-iso-16283-iso-10140-iso-717-iso-354): the impact-level normalisations of ISO 10140 and ISO 717-2 that the rubber ball and bang machine feed.
 
 ## References

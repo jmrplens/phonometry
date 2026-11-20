@@ -28,7 +28,7 @@ What it is not for
 
 The Introduction draws three lines. A screen in an open-plan office is
 ISO 10053; an outdoor community-noise barrier is ISO 10847, which is
-[`phonometry.environment.propagation.barrier_in_situ`](/phonometry/reference/api/environment/barrier-in-situ/); and this method is
+[`phonometry.environment.propagation.barrier_in_situ`](/reference/api/environment/barrier-in-situ/); and this method is
 not a qualification of a screen as a product but a measurement of one
 installation. Indoors the room decides a large part of the answer, so two
 screens may only be compared where the test conditions were the same.
@@ -54,12 +54,12 @@ The two guards worth knowing
 Clause 5.7 corrects for the background with the ordinary energy subtraction,
 not with a table, and it draws two hard lines: under 6 dB "the environmental
 conditions are not acceptable", and over 10 dB there is nothing to correct.
-[`screen_background_corrected_level`](/phonometry/reference/api/noise_control/screen-in-situ/#screen_background_corrected_level) refuses the first and skips the second.
+[`screen_background_corrected_level`](/reference/api/noise_control/screen-in-situ/#screen_background_corrected_level) refuses the first and skips the second.
 
 Clause 5.9 is the other: the A-weighted attenuation $D_{p\mathrm{A}}$ **shall not
 be determined when an artificial sound source is used**, because an A-weighted
 number belongs to the spectrum that produced it and a loudspeaker's spectrum is
-not the machine's. [`screen_attenuation`](/phonometry/reference/api/noise_control/screen-in-situ/#screen_attenuation) refuses it rather than compute a
+not the machine's. [`screen_attenuation`](/reference/api/noise_control/screen-in-situ/#screen_attenuation) refuses it rather than compute a
 number the standard forbids.
 
 > Auto-generated from the source docstrings by `scripts/generate_api_docs.py` (`make api-docs`). Do not edit by hand.
@@ -125,9 +125,9 @@ weighting, and the level is the **arithmetic** mean of the repeats, not
 the energy mean: the clause says "arithmetic mean values" and means it.
 
 The spread decides whether the set counts. Past
-[`IMPULSE_REPEAT_DEVIATION_DB`](/phonometry/reference/api/noise_control/screen-in-situ/#impulse_repeat_deviation_db) the clause asks for three more
+[`IMPULSE_REPEAT_DEVIATION_DB`](/reference/api/noise_control/screen-in-situ/#impulse_repeat_deviation_db) the clause asks for three more
 repeats, which is reported here; past
-[`IMPULSE_INVALID_DEVIATION_DB`](/phonometry/reference/api/noise_control/screen-in-situ/#impulse_invalid_deviation_db) the measurement is invalid, which is
+[`IMPULSE_INVALID_DEVIATION_DB`](/reference/api/noise_control/screen-in-situ/#impulse_invalid_deviation_db) the measurement is invalid, which is
 refused.
 
 **Parameters**
@@ -142,7 +142,7 @@ refused.
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | For fewer than [`IMPULSE_REPEATS`](/phonometry/reference/api/noise_control/screen-in-situ/#impulse_repeats) repeats or a spread past [`IMPULSE_INVALID_DEVIATION_DB`](/phonometry/reference/api/noise_control/screen-in-situ/#impulse_invalid_deviation_db). |
+| ValueError | For fewer than [`IMPULSE_REPEATS`](/reference/api/noise_control/screen-in-situ/#impulse_repeats) repeats or a spread past [`IMPULSE_INVALID_DEVIATION_DB`](/reference/api/noise_control/screen-in-situ/#impulse_invalid_deviation_db). |
 | TypeError | if `repeat_levels` holds a text or a value that is not a real number. |
 
 ## IMPULSE_REPEAT_DEVIATION_DB
@@ -195,7 +195,7 @@ Where the microphones stand in front of a screen, 5.5.2.
 
 A quarter, a half, once and twice the screen height, along a line
 perpendicular to the screen, and never closer than
-[`MIN_MICROPHONE_DISTANCE_M`](/phonometry/reference/api/noise_control/screen-in-situ/#min_microphone_distance_m). Under 4 m the quarter-height
+[`MIN_MICROPHONE_DISTANCE_M`](/reference/api/noise_control/screen-in-situ/#min_microphone_distance_m). Under 4 m the quarter-height
 position falls inside that floor and is pushed out to it; at 2 m and under
 the half-height one is pushed out too, and then the two nearest positions
 coincide. The clause keeps the floor rather than the factor, so the
@@ -283,7 +283,7 @@ $D_p = L_{p1} - L_{p2}$, the unscreened level less the screened one
 at the same position, band by band. Clause 5.8 adds the condition that
 makes the subtraction mean anything: either both levels are time-averaged,
 or both are arithmetic means of several $L_{S\text{max}}$ values.
-The two kinds are not mixed, and [`impulse_mean_level`](/phonometry/reference/api/noise_control/screen-in-situ/#impulse_mean_level) is the
+The two kinds are not mixed, and [`impulse_mean_level`](/reference/api/noise_control/screen-in-situ/#impulse_mean_level) is the
 second of them.
 
 $D_{p\mathrm{A}} = L_{p\mathrm{A}1} - L_{p\mathrm{A}2}$ is clause 5.9, and it carries the
@@ -305,7 +305,7 @@ machine's, so the pair is refused rather than computed under
 | `a_weighted_screened_level` | $L_{p\mathrm{A}2}$, in decibels. |
 | `distance` | How far this position stands from the screen, in metres, carried into the result because 5.5.2 reports the spread over the line rather than one number. |
 
-**Returns:** The attenuation, as a [`ScreenInSituResult`](/phonometry/reference/api/noise_control/screen-in-situ/#screeninsituresult).
+**Returns:** The attenuation, as a [`ScreenInSituResult`](/reference/api/noise_control/screen-in-situ/#screeninsituresult).
 
 **Raises**
 
@@ -367,7 +367,7 @@ the remedy is to wait for a quieter day rather than to correct harder.
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | For inputs that do not match band for band, or a margin under [`ISO11821_MIN_BACKGROUND_MARGIN_DB`](/phonometry/reference/api/noise_control/screen-in-situ/#iso11821_min_background_margin_db). |
+| ValueError | For inputs that do not match band for band, or a margin under [`ISO11821_MIN_BACKGROUND_MARGIN_DB`](/reference/api/noise_control/screen-in-situ/#iso11821_min_background_margin_db). |
 | TypeError | if `background_levels` or `levels` holds a text or a value that is not a real number. |
 
 ## SCREEN_DISTANCE_FACTORS
@@ -398,7 +398,7 @@ position, the index is **positive where the position is quieter than the
 mean**, which is the opposite of the directivity index of the emission
 standards. Clause 5.2.2 then reads naturally: an artificial source
 qualifies while no position falls more than
-[`DIRECTIVITY_INDEX_LIMIT_DB`](/phonometry/reference/api/noise_control/screen-in-situ/#directivity_index_limit_db) below the mean, which is a bound on how
+[`DIRECTIVITY_INDEX_LIMIT_DB`](/reference/api/noise_control/screen-in-situ/#directivity_index_limit_db) below the mean, which is a bound on how
 much of a shadow the source casts on itself.
 
 **Parameters**
@@ -413,7 +413,7 @@ much of a shadow the source casts on itself.
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | For a count that is not [`DIRECTIVITY_POSITIONS`](/phonometry/reference/api/noise_control/screen-in-situ/#directivity_positions). |
+| ValueError | For a count that is not [`DIRECTIVITY_POSITIONS`](/reference/api/noise_control/screen-in-situ/#directivity_positions). |
 | TypeError | if `levels` holds a text or a value that is not a real number. |
 
 ## ScreenInSituResult

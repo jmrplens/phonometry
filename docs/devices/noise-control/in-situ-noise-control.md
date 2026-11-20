@@ -1,6 +1,6 @@
 <!-- Written by `make llms` from site/src/content/docs/devices/noise-control/in-situ-noise-control.mdx: edit that page and its Spanish twin, then run `make llms`. -->
 
-← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/devices/noise-control/in-situ-noise-control/
+← [Documentation index](../../README.md) · Published at https://phonometry.dev/devices/noise-control/in-situ-noise-control/
 
 # Silencers, Screens and Barriers In Situ
 
@@ -459,9 +459,9 @@ still determined; under 3 dB it is not.
   wind class printed with a positive lower bound, and one prime asked to mean two
   different things.
 - API reference:
-  [`noise_control.silencer_in_situ`](https://docs.jmrp.io/phonometry/reference/api/noise_control/silencer-in-situ/),
-  [`noise_control.screen_in_situ`](https://docs.jmrp.io/phonometry/reference/api/noise_control/screen-in-situ/)
-  and [`environment.propagation.barrier_in_situ`](https://docs.jmrp.io/phonometry/reference/api/environment/barrier-in-situ/).
+  [`noise_control.silencer_in_situ`](https://phonometry.dev/reference/api/noise_control/silencer-in-situ/),
+  [`noise_control.screen_in_situ`](https://phonometry.dev/reference/api/noise_control/screen-in-situ/)
+  and [`environment.propagation.barrier_in_situ`](https://phonometry.dev/reference/api/environment/barrier-in-situ/).
 
 ## References
 

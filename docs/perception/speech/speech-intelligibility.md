@@ -1,6 +1,6 @@
 <!-- Written by `make llms` from site/src/content/docs/perception/speech/speech-intelligibility.mdx: edit that page and its Spanish twin, then run `make llms`. -->
 
-← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/perception/speech/speech-intelligibility/
+← [Documentation index](../../README.md) · Published at https://phonometry.dev/perception/speech/speech-intelligibility/
 
 # Speech Intelligibility Index
 
@@ -732,7 +732,7 @@ Speech intelligibility index fiche (SIIResult.report), the SII with its per-band
   evaluated on.
 - [Levels](../../signals/levels/levels.md): the spectrum and band levels behind the equivalent
   spectrum-level inputs.
-- API reference: [`speech.sii`](https://docs.jmrp.io/phonometry/reference/api/speech/sii/).
+- API reference: [`speech.sii`](https://phonometry.dev/reference/api/speech/sii/).
 - Theory: [Speech Intelligibility Index (ANSI S3.5)](../../reference/theory/perception.md#speech-intelligibility-index-ansi-s35): the band-importance weighting of ANSI S3.5 and the audibility function it multiplies.
 
 ## Quick answers

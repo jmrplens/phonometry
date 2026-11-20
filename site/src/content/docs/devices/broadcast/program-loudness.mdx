@@ -181,7 +181,7 @@ different spectra: heavily low-frequency music against dialogue being the
 standard example, and the reason the RLB high-pass exists at all. When the
 question really is perceived magnitude rather than delivery level, the
 psychoacoustic models are in
-[Loudness (ISO 532)](/phonometry/perception/psychoacoustics/loudness/), which
+[Loudness (ISO 532)](/perception/psychoacoustics/loudness/), which
 reports sones and a specific-loudness pattern instead of a single gated number.
 
 ## 2. Gating and the programme loudness
@@ -513,7 +513,7 @@ plt.show()
 EBU R 128 caps production at **−1 dBTP**; distribution codecs often need
 more headroom. This is the same oversampled-peak machinery behind the
 C-weighted `lc_peak` of
-[Integrated & Statistical Levels](/phonometry/signals/levels/levels/).
+[Integrated & Statistical Levels](/signals/levels/levels/).
 
 ## 6. Multichannel programmes and Annex 3
 
@@ -654,7 +654,7 @@ The stacked layout (compliance table on top, plot below) differs from the
 narrow two-panel body of the other fiches because the compliance table needs
 four columns and the loudness-vs-time trace is landscape. It uses the same
 `ReportMetadata` container and rendering engine as the
-[ISO 717 insulation fiche](/phonometry/buildings/insulation/insulation-ratings/#iso-717-report-report).
+[ISO 717 insulation fiche](/buildings/insulation/insulation-ratings/#iso-717-report-report).
 
 **What drives the verdict.** A supplied `requirement` is read as the target
 programme loudness in LUFS (defaulting to the EBU R 128 −23.0 LUFS), and the
@@ -746,7 +746,7 @@ shows the single gain, and applying it is one multiplication. And nothing on
 this page is a loudness **model**: K-weighting is a fixed linear filter, so
 masking, level dependence, critical bands and binaural summation are all
 outside it by construction; those live in [Loudness (ISO
-532)](/phonometry/perception/psychoacoustics/loudness/).
+532)](/perception/psychoacoustics/loudness/).
 </ScopeClaim>
 </Scope>
 
@@ -754,17 +754,17 @@ outside it by construction; those live in [Loudness (ISO
 
 ## See also
 
-- [Loudness (ISO 532)](/phonometry/perception/psychoacoustics/loudness/): the
+- [Loudness (ISO 532)](/perception/psychoacoustics/loudness/): the
   psychoacoustic models, in sones and specific loudness, that answer the
   perceived-magnitude question this page's gated LUFS deliberately does not.
-- [Integrated & Statistical Levels](/phonometry/signals/levels/levels/):
+- [Integrated & Statistical Levels](/signals/levels/levels/):
   $L_\mathrm{eq}$, $L_\mathrm{Ceq}$ and the same oversampled-peak machinery behind `lc_peak`.
-- [Frequency weightings](/phonometry/signals/levels/weighting/): A, C and Z
+- [Frequency weightings](/signals/levels/weighting/): A, C and Z
   against the K-weighting of this page.
-- [Electroacoustics (IEC 60268-3)](/phonometry/devices/electroacoustics/electroacoustics/):
+- [Electroacoustics (IEC 60268-3)](/devices/electroacoustics/electroacoustics/):
   the chain that carries the programme once it has been normalised.
-- [Broadcast](/phonometry/devices/broadcast/): the section overview.
-- API reference: [`broadcast`](/phonometry/reference/api/broadcast/program-loudness/).
+- [Broadcast](/devices/broadcast/): the section overview.
+- API reference: [`broadcast`](/reference/api/broadcast/program-loudness/).
 
 </SeeAlso>
 

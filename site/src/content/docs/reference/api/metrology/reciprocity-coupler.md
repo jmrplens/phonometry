@@ -23,7 +23,7 @@ The electrical transfer impedance $U_2/i_1$ is measured; this module
 computes the acoustic transfer impedance $Z_{\mathrm{a},12}$ it is
 divided by, with every correction the standard gives, and solves the three
 products for the sensitivities with
-[`reciprocity_calibration`](/phonometry/reference/api/metrology/reciprocity-calibration/).
+[`reciprocity_calibration`](/reference/api/metrology/reciprocity-calibration/).
 
 **Two couplers** (5.4 and Annex C). A *large-volume* coupler, small against
 the wavelength, holds a pure compliance, and Formula (3) adds the admittances
@@ -53,7 +53,7 @@ $$
 $$
 
 where $E_V$ is Gerber's temperature transfer function of a finite
-cylinder: [`temperature_transfer_function`](/phonometry/reference/api/metrology/reciprocity-coupler/#temperature_transfer_function) computes it either by the
+cylinder: [`temperature_transfer_function`](/reference/api/metrology/reciprocity-coupler/#temperature_transfer_function) computes it either by the
 approximation (A.2) or by the full solution of the reference [A.1], which
 A.2 requires below 20 Hz unless the uncertainty component is increased
 instead, and which reproduces every entry of Table A.1 to its
@@ -69,26 +69,26 @@ $$
 $$
 
 with $Z_{\mathrm{a,C}}$ the input impedance of an open tube of Formulas
-(B.1) to (B.3), which [`capillary_tube_impedance`](/phonometry/reference/api/metrology/reciprocity-coupler/#capillary_tube_impedance) computes and Tables B.1
+(B.1) to (B.3), which [`capillary_tube_impedance`](/reference/api/metrology/reciprocity-coupler/#capillary_tube_impedance) computes and Tables B.1
 and B.2 test.
 
 **The microphone** (7.3.3 and Annex E). Its acoustic impedance is a lumped
 compliance, mass and resistance, written as an equivalent volume, a resonance
-frequency and a loss factor ([`ReciprocityMicrophone`](/phonometry/reference/api/metrology/reciprocity-coupler/#reciprocitymicrophone)); its front cavity
+frequency and a loss factor ([`ReciprocityMicrophone`](/reference/api/metrology/reciprocity-coupler/#reciprocitymicrophone)); its front cavity
 adds volume, length and, through the excess of its measured volume over the
 cylinder of its depth, a further terminating admittance (7.3.3.1).
 
 The wave-motion corrections of Table C.3 for the air-filled large-volume
-coupler of LS1P microphones are [`large_volume_wave_motion_correction`](/phonometry/reference/api/metrology/reciprocity-coupler/#large_volume_wave_motion_correction),
-the coupler dimensions of Tables C.1 and C.2 are [`IEC61094_2_TABLE_C1`](/phonometry/reference/api/metrology/reciprocity-coupler/#iec61094_2_table_c1)
-and [`IEC61094_2_TABLE_C2`](/phonometry/reference/api/metrology/reciprocity-coupler/#iec61094_2_table_c2), and [`coupler_parameter_uncertainty`](/phonometry/reference/api/metrology/reciprocity-coupler/#coupler_parameter_uncertainty)
+coupler of LS1P microphones are [`large_volume_wave_motion_correction`](/reference/api/metrology/reciprocity-coupler/#large_volume_wave_motion_correction),
+the coupler dimensions of Tables C.1 and C.2 are [`IEC61094_2_TABLE_C1`](/reference/api/metrology/reciprocity-coupler/#iec61094_2_table_c1)
+and [`IEC61094_2_TABLE_C2`](/reference/api/metrology/reciprocity-coupler/#iec61094_2_table_c2), and [`coupler_parameter_uncertainty`](/reference/api/metrology/reciprocity-coupler/#coupler_parameter_uncertainty)
 finds the uncertainty each coupler and microphone parameter contributes, by the
 one-at-a-time recalculation 7.5 describes.
 
 The properties of the gas, $\rho$, $c$, $\kappa$,
 $\eta$ and $\alpha_t$, are those of humid air by Annex F
-([`air`](/phonometry/reference/api/fluids/air/#air)) at the conditions of the calibration, or of
-any [`Fluid`](/phonometry/reference/api/fluids/fluids/#fluid) passed as `gas`: 7.3.2.1 allows the
+([`air`](/reference/api/fluids/air/#air)) at the conditions of the calibration, or of
+any [`Fluid`](/reference/api/fluids/fluids/#fluid) passed as `gas`: 7.3.2.1 allows the
 coupler to be filled with hydrogen or helium.
 
 > Auto-generated from the source docstrings by `scripts/generate_api_docs.py` (`make api-docs`). Do not edit by hand.
@@ -137,7 +137,7 @@ values were computed with.
 | `radius_m` | $a_\mathrm{t}$, in m. |
 | `gas` | The gas in the tube. |
 
-**Returns:** The [`CapillaryTubeImpedance`](/phonometry/reference/api/metrology/reciprocity-coupler/#capillarytubeimpedance).
+**Returns:** The [`CapillaryTubeImpedance`](/reference/api/metrology/reciprocity-coupler/#capillarytubeimpedance).
 
 **Raises**
 
@@ -266,7 +266,7 @@ equations (15 °C to 27 °C, 60 kPa to 110 kPa, 10 % to 90 %).
 | `gas` | Another gas than air, or `None`. |
 | `heat_conduction_method` | The method the calibration uses for $E_V$. One of `"exact"` or `"approximation"`. |
 
-**Returns:** The [`CouplerCheck`](/phonometry/reference/api/metrology/reciprocity-coupler/#couplercheck).
+**Returns:** The [`CouplerCheck`](/reference/api/metrology/reciprocity-coupler/#couplercheck).
 
 **Raises**
 
@@ -318,15 +318,15 @@ are the length and the radius of the capillary tubes.
 | `frequencies` | The frequencies, in Hz, increasing. |
 | `coupler` | The coupler, the same for the three pairs. |
 | `microphones` | The three microphones. |
-| `uncertainties` | The standard uncertainty of each input quantity, a [`CouplerInputUncertainties`](/phonometry/reference/api/metrology/reciprocity-coupler/#couplerinputuncertainties). |
+| `uncertainties` | The standard uncertainty of each input quantity, a [`CouplerInputUncertainties`](/reference/api/metrology/reciprocity-coupler/#couplerinputuncertainties). |
 | `temperature_c` | The temperature, in °C. |
 | `static_pressure_pa` | The static pressure, in Pa. |
 | `relative_humidity_percent` | The relative humidity, in %. |
 | `microphone` | The microphone whose level is analysed, 1, 2 or 3 (Default: 1). |
-| `gas` | A [`Fluid`](/phonometry/reference/api/fluids/fluids/#fluid) for a coupler filled with a gas other than air (7.3.2.1), as in [`coupler_transfer_impedance`](/phonometry/reference/api/metrology/reciprocity-coupler/#coupler_transfer_impedance); `None` (default) takes humid air by Annex F at the conditions. A given gas keeps its properties whatever the conditions, so a step in the static pressure, the temperature or the humidity could not move them with it, and an uncertainty on any of the three is refused. |
+| `gas` | A [`Fluid`](/reference/api/fluids/fluids/#fluid) for a coupler filled with a gas other than air (7.3.2.1), as in [`coupler_transfer_impedance`](/reference/api/metrology/reciprocity-coupler/#coupler_transfer_impedance); `None` (default) takes humid air by Annex F at the conditions. A given gas keeps its properties whatever the conditions, so a step in the static pressure, the temperature or the humidity could not move them with it, and an uncertainty on any of the three is refused. |
 | `heat_conduction_method` | The method for $E_V$ (Default: `"exact"`). One of `"exact"` or `"approximation"`. |
 
-**Returns:** The [`CouplerParameterUncertainty`](/phonometry/reference/api/metrology/reciprocity-coupler/#couplerparameteruncertainty), with a component for each parameter given a non-zero uncertainty.
+**Returns:** The [`CouplerParameterUncertainty`](/reference/api/metrology/reciprocity-coupler/#couplerparameteruncertainty), with a component for each parameter given a non-zero uncertainty.
 
 **Raises**
 
@@ -355,17 +355,17 @@ coupler_transfer_impedance(
 The acoustic transfer impedance $Z_{\mathrm{a},12}$ of a coupler
 closed by two microphones (IEC 61094-2:2009 5.4 to 5.6).
 
-A [`LargeVolumeCoupler`](/phonometry/reference/api/metrology/reciprocity-coupler/#largevolumecoupler) takes Formula (3): the gas of the coupler,
+A [`LargeVolumeCoupler`](/reference/api/metrology/reciprocity-coupler/#largevolumecoupler) takes Formula (3): the gas of the coupler,
 the two bores of Figure C.2 and the two front cavities (7.3.3.1) as one
 compliance, its volume multiplied by $\Delta_\mathrm{H}$ of Formula
 (A.1) for the heat conduction, in parallel with the equivalent volumes of
 the two microphones. The surface the heat conduction sees is that of the
 coupler plus the wall of each bore and front cavity and any thread in it
 (7.3.2.2): the diaphragm takes the place of the port it closes
-([`LargeVolumeCoupler.closed_volume_m3`](/phonometry/reference/api/metrology/reciprocity-coupler/#largevolumecouplerclosed_volume_m3),
-[`LargeVolumeCoupler.closed_surface_m2`](/phonometry/reference/api/metrology/reciprocity-coupler/#largevolumecouplerclosed_surface_m2)).
+([`LargeVolumeCoupler.closed_volume_m3`](/reference/api/metrology/reciprocity-coupler/#largevolumecouplerclosed_volume_m3),
+[`LargeVolumeCoupler.closed_surface_m2`](/reference/api/metrology/reciprocity-coupler/#largevolumecouplerclosed_surface_m2)).
 
-A [`PlaneWaveCoupler`](/phonometry/reference/api/metrology/reciprocity-coupler/#planewavecoupler) takes Formula (4): a line of length
+A [`PlaneWaveCoupler`](/reference/api/metrology/reciprocity-coupler/#planewavecoupler) takes Formula (4): a line of length
 $l_0$, the coupler plus the two front-cavity depths, terminated at
 each end by the microphone's acoustic impedance in parallel with the excess
 volume of its front cavity (7.3.3.1); the losses of Formulas (A.3) to (A.5)
@@ -387,16 +387,16 @@ not change the result.
 | `temperature_c` | The temperature of the gas, in °C. |
 | `static_pressure_pa` | The static pressure $p_\mathrm{s}$, in Pa. |
 | `relative_humidity_percent` | The relative humidity, in %. |
-| `gas` | A [`Fluid`](/phonometry/reference/api/fluids/fluids/#fluid) for a coupler filled with a gas other than air; `None` (default) takes humid air by Annex F at the three conditions. |
-| `heat_conduction_method` | `"exact"` (default) or `"approximation"` for $E_V$ in a large-volume coupler ([`temperature_transfer_function`](/phonometry/reference/api/metrology/reciprocity-coupler/#temperature_transfer_function)). |
+| `gas` | A [`Fluid`](/reference/api/fluids/fluids/#fluid) for a coupler filled with a gas other than air; `None` (default) takes humid air by Annex F at the three conditions. |
+| `heat_conduction_method` | `"exact"` (default) or `"approximation"` for $E_V$ in a large-volume coupler ([`temperature_transfer_function`](/reference/api/metrology/reciprocity-coupler/#temperature_transfer_function)). |
 
-**Returns:** The [`CouplerTransferImpedance`](/phonometry/reference/api/metrology/reciprocity-coupler/#couplertransferimpedance).
+**Returns:** The [`CouplerTransferImpedance`](/reference/api/metrology/reciprocity-coupler/#couplertransferimpedance).
 
 **Raises**
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | for a `coupler` that is neither a [`PlaneWaveCoupler`](/phonometry/reference/api/metrology/reciprocity-coupler/#planewavecoupler) nor a [`LargeVolumeCoupler`](/phonometry/reference/api/metrology/reciprocity-coupler/#largevolumecoupler), a `static_pressure_pa` that is not one number, or a `heat_conduction_method` that is not a text. |
+| TypeError | for a `coupler` that is neither a [`PlaneWaveCoupler`](/reference/api/metrology/reciprocity-coupler/#planewavecoupler) nor a [`LargeVolumeCoupler`](/reference/api/metrology/reciprocity-coupler/#largevolumecoupler), a `static_pressure_pa` that is not one number, or a `heat_conduction_method` that is not a text. |
 | ValueError | for frequencies that are not positive and increasing, a static pressure that is not positive, or an unknown method. |
 
 ## CouplerCheck
@@ -420,7 +420,7 @@ CouplerCheck(
 Whether the formulas of IEC 61094-2:2009 apply to a coupler at the
 frequencies and conditions of a calibration.
 
-Built by [`check_coupler`](/phonometry/reference/api/metrology/reciprocity-coupler/#check_coupler). The verdicts are read from the figures
+Built by [`check_coupler`](/reference/api/metrology/reciprocity-coupler/#check_coupler). The verdicts are read from the figures
 and the conditions the check holds, against the ranges the standard
 prints, so they are not fields.
 
@@ -571,7 +571,7 @@ CouplerInputUncertainties(
 The standard uncertainty of each input quantity of the acoustic transfer
 impedance in a coupler: those Table 1 of IEC 61094-2:2009 lists under
 "Coupler properties" (7.3.2) and "Microphone parameters" (7.3.3) that
-[`coupler_parameter_uncertainty`](/phonometry/reference/api/metrology/reciprocity-coupler/#coupler_parameter_uncertainty) can move.
+[`coupler_parameter_uncertainty`](/reference/api/metrology/reciprocity-coupler/#coupler_parameter_uncertainty) can move.
 
 Each one left at zero contributes no component. A microphone parameter is
 the uncertainty of that parameter on each of the three microphones.
@@ -614,15 +614,15 @@ CouplerParameterUncertainty(
 The standard uncertainty of a sensitivity level that each parameter of
 the acoustic transfer impedance contributes (IEC 61094-2:2009 7.5).
 
-Built by [`coupler_parameter_uncertainty`](/phonometry/reference/api/metrology/reciprocity-coupler/#coupler_parameter_uncertainty); ready to pass to
-[`reciprocity_uncertainty_budget`](/phonometry/reference/api/metrology/reciprocity-calibration/#reciprocity_uncertainty_budget).
+Built by [`coupler_parameter_uncertainty`](/reference/api/metrology/reciprocity-coupler/#coupler_parameter_uncertainty); ready to pass to
+[`reciprocity_uncertainty_budget`](/reference/api/metrology/reciprocity-calibration/#reciprocity_uncertainty_budget).
 
 **Attributes**
 
 | Name | Description |
 | :--- | :--- |
 | `frequencies` | The frequencies, in Hz. |
-| `component_uncertainties_db` | The component of each parameter, keyed by its name in [`IEC61094_2_TABLE_1`](/phonometry/reference/api/metrology/reciprocity-calibration/#iec61094_2_table_1), in dB at each frequency. Keyed by any of `"series_impedance"`, `"voltage_ratio"`, `"cross_talk"`, `"noise"`, `"distortion"`, `"frequency"`, `"receiver_ground_shield"`, `"transmitter_ground_shield"`, `"coupler_length"`, `"coupler_diameter"`, `"coupler_volume"`, `"coupler_surface_area"`, `"leakage"`, `"capillary_tube_dimensions"`, `"static_pressure"`, `"temperature"`, `"relative_humidity"`, `"front_cavity_depth"`, `"front_cavity_volume"`, `"equivalent_volume"`, `"resonance_frequency"`, `"loss_factor"`, `"diaphragm_compliance"`, `"diaphragm_mass"`, `"diaphragm_resistance"`, `"front_cavity_thread"`, `"polarizing_voltage"`, `"heat_conduction_theory"`, `"excess_volume"`, `"viscosity_losses"`, `"radial_wave_motion"`, `"rounding"`, `"repeatability"`, `"static_pressure_corrections"` or `"temperature_corrections"`. |
+| `component_uncertainties_db` | The component of each parameter, keyed by its name in [`IEC61094_2_TABLE_1`](/reference/api/metrology/reciprocity-calibration/#iec61094_2_table_1), in dB at each frequency. Keyed by any of `"series_impedance"`, `"voltage_ratio"`, `"cross_talk"`, `"noise"`, `"distortion"`, `"frequency"`, `"receiver_ground_shield"`, `"transmitter_ground_shield"`, `"coupler_length"`, `"coupler_diameter"`, `"coupler_volume"`, `"coupler_surface_area"`, `"leakage"`, `"capillary_tube_dimensions"`, `"static_pressure"`, `"temperature"`, `"relative_humidity"`, `"front_cavity_depth"`, `"front_cavity_volume"`, `"equivalent_volume"`, `"resonance_frequency"`, `"loss_factor"`, `"diaphragm_compliance"`, `"diaphragm_mass"`, `"diaphragm_resistance"`, `"front_cavity_thread"`, `"polarizing_voltage"`, `"heat_conduction_theory"`, `"excess_volume"`, `"viscosity_losses"`, `"radial_wave_motion"`, `"rounding"`, `"repeatability"`, `"static_pressure_corrections"` or `"temperature_corrections"`. |
 | `microphone` | The microphone whose level they are for, 1, 2 or 3. |
 
 ### CouplerParameterUncertainty.plot()
@@ -673,7 +673,7 @@ with its corrections (IEC 61094-2:2009 5.4 to 5.6).
 | `adiabatic_impedance_pa_s_m3` | $Z'_{\mathrm{a},12}$, adiabatic and without losses (Formula (3) or (4)), in Pa·s/m³. |
 | `heat_conducting_impedance_pa_s_m3` | $Z''_{\mathrm{a},12}$, corrected for heat conduction (5.5): with $\Delta_\mathrm{H}$ in a large-volume coupler, with Formulas (A.3) to (A.5) in a plane-wave one, in Pa·s/m³. |
 | `capillary_correction` | $\Delta_\mathrm{C}$ of Formula (6), 1 without capillary tubes. |
-| `heat_conduction` | The [`HeatConductionCorrection`](/phonometry/reference/api/metrology/reciprocity-coupler/#heatconductioncorrection) of a large-volume coupler, `None` for a plane-wave one. |
+| `heat_conduction` | The [`HeatConductionCorrection`](/reference/api/metrology/reciprocity-coupler/#heatconductioncorrection) of a large-volume coupler, `None` for a plane-wave one. |
 
 ### CouplerTransferImpedance.capillary_correction_db
 
@@ -740,7 +740,7 @@ cavity (IEC 61094-2:2009 5.5, A.2).
 $\Delta_\mathrm{H}$ multiplies the geometrical volume $V$ in
 Formula (3). For a coupler closed by microphones, $V$ and the surface
 are those of the coupler together with the front cavities (7.3.2.2), which
-[`coupler_transfer_impedance`](/phonometry/reference/api/metrology/reciprocity-coupler/#coupler_transfer_impedance) assembles; $R$ is that of the
+[`coupler_transfer_impedance`](/reference/api/metrology/reciprocity-coupler/#coupler_transfer_impedance) assembles; $R$ is that of the
 coupler.
 
 **Parameters**
@@ -752,9 +752,9 @@ coupler.
 | `surface_area_m2` | The total surface, in m². |
 | `length_to_diameter_ratio` | $R$. |
 | `gas` | The gas: its thermal diffusivity and ratio of specific heats. |
-| `method` | `"exact"` (default) or `"approximation"` ([`temperature_transfer_function`](/phonometry/reference/api/metrology/reciprocity-coupler/#temperature_transfer_function)). |
+| `method` | `"exact"` (default) or `"approximation"` ([`temperature_transfer_function`](/reference/api/metrology/reciprocity-coupler/#temperature_transfer_function)). |
 
-**Returns:** The [`HeatConductionCorrection`](/phonometry/reference/api/metrology/reciprocity-coupler/#heatconductioncorrection).
+**Returns:** The [`HeatConductionCorrection`](/reference/api/metrology/reciprocity-coupler/#heatconductioncorrection).
 
 **Raises**
 
@@ -886,7 +886,7 @@ frequency is read at its value divided by it.
 | `frequencies` | The frequencies, in Hz, increasing. |
 | `speed_of_sound_ratio` | The speed of sound in the gas re that in air (Default: 1, air). |
 
-**Returns:** The [`WaveMotionCorrection`](/phonometry/reference/api/metrology/reciprocity-coupler/#wavemotioncorrection).
+**Returns:** The [`WaveMotionCorrection`](/reference/api/metrology/reciprocity-coupler/#wavemotioncorrection).
 
 **Raises**
 
@@ -917,7 +917,7 @@ from the cavity: the front cavity, of diameter B, continues through the
 wall of the coupler as a bore of length F to the cavity. Each bore adds
 $\pi B^2 F/4$ to the volume of Formula (3) and $\pi B F$ to the
 surface the heat conduction sees, with B the front-cavity diameter of the
-microphone in it ([`coupler_transfer_impedance`](/phonometry/reference/api/metrology/reciprocity-coupler/#coupler_transfer_impedance)). For the coupler of
+microphone in it ([`coupler_transfer_impedance`](/reference/api/metrology/reciprocity-coupler/#coupler_transfer_impedance)). For the coupler of
 Table C.2 the two bores of LS1P microphones are 2.4 % of the cavity, about
 0.1 dB on each sensitivity.
 
@@ -1046,7 +1046,7 @@ impedance $Z_\mathrm{e,0}$ at 100 kHz to 200 kHz, where the
 diaphragm cannot move. E.4 calculates it "by iteration", because the
 pressure sensitivity is itself the result of a calibration that used
 $Z_\mathrm{a}$: alternate this with
-[`pressure_reciprocity`](/phonometry/reference/api/metrology/reciprocity-coupler/#pressure_reciprocity) until both stop changing.
+[`pressure_reciprocity`](/reference/api/metrology/reciprocity-coupler/#pressure_reciprocity) until both stop changing.
 
 **Parameters**
 
@@ -1114,7 +1114,7 @@ $$
 with similar expressions for the other two, and the phase "by a similar
 procedure from the phase angle of each term". The library solves the
 complex products together, on the branch described in
-[`reciprocity_calibration`](/phonometry/reference/api/metrology/reciprocity-calibration/).
+[`reciprocity_calibration`](/reference/api/metrology/reciprocity-calibration/).
 
 **Parameters**
 
@@ -1122,11 +1122,11 @@ complex products together, on the branch described in
 | :--- | :--- |
 | `frequencies` | The frequencies, in Hz, increasing. |
 | `electrical_transfer_impedances_ohm` | $Z_{\mathrm{e},12}$, $Z_{\mathrm{e},23}$ and $Z_{\mathrm{e},31}$, complex, in Ω, each one value or one per frequency. |
-| `acoustic_transfer_impedances` | $Z_{\mathrm{a},12}$, $Z_{\mathrm{a},23}$ and $Z_{\mathrm{a},31}$, each a [`CouplerTransferImpedance`](/phonometry/reference/api/metrology/reciprocity-coupler/#couplertransferimpedance) or complex values in Pa·s/m³ already corrected. |
-| `corrections` | Corrections added to every sensitivity level, by name, in dB: [`large_volume_wave_motion_correction`](/phonometry/reference/api/metrology/reciprocity-coupler/#large_volume_wave_motion_correction) for the large-volume coupler of LS1P microphones (Default: none). |
-| `expanded_uncertainty_db` | The expanded uncertainty of the levels, in dB, one value or one per frequency, from [`reciprocity_uncertainty_budget`](/phonometry/reference/api/metrology/reciprocity-calibration/#reciprocity_uncertainty_budget) (Default: `None`). |
+| `acoustic_transfer_impedances` | $Z_{\mathrm{a},12}$, $Z_{\mathrm{a},23}$ and $Z_{\mathrm{a},31}$, each a [`CouplerTransferImpedance`](/reference/api/metrology/reciprocity-coupler/#couplertransferimpedance) or complex values in Pa·s/m³ already corrected. |
+| `corrections` | Corrections added to every sensitivity level, by name, in dB: [`large_volume_wave_motion_correction`](/reference/api/metrology/reciprocity-coupler/#large_volume_wave_motion_correction) for the large-volume coupler of LS1P microphones (Default: none). |
+| `expanded_uncertainty_db` | The expanded uncertainty of the levels, in dB, one value or one per frequency, from [`reciprocity_uncertainty_budget`](/reference/api/metrology/reciprocity-calibration/#reciprocity_uncertainty_budget) (Default: `None`). |
 
-**Returns:** The [`ReciprocityCalibration`](/phonometry/reference/api/metrology/reciprocity-calibration/#reciprocitycalibration).
+**Returns:** The [`ReciprocityCalibration`](/reference/api/metrology/reciprocity-calibration/#reciprocitycalibration).
 
 **Raises**
 
@@ -1165,12 +1165,12 @@ reciprocal (5.1.1).
 | :--- | :--- |
 | `frequencies` | The frequencies, in Hz, increasing. |
 | `electrical_transfer_impedance_ohm` | $Z_{\mathrm{e},12}$, complex, in Ω. |
-| `acoustic_transfer_impedance` | $Z_{\mathrm{a},12}$, a [`CouplerTransferImpedance`](/phonometry/reference/api/metrology/reciprocity-coupler/#couplertransferimpedance) or complex values in Pa·s/m³. |
+| `acoustic_transfer_impedance` | $Z_{\mathrm{a},12}$, a [`CouplerTransferImpedance`](/reference/api/metrology/reciprocity-coupler/#couplertransferimpedance) or complex values in Pa·s/m³. |
 | `sensitivity_ratio` | $M_{\mathrm{p},1}/M_{\mathrm{p},2}$, complex, one value or one per frequency. |
 | `corrections` | Corrections added to both levels (Default: none). |
 | `expanded_uncertainty_db` | The expanded uncertainty, in dB (Default: `None`). |
 
-**Returns:** The [`ReciprocityCalibration`](/phonometry/reference/api/metrology/reciprocity-calibration/#reciprocitycalibration), of two microphones.
+**Returns:** The [`ReciprocityCalibration`](/reference/api/metrology/reciprocity-calibration/#reciprocitycalibration), of two microphones.
 
 **Raises**
 

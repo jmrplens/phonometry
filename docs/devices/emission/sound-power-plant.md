@@ -1,6 +1,6 @@
 <!-- Written by `make llms` from site/src/content/docs/devices/emission/sound-power-plant.mdx: edit that page and its Spanish twin, then run `make llms`. -->
 
-← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/devices/emission/sound-power-plant/
+← [Documentation index](../../README.md) · Published at https://phonometry.dev/devices/emission/sound-power-plant/
 
 # Sound Power of Multisource Industrial Plants
 
@@ -571,7 +571,7 @@ reads the table, and every result carries it as `uncertainty_db`.
   the SAE ARP 866A coefficient of ISO 3891 that the weather path evaluates.
 - [Outdoor Sound Propagation](../../environment/propagation/outdoor-propagation.md):
   what the plant's $L_W$ is for, the level at a neighbour.
-- API reference: [`emission.plant_sound_power`](https://docs.jmrp.io/phonometry/reference/api/power/sound-power-plant/).
+- API reference: [`emission.plant_sound_power`](https://phonometry.dev/reference/api/power/sound-power-plant/).
 
 ## References
 

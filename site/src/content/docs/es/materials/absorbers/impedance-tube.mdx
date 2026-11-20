@@ -54,7 +54,7 @@ de transferencia** con dos micrófonos de ISO 10534-2 y el método de la
 **matriz de transferencia** con cuatro micrófonos de ASTM E2611, que añade la
 pérdida por transmisión. La sección final ejecuta el instrumento completo,
 muestra incluida, dentro del
-[simulación FDTD](/phonometry/es/simulation/fdtd-simulation/) y recupera la respuesta
+[simulación FDTD](/es/simulation/fdtd-simulation/) y recupera la respuesta
 analítica con las mismas cadenas de reducción.
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_impedance_tube.svg" alt="Tubo de impedancia de dos micrófonos de ISO 10534-2: un altavoz radiando una onda plana por el tubo, dos micrófonos enrasados en la pared a la separación s y a la distancia x1 de la cara de la probeta, la probeta de ensayo contra un respaldo rígido, y las ondas incidente y reflejada" width="92%" />
@@ -811,7 +811,7 @@ rígido superpuesta (una matriz construida por esas reducciones retiene
 $\rho c$ y, si se aporta, el vector de frecuencias, de modo que solo una
 matriz construida a mano los necesita como argumentos). La matriz no tiene por qué venir de una
 medición: el
-[modelo multicapa](/phonometry/es/materials/absorbers/porous-absorbers/) expone la
+[modelo multicapa](/es/materials/absorbers/porous-absorbers/) expone la
 matriz de cadena de cualquier apilado modelado en el mismo convenio, de modo
 que una probeta predicha se lee exactamente igual que una medida.
 
@@ -845,7 +845,7 @@ aleatoria; el mismo aviso vale del lado de la transmisión, y ahí se pasa por
 alto más a menudo. Lo que mide el tubo es la pérdida por transmisión de una
 probeta de unos pocos centímetros, para una onda plana a un ángulo, con los
 bordes de la probeta empotrados por la pared del tubo. Lo que es el
-[índice de reducción sonora $R$](/phonometry/es/buildings/insulation/insulation-lab/)
+[índice de reducción sonora $R$](/es/buildings/insulation/insulation-lab/)
 es una magnitud de campo difuso medida sobre un elemento a tamaño real con su
 montaje real, y lleva consigo las ondas de flexión del propio elemento, sus
 condiciones de borde y su caída de aislamiento en la coincidencia, nada de lo cual existe dentro
@@ -855,7 +855,7 @@ que el tubo se pierda por completo los valles de resonancia y de coincidencia de
 un panel real. Usa el TL de tubo para comparar materiales y para ajustar y
 verificar un modelo de matriz de transferencia; predice después la construcción
 con el modelo, o con
-[EN 12354](/phonometry/es/buildings/design/insulation-prediction/), y nunca
+[EN 12354](/es/buildings/design/insulation-prediction/), y nunca
 llevando el número del tubo a un cálculo de partición.
 
 <details>
@@ -926,7 +926,7 @@ el portamuestras, mucho antes del procesado de señal. Los fallos recurrentes:
 ## 5. El tubo virtual: la simulación medida por las normas
 
 Un dominio de tres filas con paredes rígidas del
-[simulación FDTD 2D](/phonometry/es/simulation/fdtd-simulation/) es un tubo de onda
+[simulación FDTD 2D](/es/simulation/fdtd-simulation/) es un tubo de onda
 plana, y con el mapa de `damping` por celda una muestra porosa se convierte
 en un fluido equivalente (mapas de densidad, velocidad y pérdidas). Eso cierra un
 círculo notable: las historias de las sondas FDTD pueden reducirse con las
@@ -1033,7 +1033,7 @@ que la propia norma llama límite inferior; la determinación medida de las Ecs.
 (A.13)/(A.14) con el tubo vacío no está implementada. El $\alpha_\mathrm{s}$ de
 incidencia aleatoria de la cámara reverberante es otra magnitud con su propia
 guía: [Medida y clasificación de la absorción
-sonora](/phonometry/es/materials/absorbers/absorption-measurement/).
+sonora](/es/materials/absorbers/absorption-measurement/).
 </ScopeClaim>
 </Scope>
 
@@ -1041,21 +1041,21 @@ sonora](/phonometry/es/materials/absorbers/absorption-measurement/).
 
 ## Véase también
 
-- [Medida y clasificación de la absorción sonora](/phonometry/es/materials/absorbers/absorption-measurement/):
+- [Medida y clasificación de la absorción sonora](/es/materials/absorbers/absorption-measurement/):
   el coeficiente de incidencia aleatoria de la cámara reverberante, su
   valoración ISO 11654 y cuándo el tubo o la cámara es el instrumento
   adecuado.
-- [Resistencia al flujo de aire](/phonometry/es/materials/absorbers/airflow-resistance/):
+- [Resistencia al flujo de aire](/es/materials/absorbers/airflow-resistance/):
   la resistividad al flujo de ISO 9053 que ancla los modelos contra los que
   se ajusta una medida de tubo.
-- [Absorbentes porosos y multicapa](/phonometry/es/materials/absorbers/porous-absorbers/):
+- [Absorbentes porosos y multicapa](/es/materials/absorbers/porous-absorbers/):
   los modelos de fluido equivalente y el modelo multicapa cuya matriz de
   cadena se lee con la misma maquinaria ASTM E2611 que una probeta medida.
-- [Simulación FDTD](/phonometry/es/simulation/fdtd-simulation/): el esquema 2D
+- [Simulación FDTD](/es/simulation/fdtd-simulation/): el esquema 2D
   detrás de los tubos virtuales de la sección 5.
-- [Calibración](/phonometry/es/signals/metrology/calibration/): la calibración de
+- [Calibración](/es/signals/metrology/calibration/): la calibración de
   micrófonos previa a la función de transferencia con dos micrófonos.
-- Referencia de la API: [`materials.absorbers.impedance_tube`](/phonometry/es/reference/api/materials/impedance-tube/).
-- Teoría: [Caracterización de materiales acústicos](/phonometry/es/reference/theory/materials-surfaces/#caracterizacion-de-materiales-acusticos-iso-11654-iso-9053-12-iso-10534-12-astm-e2611): la derivación por función de transferencia de ISO 10534-2 y la extensión con cuatro micrófonos de ASTM E2611.
+- Referencia de la API: [`materials.absorbers.impedance_tube`](/es/reference/api/materials/impedance-tube/).
+- Teoría: [Caracterización de materiales acústicos](/es/reference/theory/materials-surfaces/#caracterizacion-de-materiales-acusticos-iso-11654-iso-9053-12-iso-10534-12-astm-e2611): la derivación por función de transferencia de ISO 10534-2 y la extensión con cuatro micrófonos de ASTM E2611.
 
 </SeeAlso>

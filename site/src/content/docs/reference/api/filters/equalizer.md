@@ -86,7 +86,7 @@ Frequency response of a parametric-EQ cascade (RBJ Audio EQ Cookbook).
 | `section_magnitude_db` | Per-section magnitude, in dB, shape `(n_sections, n_frequencies)`; the cascade magnitude is their sum. |
 | `sos` | The designed cascade, shape `(n_sections, 6)` (scipy SOS layout, normalized so every section's `a0` is 1). |
 | `fs` | Sample rate, in Hz. |
-| `sections` | The [`EQSection`](/phonometry/reference/api/filters/equalizer/#eqsection) specifications, in cascade order. |
+| `sections` | The [`EQSection`](/reference/api/filters/equalizer/#eqsection) specifications, in cascade order. |
 
 ### EQResponseResult.plot()
 
@@ -169,15 +169,15 @@ parametric_eq(
 
 Apply a parametric-EQ cascade to a signal (RBJ Audio EQ Cookbook).
 
-Convenience wrapper around [`ParametricEQ`](/phonometry/reference/api/filters/equalizer/#parametriceq) for one-shot use.
+Convenience wrapper around [`ParametricEQ`](/reference/api/filters/equalizer/#parametriceq) for one-shot use.
 
 **Parameters**
 
 | Name | Description |
 | :--- | :--- |
-| `x` | Input signal (1D or 2D `[channels, samples]`), or a [`phonometry.io.Signal`](/phonometry/reference/api/io/io/#signal) read from a measurement file. A calibrated Signal is equalized in pascals, so the result is in pascals too. |
-| `fs` | Sample rate in Hz. Required for a bare array; a [`Signal`](/phonometry/reference/api/io/io/#signal) brings its own, and an explicit value that disagrees with it raises. |
-| `sections` | One [`EQSection`](/phonometry/reference/api/filters/equalizer/#eqsection) or a sequence of them. Keyword-only and required: it sits behind an optional `fs`, and a default here would be a signature that lies about what the call needs. |
+| `x` | Input signal (1D or 2D `[channels, samples]`), or a [`phonometry.io.Signal`](/reference/api/io/io/#signal) read from a measurement file. A calibrated Signal is equalized in pascals, so the result is in pascals too. |
+| `fs` | Sample rate in Hz. Required for a bare array; a [`Signal`](/reference/api/io/io/#signal) brings its own, and an explicit value that disagrees with it raises. |
+| `sections` | One [`EQSection`](/reference/api/filters/equalizer/#eqsection) or a sequence of them. Keyword-only and required: it sits behind an optional `fs`, and a default here would be a signature that lies about what the call needs. |
 
 **Returns:** Equalized signal.
 
@@ -195,9 +195,9 @@ ParametricEQ(
 
 Cascade of RBJ Audio EQ Cookbook biquads.
 
-Designs one second-order section per [`EQSection`](/phonometry/reference/api/filters/equalizer/#eqsection) and runs them in
+Designs one second-order section per [`EQSection`](/reference/api/filters/equalizer/#eqsection) and runs them in
 series as a numerically robust SOS cascade, following the house style of
-[`WeightingFilter`](/phonometry/reference/api/filters/weighting/#weightingfilter)
+[`WeightingFilter`](/reference/api/filters/weighting/#weightingfilter)
 (reusable coefficients, optional stateful block processing).
 
 **Parameters**
@@ -205,7 +205,7 @@ series as a numerically robust SOS cascade, following the house style of
 | Name | Description |
 | :--- | :--- |
 | `fs` | Sample rate in Hz. |
-| `sections` | One [`EQSection`](/phonometry/reference/api/filters/equalizer/#eqsection) or a sequence of them; the cascade applies them in order. |
+| `sections` | One [`EQSection`](/reference/api/filters/equalizer/#eqsection) or a sequence of them; the cascade applies them in order. |
 | `stateful` | If True, `filter` carries the filter state across calls (block processing). |
 | `steady_ic` | If True, initialize the state at steady state. |
 
@@ -229,9 +229,9 @@ Apply the EQ cascade to a signal.
 
 | Name | Description |
 | :--- | :--- |
-| `x` | Input signal (1D or 2D `[channels, samples]`), or a [`phonometry.io.Signal`](/phonometry/reference/api/io/io/#signal). A Signal whose rate disagrees with the one this cascade was designed for is refused; a calibrated one is equalized in pascals. |
+| `x` | Input signal (1D or 2D `[channels, samples]`), or a [`phonometry.io.Signal`](/reference/api/io/io/#signal). A Signal whose rate disagrees with the one this cascade was designed for is refused; a calibrated one is equalized in pascals. |
 
-**Returns:** The equalized record. A bare array in gives a bare array back; a [`Signal`](/phonometry/reference/api/io/io/#signal) gives a Signal, on the same terms as [`parametric_eq`](/phonometry/reference/api/filters/equalizer/#parametric_eq).
+**Returns:** The equalized record. A bare array in gives a bare array back; a [`Signal`](/reference/api/io/io/#signal) gives a Signal, on the same terms as [`parametric_eq`](/reference/api/filters/equalizer/#parametric_eq).
 
 **Raises**
 
@@ -260,7 +260,7 @@ Evaluate the cascade frequency response on a log-spaced grid.
 | `f_min` | Lowest frequency, in Hz. |
 | `f_max` | Highest frequency, in Hz (default: Nyquist). |
 
-**Returns:** An [`EQResponseResult`](/phonometry/reference/api/filters/equalizer/#eqresponseresult) (carries the SOS cascade and plots the magnitude/phase response).
+**Returns:** An [`EQResponseResult`](/reference/api/filters/equalizer/#eqresponseresult) (carries the SOS cascade and plots the magnitude/phase response).
 
 **Raises**
 

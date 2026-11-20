@@ -41,8 +41,8 @@ free choice:
 Table H.1 prints the same split. The railway spectrum of Table A.4 happens to
 be numerically identical to the road-traffic spectrum of Table A.3, so the two
 routes give the same number for a rail-dominant site; the *name* of the
-reported quantity still differs, which is why [`d2m_nt_a`](/phonometry/reference/api/building/spain/#d2m_nt_a) and
-[`d2m_nt_atr`](/phonometry/reference/api/building/spain/#d2m_nt_atr) are separate entry points rather than one function with a
+reported quantity still differs, which is why [`d2m_nt_a`](/reference/api/building/spain/#d2m_nt_a) and
+[`d2m_nt_atr`](/reference/api/building/spain/#d2m_nt_atr) are separate entry points rather than one function with a
 spectrum switch.
 
 **Relationship with the ISO 717-1 route.** DB-HR Annex H accepts
@@ -58,7 +58,7 @@ core range stops at 3150 Hz, is the one the Spanish literature makes explicit
 library keeps both routes: this module implements the direct Annex A route
 (Formulae (A.5) to (A.7), (A.14), (A.17) and (A.18)), which is the normative
 one for DB-HR, and
-[`weighted_rating_extended`](/phonometry/reference/api/building/ratings/#weighted_rating_extended) supplies the
+[`weighted_rating_extended`](/reference/api/building/ratings/#weighted_rating_extended) supplies the
 ISO 717-1 route with the enlarged-range adaptation terms.
 
 **Rounding.** DB-HR 3.1.3.1 point 4 requires the final values of the
@@ -78,11 +78,11 @@ about 1.8 m2 specimens; larger windows insulate less, and the CEC corrects
 
 :::note
 `"sanitary"` does not mean the same thing here as in
-[`phonometry.environment.assessment.spain`](/phonometry/reference/api/environment/spain/). In Table 2.1 of DB-HR
+[`phonometry.environment.assessment.spain`](/reference/api/environment/spain/). In Table 2.1 of DB-HR
 it is the *non-hospital* ambulatory health use of footnote (1) (medical
 practices, consulting rooms), deliberately distinct from `"hospital"`;
 in the RD 1367/2007 tables it is the *hospitalario* use itself. Both names
-reach the top-level [`phonometry`](/phonometry/reference/api/filters/phonometry/) namespace.
+reach the top-level [`phonometry`](/reference/api/filters/phonometry/) namespace.
 :::
 
 > Auto-generated from the source docstrings by `scripts/generate_api_docs.py` (`make api-docs`). Do not edit by hand.
@@ -103,7 +103,7 @@ Judge a set of achieved values against their DB-HR requirements.
 | :--- | :--- |
 | `items` | `(value, requirement)` pairs. |
 
-**Returns:** A [`DBHRAssessment`](/phonometry/reference/api/building/spain/#dbhrassessment).
+**Returns:** A [`DBHRAssessment`](/reference/api/building/spain/#dbhrassessment).
 
 **Raises**
 
@@ -131,9 +131,9 @@ for a reverberation time), and the rounded value is compared with the limit.
 | Name | Description |
 | :--- | :--- |
 | `value` | The achieved value, in the requirement's unit. |
-| `requirement` | The [`DBHRRequirement`](/phonometry/reference/api/building/spain/#dbhrrequirement) to check against. |
+| `requirement` | The [`DBHRRequirement`](/reference/api/building/spain/#dbhrrequirement) to check against. |
 
-**Returns:** A [`DBHRCheck`](/phonometry/reference/api/building/spain/#dbhrcheck).
+**Returns:** A [`DBHRCheck`](/reference/api/building/spain/#dbhrcheck).
 
 **Raises**
 
@@ -162,7 +162,7 @@ with the Table A.4 railway spectrum; Table H.1 prints the same split and
 Annex H (H.2) gives `D2m,nT,w + C` as its ISO 717-1 approximation.
 
 For a road-traffic or aircraft dominant site the quantity is
-`D2m,nT,Atr` instead: use [`d2m_nt_atr`](/phonometry/reference/api/building/spain/#d2m_nt_atr).
+`D2m,nT,Atr` instead: use [`d2m_nt_atr`](/reference/api/building/spain/#d2m_nt_atr).
 
 **Parameters**
 
@@ -172,7 +172,7 @@ For a road-traffic or aircraft dominant site the quantity is
 | `frequencies` | Band centre frequencies, in Hz (optional). |
 | `spectrum` | `"pink"` (default, Table A.5) or `"railway"` (Table A.4), per the dominant outdoor noise. |
 
-**Returns:** A [`DBHRGlobalIndexResult`](/phonometry/reference/api/building/spain/#dbhrglobalindexresult) named `"D2m,nT,A"`.
+**Returns:** A [`DBHRGlobalIndexResult`](/reference/api/building/spain/#dbhrglobalindexresult) named `"D2m,nT,A"`.
 
 **Raises**
 
@@ -201,7 +201,7 @@ case evaluated through the same Formula (A.6) with the Table A.2 aircraft
 spectrum.
 
 A railway-dominant site is assessed as `D2m,nT,A` through Formula (A.5)
-instead: use [`d2m_nt_a`](/phonometry/reference/api/building/spain/#d2m_nt_a). The railway spectrum of Table A.4 is
+instead: use [`d2m_nt_a`](/reference/api/building/spain/#d2m_nt_a). The railway spectrum of Table A.4 is
 numerically identical to the road-traffic spectrum of Table A.3, so the
 two give the same number, but the quantity that the requirement and the
 report are stated in is not the same.
@@ -214,7 +214,7 @@ report are stated in is not the same.
 | `frequencies` | Band centre frequencies, in Hz (optional). |
 | `spectrum` | `"traffic"` (default, Table A.3) or `"aircraft"` (Table A.2), per the dominant outdoor noise. |
 
-**Returns:** A [`DBHRGlobalIndexResult`](/phonometry/reference/api/building/spain/#dbhrglobalindexresult) named `_D2M_NT_ATR`.
+**Returns:** A [`DBHRGlobalIndexResult`](/reference/api/building/spain/#dbhrglobalindexresult) named `_D2M_NT_ATR`.
 
 **Raises**
 
@@ -256,7 +256,7 @@ those instead.
 | `source_room` | `"same_unit"`, `"other_unit"`, `"installations"` or `"activity"`. |
 | `shared_opening` | The two rooms share a door or window. |
 
-**Returns:** A tuple of [`DBHRRequirement`](/phonometry/reference/api/building/spain/#dbhrrequirement), of length one in the general case and two when `shared_opening` applies.
+**Returns:** A tuple of [`DBHRRequirement`](/reference/api/building/spain/#dbhrrequirement), of length one in the general case and two when `shared_opening` applies.
 
 **Raises**
 
@@ -299,7 +299,7 @@ residential acoustic areas.
 | `dominant_noise` | `"road"` (default), `"railway"` or `"aircraft"`. This selects the quantity the requirement is stated in as well as the aircraft increment: `"railway"` gives a `D2m,nT,A` requirement (Formula (A.5)) and the other two a `D2m,nT,Atr` one (Formula (A.6)), per clause 3.1.3.4 point 1. |
 | `quiet_facade` | Assess with `Ld` reduced by 10 dBA. |
 
-**Returns:** The [`DBHRRequirement`](/phonometry/reference/api/building/spain/#dbhrrequirement), on `D2m,nT,Atr` or, for a railway-dominant site, on `D2m,nT,A`.
+**Returns:** The [`DBHRRequirement`](/reference/api/building/spain/#dbhrrequirement), on `D2m,nT,Atr` or, for a railway-dominant site, on `D2m,nT,A`.
 
 **Raises**
 
@@ -343,7 +343,7 @@ one-third-octave bands 100 Hz to 5 kHz (Formulae (A.5) to (A.7), (A.14),
 | `frequencies` | Band centre frequencies, in Hz, one per value. `None` assumes exactly the eighteen DB-HR bands in order, so it is required for any other length. That condition is on the length of `band_values` at run time, which a signature cannot state, so it is checked here and raises rather than being caught by a type checker. |
 | `name` | Optional index name carried on the result (e.g. `"R'A"`). |
 
-**Returns:** A [`DBHRGlobalIndexResult`](/phonometry/reference/api/building/spain/#dbhrglobalindexresult).
+**Returns:** A [`DBHRGlobalIndexResult`](/reference/api/building/spain/#dbhrglobalindexresult).
 
 **Raises**
 
@@ -376,7 +376,7 @@ horizontally adjacent to a staircase.
 | `receiving_room` | `"protected"` or `"habitable"`. |
 | `source_room` | `"other_unit"`, `"installations"` or `"activity"`. |
 
-**Returns:** The [`DBHRRequirement`](/phonometry/reference/api/building/spain/#dbhrrequirement) on `L'nT,w`.
+**Returns:** The [`DBHRRequirement`](/reference/api/building/spain/#dbhrrequirement) on `L'nT,w`.
 
 **Raises**
 
@@ -415,7 +415,7 @@ requirements, so this function returns the one route asked for.
 | :--- | :--- |
 | `quantity` | `"D2m,nT,Atr"` (default, the per-leaf route, 40 dBA) or `"DnT,A"` (the combined route, 50 dBA). |
 
-**Returns:** The [`DBHRRequirement`](/phonometry/reference/api/building/spain/#dbhrrequirement) of the chosen route.
+**Returns:** The [`DBHRRequirement`](/reference/api/building/spain/#dbhrrequirement) of the chosen route.
 
 **Raises**
 
@@ -449,7 +449,7 @@ area of at least 0.2 m2 per cubic metre of room volume.
 | `room_use` | `"classroom"` (or `"conference_hall"`), `"restaurant"` (or `"dining_room"`) or `"common_area"`. |
 | `furnished` | For a classroom or conference hall, include the seating (the 0.5 s limit). |
 
-**Returns:** The [`DBHRRequirement`](/phonometry/reference/api/building/spain/#dbhrrequirement).
+**Returns:** The [`DBHRRequirement`](/reference/api/building/spain/#dbhrrequirement).
 
 **Raises**
 
@@ -470,7 +470,7 @@ A set of DB-HR requirement checks.
 
 | Name | Description |
 | :--- | :--- |
-| `checks` | The individual [`DBHRCheck`](/phonometry/reference/api/building/spain/#dbhrcheck) results. |
+| `checks` | The individual [`DBHRCheck`](/reference/api/building/spain/#dbhrcheck) results. |
 
 ### DBHRAssessment.passes
 
@@ -513,7 +513,7 @@ comply with a value DB-HR fails.
 
 | Name | Description |
 | :--- | :--- |
-| `requirement` | The [`DBHRRequirement`](/phonometry/reference/api/building/spain/#dbhrrequirement) checked. |
+| `requirement` | The [`DBHRRequirement`](/reference/api/building/spain/#dbhrrequirement) checked. |
 | `value` | The achieved value, unrounded. |
 
 ### DBHRCheck.margin
@@ -642,7 +642,7 @@ A-weighted standardized level difference `DnT,A` (Formula (A.7)).
 | `level_difference` | Band standardized level difference `DnT`, in dB. |
 | `frequencies` | Band centre frequencies, in Hz (optional). |
 
-**Returns:** A [`DBHRGlobalIndexResult`](/phonometry/reference/api/building/spain/#dbhrglobalindexresult) named `_DNT_A`.
+**Returns:** A [`DBHRGlobalIndexResult`](/reference/api/building/spain/#dbhrglobalindexresult) named `_DNT_A`.
 
 **Raises**
 
@@ -673,7 +673,7 @@ Given the apparent index `R'` measured in the building, the same sum is
 | `reduction_index` | Band sound reduction index `R` (or `R'`), in dB. |
 | `frequencies` | Band centre frequencies, in Hz (optional). |
 
-**Returns:** A [`DBHRGlobalIndexResult`](/phonometry/reference/api/building/spain/#dbhrglobalindexresult) named `"RA"`.
+**Returns:** A [`DBHRGlobalIndexResult`](/reference/api/building/spain/#dbhrglobalindexresult) named `"RA"`.
 
 **Raises**
 
@@ -701,7 +701,7 @@ A-weighted global sound reduction index `RA,tr` for road traffic (Formula (A.18)
 | `reduction_index` | Band sound reduction index `R` (or `R'`), in dB. |
 | `frequencies` | Band centre frequencies, in Hz (optional). |
 
-**Returns:** A [`DBHRGlobalIndexResult`](/phonometry/reference/api/building/spain/#dbhrglobalindexresult) named `"RA,tr"`.
+**Returns:** A [`DBHRGlobalIndexResult`](/reference/api/building/spain/#dbhrglobalindexresult) named `"RA,tr"`.
 
 **Raises**
 

@@ -1,6 +1,6 @@
 <!-- Written by `make llms` from site/src/content/docs/buildings/rooms/sound-strength.mdx: edit that page and its Spanish twin, then run `make llms`. -->
 
-← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/buildings/rooms/sound-strength/
+← [Documentation index](../../README.md) · Published at https://phonometry.dev/buildings/rooms/sound-strength/
 
 # Sound strength G (ISO 3382-1)
 
@@ -370,7 +370,7 @@ ISO 3382-1 asks for, is in
   Equation (A.9) subtracts, measured to ISO 3741.
 - [Absorption and Reverberation Time](enclosed-space-absorption.md):
   the absorption area Equation (A.5) converts a diffuse-field reading through.
-- API reference: [`room.auditorium`](https://docs.jmrp.io/phonometry/reference/api/rooms/auditorium/).
+- API reference: [`room.auditorium`](https://phonometry.dev/reference/api/rooms/auditorium/).
 
 ## References
 

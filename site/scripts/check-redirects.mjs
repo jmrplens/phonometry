@@ -119,10 +119,12 @@ if (misquoted.length > 0) {
 }
 
 // --- The edge list covers the map, in both spellings -----------------------
-// docs.jmrp.io answers these addresses with a 301 from a Cloudflare Bulk
-// Redirects list that scripts/cloudflare-redirects.mjs prints from this map.
-// Each address has to be there with and without its trailing slash, aimed at
-// the same absolute destination, or one spelling falls through to the stub.
+// The site answers these addresses with a 301 from the items
+// scripts/cloudflare-redirects.mjs prints from this map (phonometry.dev reads
+// them as its `_redirects` file; `--legacy` prints them for the host the site
+// was published on before). Each address has to be there with and without its
+// trailing slash, aimed at the same absolute destination, or one spelling
+// falls through to the stub.
 // The Markdown copy of each, `<address>index.md`, has to lead to the copy of
 // the page it moved to, and each llms shard name retired before the generator
 // kept them (src/data/llms-shards.json) to the file it names: neither has a

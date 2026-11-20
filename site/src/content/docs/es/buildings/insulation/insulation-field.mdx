@@ -59,7 +59,7 @@ import ScopeClaim from '../../../../../components/ScopeClaim.astro';
 import SeeAlso from '../../../../../components/SeeAlso.astro';
 import ThemeImage from '../../../../../components/ThemeImage.astro';
 
-Esta guía continúa desde la [guía de Acústica de salas](/phonometry/es/buildings/rooms/room-acoustics/):
+Esta guía continúa desde la [guía de Acústica de salas](/es/buildings/rooms/room-acoustics/):
 la misma respuesta al impulso, medida a ambos lados de un cerramiento, da su
 aislamiento acústico. Esta página cubre la medición con método de ingeniería
 de ISO 16283 en el edificio terminado: las diferencias de niveles aéreas $D$,
@@ -67,15 +67,15 @@ $D_{\mathrm{n}T}$ y $R'$, los niveles de impactos $L'_{\mathrm{n}T}$ y $L'_\math
 ensayo in situ y la incertidumbre de ISO 12999-1 que cualifica cada valor de
 campo. Tres parientes cercanos tienen guías propias: el motor de curva de
 referencia tras cada número único en
-[Índices globales de aislamiento (ISO 717)](/phonometry/es/buildings/insulation/insulation-ratings/),
+[Índices globales de aislamiento (ISO 717)](/es/buildings/insulation/insulation-ratings/),
 el cerramiento del edificio en
-[Aislamiento acústico de fachadas](/phonometry/es/buildings/insulation/facade-insulation/) y
+[Aislamiento acústico de fachadas](/es/buildings/insulation/facade-insulation/) y
 la vía rápida en bandas de octava en
-[Método de control del aislamiento (ISO 10052)](/phonometry/es/buildings/insulation/insulation-survey/).
+[Método de control del aislamiento (ISO 10052)](/es/buildings/insulation/insulation-survey/).
 La caracterización en laboratorio de un elemento vive en
-[Medición del aislamiento en laboratorio](/phonometry/es/buildings/insulation/insulation-lab/)
+[Medición del aislamiento en laboratorio](/es/buildings/insulation/insulation-lab/)
 y la predicción del comportamiento in situ en
-[Predicción del aislamiento acústico (EN 12354)](/phonometry/es/buildings/design/insulation-prediction/).
+[Predicción del aislamiento acústico (EN 12354)](/es/buildings/design/insulation-prediction/).
 
 ## ¿Cómo calculo DnT y R' a partir de una medición en campo con Python?
 
@@ -121,9 +121,9 @@ trayectorias por flancos, mientras que las $R$ y $L_\mathrm{n}$ sin prima son pr
 laboratorio del elemento solo, medidas con los flancos suprimidos. El mapa
 completo laboratorio-campo vive en
 [Medición del aislamiento en
-laboratorio](/phonometry/es/buildings/insulation/insulation-lab/);
+laboratorio](/es/buildings/insulation/insulation-lab/);
 la predicción que tiende el puente entre ambos es
-[EN 12354](/phonometry/es/buildings/design/insulation-prediction/).
+[EN 12354](/es/buildings/design/insulation-prediction/).
 
 Una sola medición da las tres magnitudes, así que **cuál de ellas va al informe
 es una cuestión reglamentaria, no de medición.** $D_{\mathrm{n}T}$ describe la pareja de
@@ -134,7 +134,7 @@ a un $R_\mathrm{w}$ de laboratorio o a una predicción EN 12354. Mide una vez y 
 después la magnitud en la que está escrita la exigencia, diciendo cuál es: un
 $R'_\mathrm{A}$ no se puede contrastar con un límite en $D_{\mathrm{n}T,\mathrm{A}}$ sin convertirlo antes
 a través de la $T$ del recinto y del área de la partición; véase
-[Código Técnico de la Edificación (CTE DB-HR)](/phonometry/es/buildings/insulation/spanish-building-code/),
+[Código Técnico de la Edificación (CTE DB-HR)](/es/buildings/insulation/spanish-building-code/),
 que declara su exigencia entre recintos en $D_{\mathrm{n}T,\mathrm{A}}$ y la de la tabiquería en
 $R_\mathrm{A}$.
 
@@ -189,7 +189,7 @@ constructiva que funciona y otra que genera quejas.
 `r_prime` o `None`). El motor de curva de referencia que convierte cualquiera
 de esos espectros en $R_\mathrm{w}$, $R'_\mathrm{w}$ o $D_{\mathrm{n}T,\mathrm{w}}$, sus términos de adaptación
 espectral y sus variantes de rango ampliado están en
-[Índices globales de aislamiento (ISO 717)](/phonometry/es/buildings/insulation/insulation-ratings/).
+[Índices globales de aislamiento (ISO 717)](/es/buildings/insulation/insulation-ratings/).
 
 <span id="la-medicion-iso-16283-1"></span>
 
@@ -315,7 +315,7 @@ print(np.round(l2_corr, 2))     # [44.   40.25 38.84 36.7 ]  <- última banda se
 
 `building.background_correction` existe, pero implementa la regla de
 **laboratorio de ISO 10140-4** que se usa en
-[Medición del aislamiento en laboratorio](/phonometry/es/buildings/insulation/insulation-lab/),
+[Medición del aislamiento en laboratorio](/es/buildings/insulation/insulation-lab/),
 cuyo umbral superior es de 15 dB y no de 10 dB. Aplicada a datos de campo resta
 energía en la franja de margen de 10-15 dB en la que ISO 16283-1 no pide nada
 (hasta 0,458 dB con un margen de 10 dB), y, como actúa sobre el recinto
@@ -398,9 +398,9 @@ está también en él para el tiempo de reverberación, al menos a la distancia 
 un brazo del micrófono (apartado 10.1).
 `room_parameters(ir, fs, limits=(100, 3150), fraction=3).t20` evalúa ese rango
 de 20 dB sobre una respuesta al impulso; la adquisición está en
-[Medición de la respuesta al impulso](/phonometry/es/buildings/rooms/room-impulse-response/)
+[Medición de la respuesta al impulso](/es/buildings/rooms/room-impulse-response/)
 y el análisis del decaimiento en
-[Acústica de salas](/phonometry/es/buildings/rooms/room-acoustics/). Un recinto receptor de
+[Acústica de salas](/es/buildings/rooms/room-acoustics/). Un recinto receptor de
 menos de 25 m³ cambia las tres bandas más bajas, como dice la sección
 siguiente.
 
@@ -517,7 +517,7 @@ procedimiento que ejecutar lo dice con un
 ISO 16283. La geometría de las esquinas, los requisitos de
 muestreo, las diferencias entre las tres partes y una medición resuelta con su
 valoración están en una guía propia:
-[Recintos pequeños: procedimiento de baja frecuencia](/phonometry/es/buildings/insulation/low-frequency-procedure/).
+[Recintos pequeños: procedimiento de baja frecuencia](/es/buildings/insulation/low-frequency-procedure/).
 
 ## Aislamiento a ruido de impactos en campo (ISO 16283-2)
 
@@ -549,7 +549,7 @@ un adulto caminando descalzo. Para esos, la misma norma especifica una **pelota
 de caucho** (Anexo A), valorada por un motor completamente distinto: un nivel
 máximo con ponderación Fast y la suma ponderada A del Anexo D de ISO 717-2, no
 una curva de referencia desplazada. Tiene guía propia,
-[Fuentes de impacto pesadas y blandas](/phonometry/es/buildings/insulation/heavy-impact-sources/).
+[Fuentes de impacto pesadas y blandas](/es/buildings/insulation/heavy-impact-sources/).
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_impact_setup.svg" alt="Montaje de aislamiento a impactos en campo, en sección: una máquina de impactos normalizada sobre el suelo del recinto emisor superior, tres posiciones de micrófono a distinta altura en el recinto receptor inferior con las distancias mínimas del apartado 7.6 (0,7 m entre posiciones fijas, 0,5 m a los límites del recinto, 1,0 m al techo que la máquina excita), y las fórmulas que estandarizan o normalizan el nivel promediado en energía" width="92%" />
 
@@ -587,9 +587,9 @@ revestimiento y sin capa flotante, que incumple por unos 20 dB: el ejemplo del
 Anexo C es un caso pésimo, no uno típico. Cerrar un hueco de ese tamaño pide un
 suelo flotante sobre una capa elástica o un techo desolidarizado, no una
 moqueta; véanse
-[Predicción del aislamiento acústico (EN 12354)](/phonometry/es/buildings/design/insulation-prediction/)
+[Predicción del aislamiento acústico (EN 12354)](/es/buildings/design/insulation-prediction/)
 y
-[Predicción del comportamiento de capas elásticas](/phonometry/es/buildings/design/resilient-layers/).
+[Predicción del comportamiento de capas elásticas](/es/buildings/design/resilient-layers/).
 
 <span id="la-medicion-de-impactos"></span>
 
@@ -623,7 +623,7 @@ requisitos especiales del Anexo A, que también aconseja cómo montarla.
 
 **Micrófonos fijos (apartados 7.3.1, 7.3.2 y 7.6).** Las reglas son las que
 sigue la pelota de caucho en
-[Fuentes de impacto pesadas y blandas](/phonometry/es/buildings/insulation/heavy-impact-sources/#la-medicion-in-situ):
+[Fuentes de impacto pesadas y blandas](/es/buildings/insulation/heavy-impact-sources/#la-medicion-in-situ):
 un trípode sin nadie en el recinto, o un operador cuyo tronco se mantiene al
 menos a la distancia de un brazo del micrófono; posiciones repartidas por el
 espacio permitido, sin dos en el mismo plano respecto a los límites del
@@ -663,7 +663,7 @@ anterior, mientras que ISO 16283-1:2014 sigue imprimiendo para la misma
 trayectoria que termina a no más de 0,5 m del techo (apartado 7.5.3), un
 máximo al que su propio apartado 7.6 responde con un mínimo de 0,5 m a todo
 límite del recinto; la comparación está en el
-[registro de erratas](/phonometry/es/reference/errata/). Termina la hélice a
+[registro de erratas](/es/reference/errata/). Termina la hélice a
 0,5 m del techo como mínimo en cualquiera de las dos partes. En caso de
 discrepancia, el resultado de referencia es el medido sin nadie en el recinto
 receptor (apartado 6).
@@ -717,7 +717,7 @@ con un altavoz que cumpla el Anexo B de esta parte.
 
 `impact_insulation()` devuelve un `ImpactInsulationResult` (`l_n_t`, `l_n` o
 `None`); el lado ISO 717-2 de la cadena está en
-[Índices globales de aislamiento (ISO 717)](/phonometry/es/buildings/insulation/insulation-ratings/).
+[Índices globales de aislamiento (ISO 717)](/es/buildings/insulation/insulation-ratings/).
 
 ## Informe de ensayo in situ de ISO 16283 (`.report()`)
 
@@ -979,16 +979,16 @@ lectura `COVERAGE_FACTORS` expone la Tabla 8 indexada por `(coverage, one_sided)
 Tres mediciones vecinas tienen guías propias, y una
 cuarta las acompaña. El cerramiento del edificio, medido frente al nivel a 2 m
 por delante y previsto a partir de sus elementos, es
-[Aislamiento acústico de fachadas](/phonometry/es/buildings/insulation/facade-insulation/).
+[Aislamiento acústico de fachadas](/es/buildings/insulation/facade-insulation/).
 Cuando una medición de ingeniería completa es más de lo que la pregunta
 merece, el método de control en bandas de octava es
-[Método de control del aislamiento (ISO 10052)](/phonometry/es/buildings/insulation/insulation-survey/).
+[Método de control del aislamiento (ISO 10052)](/es/buildings/insulation/insulation-survey/).
 Cada número único citado arriba sale de las curvas de referencia de
-[Índices globales de aislamiento (ISO 717)](/phonometry/es/buildings/insulation/insulation-ratings/).
+[Índices globales de aislamiento (ISO 717)](/es/buildings/insulation/insulation-ratings/).
 Y la vía de intensidad acústica hacia las mismas magnitudes, que lee la
 potencia transmitida sobre la cara radiante en lugar del nivel del recinto
 receptor, es
-[Aislamiento acústico por intensidad (ISO 15186)](/phonometry/es/buildings/insulation/insulation-intensity/).
+[Aislamiento acústico por intensidad (ISO 15186)](/es/buildings/insulation/insulation-intensity/).
 
 ## Qué cubre esta guía
 
@@ -1028,20 +1028,20 @@ proporcionan las posiciones, pero nada verifica cuántas se tomaron, dónde ni
 durante cuánto tiempo, y los tiempos de reverberación se toman tal como
 llegan. El
 procedimiento de baja frecuencia de [Recintos
-pequeños](/phonometry/es/buildings/insulation/low-frequency-procedure/) *sí* está implementado (el disparador
+pequeños](/es/buildings/insulation/low-frequency-procedure/) *sí* está implementado (el disparador
 de los 25 m³, la Fórmula (12), la Fórmula (13) y el tiempo de reverberación de
 la octava de 63 Hz del apartado 10.4), pero también recibe niveles de esquina
 que midió el operador, y el único requisito de muestreo que exige es un aviso
 por debajo de las cuatro esquinas por posición de fuente que pide el apartado
 8.3. Los demás miembros de la familia están cubiertos por sus
 propias guías: la parte de fachada ISO 16283-3 ([Aislamiento acústico de
-fachadas](/phonometry/es/buildings/insulation/facade-insulation/)), el método
+fachadas](/es/buildings/insulation/facade-insulation/)), el método
 de control ISO 10052 ([Método de control del
-aislamiento](/phonometry/es/buildings/insulation/insulation-survey/)), los
+aislamiento](/es/buildings/insulation/insulation-survey/)), los
 motores de valoración ISO 717-1/-2 ([Índices globales de
-aislamiento](/phonometry/es/buildings/insulation/insulation-ratings/)) y la
+aislamiento](/es/buildings/insulation/insulation-ratings/)) y la
 vía de intensidad acústica ISO 15186-1/-2 ([Aislamiento acústico por
-intensidad](/phonometry/es/buildings/insulation/insulation-intensity/)).
+intensidad](/es/buildings/insulation/insulation-intensity/)).
 </ScopeClaim>
 </Scope>
 
@@ -1049,33 +1049,33 @@ intensidad](/phonometry/es/buildings/insulation/insulation-intensity/)).
 
 ## Véase también
 
-- [Índices globales de aislamiento (ISO 717)](/phonometry/es/buildings/insulation/insulation-ratings/):
+- [Índices globales de aislamiento (ISO 717)](/es/buildings/insulation/insulation-ratings/):
   el motor de curva de referencia tras cada número único ponderado de esta página.
-- [Aislamiento acústico de fachadas](/phonometry/es/buildings/insulation/facade-insulation/):
+- [Aislamiento acústico de fachadas](/es/buildings/insulation/facade-insulation/):
   la tercera parte de ISO 16283, medida y prevista.
-- [Método de control del aislamiento (ISO 10052)](/phonometry/es/buildings/insulation/insulation-survey/):
+- [Método de control del aislamiento (ISO 10052)](/es/buildings/insulation/insulation-survey/):
   el método de control en bandas de octava que toma estos métodos de ingeniería
   como referencia.
-- [Fuentes de impacto pesadas y blandas](/phonometry/es/buildings/insulation/heavy-impact-sources/):
+- [Fuentes de impacto pesadas y blandas](/es/buildings/insulation/heavy-impact-sources/):
   la pelota de caucho y la máquina de neumático, las otras fuentes de impacto de
   ISO 16283-2, y la valoración del Anexo D de ISO 717-2 que las acompaña.
-- [Medición del aislamiento en laboratorio](/phonometry/es/buildings/insulation/insulation-lab/):
+- [Medición del aislamiento en laboratorio](/es/buildings/insulation/insulation-lab/):
   la caracterización de elementos de ISO 10140 con la que se comparan estas
   magnitudes de campo.
-- [Aislamiento acústico por intensidad (ISO 15186)](/phonometry/es/buildings/insulation/insulation-intensity/):
+- [Aislamiento acústico por intensidad (ISO 15186)](/es/buildings/insulation/insulation-intensity/):
   la vía de potencia directa hacia los mismos índices de campo y laboratorio.
-- [Predicción del aislamiento acústico (EN 12354)](/phonometry/es/buildings/design/insulation-prediction/):
+- [Predicción del aislamiento acústico (EN 12354)](/es/buildings/design/insulation-prediction/):
   el comportamiento in situ predicho a partir de datos de elemento de laboratorio.
-- [Acústica de salas](/phonometry/es/buildings/rooms/room-acoustics/): los parámetros de
+- [Acústica de salas](/es/buildings/rooms/room-acoustics/): los parámetros de
   sala y los tiempos de reverberación sobre los que se apoya la cadena de
   aislamiento de esta guía.
-- [Niveles](/phonometry/es/signals/levels/levels/): el promediado en energía y las métricas de
+- [Niveles](/es/signals/levels/levels/): el promediado en energía y las métricas de
   nivel que sustentan los niveles de los recintos emisor/receptor.
-- [Bancos de filtros](/phonometry/es/signals/filters/filter-banks/): los filtros de fracción
+- [Bancos de filtros](/es/signals/filters/filter-banks/): los filtros de fracción
   de octava IEC 61260 usados para los espectros de aislamiento.
-- [Teoría](/phonometry/es/reference/theory/rooms-buildings/): la derivación de la curva de referencia que sustenta
+- [Teoría](/es/reference/theory/rooms-buildings/): la derivación de la curva de referencia que sustenta
   los índices ponderados de un solo número.
-- Referencia de la API: [`building.measurement.insulation`](/phonometry/es/reference/api/building/insulation/) y [`building.measurement.uncertainty`](/phonometry/es/reference/api/building/uncertainty/).
+- Referencia de la API: [`building.measurement.insulation`](/es/reference/api/building/insulation/) y [`building.measurement.uncertainty`](/es/reference/api/building/uncertainty/).
 
 </SeeAlso>
 

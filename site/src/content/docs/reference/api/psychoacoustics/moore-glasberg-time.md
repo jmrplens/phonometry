@@ -87,13 +87,13 @@ the instantaneous sound pressure in pascals.
 
 | Name | Description |
 | :--- | :--- |
-| `x` | Calibrated pressure signal in pascals.  A 1-D array is treated as diotic (the same sound at both ears) for a binaural/diotic presentation, or as the single active ear for a monaural presentation; a two-channel `(n, 2)` array gives the left and right ear signals. Accepts a [`phonometry.io.Signal`](/phonometry/reference/api/io/io/#signal), which is where "calibrated" comes from without arithmetic: this model reads absolute levels, so an uncalibrated record is taken as if one digital unit were one pascal and the answer is wrong by however far that is from true. |
-| `fs` | Sampling rate in Hz (positive). Required for a bare array; a [`Signal`](/phonometry/reference/api/io/io/#signal) brings its own, and an explicit value that disagrees with it raises instead of silently winning. |
+| `x` | Calibrated pressure signal in pascals.  A 1-D array is treated as diotic (the same sound at both ears) for a binaural/diotic presentation, or as the single active ear for a monaural presentation; a two-channel `(n, 2)` array gives the left and right ear signals. Accepts a [`phonometry.io.Signal`](/reference/api/io/io/#signal), which is where "calibrated" comes from without arithmetic: this model reads absolute levels, so an uncalibrated record is taken as if one digital unit were one pascal and the answer is wrong by however far that is from true. |
+| `fs` | Sampling rate in Hz (positive). Required for a bare array; a [`Signal`](/reference/api/io/io/#signal) brings its own, and an explicit value that disagrees with it raises instead of silently winning. |
 | `field` | Listening condition setting the outer-ear transfer: `"free"` (frontal free field, default), `"diffuse"` (diffuse field) or `"eardrum"` (levels already at the tympanic membrane). |
 | `presentation` | `"binaural"`/`"diotic"` (default) or `"monaural"`. |
 | `percentiles` | Fractions (percent) for which the exceeded long-term loudness is reported. |
 
-**Returns:** A [`MooreGlasbergTimeVaryingLoudness`](/phonometry/reference/api/psychoacoustics/moore-glasberg-time/#mooreglasbergtimevaryingloudness).
+**Returns:** A [`MooreGlasbergTimeVaryingLoudness`](/reference/api/psychoacoustics/moore-glasberg-time/#mooreglasbergtimevaryingloudness).
 
 **Raises**
 

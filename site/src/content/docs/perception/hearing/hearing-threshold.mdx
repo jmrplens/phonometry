@@ -206,7 +206,7 @@ audiogram would show, $H' = H + N - HN/120$, at the same fractile. In
 practice that means the two guides chain: pick the population and fractile
 here, add the exposure there, and compare the result, never the noise
 component alone, against a measured audiogram. The
-[noise-induced hearing loss guide](/phonometry/perception/hearing/noise-induced-hearing-loss/)
+[noise-induced hearing loss guide](/perception/hearing/noise-induced-hearing-loss/)
 picks the chain up at that point.
 
 ## 2. Reference threshold of hearing (ISO 389-7)
@@ -338,7 +338,7 @@ The `AgeThresholdResult` carries the `median`, the `spread_upper` and
 `.plot()` draws the median with the 10–90 % band. The noise-induced permanent
 threshold shift of ISO 1999, which adds a noise component on top of this age
 component, is the subject of the
-[noise-induced hearing loss](/phonometry/perception/hearing/noise-induced-hearing-loss/) guide.
+[noise-induced hearing loss](/perception/hearing/noise-induced-hearing-loss/) guide.
 
 ## 3. The audiometric zero of an earphone (ISO 389-1)
 
@@ -416,7 +416,7 @@ added to an audiogram by `hearing_level_to_coupler_spl`.
 ISO 1999:2013 clause 6.1 Formula (1) combines this age threshold with a
 noise-induced shift into a real audiogram. That combination *is* implemented,
 by `htlan`, but it is documented in the [noise-induced hearing
-loss](/phonometry/perception/hearing/noise-induced-hearing-loss/) guide rather
+loss](/perception/hearing/noise-induced-hearing-loss/) guide rather
 than here; this page stops at the age component. Of ISO 389-7:2005, this
 module returns only the eleven audiometric rows of Table 1. The other 27 (the
 third octaves from 20 Hz to 100 Hz, the intermediate third octaves between the
@@ -435,15 +435,15 @@ implemented.
 
 ## See also
 
-- [Noise-induced hearing loss](/phonometry/perception/hearing/noise-induced-hearing-loss/): the
+- [Noise-induced hearing loss](/perception/hearing/noise-induced-hearing-loss/): the
   ISO 1999 model that adds the noise component on top of this age component.
-- [Speech Intelligibility Index](/phonometry/perception/speech/speech-intelligibility/): a raised
+- [Speech Intelligibility Index](/perception/speech/speech-intelligibility/): a raised
   threshold as an input, and what it costs in speech audibility.
-- [Loudness](/phonometry/perception/psychoacoustics/loudness/): the ISO 226:2023 threshold of hearing, the
+- [Loudness](/perception/psychoacoustics/loudness/): the ISO 226:2023 threshold of hearing, the
   free-field pure-tone counterpart of the audiometric zero of section 2.
-- [Occupational noise exposure](/phonometry/perception/hearing/occupational-exposure/): the ISO 9612
+- [Occupational noise exposure](/perception/hearing/occupational-exposure/): the ISO 9612
   daily exposure level that drives the noise component.
-- API reference: [`hearing.threshold`](/phonometry/reference/api/hearing/threshold/).
-- Theory: [Hearing thresholds and presbycusis](/phonometry/reference/theory/perception/#hearing-thresholds-and-presbycusis-iso-389-7-iso-7029): the ISO 389-7 reference thresholds and the ISO 7029 age statistics, and why the two are different quantities.
+- API reference: [`hearing.threshold`](/reference/api/hearing/threshold/).
+- Theory: [Hearing thresholds and presbycusis](/reference/theory/perception/#hearing-thresholds-and-presbycusis-iso-389-7-iso-7029): the ISO 389-7 reference thresholds and the ISO 7029 age statistics, and why the two are different quantities.
 
 </SeeAlso>

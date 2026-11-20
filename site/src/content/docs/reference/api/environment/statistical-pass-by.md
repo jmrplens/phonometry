@@ -25,7 +25,7 @@ L_{\mathrm{AFmax}} = a + b \lg \frac{v}{1\ \mathrm{km/h}},
 $$
 
 and the ordinate of that line at the reference speed of Table 1 is the vehicle
-sound level $L_\mathrm{veh}$ of the category ([`pass_by_regression`](/phonometry/reference/api/environment/statistical-pass-by/#pass_by_regression)).
+sound level $L_\mathrm{veh}$ of the category ([`pass_by_regression`](/reference/api/environment/statistical-pass-by/#pass_by_regression)).
 The reference speed depends on the road speed category of 3.3 (low, medium,
 high) and is the same for the two heavy categories.
 
@@ -37,11 +37,11 @@ $$
 \mathrm{SPBI} = 10 \lg \left[ W_1 \, 10^{L_1/10} + W_{2a} \frac{v_1}{v_{2a}} 10^{L_{2a}/10} + W_{2b} \frac{v_1}{v_{2b}} 10^{L_{2b}/10} \right]
 $$
 
-([`statistical_pass_by_index`](/phonometry/reference/api/environment/statistical-pass-by/#statistical_pass_by_index)). The index is for comparing surfaces, not
+([`statistical_pass_by_index`](/reference/api/environment/statistical-pass-by/#statistical_pass_by_index)). The index is for comparing surfaces, not
 for predicting a traffic noise level (9.5 NOTE), and the comparison clause 10
 has in mind is a difference from a reference surface, of which Annex D gives an
 example built from seven dense bituminous surfaces
-([`normalized_reference_levels`](/phonometry/reference/api/environment/statistical-pass-by/#normalized_reference_levels), [`SPB_NORMALIZED_REFERENCE_LEVELS`](/phonometry/reference/api/environment/statistical-pass-by/#spb_normalized_reference_levels)).
+([`normalized_reference_levels`](/reference/api/environment/statistical-pass-by/#normalized_reference_levels), [`SPB_NORMALIZED_REFERENCE_LEVELS`](/reference/api/environment/statistical-pass-by/#spb_normalized_reference_levels)).
 
 **The rounding chain.** 9.2 ends "All levels shall be calculated to two decimal
 places and rounded to one decimal place", and 9.5 defines the levels the index
@@ -63,7 +63,7 @@ The example of Annex E is reproduced by this chain: its levels 78.5, 81.1 and
 83.8 dB give 79.946 dB, printed 79.9 dB. Carried at full precision from the
 coefficients Annex E prints, the same levels are 78.546, 81.114 and 83.838 dB,
 and their index, 79.985 dB, would print 80.0 dB
-([`StatisticalPassByResult.full_precision_index`](/phonometry/reference/api/environment/statistical-pass-by/#statisticalpassbyresultfull_precision_index)). The printed
+([`StatisticalPassByResult.full_precision_index`](/reference/api/environment/statistical-pass-by/#statisticalpassbyresultfull_precision_index)). The printed
 coefficients are rounded too, so the page alone does not prove which chain the
 example was computed with: over every line that agrees with the intercept,
 slope, mean level, mean speed and vehicle sound level Annex E prints, to their
@@ -79,7 +79,7 @@ logarithm of speed", and the mean it prints is $10^{\overline{\lg v}}$.
 For surface classification, 7.3 asks for at least 100 cars, 30 vehicles of each
 heavy category and 80 heavy vehicles in all. Both conditions are judged, kept
 on the result and, when they fail, emitted as
-[`StatisticalPassByWarning`](/phonometry/reference/api/environment/statistical-pass-by/#statisticalpassbywarning) rather than raised: a before-and-after study
+[`StatisticalPassByWarning`](/reference/api/environment/statistical-pass-by/#statisticalpassbywarning) rather than raised: a before-and-after study
 (6.6) is still an SPB measurement.
 
 **9.4, temperature.** The vehicle sound levels should be corrected to an air
@@ -92,7 +92,7 @@ items (26 and 28) beside the mandatory uncorrected ones (25 and 27).
 **9.6, the random errors.** Table 2 gives the spread expected of individual
 vehicles about $L_\mathrm{veh}$ and the 95 % confidence interval that
 spread leaves on it for 100 cars and 40 heavy vehicles of each type
-([`SPB_VEHICLE_STANDARD_DEVIATIONS_DB`](/phonometry/reference/api/environment/statistical-pass-by/#spb_vehicle_standard_deviations_db), [`SPB_CONFIDENCE_INTERVALS_DB`](/phonometry/reference/api/environment/statistical-pass-by/#spb_confidence_intervals_db)).
+([`SPB_VEHICLE_STANDARD_DEVIATIONS_DB`](/reference/api/environment/statistical-pass-by/#spb_vehicle_standard_deviations_db), [`SPB_CONFIDENCE_INTERVALS_DB`](/reference/api/environment/statistical-pass-by/#spb_confidence_intervals_db)).
 A regression also returns the confidence interval of its own line at the
 reference speed, from the Student distribution with $n - 2$ degrees of
 freedom, and the result combines the three into an interval on the index with
@@ -120,7 +120,7 @@ The normalized reference case is a fictitious surface whose
 $L_\mathrm{veh}$ are set by convention, "for instance ... the
 average results of a great number of SPB measurements" on dense asphalt
 surfaces. Annex D builds one from seven surfaces
-([`SPB_ANNEX_D_SURFACE_LEVELS`](/phonometry/reference/api/environment/statistical-pass-by/#spb_annex_d_surface_levels)) and prints the average of each column,
+([`SPB_ANNEX_D_SURFACE_LEVELS`](/reference/api/environment/statistical-pass-by/#spb_annex_d_surface_levels)) and prints the average of each column,
 which is what this returns: the arithmetic mean, category by category.
 
 The energetic mean would print the same row there (76.4, 81.0 and 84.0 dB
@@ -161,10 +161,10 @@ The maximum A-weighted levels are regressed on
 $\lg(v / 1\ \mathrm{km/h})$ by least squares, and the ordinate of the
 line at the Table 1 reference speed is the vehicle sound level
 $L_\mathrm{veh}$ of the category
-([`PassByRegression.vehicle_sound_level`](/phonometry/reference/api/environment/statistical-pass-by/#passbyregressionvehicle_sound_level)).
+([`PassByRegression.vehicle_sound_level`](/reference/api/environment/statistical-pass-by/#passbyregressionvehicle_sound_level)).
 
 Two conditions are judged on the way and emitted as
-[`StatisticalPassByWarning`](/phonometry/reference/api/environment/statistical-pass-by/#statisticalpassbywarning) when they fail: the 7.3 minimum number of
+[`StatisticalPassByWarning`](/reference/api/environment/statistical-pass-by/#statisticalpassbywarning) when they fail: the 7.3 minimum number of
 vehicles of the category for surface classification, and the 9.3 window the
 reference speed has to lie in for the line to be used at it. Both verdicts
 stay on the result.
@@ -178,7 +178,7 @@ stay on the result.
 | `vehicle_category` | `"1"` (cars), `"2a"` (dual-axle heavy vehicles) or `"2b"` (multi-axle heavy vehicles). |
 | `road_speed_category` | `"low"`, `"medium"` or `"high"` (3.3), which picks the reference speed. |
 
-**Returns:** The line and its statistics, as a [`PassByRegression`](/phonometry/reference/api/environment/statistical-pass-by/#passbyregression).
+**Returns:** The line and its statistics, as a [`PassByRegression`](/reference/api/environment/statistical-pass-by/#passbyregression).
 
 **Raises**
 
@@ -319,7 +319,7 @@ The speeds the reference speed must lie between, 9.3, in km/h.
 
 $10^{\overline{\lg v} \pm k s}$ with $s$ the standard
 deviation of $\lg v$ and $k$ 1.5 for cars and 1 for heavy
-vehicles ([`SPB_SPEED_WINDOW_STANDARD_DEVIATIONS`](/phonometry/reference/api/environment/statistical-pass-by/#spb_speed_window_standard_deviations)).
+vehicles ([`SPB_SPEED_WINDOW_STANDARD_DEVIATIONS`](/reference/api/environment/statistical-pass-by/#spb_speed_window_standard_deviations)).
 
 ### PassByRegression.vehicle_sound_level
 
@@ -434,16 +434,16 @@ The Statistical Pass-By method of ISO 11819-1 from a list of pass-bys.
 
 One row per vehicle that passed on its own: its category, its speed and its
 maximum A-weighted level. The rows are split by category, a line is fitted
-through each ([`pass_by_regression`](/phonometry/reference/api/environment/statistical-pass-by/#pass_by_regression)), and each line is read at its
+through each ([`pass_by_regression`](/reference/api/environment/statistical-pass-by/#pass_by_regression)), and each line is read at its
 Table 1 reference speed. The three vehicle sound levels are rounded to one
 decimal, as 9.2 has them reported, and combined into the index
-([`statistical_pass_by_index`](/phonometry/reference/api/environment/statistical-pass-by/#statistical_pass_by_index)), so that the index is the one anyone
+([`statistical_pass_by_index`](/reference/api/environment/statistical-pass-by/#statistical_pass_by_index)), so that the index is the one anyone
 recomputes from the reported levels (9.5). The unrounded levels and their
-index stay on the result ([`StatisticalPassByResult.full_precision_index`](/phonometry/reference/api/environment/statistical-pass-by/#statisticalpassbyresultfull_precision_index)).
+index stay on the result ([`StatisticalPassByResult.full_precision_index`](/reference/api/environment/statistical-pass-by/#statisticalpassbyresultfull_precision_index)).
 
 The 7.3 counts (the two heavy categories together included) and the 9.3
 speed windows are judged, kept on the result and emitted as
-[`StatisticalPassByWarning`](/phonometry/reference/api/environment/statistical-pass-by/#statisticalpassbywarning) when they fail.
+[`StatisticalPassByWarning`](/reference/api/environment/statistical-pass-by/#statisticalpassbywarning) when they fail.
 
 **Parameters**
 
@@ -453,11 +453,11 @@ speed windows are judged, kept on the result and emitted as
 | `speeds_kmh` | The speed of each pass-by, in km/h. |
 | `max_levels` | The maximum A-weighted level of each pass-by, time weighting F, in decibels. |
 | `road_speed_category` | `"low"`, `"medium"` or `"high"` (3.3). |
-| `corrected_vehicle_sound_levels` | Vehicle sound levels corrected to [`SPB_REFERENCE_AIR_TEMPERATURE_C`](/phonometry/reference/api/environment/statistical-pass-by/#spb_reference_air_temperature_c) by a method of the caller's choosing, keyed by category, for which the index is also computed, from the levels rounded to one decimal. 9.4 gives no method. To correct each pass-by instead, which 9.4 prefers, correct `max_levels` and call this again. Keyed by any of `"1"`, `"2a"` or `"2b"`. |
-| `reference_levels` | The reference surface of clause 10: either its SPBI in decibels, used as given, or its three vehicle sound levels keyed by category (for instance [`SPB_NORMALIZED_REFERENCE_LEVELS`](/phonometry/reference/api/environment/statistical-pass-by/#spb_normalized_reference_levels)), whose index is then computed from the levels rounded to one decimal, with the same weighting factors. Keyed by any of `"1"`, `"2a"` or `"2b"`. |
+| `corrected_vehicle_sound_levels` | Vehicle sound levels corrected to [`SPB_REFERENCE_AIR_TEMPERATURE_C`](/reference/api/environment/statistical-pass-by/#spb_reference_air_temperature_c) by a method of the caller's choosing, keyed by category, for which the index is also computed, from the levels rounded to one decimal. 9.4 gives no method. To correct each pass-by instead, which 9.4 prefers, correct `max_levels` and call this again. Keyed by any of `"1"`, `"2a"` or `"2b"`. |
+| `reference_levels` | The reference surface of clause 10: either its SPBI in decibels, used as given, or its three vehicle sound levels keyed by category (for instance [`SPB_NORMALIZED_REFERENCE_LEVELS`](/reference/api/environment/statistical-pass-by/#spb_normalized_reference_levels)), whose index is then computed from the levels rounded to one decimal, with the same weighting factors. Keyed by any of `"1"`, `"2a"` or `"2b"`. |
 | `weighting_factors` | Other proportions of the three categories (9.5); Table 1 when omitted. Keyed by any of `"1"`, `"2a"` or `"2b"`. |
 
-**Returns:** The regressions, the levels and the index, as a [`StatisticalPassByResult`](/phonometry/reference/api/environment/statistical-pass-by/#statisticalpassbyresult).
+**Returns:** The regressions, the levels and the index, as a [`StatisticalPassByResult`](/reference/api/environment/statistical-pass-by/#statisticalpassbyresult).
 
 **Raises**
 
@@ -494,7 +494,7 @@ itself is not an equivalent level of traffic noise (9.5 NOTE).
 Whatever levels are handed in are used as they are. Handed the three levels
 a report prints to one decimal, this is the index a third party computes
 from the report, which 9.5 anticipates, and the index
-[`statistical_pass_by`](/phonometry/reference/api/environment/statistical-pass-by/#statistical_pass_by) reports, which rounds its levels that way
+[`statistical_pass_by`](/reference/api/environment/statistical-pass-by/#statistical_pass_by) reports, which rounds its levels that way
 before calling this.
 
 **Parameters**
@@ -536,7 +536,7 @@ The vehicle sound levels and the index of one road surface (ISO 11819-1).
 | Name | Description |
 | :--- | :--- |
 | `road_speed_category` | `"low"`, `"medium"` or `"high"`. |
-| `regressions` | The [`PassByRegression`](/phonometry/reference/api/environment/statistical-pass-by/#passbyregression) of each vehicle category, keyed `"1"`, `"2a"` and `"2b"`. |
+| `regressions` | The [`PassByRegression`](/reference/api/environment/statistical-pass-by/#passbyregression) of each vehicle category, keyed `"1"`, `"2a"` and `"2b"`. |
 | `weighting_factors` | The $W_x$ the index was computed with. Keyed by any of `"1"`, `"2a"` or `"2b"`. |
 | `vehicle_sound_levels` | $L_\mathrm{veh}$ of each category, uncorrected for temperature and unrounded, in decibels. Keyed by any of `"1"`, `"2a"` or `"2b"`. |
 | `index` | The SPBI of those levels as 9.2 reports them, rounded to one decimal (`reported_vehicle_sound_levels`), in decibels. The index itself is not rounded; `reported_index` is. |
@@ -584,7 +584,7 @@ $$
 
 with $W'_x$ the weighting factor times the speed ratio of 9.5,
 $L_x$ the reported levels the index adds and $\Delta_x$
-each category's [`PassByRegression.confidence_interval_db`](/phonometry/reference/api/environment/statistical-pass-by/#passbyregressionconfidence_interval_db). The
+each category's [`PassByRegression.confidence_interval_db`](/reference/api/environment/statistical-pass-by/#passbyregressionconfidence_interval_db). The
 three categories are measured on different vehicles and are taken as
 independent.
 

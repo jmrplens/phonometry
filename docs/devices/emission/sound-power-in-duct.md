@@ -1,6 +1,6 @@
 <!-- Written by `make llms` from site/src/content/docs/devices/emission/sound-power-in-duct.mdx: edit that page and its Spanish twin, then run `make llms`. -->
 
-← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/devices/emission/sound-power-in-duct/
+← [Documentation index](../../README.md) · Published at https://phonometry.dev/devices/emission/sound-power-in-duct/
 
 # Sound Power in a Duct
 
@@ -389,7 +389,7 @@ one above, will reproduce worse than 2 dB in that band.
   duct modes whose cut-on bounds the plane-wave range of Eq. 12.
 - [Levels](../../signals/levels/levels.md): energy averaging and the
   A-weighting behind $L_{W\mathrm{A}}$.
-- API reference: [`emission`: sound power in a duct](https://docs.jmrp.io/phonometry/reference/api/power/sound-power-in-duct/).
+- API reference: [`emission`: sound power in a duct](https://phonometry.dev/reference/api/power/sound-power-in-duct/).
 
 ## References
 

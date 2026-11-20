@@ -49,8 +49,8 @@ ruido), los patrones direccionales con su índice de directividad, y el
 norma a partir de una respuesta de campo libre medida, con cada panel
 dibujado según las convenciones de escala de IEC 60263. Las mediciones de
 distorsión y respuesta en frecuencia en sí viven en
-[Electroacústica](/phonometry/es/devices/electroacoustics/electroacoustics/); el homólogo de
-altavoz tiene [su propia guía](/phonometry/es/devices/electroacoustics/loudspeakers/).
+[Electroacústica](/es/devices/electroacoustics/electroacoustics/); el homólogo de
+altavoz tiene [su propia guía](/es/devices/electroacoustics/loudspeakers/).
 
 ## 1. La sensibilidad y sus referencias (IEC 60268-4, apartado 11)
 
@@ -137,7 +137,7 @@ dentro de ±1 dB. El apartado 5.7 pone el techo a todo: se obtendrá una exactit
 global de ±2 dB o mejor. Todos los números de la ficha de la sección 4 heredan
 esa cota. Convertir una sensibilidad nominal en niveles calibrados sobre una
 cadena en uso es
-[Calibración y dBFS](/phonometry/es/signals/metrology/calibration/).
+[Calibración y dBFS](/es/signals/metrology/calibration/).
 
 <span id="patron-direccional"></span>
 
@@ -250,7 +250,7 @@ nivel de ruido equivalente, y el nivel de presión acústica de sobrecarga
 (apartado 15.2) acota el rango útil por arriba. La propia curva de
 ponderación ITU-R BS.468-4 está expuesta como `weighting_bs468` en el
 [conjunto de distorsión de
-electroacústica](/phonometry/es/devices/electroacoustics/electroacoustics/),
+electroacústica](/es/devices/electroacoustics/electroacoustics/),
 donde también pondera la THD.
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/microphone_noise_weightings.svg" alt="Panel superior: un espectro de banda de ruido propio que decrece con la frecuencia, dibujado en bruto, ponderado A y ponderado ITU-R BS.468-4, de modo que se ve la curva 468 levantando las bandas de 2 a 10 kHz que la curva A ya ha empezado a atenuar. Panel inferior: los niveles sumados por bandas de las dos ponderaciones para esa cápsula y para otra más siseante cuyo ruido crece hacia 20 kHz, con la diferencia debida solo a la red anotada en cada caso, más 2,4 dB y más 8,3 dB respectivamente" width="82%" />
@@ -260,14 +260,14 @@ del ruido de cada cápsula: 2,4 dB para el espectro 1/f decreciente del ejemplo 
 8,3 dB para una cápsula más siseante. El resto de los 10 dB de costumbre viene
 del **detector de cuasipico** de la ITU-R BS.468-4, que lee un ruido más alto que un
 detector de valor eficaz; ese detector es
-[`broadcast.quasi_peak_meter`](/phonometry/es/devices/broadcast/quasi-peak/) y
+[`broadcast.quasi_peak_meter`](/es/devices/broadcast/quasi-peak/) y
 lee un registro, mientras que `weighting_bs468` es solo la red, así que un
 nivel calculado con la red y una suma en valor eficaz sigue sin ser una cifra en
 dBqps y no se debe comparar con una de una hoja de características.*
 
 El espectro de banda que ahí se dibuja es el que el fragmento de la sección 4
 pasa como `MicrophoneNoise(spectrum=...)`, ponderado con `weighting_bs468`
-del [módulo de electroacústica](/phonometry/es/devices/electroacoustics/electroacoustics/)
+del [módulo de electroacústica](/es/devices/electroacoustics/electroacoustics/)
 y con ponderación A, y sumado después banda a banda.
 
 **Cómo se obtiene $U_\mathrm{N}$** (apartado 17.2). El micrófono se aísla del sonido, del
@@ -323,7 +323,7 @@ comparar banda a banda con el ruido propio de arriba:
 ## 4. Informe de características del micrófono (IEC 60268-4)
 
 El compañero de micrófono del
-[informe de altavoz](/phonometry/es/devices/electroacoustics/loudspeakers/): las
+[informe de altavoz](/es/devices/electroacoustics/loudspeakers/): las
 características nominales que
 IEC 60268-4 define en torno a una respuesta en frecuencia de campo libre medida
 se reúnen en un único resultado de **características del micrófono** que
@@ -443,7 +443,7 @@ equivocado encima, que es exactamente el error del que avisa la sección 3, ahor
 impreso en un informe. Eso sigue siendo cierto ahora que existe el detector de
 cuasipico: el apartado 17 toma una tensión declarada, no un registro, así que
 aquí no hay nada sobre lo que
-[`quasi_peak_meter`](/phonometry/es/devices/broadcast/quasi-peak/) pueda correr
+[`quasi_peak_meter`](/es/devices/broadcast/quasi-peak/) pueda correr
 y el campo sigue siendo un registro de cómo midió el fabricante. Dar las dos
 cifras de la misma cápsula es la forma honrada, porque son preguntas distintas y
 las dos son legítimas.
@@ -641,7 +641,7 @@ fuente de nivel alto que produce un campo de 140 dB y el plato giratorio. Las
 1.1, 3 y 3.1, porque son lo que significan los números presentados; la
 adquisición en sí no está implementada aquí. El detector de cuasipico de la
 ITU-R BS.468-4 ahora sí lo está, en [Medidor de
-cuasipico](/phonometry/es/devices/broadcast/quasi-peak/), pero lee un registro y
+cuasipico](/es/devices/broadcast/quasi-peak/), pero lee un registro y
 el apartado 17 toma una tensión o un nivel declarados, así que `weighting="468"`
 en esta página sigue siendo una etiqueta sobre la cifra de un fabricante, y un
 nivel de ruido propio calculado con `weighting_bs468` y una suma en valor
@@ -649,7 +649,7 @@ eficaz sigue sin ser una cifra en dBqps. La
 edición implementada está congelada en IEC 60268-4:2014; la revisión de 2018
 que la sustituye no es la verificada. La calibración acústica de una cadena en
 uso, de la sensibilidad a pascales y dBFS, vive en [Calibración y
-dBFS](/phonometry/es/signals/metrology/calibration/).
+dBFS](/es/signals/metrology/calibration/).
 </ScopeClaim>
 </Scope>
 
@@ -657,18 +657,18 @@ dBFS](/phonometry/es/signals/metrology/calibration/).
 
 ## Véase también
 
-- [Electroacústica](/phonometry/es/devices/electroacoustics/electroacoustics/): el conjunto de
+- [Electroacústica](/es/devices/electroacoustics/electroacoustics/): el conjunto de
   distorsión de IEC 60268-3, THD+N y SINAD, la THD ponderada ITU-R BS.468-4 y
   los estimadores de respuesta en frecuencia H1/H2 que producen las curvas
   medidas.
-- [Caracterización de altavoces (IEC 60268-5)](/phonometry/es/devices/electroacoustics/loudspeakers/):
+- [Caracterización de altavoces (IEC 60268-5)](/es/devices/electroacoustics/loudspeakers/):
   el informe de características nominales homólogo para el lado de
   reproducción de la cadena.
-- [Calibración y dBFS](/phonometry/es/signals/metrology/calibration/): convertir la
+- [Calibración y dBFS](/es/signals/metrology/calibration/): convertir la
   sensibilidad nominal de un micrófono en niveles de presión acústica
   calibrados.
-- [Montar un sonómetro](/phonometry/es/signals/sound-level-meter/): la cadena
+- [Montar un sonómetro](/es/signals/sound-level-meter/): la cadena
   de medición que alimenta un micrófono caracterizado.
-- Referencia de la API: [`electroacoustics.microphone`](/phonometry/es/reference/api/electroacoustics/microphone/).
+- Referencia de la API: [`electroacoustics.microphone`](/es/reference/api/electroacoustics/microphone/).
 
 </SeeAlso>

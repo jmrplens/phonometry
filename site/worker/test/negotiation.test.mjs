@@ -14,11 +14,11 @@ import { twinExclusions } from '../lib/twins.mjs';
 import { prefersMarkdown } from './fixtures/prefers-markdown.mjs';
 
 const DOCS_EDGE = '/var/www/jmrp.io/workers/docs-edge/markdown-negotiation.js';
-const prefix = '/phonometry';
+const prefix = '';
 const zone = { host: 'phonometry.dev', prefix, exclusions: twinExclusions(prefix) };
 const page = (accept, extra = {}) =>
 	markdownRuleMatches(
-		{ host: 'phonometry.dev', method: 'GET', path: '/phonometry/signals/levels/', accept: accept === null ? [] : [accept], ...extra },
+		{ host: 'phonometry.dev', method: 'GET', path: '/signals/levels/', accept: accept === null ? [] : [accept], ...extra },
 		zone,
 	);
 
@@ -167,19 +167,19 @@ describe('markdown-twin rule scope', () => {
 		assert.equal(page(md, { method: 'POST' }), false);
 	});
 
-	test('only slash pages under the base path, on the zone host', () => {
-		assert.equal(page(md, { path: '/phonometry/signals/levels' }), false);
-		assert.equal(page(md, { path: '/phonometry/signals/levels/index.md' }), false);
-		assert.equal(page(md, { path: '/other/' }), false);
+	test('only slash pages, on the zone host; at the root every slash path is one', () => {
+		assert.equal(page(md, { path: '/signals/levels' }), false);
+		assert.equal(page(md, { path: '/signals/levels/index.md' }), false);
+		assert.equal(page(md, { path: '/other/' }), true);
 		assert.equal(page(md, { host: 'www.phonometry.dev' }), false);
 	});
 
 	test('the homes are negotiated, the Spanish API pages are not', () => {
-		assert.equal(page(md, { path: '/phonometry/' }), true);
-		assert.equal(page(md, { path: '/phonometry/es/' }), true);
-		assert.equal(page(md, { path: '/phonometry/es/reference/api/' }), false);
-		assert.equal(page(md, { path: '/phonometry/es/reference/api/signals/levels/' }), false);
-		assert.equal(page(md, { path: '/phonometry/reference/api/signals/levels/' }), true);
+		assert.equal(page(md, { path: '/' }), true);
+		assert.equal(page(md, { path: '/es/' }), true);
+		assert.equal(page(md, { path: '/es/reference/api/' }), false);
+		assert.equal(page(md, { path: '/es/reference/api/signals/levels/' }), false);
+		assert.equal(page(md, { path: '/reference/api/signals/levels/' }), true);
 	});
 
 	test('any one of several Accept fields can carry the type', () => {

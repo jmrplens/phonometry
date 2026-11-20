@@ -68,7 +68,7 @@ import ThemeImage from '../../../../components/ThemeImage.astro';
 import Video from '../../../../components/Video.astro';
 
 A porous blanket absorbs low frequencies only by growing thick: the
-[porous models](/phonometry/materials/absorbers/porous-absorbers/) put the useful
+[porous models](/materials/absorbers/porous-absorbers/) put the useful
 absorption where the layer is a fair fraction of the wavelength, which at
 300 Hz means tens of centimetres. Acoustic metamaterial absorbers break that
 rule with resonance instead of bulk. A rigid panel of thin closed slits, each
@@ -449,7 +449,7 @@ quarter wavelength at 308 Hz, where the panel resonates. The same 30 mm of
 plain air would be a quarter wave at 2858 Hz, and that ratio is the whole
 argument for the panel being thin. The same curve explains the 2 cm
 metadiffuser panel of the
-[metadiffuser guide](/phonometry/materials/diffusers/metadiffusers/).*
+[metadiffuser guide](/materials/diffusers/metadiffusers/).*
 
 <details>
 <summary>Show the code for this figure</summary>
@@ -524,14 +524,14 @@ print it in Eqs. (7) and (8): its leading constant of 4 gives sixteen times
 $\rho_0$ where only 64 reaches both. That constant, and a slit-radiation term
 printed in the opposite time convention, which would raise the resonance an
 added mass must lower, are the two entries of the
-[errata registry](/phonometry/reference/errata/) on these papers; the library
+[errata registry](/reference/errata/) on these papers; the library
 implements 64 and the added-mass sign.
 
 ## 4. Classical resonant absorbers through the same lens
 
 Critical coupling is not exclusive to metamaterials; it is the organising
 principle hiding inside the classical resonant absorbers of the
-[porous and multilayer guide](/phonometry/materials/absorbers/porous-absorbers/):
+[porous and multilayer guide](/materials/absorbers/porous-absorbers/):
 
 - **The microperforated panel is a critically coupled absorber avant la
   lettre.** Maa's peak absorption $4r/(1+r)^2$ equals one exactly when the
@@ -630,12 +630,12 @@ length, not on a nominal diameter.
 panel face, not the mouth of the slit and not the front of the frame; a
 millimetre of error there rotates the measured impedance without touching the
 absorption, exactly as the
-[impedance-tube guide](/phonometry/materials/absorbers/impedance-tube/#3-transfer-function-method-iso-10534-2)
+[impedance-tube guide](/materials/absorbers/impedance-tube/#3-transfer-function-method-iso-10534-2)
 describes.
 
 **Or measure it as a surface.** If the panel is meant for a room rather than
 for a duct, the honest verification is a 10–12 m² specimen in a reverberation
-room to [ISO 354](/phonometry/materials/absorbers/absorption-measurement/), and the
+room to [ISO 354](/materials/absorbers/absorption-measurement/), and the
 result will be the random-incidence coefficient, not the $\alpha = 1$ the
 normal-incidence design promises, for the reason set out under off-normal
 incidence above.
@@ -662,17 +662,17 @@ resonators, which is the graded chain of section 4.
 <ScopeClaim status="not-covered" label="Not covered">
 No measurement standard governs these prediction models; section 5 sets out
 the route a built panel would be verified along, in the [impedance
-tube](/phonometry/materials/absorbers/impedance-tube/) (ISO 10534-2) or the
-[reverberation room](/phonometry/materials/absorbers/absorption-measurement/)
+tube](/materials/absorbers/impedance-tube/) (ISO 10534-2) or the
+[reverberation room](/materials/absorbers/absorption-measurement/)
 (ISO 354), but nothing here performs any of it: the tolerance and angle
 figures quoted are model evaluations, and the roughness of a printed slit, the
 frame, the mounting and the finite panel size are all outside the model. The
 membrane and decorated-membrane absorbers of section 4 are discussed as
 context only; the classical perforated, microperforated and membrane layers
 are implemented in [Porous and Multilayer
-Absorbers](/phonometry/materials/absorbers/porous-absorbers/), and the
+Absorbers](/materials/absorbers/porous-absorbers/), and the
 resonator-loaded slit used as a phase element rather than an absorber is the
-subject of [Metadiffusers](/phonometry/materials/diffusers/metadiffusers/).
+subject of [Metadiffusers](/materials/diffusers/metadiffusers/).
 </ScopeClaim>
 </Scope>
 
@@ -680,19 +680,19 @@ subject of [Metadiffusers](/phonometry/materials/diffusers/metadiffusers/).
 
 ## See also
 
-- [Porous and Multilayer Absorbers](/phonometry/materials/absorbers/porous-absorbers/):
+- [Porous and Multilayer Absorbers](/materials/absorbers/porous-absorbers/):
   the equivalent-fluid and resonant layers of the classical family, including
   the Maa microperforated panel that section 4 re-reads.
-- [Metadiffusers](/phonometry/materials/diffusers/metadiffusers/): the same slit and
+- [Metadiffusers](/materials/diffusers/metadiffusers/): the same slit and
   resonator cell tuned for controlled reflection phase instead of perfect
   absorption; its ternary designs borrow the critically coupled slit as their
   `0` state.
-- [Impedance Tube](/phonometry/materials/absorbers/impedance-tube/): the normal-incidence
+- [Impedance Tube](/materials/absorbers/impedance-tube/): the normal-incidence
   measurement a built panel would be verified in, and the virtual FDTD tube
   behind the animation above.
-- [Airflow Resistance](/phonometry/materials/absorbers/airflow-resistance/): the viscous
+- [Airflow Resistance](/materials/absorbers/airflow-resistance/): the viscous
   physics of the narrow channels, measured on the bulk material.
-- API reference: [`materials.absorbers.slow_sound`](/phonometry/reference/api/materials/slow-sound/).
-- Theory: [Acoustic material characterisation](/phonometry/reference/theory/materials-surfaces/#acoustic-material-characterisation-iso-11654-iso-9053-12-iso-10534-12-astm-e2611): the surface-impedance and absorption definitions the resonator models are evaluated against.
+- API reference: [`materials.absorbers.slow_sound`](/reference/api/materials/slow-sound/).
+- Theory: [Acoustic material characterisation](/reference/theory/materials-surfaces/#acoustic-material-characterisation-iso-11654-iso-9053-12-iso-10534-12-astm-e2611): the surface-impedance and absorption definitions the resonator models are evaluated against.
 
 </SeeAlso>

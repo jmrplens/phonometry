@@ -11,9 +11,9 @@ energies (Norton & Karczub Ch. 6).
 Statistical energy analysis (SEA) has two routes to the coupling loss factor
 `eta_ij`. The **predictive** route derives it from a wave transmission
 coefficient at the junction, which is what
-[`coupling_loss_factor`](/phonometry/reference/api/vibration/junction-transmission/#coupling_loss_factor) does
+[`coupling_loss_factor`](/reference/api/vibration/junction-transmission/#coupling_loss_factor) does
 with the closed-form coefficients of
-[`junction_transmission`](/phonometry/reference/api/vibration/junction-transmission/#junction_transmission). The
+[`junction_transmission`](/reference/api/vibration/junction-transmission/#junction_transmission). The
 **experimental** route, implemented here, inverts the steady-state power
 balance from *measured* subsystem energies: it needs no model of the junction
 at all, and it is the only route open for real joints (welds, bolt rows,
@@ -35,7 +35,7 @@ with $E_i = M_i \langle v_i^2 \rangle$ the band energy of subsystem
 `eta_i` its internal loss factor and `omega` the band centre frequency
 in rad/s. Two inversions follow.
 
-**Single drive plus reciprocity** ([`power_injection_clf`](/phonometry/reference/api/vibration/experimental-sea/#power_injection_clf)). Drive
+**Single drive plus reciprocity** ([`power_injection_clf`](/reference/api/vibration/experimental-sea/#power_injection_clf)). Drive
 subsystem 1 only. The second equation with $\Pi_2 = 0$ gives one
 relation between `eta_12` and `eta_21`; the SEA consistency
 (reciprocity) relationship $\eta_{12} n_1 = \eta_{21} n_2$ (Eq. 6.8)
@@ -62,21 +62,21 @@ the driven subsystem exceeds that of the receiver,
 $E_1/n_1 > E_2/n_2$; a measurement that violates it is not a
 two-subsystem SEA system and is rejected.
 
-**Two drives, no reciprocity assumed** ([`power_injection_matrix`](/phonometry/reference/api/vibration/experimental-sea/#power_injection_matrix)). The
+**Two drives, no reciprocity assumed** ([`power_injection_matrix`](/reference/api/vibration/experimental-sea/#power_injection_matrix)). The
 classical power-injection method drives each subsystem in turn and measures
 both energies each time, giving four equations for the four unknowns
 `eta_1`, `eta_2`, `eta_12`, `eta_21` with no prior assumption at all.
 Reciprocity then becomes a *check* on the measurement rather than an input:
-[`PowerInjectionResult.modal_density_ratio`](/phonometry/reference/api/vibration/experimental-sea/#powerinjectionresultmodal_density_ratio) compares the measured
+[`PowerInjectionResult.modal_density_ratio`](/reference/api/vibration/experimental-sea/#powerinjectionresultmodal_density_ratio) compares the measured
 $\eta_{12}/\eta_{21}$ with the expected $n_2/n_1$.
 
 Modal densities for the usual subsystems are provided as well
-([`flat_plate_modal_density`](/phonometry/reference/api/vibration/experimental-sea/#flat_plate_modal_density), [`cylindrical_shell_modal_density`](/phonometry/reference/api/vibration/experimental-sea/#cylindrical_shell_modal_density),
-[`bar_modal_density`](/phonometry/reference/api/vibration/experimental-sea/#bar_modal_density), [`beam_modal_density`](/phonometry/reference/api/vibration/experimental-sea/#beam_modal_density)), following Norton
+([`flat_plate_modal_density`](/reference/api/vibration/experimental-sea/#flat_plate_modal_density), [`cylindrical_shell_modal_density`](/reference/api/vibration/experimental-sea/#cylindrical_shell_modal_density),
+[`bar_modal_density`](/reference/api/vibration/experimental-sea/#bar_modal_density), [`beam_modal_density`](/reference/api/vibration/experimental-sea/#beam_modal_density)), following Norton
 Eqs. 6.23-6.29. The flat-plate expression
 $n(f) = S \sqrt{12} / (2 c_\mathrm{L} t)$ is the same quantity as EN 12354-4's
 $n = \pi S f_\mathrm{c} / c_0^2$
-([`modal_density`](/phonometry/reference/api/building/flanking-transmission/#modal_density)), only
+([`modal_density`](/reference/api/building/flanking-transmission/#modal_density)), only
 parametrised by the plate itself rather than by its critical frequency; the
 two agree identically and a regression test pins that.
 
@@ -194,7 +194,7 @@ Average modal density of a thin-walled cylinder (Norton 6.27-6.29).
 
 The semi-empirical approximations of Szechenyi, as collected by Clarkson &
 Pope, in three regimes of $x = f / f_\mathrm{r}$ around the ring frequency
-[`ring_frequency`](/phonometry/reference/api/vibration/experimental-sea/#ring_frequency):
+[`ring_frequency`](/reference/api/vibration/experimental-sea/#ring_frequency):
 
 $$
 n = \frac{5 S}{\pi c_\mathrm{L} t} \sqrt{x}, \qquad x \le 0.48 \tag{6.27}
@@ -316,7 +316,7 @@ time-averaged mean-square velocity in the band.
 | `modal_density1` | `n_1`, in modes per hertz (> 0). |
 | `modal_density2` | `n_2`, in modes per hertz (> 0). |
 
-**Returns:** A [`PowerInjectionResult`](/phonometry/reference/api/vibration/experimental-sea/#powerinjectionresult) (method `"single-drive"`).
+**Returns:** A [`PowerInjectionResult`](/reference/api/vibration/experimental-sea/#powerinjectionresult) (method `"single-drive"`).
 
 **Raises**
 
@@ -341,7 +341,7 @@ Full two-drive power-injection inversion (no reciprocity assumed).
 Each subsystem is driven in turn with a known injected power while both
 band energies are measured, giving four equations for the four unknowns
 `eta_1`, `eta_2`, `eta_12`, `eta_21`. Because reciprocity is not
-used, [`PowerInjectionResult.modal_density_ratio`](/phonometry/reference/api/vibration/experimental-sea/#powerinjectionresultmodal_density_ratio) becomes an
+used, [`PowerInjectionResult.modal_density_ratio`](/reference/api/vibration/experimental-sea/#powerinjectionresultmodal_density_ratio) becomes an
 independent check on the measurement.
 
 **Parameters**
@@ -352,7 +352,7 @@ independent check on the measurement.
 | `energies` | Measured band energies, in joules, shape `(2, 2, nb)`: `energies[i][j]` is the energy of subsystem `i` while subsystem `j` is driven (all > 0). |
 | `input_powers` | Injected powers, in watts, shape `(2, nb)`: `input_powers[j]` is the power injected into subsystem `j` during test `j` (all > 0). |
 
-**Returns:** A [`PowerInjectionResult`](/phonometry/reference/api/vibration/experimental-sea/#powerinjectionresult) (method `"two-drive"`); its `energy1`/`energy2` and `input_power1`/`input_power2` report the first test (subsystem 1 driven).
+**Returns:** A [`PowerInjectionResult`](/reference/api/vibration/experimental-sea/#powerinjectionresult) (method `"two-drive"`); its `energy1`/`energy2` and `input_power1`/`input_power2` report the first test (subsystem 1 driven).
 
 **Raises**
 

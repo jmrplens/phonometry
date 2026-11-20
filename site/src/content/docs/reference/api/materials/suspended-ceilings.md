@@ -99,7 +99,7 @@ difference because everything else about the room cancels.
 
 A room measured on two days of different humidity can carry more of this
 than the specimen carries of its own absorption at 4 kHz, which is why the
-clause caps it at [`AIR_CORRECTION_LIMIT`](/phonometry/reference/api/materials/suspended-ceilings/#air_correction_limit) and asks for 50 % relative
+clause caps it at [`AIR_CORRECTION_LIMIT`](/reference/api/materials/suspended-ceilings/#air_correction_limit) and asks for 50 % relative
 humidity or more.
 
 **Parameters**
@@ -293,13 +293,13 @@ it that a number of the arrangement as built can be held to:
 * when it is given, a relative humidity of at least 50 % in every
   measurement (4.2.2, checked for each measurement by 4.2.3).
 
-Leaving one of them raises a [`SuspendedCeilingWarning`](/phonometry/reference/api/materials/suspended-ceilings/#suspendedceilingwarning) that names
+Leaving one of them raises a [`SuspendedCeilingWarning`](/reference/api/materials/suspended-ceilings/#suspendedceilingwarning) that names
 it, and makes `passes` false. A substructure and support units are
 what 4.1.1.2.3.4 and 4.1.1.2.3.6 allow rather than require, so their
 dimensions default to zero, which is none at all, and the centre distance
 is judged only when it is given. The cap of 4.2.1 on the air-absorption
 correction is judged where that correction is computed, by
-[`air_absorption_correction`](/phonometry/reference/api/materials/suspended-ceilings/#air_absorption_correction).
+[`air_absorption_correction`](/reference/api/materials/suspended-ceilings/#air_absorption_correction).
 
 Two figures are reported and kept out of the verdict. The area error,
 because 4.1.1.1.1 asks for an area "as close to 10,80 m2 as possible",
@@ -308,12 +308,12 @@ which is a target and not a tolerance. And whether a type E depth is the
 compiled from: another depth is said in the warning and passes.
 
 Three printed figures are targets to build to and are not judged at all:
-the 0.6 m by 0.6 m test object of 4.1.1.1.2 ([`TEST_OBJECT_SIZE_M`](/phonometry/reference/api/materials/suspended-ceilings/#test_object_size_m)),
+the 0.6 m by 0.6 m test object of 4.1.1.1.2 ([`TEST_OBJECT_SIZE_M`](/reference/api/materials/suspended-ceilings/#test_object_size_m)),
 which "should" be that size and otherwise the closest in the product
 range; the 10 degree edge angle of 4.1.1.1.5
-([`MIN_ROOM_EDGE_ANGLE_DEG`](/phonometry/reference/api/materials/suspended-ceilings/#min_room_edge_angle_deg)), which "should be aimed at"; and the
+([`MIN_ROOM_EDGE_ANGLE_DEG`](/reference/api/materials/suspended-ceilings/#min_room_edge_angle_deg)), which "should be aimed at"; and the
 substructure pitch of "approx. 0,6 m" of 4.1.1.2.3.4
-([`SUBSTRUCTURE_SPACING_M`](/phonometry/reference/api/materials/suspended-ceilings/#substructure_spacing_m)).
+([`SUBSTRUCTURE_SPACING_M`](/reference/api/materials/suspended-ceilings/#substructure_spacing_m)).
 
 **Parameters**
 
@@ -331,7 +331,7 @@ substructure pitch of "approx. 0,6 m" of 4.1.1.2.3.4
 | `support_center_distance_m` | The centre distance between support units, in metres, or `None` when there are none or it was not recorded. |
 | `relative_humidity_percent` | The relative humidity of the room in each measurement, in percent, one value per measurement, or `None` to leave 4.2.2 unjudged. |
 
-**Returns:** The verdict, as a [`CeilingSpecimenCheck`](/phonometry/reference/api/materials/suspended-ceilings/#ceilingspecimencheck).
+**Returns:** The verdict, as a [`CeilingSpecimenCheck`](/reference/api/materials/suspended-ceilings/#ceilingspecimencheck).
 
 **Raises**
 
@@ -441,7 +441,7 @@ Table 1, the reproducibility between European laboratories.
 
 The figures are an expanded uncertainty: the round robin of Annex A gives a
 reproducibility standard deviation and ISO 5725-6 multiplies it by
-[`EN16487_COVERAGE_FACTOR`](/phonometry/reference/api/materials/suspended-ceilings/#en16487_coverage_factor). They hold for a plane absorber with the type E
+[`EN16487_COVERAGE_FACTOR`](/reference/api/materials/suspended-ceilings/#en16487_coverage_factor). They hold for a plane absorber with the type E
 mounting and a 200 mm overall depth, and 6.2 says plainly that nothing has
 been investigated for any other absorber or mounting.
 

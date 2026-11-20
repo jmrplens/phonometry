@@ -122,7 +122,7 @@ cal = metrology.sensitivity(calibrator, target_spl=94.0, fs=fs)
 # calibration_factor. For this synthetic tone it is ~1.0.
 ```
 
-Deep guide: [Calibration and dBFS](/phonometry/signals/metrology/calibration/), which
+Deep guide: [Calibration and dBFS](/signals/metrology/calibration/), which
 covers the stability check this call runs on the calibrator recording, the
 integer-format rule, and the digital dBFS mode used when no physical reference
 exists. With no calibrator at all the factor can be computed from the chain's
@@ -166,8 +166,8 @@ integrate the squared weighted signal directly, with no ballistics at all,
 which is why they show no needle movement to follow. The chain is shown here
 because it *is* the meter's display.
 
-Deep guides: [Frequency Weighting (A, C, Z)](/phonometry/signals/levels/weighting/)
-and [Time Weighting](/phonometry/signals/levels/time-weighting/), which takes
+Deep guides: [Frequency Weighting (A, C, Z)](/signals/levels/weighting/)
+and [Time Weighting](/signals/levels/time-weighting/), which takes
 this same clip apart against the IEC 61672-1 tone-burst table.
 
 ## 4. Integrate: the numbers a meter reports
@@ -233,11 +233,11 @@ plt.show()
 
 </details>
 
-Deep guide: [Integrated and Statistical Levels](/phonometry/signals/levels/levels/),
+Deep guide: [Integrated and Statistical Levels](/signals/levels/levels/),
 which adds the maximum time-weighted level $L_\mathrm{AFmax}$ that this same `laf_t`
 track yields, noise dose and octave spectrograms; the $L_\mathrm{den}$ and rating
 levels continue in
-[Environmental Levels](/phonometry/environment/assessment/environmental-levels/).
+[Environmental Levels](/environment/assessment/environmental-levels/).
 
 ## 5. Band-filter: the spectrum view (IEC 61260-1)
 
@@ -310,10 +310,10 @@ plt.show()
 
 </details>
 
-Deep guides: [Filter Banks](/phonometry/signals/filters/filter-banks/) for the filter
+Deep guides: [Filter Banks](/signals/filters/filter-banks/) for the filter
 architectures and zero-phase mode,
-[Block Processing](/phonometry/signals/filters/block-processing/) for streaming, and
-[Multichannel and Performance](/phonometry/signals/filters/multichannel/) for arrays.
+[Block Processing](/signals/filters/block-processing/) for streaming, and
+[Multichannel and Performance](/signals/filters/multichannel/) for arrays.
 
 ## 6. Verify: is this meter class 1?
 
@@ -334,9 +334,9 @@ print(filters.verify_filter_class(bank).overall_class)    # 1
 
 The verdicts also come per band, so you can see exactly where a design would
 leave its class corridor. Deep guides:
-[Frequency Weighting](/phonometry/signals/levels/weighting/) (section on class
+[Frequency Weighting](/signals/levels/weighting/) (section on class
 verification) and
-[Filter Class Verification](/phonometry/signals/filters/filter-compliance/) (the
+[Filter Class Verification](/signals/filters/filter-compliance/) (the
 Table 1 mask, class 0 and the compliance fiche).
 
 ## 7. Is this measurement valid?
@@ -374,7 +374,7 @@ Refuse the record if any clipped run exists, require at least 10 dB of margin
 over the chain's self-noise (below that, $L_{90}$ is reading the preamplifier
 rather than the background), and hold the pre/post sensitivity difference to
 the 0.5 dB gate of the
-[calibration guide](/phonometry/signals/metrology/calibration/), which also
+[calibration guide](/signals/metrology/calibration/), which also
 explains why that same difference is the drift term of the uncertainty budget.
 
 Learn the fingerprint of the failure the broadband level hides. Clipping barely
@@ -404,7 +404,7 @@ an acceptance limit, by the conformance rule of IEC TC 29. So has a working
 meter's periodic test: `metrology.verify_sound_level_meter_periodic` grades
 what a laboratory measured in the tests of IEC 61672-3:2013, clause by
 clause ([Periodic tests of a sound level
-meter](/phonometry/signals/metrology/sound-level-meter-periodic-tests/)).
+meter](/signals/metrology/sound-level-meter-periodic-tests/)).
 </ScopeClaim>
 
 <ScopeClaim status="not-covered" label="Not covered">
@@ -420,7 +420,7 @@ checks of step 7 screen the *recording*, not the instrument. The same
 holds for the calibrator: nothing here performs an IEC 60942:2017 test on
 one. `verify_sound_calibrator` grades the numbers a laboratory measured, and
 `sensitivity()` screens the short-term stability of the take against Table 2;
-the [calibration guide](/phonometry/signals/metrology/calibration/#verifying-the-calibrator-itself-iec-609422017)
+the [calibration guide](/signals/metrology/calibration/#verifying-the-calibrator-itself-iec-609422017)
 says exactly what each checks and what it does not.
 </ScopeClaim>
 </Scope>
@@ -431,19 +431,19 @@ says exactly what each checks and what it does not.
 
 The meter built here is the trunk; the rest of the core grows from it.
 
-- [Measurement uncertainty (GUM and Monte Carlo)](/phonometry/signals/metrology/gum-uncertainty/):
+- [Measurement uncertainty (GUM and Monte Carlo)](/signals/metrology/gum-uncertainty/):
   attach an uncertainty to the $L_\mathrm{Aeq}$ you just computed, calibration term
   included.
-- [Calibrated spectral analysis](/phonometry/signals/spectra/spectral-analysis/): when
+- [Calibrated spectral analysis](/signals/spectra/spectral-analysis/): when
   bands are too coarse, the Welch PSD with confidence intervals.
-- [Correlation, time delay and envelope](/phonometry/signals/spectra/correlation-delay/):
+- [Correlation, time delay and envelope](/signals/spectra/correlation-delay/):
   two microphones instead of one, and the delay between them.
-- [Block Processing](/phonometry/signals/filters/block-processing/): turn this page's
+- [Block Processing](/signals/filters/block-processing/): turn this page's
   offline meter into a streaming one with carried filter state.
-- API reference: [`metrology.calibration`](/phonometry/reference/api/metrology/calibration/),
-  [`filters.weighting`](/phonometry/reference/api/filters/weighting/),
-  [`signals.levels`](/phonometry/reference/api/signals/levels/),
-  [`phonometry`](/phonometry/reference/api/filters/phonometry/) and
-  [`filters.compliance`](/phonometry/reference/api/filters/compliance/).
+- API reference: [`metrology.calibration`](/reference/api/metrology/calibration/),
+  [`filters.weighting`](/reference/api/filters/weighting/),
+  [`signals.levels`](/reference/api/signals/levels/),
+  [`phonometry`](/reference/api/filters/phonometry/) and
+  [`filters.compliance`](/reference/api/filters/compliance/).
 
 </SeeAlso>

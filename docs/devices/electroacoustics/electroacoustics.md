@@ -1,6 +1,6 @@
 <!-- Written by `make llms` from site/src/content/docs/devices/electroacoustics/electroacoustics.mdx: edit that page and its Spanish twin, then run `make llms`. -->
 
-← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/devices/electroacoustics/electroacoustics/
+← [Documentation index](../../README.md) · Published at https://phonometry.dev/devices/electroacoustics/electroacoustics/
 
 # Electroacoustics: distortion and frequency response
 
@@ -636,7 +636,7 @@ plt.show()
 - [Two-channel system measurement](../../signals/spectra/system-measurement.md):
   the physical arrangement behind the $H_1$ estimate of section 5, with the
   reference tap and the two synchronous channels drawn.
-- API reference: [`electroacoustics.distortion`](https://docs.jmrp.io/phonometry/reference/api/electroacoustics/distortion/), [`electroacoustics.intermodulation`](https://docs.jmrp.io/phonometry/reference/api/electroacoustics/intermodulation/), [`electroacoustics.noise_measurements`](https://docs.jmrp.io/phonometry/reference/api/electroacoustics/noise-measurements/) and [`electroacoustics.frequency_response`](https://docs.jmrp.io/phonometry/reference/api/electroacoustics/frequency-response/).
+- API reference: [`electroacoustics.distortion`](https://phonometry.dev/reference/api/electroacoustics/distortion/), [`electroacoustics.intermodulation`](https://phonometry.dev/reference/api/electroacoustics/intermodulation/), [`electroacoustics.noise_measurements`](https://phonometry.dev/reference/api/electroacoustics/noise-measurements/) and [`electroacoustics.frequency_response`](https://phonometry.dev/reference/api/electroacoustics/frequency-response/).
 
 ## References
 

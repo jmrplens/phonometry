@@ -30,9 +30,9 @@ row at the foot.
 Three arithmetic conventions matter and are worth stating once:
 
 * **Attenuations are positive.** Every element model in
-  [`phonometry.noise_control.hvac`](/phonometry/reference/api/noise_control/hvac/) returns a loss as a positive number of
+  [`phonometry.noise_control.hvac`](/reference/api/noise_control/hvac/) returns a loss as a positive number of
   decibels, and the cascade subtracts it. Published worksheets print the same
-  quantity as a negative level change; [`DuctPathResult.table`](/phonometry/reference/api/noise_control/duct-path/#ductpathresulttable) follows the
+  quantity as a negative level change; [`DuctPathResult.table`](/reference/api/noise_control/duct-path/#ductpathresulttable) follows the
   worksheet sign so the printed sheet reads like the reference.
 * **Regenerated noise adds on a power basis.** The self-noise of an element is
   a sound power level in its own right and is combined with the level arriving
@@ -43,14 +43,14 @@ Three arithmetic conventions matter and are worth stating once:
   than running to minus infinity. `self_noise_floor` reproduces that and can
   be switched off with `None`.
 
-The elements themselves come from [`phonometry.noise_control.hvac`](/phonometry/reference/api/noise_control/hvac/) (fan
+The elements themselves come from [`phonometry.noise_control.hvac`](/reference/api/noise_control/hvac/) (fan
 sound power, straight lined and unlined ducts, elbows, flexible duct, branch
 splits, end reflection, silencer self-noise, plenums and the room effect) and
 from manufacturer data, which is what a real calculation uses for silencers and
-air terminal devices. [`phonometry.noise_control.duct_modes`](/phonometry/reference/api/noise_control/duct-modes/) supplies the
+air terminal devices. [`phonometry.noise_control.duct_modes`](/reference/api/noise_control/duct-modes/) supplies the
 cut-on frequency above which the plane-wave elements stop being valid, and the
 cascade raises a
-[`PlaneWaveWarning`](/phonometry/reference/api/noise_control/duct-modes/#planewavewarning) when a duct
+[`PlaneWaveWarning`](/reference/api/noise_control/duct-modes/#planewavewarning) when a duct
 section is declared and the analysis runs past it.
 
 > Auto-generated from the source docstrings by `scripts/generate_api_docs.py` (`make api-docs`). Do not edit by hand.
@@ -78,12 +78,12 @@ criterion.
 
 | Name | Description |
 | :--- | :--- |
-| `paths` | Two or more [`DuctPathResult`](/phonometry/reference/api/noise_control/duct-path/#ductpathresult) objects sharing the same analysis bands. |
+| `paths` | Two or more [`DuctPathResult`](/reference/api/noise_control/duct-path/#ductpathresult) objects sharing the same analysis bands. |
 | `criterion` | Room-criterion family; `None` (default) takes it from the first path. |
 | `target` | Design criterion value; `None` (default) takes it from the first path that declares one. |
 | `label` | A short human label of the combination. |
 
-**Returns:** A [`DuctPathResult`](/phonometry/reference/api/noise_control/duct-path/#ductpathresult) whose `contributions` hold the per-path received spectra and whose `stages` are empty.
+**Returns:** A [`DuctPathResult`](/reference/api/noise_control/duct-path/#ductpathresult) whose `contributions` hold the per-path received spectra and whose `stages` are empty.
 
 **Raises**
 
@@ -123,26 +123,26 @@ calculation of Long Table 14.9 and of AHRI 885 Table 8.
 | Name | Description |
 | :--- | :--- |
 | `frequencies` | Octave-band centre frequencies, Hz (1-D array). The published sheets use 63 Hz to 8 kHz. |
-| `source_level` | Sound power level entering the path, dB re 1 pW; e.g. from [`phonometry.noise_control.hvac.fan_sound_power`](/phonometry/reference/api/noise_control/hvac/#fan_sound_power). |
-| `elements` | The path elements in order, as [`DuctElement`](/phonometry/reference/api/noise_control/duct-path/#ductelement) entries. Their `attenuation` and `self_noise` accept a scalar, a per-band array or an [`HVACSpectrumResult`](/phonometry/reference/api/noise_control/hvac/#hvacspectrumresult). |
-| `room_effect` | The room effect as a positive attenuation, dB (from [`phonometry.noise_control.hvac.room_effect`](/phonometry/reference/api/noise_control/hvac/#room_effect)). `None` leaves the received spectrum as a sound power level at the terminal device. |
+| `source_level` | Sound power level entering the path, dB re 1 pW; e.g. from [`phonometry.noise_control.hvac.fan_sound_power`](/reference/api/noise_control/hvac/#fan_sound_power). |
+| `elements` | The path elements in order, as [`DuctElement`](/reference/api/noise_control/duct-path/#ductelement) entries. Their `attenuation` and `self_noise` accept a scalar, a per-band array or an [`HVACSpectrumResult`](/reference/api/noise_control/hvac/#hvacspectrumresult). |
+| `room_effect` | The room effect as a positive attenuation, dB (from [`phonometry.noise_control.hvac.room_effect`](/reference/api/noise_control/hvac/#room_effect)). `None` leaves the received spectrum as a sound power level at the terminal device. |
 | `source_label` | Description of the source for the printed sheet. |
 | `criterion` | Room-criterion family, `"NC"` (default) or `"RC"`. |
 | `target` | The design criterion value (e.g. `30`), or `None`. |
 | `self_noise_floor` | Default regenerated sound power level, dB re 1 pW, applied where an element declares none and as a floor under every element's self-noise. Long's worked sheet uses 0 dB; pass `None` to disable the floor entirely. |
-| `section` | Optional duct cross section for the plane-wave validity check, as `{"diameter_m": d}`, `{"width_m": a, "height_m": b}` or `{"area": s}`, in metres. When given, a [`PlaneWaveWarning`](/phonometry/reference/api/noise_control/duct-modes/#planewavewarning) is raised for analysis frequencies above the first cut-on. |
+| `section` | Optional duct cross section for the plane-wave validity check, as `{"diameter_m": d}`, `{"width_m": a, "height_m": b}` or `{"area": s}`, in metres. When given, a [`PlaneWaveWarning`](/reference/api/noise_control/duct-modes/#planewavewarning) is raised for analysis frequencies above the first cut-on. |
 | `flow_velocity` | Mean axial flow speed in that section, m/s, used for the cut-on Mach correction. |
 | `speed_of_sound` | Speed of sound, m/s, for the same check. |
 | `label` | A short human label of the path. |
 
-**Returns:** A [`DuctPathResult`](/phonometry/reference/api/noise_control/duct-path/#ductpathresult).
+**Returns:** A [`DuctPathResult`](/reference/api/noise_control/duct-path/#ductpathresult).
 
 **Raises**
 
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the spectra do not share one value per band, the criterion family is unknown, or a key of `section` is not one of `diameter_m`, `width_m`, `height_m` or `area`. |
-| TypeError | If an entry of `elements` is not a [`DuctElement`](/phonometry/reference/api/noise_control/duct-path/#ductelement), or `criterion` or a key of `section` is not a text, or `frequencies`, `room_effect` or `source_level` holds a text or a value that is not a real number, or `flow_velocity`, `self_noise_floor` or `speed_of_sound` is not a single number. |
+| TypeError | If an entry of `elements` is not a [`DuctElement`](/reference/api/noise_control/duct-path/#ductelement), or `criterion` or a key of `section` is not a text, or `frequencies`, `room_effect` or `source_level` holds a text or a value that is not a real number, or `flow_velocity`, `self_noise_floor` or `speed_of_sound` is not a single number. |
 
 ## DuctElement
 
@@ -163,8 +163,8 @@ One element of a duct path: what it attenuates and what it regenerates.
 | Name | Description |
 | :--- | :--- |
 | `label` | Human description of the element, e.g. `"Silencer, 3 ft, standard pressure drop"`. |
-| `attenuation` | Octave-band attenuation as a **positive** loss, dB. A scalar is broadcast over the bands; an [`HVACSpectrumResult`](/phonometry/reference/api/noise_control/hvac/#hvacspectrumresult) is accepted directly, its `values` read. `None` means no attenuation. |
-| `self_noise` | Octave-band regenerated sound power level of the element, dB re 1 pW, as a scalar, per band or an [`HVACSpectrumResult`](/phonometry/reference/api/noise_control/hvac/#hvacspectrumresult), or `None` when the element regenerates nothing (the cascade then applies its self-noise floor). |
+| `attenuation` | Octave-band attenuation as a **positive** loss, dB. A scalar is broadcast over the bands; an [`HVACSpectrumResult`](/reference/api/noise_control/hvac/#hvacspectrumresult) is accepted directly, its `values` read. `None` means no attenuation. |
+| `self_noise` | Octave-band regenerated sound power level of the element, dB re 1 pW, as a scalar, per band or an [`HVACSpectrumResult`](/reference/api/noise_control/hvac/#hvacspectrumresult), or `None` when the element regenerates nothing (the cascade then applies its self-noise floor). |
 | `code` | A short worksheet code for the printed sheet (AHRI 885 style, e.g. `"D1"`, `"S"`); defaults to the row number. |
 
 ## DuctPathResult
@@ -186,8 +186,8 @@ DuctPathResult(
 
 The end-to-end duct-borne noise calculation of one path (or of a sum).
 
-Built by [`duct_path`](/phonometry/reference/api/noise_control/duct-path/#duct_path) for a single fan-to-room path, and by
-[`combine_duct_paths`](/phonometry/reference/api/noise_control/duct-path/#combine_duct_paths) for the logarithmic sum of several such paths
+Built by [`duct_path`](/reference/api/noise_control/duct-path/#duct_path) for a single fan-to-room path, and by
+[`combine_duct_paths`](/reference/api/noise_control/duct-path/#combine_duct_paths) for the logarithmic sum of several such paths
 (whose `stages` are empty and whose `contributions` carry one entry per
 path).
 
@@ -198,7 +198,7 @@ path).
 | `frequencies` | Octave-band centre frequencies, Hz. |
 | `source_level` | Sound power level entering the path, dB re 1 pW. |
 | `source_label` | Description of the source, e.g. the fan. |
-| `stages` | One [`DuctPathStage`](/phonometry/reference/api/noise_control/duct-path/#ductpathstage) per element, in path order. |
+| `stages` | One [`DuctPathStage`](/reference/api/noise_control/duct-path/#ductpathstage) per element, in path order. |
 | `room_effect` | The room effect applied after the last element, as a positive attenuation in dB, or `None` when the path was not taken into a room (`received_level` is then still a sound power level). |
 | `received_level` | The spectrum at the receiver: a sound pressure level in dB when `room_effect` was applied, otherwise the sound power level leaving the last element. |
 | `criterion` | `"NC"` or `"RC"`, the room-criterion family used. |
@@ -268,9 +268,9 @@ bottom, with the design criterion curve overlaid. Requires matplotlib
 
 The room-criterion rating of `received_level`.
 
-An [`NCResult`](/phonometry/reference/api/rooms/noise-criteria/#ncresult) when
+An [`NCResult`](/reference/api/rooms/noise-criteria/#ncresult) when
 `criterion` is `"NC"`, otherwise an
-[`RCResult`](/phonometry/reference/api/rooms/noise-criteria/#rcresult) (ANSI/ASA S12.2-2019).
+[`RCResult`](/reference/api/rooms/noise-criteria/#rcresult) (ANSI/ASA S12.2-2019).
 
 ### DuctPathResult.report()
 
@@ -303,7 +303,7 @@ criterion, and a method-basis strip.
 | Name | Description |
 | :--- | :--- |
 | `path` | Destination path of the PDF file. |
-| `metadata` | Optional [`ReportMetadata`](/phonometry/reference/api/building/insulation/#reportmetadata) supplying the header (`client`, `specimen` the air system, `test_room` the served room, `instrumentation`, `temperature_c`, `relative_humidity_percent`, `pressure`, `test_date`) and the footer identity. The design criterion comes from the result's own `target`; a `requirement` in the metadata overrides it. |
+| `metadata` | Optional [`ReportMetadata`](/reference/api/building/insulation/#reportmetadata) supplying the header (`client`, `specimen` the air system, `test_room` the served room, `instrumentation`, `temperature_c`, `relative_humidity_percent`, `pressure`, `test_date`) and the footer identity. The design criterion comes from the result's own `target`; a `requirement` in the metadata overrides it. |
 | `engine` | Rendering back end; only `"reportlab"` is supported. |
 | `verbose` | When `True` the table adds the running level after every element; when `False` only the source, the element attenuations, the regenerated-noise rows and the received spectrum are printed, which keeps a long path on one page. |
 | `language` | Fiche language: `"en"` (default) or `"es"`. |

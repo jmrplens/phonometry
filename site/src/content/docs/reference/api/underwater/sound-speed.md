@@ -9,7 +9,7 @@ Sound-speed profiles over a column of water.
 
 A profile is a description of a place rather than of a substance, so it stays
 with the marchers that consume it while the point state of sea water lives in
-[`phonometry.fluids.water`](/phonometry/reference/api/fluids/water/). The four sound-speed equations moved there with
+[`phonometry.fluids.water`](/reference/api/fluids/water/). The four sound-speed equations moved there with
 it; this module builds a column out of them.
 
 > Auto-generated from the source docstrings by `scripts/generate_api_docs.py` (`make api-docs`). Do not edit by hand.
@@ -36,10 +36,10 @@ Evaluate a sound-speed profile over a depth column.
 | `depths` | Depths, in metres (1-D, non-negative, increasing). |
 | `temperatures_c` | Temperature per depth, in °C (array or a scalar broadcast to every depth). |
 | `salinities` | Salinity per depth, in PSU (array or scalar). |
-| `model` | Sound-speed equation (see [`sea_water_sound_speed`](/phonometry/reference/api/fluids/water/#sea_water_sound_speed)). One of `"unesco"`, `"del_grosso"`, `"mackenzie"` or `"medwin"`. |
+| `model` | Sound-speed equation (see [`sea_water_sound_speed`](/reference/api/fluids/water/#sea_water_sound_speed)). One of `"unesco"`, `"del_grosso"`, `"mackenzie"` or `"medwin"`. |
 | `latitude` | Latitude for the depth→pressure conversion, in degrees. |
 
-**Returns:** A [`SoundSpeedProfile`](/phonometry/reference/api/underwater/sound-speed/#soundspeedprofile).
+**Returns:** A [`SoundSpeedProfile`](/reference/api/underwater/sound-speed/#soundspeedprofile).
 
 **Raises**
 

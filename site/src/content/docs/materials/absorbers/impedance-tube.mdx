@@ -52,7 +52,7 @@ separate and never mixes them: the **standing-wave-ratio** method of
 ISO 10534-1, the two-microphone **transfer-function** method of ISO 10534-2,
 and the four-microphone **transfer-matrix** method of ASTM E2611 that adds
 the transmission loss. The closing section runs the whole instrument, sample
-included, inside the [FDTD solver](/phonometry/simulation/fdtd-simulation/) and
+included, inside the [FDTD solver](/simulation/fdtd-simulation/) and
 recovers the analytic answer through the same reduction chains.
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_impedance_tube.svg" alt="ISO 10534-2 two-microphone impedance tube: a loudspeaker radiating a plane wave down the tube, two microphones flush in the wall at spacing s and distance x1 from the specimen face, the test specimen against a rigid backing, and the incident and reflected waves" width="92%" />
@@ -779,7 +779,7 @@ the hard-backed absorption overlaid (a matrix built by the solvers retains
 $\rho c$ and, when supplied, the frequency vector, so only a hand-built
 matrix needs them as arguments). The matrix does
 not have to come from a measurement: the
-[multilayer solver](/phonometry/materials/absorbers/porous-absorbers/) exposes the chain
+[multilayer solver](/materials/absorbers/porous-absorbers/) exposes the chain
 matrix of any modelled stack in the same convention, so a predicted specimen
 can be read out exactly like a measured one.
 
@@ -812,7 +812,7 @@ same warning applies on the transmission side and is missed more often. What
 the tube measures is the transmission loss of a specimen a few centimetres
 across, for one plane wave at one angle, with the specimen edges clamped by
 the tube wall. What the
-[sound reduction index $R$](/phonometry/buildings/insulation/insulation-lab/) is,
+[sound reduction index $R$](/buildings/insulation/insulation-lab/) is,
 is a diffuse-field quantity measured on a full-size element with its real
 mounting, and it carries the element's own bending waves, its edge conditions
 and its coincidence dip, none of which exist inside a tube. Expect the
@@ -821,7 +821,7 @@ mass-controlled layer, and expect the tube to miss the resonance and
 coincidence dips of a real panel entirely. Use the tube TL to compare
 materials and to fit and verify a transfer-matrix model; then predict the
 construction with the model, or with
-[EN 12354](/phonometry/buildings/design/insulation-prediction/), and never by
+[EN 12354](/buildings/design/insulation-prediction/), and never by
 carrying the tube number into a partition calculation.
 
 <details>
@@ -891,7 +891,7 @@ before the signal processing. The recurring failures:
 ## 5. The virtual tube: the solver measured by the standards
 
 A three-row rigid-walled domain of the
-[2D FDTD solver](/phonometry/simulation/fdtd-simulation/) is a plane-wave tube,
+[2D FDTD solver](/simulation/fdtd-simulation/) is a plane-wave tube,
 and with the per-cell `damping` map a porous sample becomes an equivalent
 fluid (density, speed and loss maps). That closes a remarkable loop: the FDTD probe histories can
 be reduced through the library's own ISO 10534-2 and ASTM E2611 chains as
@@ -993,7 +993,7 @@ which the standard itself calls a lower limit; the measured determination of
 Eqs. (A.13)/(A.14) from the empty tube is not implemented. The
 random-incidence $\alpha_\mathrm{s}$ of the reverberation room is a different quantity
 with its own guide: [Sound Absorption Measurement and
-Rating](/phonometry/materials/absorbers/absorption-measurement/).
+Rating](/materials/absorbers/absorption-measurement/).
 </ScopeClaim>
 </Scope>
 
@@ -1001,20 +1001,20 @@ Rating](/phonometry/materials/absorbers/absorption-measurement/).
 
 ## See also
 
-- [Sound Absorption Measurement and Rating](/phonometry/materials/absorbers/absorption-measurement/):
+- [Sound Absorption Measurement and Rating](/materials/absorbers/absorption-measurement/):
   the random-incidence reverberation-room coefficient, its ISO 11654 rating,
   and when the tube or the room is the right instrument.
-- [Airflow Resistance](/phonometry/materials/absorbers/airflow-resistance/): the ISO 9053
+- [Airflow Resistance](/materials/absorbers/airflow-resistance/): the ISO 9053
   flow resistivity that anchors the models a tube measurement is fitted
   against.
-- [Porous and Multilayer Absorbers](/phonometry/materials/absorbers/porous-absorbers/): the
+- [Porous and Multilayer Absorbers](/materials/absorbers/porous-absorbers/): the
   equivalent-fluid models and the multilayer solver whose chain matrix reads
   out through the same ASTM E2611 machinery as a measured specimen.
-- [FDTD Simulation](/phonometry/simulation/fdtd-simulation/): the 2D solver behind
+- [FDTD Simulation](/simulation/fdtd-simulation/): the 2D solver behind
   the virtual tubes of section 5.
-- [Calibration](/phonometry/signals/metrology/calibration/): microphone calibration ahead
+- [Calibration](/signals/metrology/calibration/): microphone calibration ahead
   of the two-microphone transfer function.
-- API reference: [`materials.absorbers.impedance_tube`](/phonometry/reference/api/materials/impedance-tube/).
-- Theory: [Acoustic material characterisation](/phonometry/reference/theory/materials-surfaces/#acoustic-material-characterisation-iso-11654-iso-9053-12-iso-10534-12-astm-e2611): the transfer-function derivation of ISO 10534-2 and the ASTM E2611 four-microphone extension.
+- API reference: [`materials.absorbers.impedance_tube`](/reference/api/materials/impedance-tube/).
+- Theory: [Acoustic material characterisation](/reference/theory/materials-surfaces/#acoustic-material-characterisation-iso-11654-iso-9053-12-iso-10534-12-astm-e2611): the transfer-function derivation of ISO 10534-2 and the ASTM E2611 four-microphone extension.
 
 </SeeAlso>

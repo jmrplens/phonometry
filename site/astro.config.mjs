@@ -718,7 +718,8 @@ export default defineConfig({
       defaultLocale: 'root',
       locales,
       head: [
-        // The Cloudflare response header rule for docs.jmrp.io sends a whole
+        // The headers phonometry.dev sends (site/worker/lib/headers.mjs, the
+        // same set as the response header rule of docs.jmrp.io) carry a whole
         // Content-Security-Policy on every response, frame-ancestors 'none'
         // and its report-uri included (meta delivery cannot carry either; the
         // spec ignores them there), with X-Frame-Options: DENY,
@@ -733,7 +734,7 @@ export default defineConfig({
         // island hydration are inline by design. 'wasm-unsafe-eval' is for
         // Pagefind, whose search index is compiled WebAssembly fetched from
         // this origin. media-src also names the clip hosts of mediaOrigins:
-        // the phonometry.dev preview redirects every clip to one of them for
+        // phonometry.dev redirects every clip to one of them for
         // byte ranges, and a browser holds the redirect target to this policy.
         {
           tag: 'meta',
@@ -823,7 +824,8 @@ export default defineConfig({
         },
         // Ownership proofs for Google Search Console and Bing Webmaster Tools.
         // They were issued for the https://jmrplens.github.io/phonometry/
-        // property, which now redirects to https://docs.jmrp.io/phonometry/;
+        // property, which redirects to docs.jmrp.io and from there, as every
+        // address of the site published there, to phonometry.dev;
         // a property for the new address that is given a different proof
         // takes it as one more tag here. Both services read them from the
         // property's home page and re-check them later, so they stay. Public

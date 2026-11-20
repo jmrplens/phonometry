@@ -1,6 +1,6 @@
 <!-- Written by `make llms` from site/src/content/docs/buildings/insulation/spanish-building-code.mdx: edit that page and its Spanish twin, then run `make llms`. -->
 
-← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/buildings/insulation/spanish-building-code/
+← [Documentation index](../../README.md) · Published at https://phonometry.dev/buildings/insulation/spanish-building-code/
 
 # Spanish Building Code (CTE DB-HR)
 
@@ -357,7 +357,7 @@ plt.show()
 - [Façade Sound Insulation](facade-insulation.md): the ISO 16283-3 measurement of $D_{2\mathrm{m,n}T}$ and its EN 12354-3 prediction, which feed the $D_{2\mathrm{m,n}T,\mathrm{Atr}}$ index of this page.
 - [Predicting Panel Sound Insulation](../design/panel-sound-insulation.md): the composite-façade calculation and transmission through openings and slits.
 - [Field Insulation Measurement (ISO 16283)](insulation-field.md): the band spectra of $R'$, $D_{\mathrm{n}T}$ and $L'_{\mathrm{n}T}$ that these global quantities summarise.
-- API reference: [`building.regulation.spain`](https://docs.jmrp.io/phonometry/reference/api/building/spain/).
+- API reference: [`building.regulation.spain`](https://phonometry.dev/reference/api/building/spain/).
 - Theory: [Sound insulation and absorption, measured](../../reference/theory/rooms-buildings.md#sound-insulation-and-absorption-measured-iso-16283-iso-10140-iso-717-iso-354): the quantities the code requires, derived from ISO 12354 and ISO 717 rather than from the code.
 
 ## Quick answers

@@ -30,10 +30,10 @@ L_{S,\mathrm{max}}' = L_{S,\mathrm{max}} + \left(A_\mathrm{earphone} - A_\mathrm
 $$
 
 and Table 3 prints it for an insert (Etymotic ER-3A) and a circumaural
-(Sennheiser HDA 200) earphone. [`ambient_noise_limits`](/phonometry/reference/api/hearing/audiometry/#ambient_noise_limits) returns the
-limits and [`check_audiometric_ambient_noise`](/phonometry/reference/api/hearing/audiometry/#check_audiometric_ambient_noise) judges a measured
+(Sennheiser HDA 200) earphone. [`ambient_noise_limits`](/reference/api/hearing/audiometry/#ambient_noise_limits) returns the
+limits and [`check_audiometric_ambient_noise`](/reference/api/hearing/audiometry/#check_audiometric_ambient_noise) judges a measured
 spectrum against them, including the sound-field limits of ISO 8253-2:2009
-Table 2 ([`phonometry.hearing.SOUND_FIELD_AMBIENT_LIMITS_DB`](/phonometry/reference/api/hearing/sound-field-audiometry/#sound_field_ambient_limits_db)).
+Table 2 ([`phonometry.hearing.SOUND_FIELD_AMBIENT_LIMITS_DB`](/reference/api/hearing/sound-field-audiometry/#sound_field_ambient_limits_db)).
 
 **The threshold (6.2.4, 6.3.5, 7.5).** Each audiometric method ends in a rule
 that turns the subject's responses into a hearing threshold level:
@@ -43,18 +43,18 @@ that turns the subject's responses into a hearing threshold level:
   three responses fall at one level within at most five ascents (two out of
   three in the shortened version). The threshold is the lowest level at which
   responses occur in more than half of the ascents
-  ([`ascending_method_threshold`](/phonometry/reference/api/hearing/audiometry/#ascending_method_threshold), which also replays a presentation
+  ([`ascending_method_threshold`](/reference/api/hearing/audiometry/#ascending_method_threshold), which also replays a presentation
   sequence and gives the next level to present);
 - the **bracketing method** (6.2.4.3) averages the lowest response levels of
   the ascents, and those of the descents, and rounds the mean of the two
-  averages to the nearest 5 dB step ([`bracketing_method_threshold`](/phonometry/reference/api/hearing/audiometry/#bracketing_method_threshold));
+  averages to the nearest 5 dB step ([`bracketing_method_threshold`](/reference/api/hearing/audiometry/#bracketing_method_threshold));
 - **automatic recording** audiometry (6.3.5) averages the peaks and the
   valleys of the tracing, after dropping the first reversal and those of
   excursions of 3 dB or less, and rounds the mean of the two up to the next
-  whole decibel ([`automatic_audiometry_threshold`](/phonometry/reference/api/hearing/audiometry/#automatic_audiometry_threshold));
+  whole decibel ([`automatic_audiometry_threshold`](/reference/api/hearing/audiometry/#automatic_audiometry_threshold));
 - **sweep-frequency** audiometry (7.5) averages the three peaks and the three
   valleys closest to a frequency, or runs that average along the tracing
-  ([`sweep_audiometry_threshold`](/phonometry/reference/api/hearing/audiometry/#sweep_audiometry_threshold)).
+  ([`sweep_audiometry_threshold`](/reference/api/hearing/audiometry/#sweep_audiometry_threshold)).
 
 Each also carries the text's own reliability test: a span of more than 10 dB
 between the levels it averages.
@@ -62,10 +62,10 @@ between the levels it averages.
 **The cautions (6.2.3.2, 8.4).** Three more rules of the text judge the
 levels once they are found. Step 3 of 6.2.3.2 repeats the measurement at
 1 kHz, and the first ear is done when the two agree to 5 dB or less
-([`check_retest_agreement`](/phonometry/reference/api/hearing/audiometry/#check_retest_agreement)). A hearing level of 40 dB or more calls for
+([`check_retest_agreement`](/reference/api/hearing/audiometry/#check_retest_agreement)). A hearing level of 40 dB or more calls for
 caution because of cross-hearing (6.2.3.2), and a bone-conduction level at the
 average vibrotactile threshold of 8.4 may be felt rather than heard
-([`VIBROTACTILE_HEARING_LEVELS`](/phonometry/reference/api/hearing/audiometry/#vibrotactile_hearing_levels)); [`audiogram_cautions`](/phonometry/reference/api/hearing/audiometry/#audiogram_cautions) flags
+([`VIBROTACTILE_HEARING_LEVELS`](/reference/api/hearing/audiometry/#vibrotactile_hearing_levels)); [`audiogram_cautions`](/reference/api/hearing/audiometry/#audiogram_cautions) flags
 both.
 
 **The uncertainty (Annex A).** The hearing threshold level is modelled as the
@@ -80,8 +80,8 @@ $$
 
 A.3 gives typical values for the repeatability, the audiometer, the
 transducer, the ambient noise and the masking;
-[`audiometric_uncertainty`](/phonometry/reference/api/hearing/audiometry/#audiometric_uncertainty) assembles them into an
-[`AudiometricUncertaintyBudget`](/phonometry/reference/api/hearing/audiometry/#audiometricuncertaintybudget), and for air conduction below 4 kHz
+[`audiometric_uncertainty`](/reference/api/hearing/audiometry/#audiometric_uncertainty) assembles them into an
+[`AudiometricUncertaintyBudget`](/reference/api/hearing/audiometry/#audiometricuncertaintybudget), and for air conduction below 4 kHz
 without masking it reproduces the example of Table A.2: $u$ = 4.9 dB and
 $U$ = 10 dB.
 
@@ -146,12 +146,12 @@ conservative reading.
 | :--- | :--- |
 | `presentation` | `"air"` (default), `"bone"` or `"sound field"`. |
 | `lowest_test_frequency_hz` | The lowest test tone frequency: 125 (default), 250, or for air conduction 500. |
-| `earphone` | A column of [`EARPHONE_ATTENUATION`](/phonometry/reference/api/hearing/audiometry/#earphone_attenuation), `"supra-aural"` (default), `"ER-3A"` or `"HDA 200"`; air conduction only. |
-| `earphone_attenuation` | Or the attenuation of another earphone, one per band of [`AMBIENT_NOISE_BANDS_HZ`](/phonometry/reference/api/hearing/audiometry/#ambient_noise_bands_hz), in dB; air conduction only. |
+| `earphone` | A column of [`EARPHONE_ATTENUATION`](/reference/api/hearing/audiometry/#earphone_attenuation), `"supra-aural"` (default), `"ER-3A"` or `"HDA 200"`; air conduction only. |
+| `earphone_attenuation` | Or the attenuation of another earphone, one per band of [`AMBIENT_NOISE_BANDS_HZ`](/reference/api/hearing/audiometry/#ambient_noise_bands_hz), in dB; air conduction only. |
 | `lowest_hearing_level` | The lowest hearing threshold level to be measured, in dB; 0 by default. |
 | `allowed_threshold_shift_db` | The threshold shift accepted from the ambient noise, 2 (default) or 5, in dB. |
 
-**Returns:** The limits in dB re 20 µPa, one per band of [`AMBIENT_NOISE_BANDS_HZ`](/phonometry/reference/api/hearing/audiometry/#ambient_noise_bands_hz) for air and bone conduction and of [`phonometry.hearing.SOUND_FIELD_AMBIENT_BANDS_HZ`](/phonometry/reference/api/hearing/sound-field-audiometry/#sound_field_ambient_bands_hz) for sound field.
+**Returns:** The limits in dB re 20 µPa, one per band of [`AMBIENT_NOISE_BANDS_HZ`](/reference/api/hearing/audiometry/#ambient_noise_bands_hz) for air and bone conduction and of [`phonometry.hearing.SOUND_FIELD_AMBIENT_BANDS_HZ`](/reference/api/hearing/sound-field-audiometry/#sound_field_ambient_bands_hz) for sound field.
 
 **Raises**
 
@@ -195,7 +195,7 @@ choices, so a check cannot be built against another table.
 | `lowest_hearing_level` | The lowest hearing threshold level to be measured the limits were raised for, in dB. |
 | `noise_floor_levels` | The measuring chain's noise floor per band, in dB, or `None` when not given. |
 | `earphone` | For air conduction, the earphone the limits were written for: a column of Table 3, or `"own attenuation"` for an attenuation given band by band; `None` for bone conduction and sound field. |
-| `earphone_attenuation` | The earphone's own attenuation per band of [`AMBIENT_NOISE_BANDS_HZ`](/phonometry/reference/api/hearing/audiometry/#ambient_noise_bands_hz), in dB, when `earphone` is `"own attenuation"`; `None` otherwise. |
+| `earphone_attenuation` | The earphone's own attenuation per band of [`AMBIENT_NOISE_BANDS_HZ`](/reference/api/hearing/audiometry/#ambient_noise_bands_hz), in dB, when `earphone` is `"own attenuation"`; `None` otherwise. |
 | `allowed_threshold_shift_db` | The threshold shift accepted from the ambient noise, 2 (default) or 5, in dB. |
 
 A band the measurement leaves out is a band the room is not shown to meet,
@@ -235,7 +235,7 @@ within its limit still is; one over its limit may be the floor's.
 
 The maximum permissible level per band, in dB.
 
-**Returns:** [`ambient_noise_limits`](/phonometry/reference/api/hearing/audiometry/#ambient_noise_limits) of the presentation and the tester's choices, at `frequencies`.
+**Returns:** [`ambient_noise_limits`](/reference/api/hearing/audiometry/#ambient_noise_limits) of the presentation and the tester's choices, at `frequencies`.
 
 ### AmbientNoiseCheck.lowest_measurable_hearing_level
 
@@ -346,7 +346,7 @@ presentations, a new call with `shortened=False`.
 | `shortened` | `True` for the shortened version. |
 | `familiarization_level` | The lowest level of the subject's responses during familiarization (6.2.2), in dB, to check the first tone of a sequence, or to give it when the sequence is empty. |
 
-**Returns:** [`AscendingThresholdResult`](/phonometry/reference/api/hearing/audiometry/#ascendingthresholdresult).
+**Returns:** [`AscendingThresholdResult`](/reference/api/hearing/audiometry/#ascendingthresholdresult).
 
 **Raises**
 
@@ -501,7 +501,7 @@ levels are averages about which individuals vary widely.
 | `bone_conduction_threshold_levels` | The bone-conduction hearing threshold levels, in dB, one per frequency. |
 | `vibrator_placement` | `"mastoid"` (default) or `"forehead"`, the placement the bone conduction is calibrated for. |
 
-**Returns:** [`AudiogramCautions`](/phonometry/reference/api/hearing/audiometry/#audiogramcautions).
+**Returns:** [`AudiogramCautions`](/reference/api/hearing/audiometry/#audiogramcautions).
 
 **Raises**
 
@@ -655,7 +655,7 @@ Table A.2: $u$ = 4.9 dB and $U$ = 10 dB.
 | `subject_uncertainty_db` | $u_7$, in dB. |
 | `special_uncertainty_db` | $u_8$, in dB. |
 
-**Returns:** [`AudiometricUncertaintyBudget`](/phonometry/reference/api/hearing/audiometry/#audiometricuncertaintybudget).
+**Returns:** [`AudiometricUncertaintyBudget`](/reference/api/hearing/audiometry/#audiometricuncertaintybudget).
 
 **Raises**
 
@@ -786,7 +786,7 @@ is a property of the method, and nothing here corrects for it.
 | :--- | :--- |
 | `reversal_levels` | The hearing level at each reversal of the tracing at one frequency, in dB, in the order they were traced. |
 
-**Returns:** [`AutomaticThresholdResult`](/phonometry/reference/api/hearing/audiometry/#automaticthresholdresult).
+**Returns:** [`AutomaticThresholdResult`](/reference/api/hearing/audiometry/#automaticthresholdresult).
 
 **Raises**
 
@@ -930,7 +930,7 @@ the tie.
 | `ascent_levels` | The lowest level at which a response occurred in each ascent, in dB. |
 | `descent_levels` | The lowest level at which a response occurred in each descent, in dB. |
 
-**Returns:** [`BracketingThresholdResult`](/phonometry/reference/api/hearing/audiometry/#bracketingthresholdresult), which also says whether the series is complete and whether 6.2.4.3 advises a repeat.
+**Returns:** [`BracketingThresholdResult`](/reference/api/hearing/audiometry/#bracketingthresholdresult), which also says whether the series is complete and whether 6.2.4.3 advises a repeat.
 
 **Raises**
 
@@ -1040,7 +1040,7 @@ Is the test room quiet enough for the audiometry? (ISO 8253-1 Clause 11).
 Compares the ambient sound pressure level measured at the position of the
 subject's head, with the subject absent and the room as it is during
 testing (ventilation running if it runs then), with the limits of
-[`ambient_noise_limits`](/phonometry/reference/api/hearing/audiometry/#ambient_noise_limits): ISO 8253-1 Table 2 for air conduction,
+[`ambient_noise_limits`](/reference/api/hearing/audiometry/#ambient_noise_limits): ISO 8253-1 Table 2 for air conduction,
 Table 4 for bone conduction, or ISO 8253-2 Table 2 for sound field
 audiometry (its Clause 6).
 
@@ -1064,13 +1064,13 @@ a narrow-band noise signal.
 | `frequencies` | The mid-frequencies of the measured bands, in hertz, each one of the table's, or `None` for all of them. A measurement that leaves bands out is judged on those it has, and does not pass. |
 | `noise_floor_levels` | The measuring chain's noise floor per measured band, in dB, to flag the bands where 11.1's 6 dB margin is missed. |
 
-**Returns:** [`AmbientNoiseCheck`](/phonometry/reference/api/hearing/audiometry/#ambientnoisecheck).
+**Returns:** [`AmbientNoiseCheck`](/reference/api/hearing/audiometry/#ambientnoisecheck).
 
 **Raises**
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | for the reasons [`ambient_noise_limits`](/phonometry/reference/api/hearing/audiometry/#ambient_noise_limits) gives, a frequency the table does not list, or levels that do not match the bands. |
+| ValueError | for the reasons [`ambient_noise_limits`](/reference/api/hearing/audiometry/#ambient_noise_limits) gives, a frequency the table does not list, or levels that do not match the bands. |
 | TypeError | if `presentation` or `earphone` is not a text, or `earphone_attenuation`, `frequencies`, `levels` or `noise_floor_levels` holds a text or a value that is not a real number. |
 
 ## check_retest_agreement
@@ -1098,7 +1098,7 @@ The text is written for the 5 dB steps of a manual audiometer, where a
 difference is either 5 dB or less or 10 dB or more. A finer control can
 give a difference in between; it is not agreement to 5 dB or less, so it
 does not pass, and the text names no action for it, so
-[`RetestAgreementCheck.retest_further_frequencies`](/phonometry/reference/api/hearing/audiometry/#retestagreementcheckretest_further_frequencies) is `False` too.
+[`RetestAgreementCheck.retest_further_frequencies`](/reference/api/hearing/audiometry/#retestagreementcheckretest_further_frequencies) is `False` too.
 
 **Parameters**
 
@@ -1108,7 +1108,7 @@ does not pass, and the text names no action for it, so
 | `repeat_threshold_level` | The hearing threshold level of the repeat, in dB. |
 | `frequency_hz` | The frequency of both, in hertz; 1 kHz by default. |
 
-**Returns:** [`RetestAgreementCheck`](/phonometry/reference/api/hearing/audiometry/#retestagreementcheck).
+**Returns:** [`RetestAgreementCheck`](/reference/api/hearing/audiometry/#retestagreementcheck).
 
 **Raises**
 
@@ -1235,7 +1235,7 @@ and the run advances one reversal at a time.
 | `reversal_frequencies` | The frequency at each reversal, in hertz, in the order traced; the sweep may run upwards or downwards. |
 | `frequencies` | The frequencies to determine the threshold at, in hertz, or `None` for the audiometric frequencies from 125 Hz to 8 kHz that the tracing spans. |
 
-**Returns:** [`SweepThresholdResult`](/phonometry/reference/api/hearing/audiometry/#sweepthresholdresult).
+**Returns:** [`SweepThresholdResult`](/reference/api/hearing/audiometry/#sweepthresholdresult).
 
 **Raises**
 

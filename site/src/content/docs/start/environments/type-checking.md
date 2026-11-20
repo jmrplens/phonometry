@@ -9,7 +9,7 @@ and [pyright](https://microsoft.github.io/pyright/) check a call into the
 library with nothing else installed. Every public module declares what it
 publishes, and the lazy domains of `import phonometry as ph` are visible to a
 checker as well as at run time. The types a checker reads are the ones the
-[API reference](/phonometry/reference/api/) prints in each signature.
+[API reference](/reference/api/) prints in each signature.
 
 Checked on 17 November 2026 with phonometry 4.0.0 from PyPI, in the
 `python:3.12-slim` and `python:3.14-slim` images, on Python 3.12.16 and

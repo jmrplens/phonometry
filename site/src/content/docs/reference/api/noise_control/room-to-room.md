@@ -8,17 +8,17 @@ sidebar:
 Room-to-room noise reduction: source room, partition, receiving room, criterion.
 
 The other classic bookkeeping exercise of noise control, beside the duct-borne
-cascade of [`phonometry.noise_control.duct_path`](/phonometry/reference/api/noise_control/duct-path/#duct_path). A machine runs in one
+cascade of [`phonometry.noise_control.duct_path`](/reference/api/noise_control/duct-path/#duct_path). A machine runs in one
 room, a partition separates that room from an occupied one, and the question is
 the octave-band spectrum in the occupied room and whether it meets a design
 criterion. The answer is a short chain, and every link of it already exists in
 the library: the reverberant level the machine builds up in the source room
-([`phonometry.room.steady_state_spl`](/phonometry/reference/api/rooms/steady-field/#steady_state_spl) over the room constant of
-[`phonometry.room.room_constant`](/phonometry/reference/api/rooms/steady-field/#room_constant)), the transmission loss of the partition
-(measured, or predicted by [`phonometry.building.prediction.panel_transmission`](/phonometry/reference/api/building/panel-transmission/)), the
+([`phonometry.room.steady_state_spl`](/reference/api/rooms/steady-field/#steady_state_spl) over the room constant of
+[`phonometry.room.room_constant`](/reference/api/rooms/steady-field/#room_constant)), the transmission loss of the partition
+(measured, or predicted by [`phonometry.building.prediction.panel_transmission`](/reference/api/building/panel-transmission/)), the
 absorption of the receiving room
-([`phonometry.room.equivalent_absorption_area`](/phonometry/reference/api/rooms/enclosed-space-absorption/#equivalent_absorption_area)) and the rating of what
-arrives ([`phonometry.room.noise_criterion`](/phonometry/reference/api/rooms/noise-criteria/#noise_criterion)). What this module adds is the
+([`phonometry.room.equivalent_absorption_area`](/reference/api/rooms/enclosed-space-absorption/#equivalent_absorption_area)) and the rating of what
+arrives ([`phonometry.room.noise_criterion`](/reference/api/rooms/noise-criteria/#noise_criterion)). What this module adds is the
 one step that lives nowhere else, and the result object that carries the whole
 path.
 
@@ -74,7 +74,7 @@ $S_2 \alpha_2$, so reproducing Barron means passing $R_2$ as
 `receiving_absorption`. And Barron adds
 $10 \log_{10}(\rho_0 c W_\mathrm{ref} / p_\mathrm{ref}^2) = 0.1$ dB to
 every level, which is not added here, as it is not in
-[`phonometry.room.steady_state_spl`](/phonometry/reference/api/rooms/steady-field/#steady_state_spl). His Example 7-6, printed folio 298, an
+[`phonometry.room.steady_state_spl`](/reference/api/rooms/steady-field/#steady_state_spl). His Example 7-6, printed folio 298, an
 operator 1.5 m from a 16 m2 wall, reads 61.7 dB with that 0.1 dB; without the
 direct field of the wall the chain would give 2.65 dB less.
 
@@ -82,14 +82,14 @@ direct field of the wall the chain would give 2.65 dB less.
 partition, not a point near the machine, so the level that drives the
 transmission is the reverberant field alone,
 $L_{p1} = L_W + 10 \log_{10}(4 / R_1)$. That is
-[`phonometry.room.steady_state_spl`](/phonometry/reference/api/rooms/steady-field/#steady_state_spl) at `distance=None`, and this module
+[`phonometry.room.steady_state_spl`](/reference/api/rooms/steady-field/#steady_state_spl) at `distance=None`, and this module
 delegates to it rather than repeating it. Norton's Table 4.5 adds the choice of
 *sound power model*: a machine standing in the intersection of a floor and a
 wall radiates more power than its free-space `L_W` if it behaves as a
 constant-volume source, and `source_model="constant_volume"` is the
 conservative upper bound a design estimate uses.
 
-**The verdict.** [`RoomToRoomResult.required_transmission_loss`](/phonometry/reference/api/noise_control/room-to-room/#roomtoroomresultrequired_transmission_loss) inverts the
+**The verdict.** [`RoomToRoomResult.required_transmission_loss`](/reference/api/noise_control/room-to-room/#roomtoroomresultrequired_transmission_loss) inverts the
 chain: given the source-room level and the criterion curve, the partition
 transmission loss that would just meet it, band by band. That is the number a
 partition is specified from.
@@ -146,7 +146,7 @@ together, and the spectrum in the receiving room: the reverberant one, or
 the one at `receiver_distance_m` from the partition. The
 source-room level is either given directly as `source.level` or built
 from a sound power level and the source room's room constant, in which case
-the reverberant field alone is used ([`phonometry.room.steady_state_spl`](/phonometry/reference/api/rooms/steady-field/#steady_state_spl)
+the reverberant field alone is used ([`phonometry.room.steady_state_spl`](/reference/api/rooms/steady-field/#steady_state_spl)
 at `distance=None`), which is the level that drives the transmission
 across the partition.
 
@@ -166,23 +166,23 @@ $R_2 = S_2 \alpha_2 / (1 - \alpha_2)$ where Norton writes
 $S_2 \alpha_2$, so reproducing his Example 7-6 (printed folio 298)
 means passing $R_2$ as `receiving_absorption`; the 0.1 dB he adds
 to every level for $\rho_0 c W_\mathrm{ref} / p_\mathrm{ref}^2$ is not
-added, as it is not in [`phonometry.room.steady_state_spl`](/phonometry/reference/api/rooms/steady-field/#steady_state_spl).
+added, as it is not in [`phonometry.room.steady_state_spl`](/reference/api/rooms/steady-field/#steady_state_spl).
 
 **Parameters**
 
 | Name | Description |
 | :--- | :--- |
 | `frequencies` | Octave-band centre frequencies, Hz (1-D array). |
-| `transmission_loss` | Transmission loss of the partition `TL`, dB; a scalar or one value per band. Measured, tabulated, or predicted by [`phonometry.building.prediction.panel_transmission`](/phonometry/reference/api/building/panel-transmission/). |
+| `transmission_loss` | Transmission loss of the partition `TL`, dB; a scalar or one value per band. Measured, tabulated, or predicted by [`phonometry.building.prediction.panel_transmission`](/reference/api/building/panel-transmission/). |
 | `partition_area` | Area of the partition between the rooms `S_w`, m2. |
-| `receiving_absorption` | What the reverberant term of the receiving room is written over, per band, m2: the equivalent absorption area `S_2 alpha_2` as Norton writes it, e.g. from [`phonometry.room.equivalent_absorption_area`](/phonometry/reference/api/rooms/enclosed-space-absorption/#equivalent_absorption_area), or the room constant $R_2$ from [`phonometry.room.room_constant`](/phonometry/reference/api/rooms/steady-field/#room_constant) for Barron's form of the same term, as above. |
-| `source` | The source room ([`SourceRoom`](/phonometry/reference/api/noise_control/room-to-room/#sourceroom)): its level, or its sound power level with the room constant, directivity and sound power model that turn it into one. Exactly one of the two descriptions is required, so the empty default is rejected. |
+| `receiving_absorption` | What the reverberant term of the receiving room is written over, per band, m2: the equivalent absorption area `S_2 alpha_2` as Norton writes it, e.g. from [`phonometry.room.equivalent_absorption_area`](/reference/api/rooms/enclosed-space-absorption/#equivalent_absorption_area), or the room constant $R_2$ from [`phonometry.room.room_constant`](/reference/api/rooms/steady-field/#room_constant) for Barron's form of the same term, as above. |
+| `source` | The source room ([`SourceRoom`](/reference/api/noise_control/room-to-room/#sourceroom)): its level, or its sound power level with the room constant, directivity and sound power model that turn it into one. Exactly one of the two descriptions is required, so the empty default is rejected. |
 | `include_partition_transmission` | When `True` the `tau S_w` term of Equation (4.101) is added to the receiving-room absorption, with $\tau = 10^{-\mathrm{TL}/10}$. Default `False`, the form hand calculations use. |
-| `criterion` | The design criterion ([`DesignCriterion`](/phonometry/reference/api/noise_control/room-to-room/#designcriterion)): the family, the target curve and the flanking allowance. `None` is the default criterion, an `"NC"` family with no target. |
+| `criterion` | The design criterion ([`DesignCriterion`](/reference/api/noise_control/room-to-room/#designcriterion)): the family, the target curve and the flanking allowance. `None` is the default criterion, an `"NC"` family with no target. |
 | `label` | A short human label of the chain. |
 | `receiver_distance_m` | Distance of the receiver from the partition `r_2`, m, to add the direct field of the partition (Barron 2003, Equations (7-71) and (7-72)); `None` (default) for the reverberant field alone, Equation (4.101) as Norton writes it. |
 
-**Returns:** A [`RoomToRoomResult`](/phonometry/reference/api/noise_control/room-to-room/#roomtoroomresult).
+**Returns:** A [`RoomToRoomResult`](/reference/api/noise_control/room-to-room/#roomtoroomresult).
 
 **Raises**
 
@@ -214,7 +214,7 @@ RoomToRoomResult(
 
 The room-to-room chain of one partition (Norton 2e, 4.9).
 
-Built by [`room_to_room_transmission`](/phonometry/reference/api/noise_control/room-to-room/#room_to_room_transmission). The four spectra are the four
+Built by [`room_to_room_transmission`](/reference/api/noise_control/room-to-room/#room_to_room_transmission). The four spectra are the four
 rows a hand calculation writes down: the level in the source room, the
 transmission loss of the partition, the noise reduction the partition and
 the receiving room deliver together, and what arrives.
@@ -297,8 +297,8 @@ Requires matplotlib (the `[plot]` extra).
 
 The rating of the spectrum arriving in the receiving room.
 
-An [`NCResult`](/phonometry/reference/api/rooms/noise-criteria/#ncresult) for the `"NC"`
-family, an [`RCResult`](/phonometry/reference/api/rooms/noise-criteria/#rcresult) for `"RC"`.
+An [`NCResult`](/reference/api/rooms/noise-criteria/#ncresult) for the `"NC"`
+family, an [`RCResult`](/reference/api/rooms/noise-criteria/#rcresult) for `"RC"`.
 
 ### RoomToRoomResult.required_transmission_loss
 
@@ -365,6 +365,6 @@ in the room raises or lowers the power it radiates.
 | :--- | :--- |
 | `level` | Reverberant sound pressure level in the source room `L_p1`, dB (scalar or per band). Mutually exclusive with `power_level`. |
 | `power_level` | Sound power level of the source `L_W`, dB re 1 pW (scalar or per band). Requires `room_constant`. |
-| `room_constant` | Room constant of the source room `R_1`, m2 (scalar or per band); from [`phonometry.room.room_constant`](/phonometry/reference/api/rooms/steady-field/#room_constant). |
+| `room_constant` | Room constant of the source room `R_1`, m2 (scalar or per band); from [`phonometry.room.room_constant`](/reference/api/rooms/steady-field/#room_constant). |
 | `directivity` | Directivity factor `Q` of the source in the source room (`1` in free space, `2` on one plane, `4` in an edge, `8` in a corner). Only affects the level through `model`, because the reverberant field itself is position-independent. |
 | `model` | Sound power model of Norton Table 4.5: `"constant_power"` (default, the radiated power does not depend on the source position), `"constant_volume"` (the conservative upper bound, the power rises by $10 \log_{10} Q$) or `"constant_pressure"` (the lower bound, it falls by $10 \log_{10} Q$). |

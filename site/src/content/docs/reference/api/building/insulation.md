@@ -59,32 +59,32 @@ unnumbered formulas inline in the Clause 3 terms; positions are
 energy-averaged with the surface-level formula (Clause 9.5.1, Formula (7)).
 The façade quantity is airborne, so its single-number rating uses the
 **ISO 717-1 airborne** reference curve and method (Clause 2, Annex F)
-unchanged, via [`weighted_rating`](/phonometry/reference/api/building/ratings/#weighted_rating).
+unchanged, via [`weighted_rating`](/reference/api/building/ratings/#weighted_rating).
 
 **Frequency range.** The three parts require the same 16 core one-third-octave
 bands, 100 Hz to 3150 Hz (Part 1 and Part 3 Clause 5, Part 2 Clause 5.1), and
 make the low range 50 Hz to 80 Hz and the high range 4000 Hz to 5000 Hz
 optional additions. The functions below evaluate whatever bands they are given
 and impose no range of their own; it is
-[`ratings`](/phonometry/reference/api/building/ratings/) that fixes a range, taking
+[`ratings`](/reference/api/building/ratings/) that fixes a range, taking
 either those 16 one-third-octave bands or the 5 octave bands from 125 Hz to
 2000 Hz, and the `report()` fiche that needs exactly the 16.
 
 When the optional low range **is** measured, the low-frequency procedure of
-[`phonometry.building.measurement.low_frequency`](/phonometry/reference/api/building/low-frequency/) becomes mandatory for the
+[`phonometry.building.measurement.low_frequency`](/reference/api/building/low-frequency/) becomes mandatory for the
 50 Hz, 63 Hz and 80 Hz bands in any room whose volume, to the nearest cubic
 metre, is under 25 m³. Each function below takes it through a
-[`LowFrequencyProcedure`](/phonometry/reference/api/building/low-frequency/#lowfrequencyprocedure): `source_low_frequency` and
+[`LowFrequencyProcedure`](/reference/api/building/low-frequency/#lowfrequencyprocedure): `source_low_frequency` and
 `receiver_low_frequency` for the airborne pair of rooms, `low_frequency`
 for the single receiving room of the other two. Computing those three bands
 from the default procedure alone in a room that small is not the ISO 16283
 quantity, so a function handed the volume and the band centres without a
-procedure raises a [`LowFrequencyWarning`](/phonometry/reference/api/building/low-frequency/#lowfrequencywarning) rather than
+procedure raises a [`LowFrequencyWarning`](/reference/api/building/low-frequency/#lowfrequencywarning) rather than
 answering silently. The one exception is the road-traffic façade, which
 ISO 16283-3 Clause 6 gives the default procedure and nothing else.
 
 The single-number rating of any of these curves is the subject of
-[`phonometry.building.measurement.ratings`](/phonometry/reference/api/building/ratings/), which implements ISO 717-1
+[`phonometry.building.measurement.ratings`](/reference/api/building/ratings/), which implements ISO 717-1
 (airborne) and ISO 717-2 (impact); the `report()` methods below call it to
 box the rating on the field report form.
 
@@ -138,7 +138,7 @@ assumed already corrected for background noise (Clause 9.2).
 mandatory for the 50 Hz, 63 Hz and 80 Hz bands "in the source and/or
 receiving room when *its* volume is smaller than 25 m³ (calculated to the
 nearest cubic metre)", so the two rooms are tested independently and either
-may carry a [`LowFrequencyProcedure`](/phonometry/reference/api/building/low-frequency/#lowfrequencyprocedure). Whichever room
+may carry a [`LowFrequencyProcedure`](/reference/api/building/low-frequency/#lowfrequencyprocedure). Whichever room
 carries one has its level at those three bands replaced by
 $L_\mathrm{LF}$ (Formula (13)) before `D` is formed. Clause 10.4 is
 a receiving-room clause alone, so the 63 Hz octave reverberation time is
@@ -151,7 +151,7 @@ Clause 8.1 is a *shall*, so a receiving room that rounds below 25 m³ and a
 `frequencies` vector naming any of the three bands are together enough
 to know the procedure was owed. When `receiver_low_frequency` is then
 absent this function computes `D` from the default procedure alone and
-raises a [`LowFrequencyWarning`](/phonometry/reference/api/building/low-frequency/#lowfrequencywarning) naming the bands it
+raises a [`LowFrequencyWarning`](/reference/api/building/low-frequency/#lowfrequencywarning) naming the bands it
 found. Only the receiving room, because only its
 volume is an argument here.
 
@@ -169,13 +169,13 @@ volume is an argument here.
 | `source_low_frequency` | Source-room corner measurements and volume (Clause 8). Must not carry a 63 Hz octave reverberation time. |
 | `receiver_low_frequency` | Receiving-room corner measurements and volume (Clause 8), which must also carry the 63 Hz octave reverberation time of Clause 10.4. |
 
-**Returns:** [`AirborneInsulationResult`](/phonometry/reference/api/building/insulation/#airborneinsulationresult) with `d`, `dnt` and `r_prime` (the latter `None` unless `area` and `volume` are both given), plus whichever low-frequency records were produced.
+**Returns:** [`AirborneInsulationResult`](/reference/api/building/insulation/#airborneinsulationresult) with `d`, `dnt` and `r_prime` (the latter `None` unless `area` and `volume` are both given), plus whichever low-frequency records were produced.
 
 **Raises**
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | If the band counts of `l1`, `l2` and `t2` differ, if only one of `area`/`volume` is supplied, if `t2`/`t0` are not positive, if inputs are non-finite, if a low-frequency argument is given without `frequencies`, if `volume` disagrees with the receiving-room procedure, or if the 63 Hz octave reverberation time is missing from the receiving room or present on the source room. A room that does not round below 25 m³ is refused where the corner measurements are described, by [`LowFrequencyProcedure`](/phonometry/reference/api/building/low-frequency/#lowfrequencyprocedure) itself. |
+| ValueError | If the band counts of `l1`, `l2` and `t2` differ, if only one of `area`/`volume` is supplied, if `t2`/`t0` are not positive, if inputs are non-finite, if a low-frequency argument is given without `frequencies`, if `volume` disagrees with the receiving-room procedure, or if the 63 Hz octave reverberation time is missing from the receiving room or present on the source room. A room that does not round below 25 m³ is refused where the corner measurements are described, by [`LowFrequencyProcedure`](/reference/api/building/low-frequency/#lowfrequencyprocedure) itself. |
 | TypeError | if `area`, `t0` or `volume` is not a single number, or `frequencies`, `l1`, `l2` or `t2` holds a text or a value that is not a real number. |
 
 **Warns**
@@ -269,7 +269,7 @@ verdict row and a footer with the identity block and disclaimer.
 | :--- | :--- |
 | `path` | Destination path of the PDF file. |
 | `quantity` | The reported field quantity: `"dnt"` (default, the standardized level difference of Annex B Figure B.1) or `"r_prime"` (the apparent sound reduction index of Figure B.2; requires the result to carry `r_prime`). |
-| `metadata` | Optional [`ReportMetadata`](/phonometry/reference/api/building/insulation/#reportmetadata); `None` produces a lightweight fiche (body, rating and disclaimer only). |
+| `metadata` | Optional [`ReportMetadata`](/reference/api/building/insulation/#reportmetadata); `None` produces a lightweight fiche (body, rating and disclaimer only). |
 | `engine` | Rendering back end; only `"reportlab"` is supported. |
 | `verbose` | When `True`, the table shows the measurement chain per band (energy-average `L1` and `L2`, reverberation time `T` and the quantity) instead of the two-column `f \| value` form. |
 | `language` | Fiche language: `"en"` (default, English) or `"es"` (Spanish, with a comma decimal separator). |
@@ -361,7 +361,7 @@ surface-level formula (Clause 9.5.1, Formula (7)). Band levels are
 assumed already corrected for background
 noise. The single-number rating uses the ISO 717-1 airborne reference
 curve (Annex F); pass the desired 16-band quantity to
-[`weighted_rating`](/phonometry/reference/api/building/ratings/#weighted_rating).
+[`weighted_rating`](/reference/api/building/ratings/#weighted_rating).
 
 **Rooms under 25 m³.** Clause 7.3.1 makes the low-frequency procedure
 mandatory for the 50 Hz, 63 Hz and 80 Hz bands in the receiving room once
@@ -371,7 +371,7 @@ ones. Pass both through `low_frequency`. A loudspeaker-method call whose
 `volume` rounds below the line and whose `frequencies` names any of the three
 bands, with no `low_frequency` to run the procedure, answers from the
 default procedure alone and raises a
-[`LowFrequencyWarning`](/phonometry/reference/api/building/low-frequency/#lowfrequencywarning) saying that those three bands
+[`LowFrequencyWarning`](/reference/api/building/low-frequency/#lowfrequencywarning) saying that those three bands
 are not the ISO 16283 quantity.
 
 **Parameters**
@@ -389,13 +389,13 @@ are not the ISO 16283 quantity.
 | `frequencies` | Optional band centre frequencies, in Hz, carried on the result for plotting; required with `low_frequency`. |
 | `low_frequency` | Receiving-room corner measurements, volume and 63 Hz octave reverberation time (Clause 7.3 and Clause 8.4). Loudspeaker methods only: Clause 6 says that for the element and global road traffic methods "only the default procedure shall be used", so a small room measured against traffic is conforming without corners and is neither refused nor warned about. |
 
-**Returns:** [`FacadeInsulationResult`](/phonometry/reference/api/building/insulation/#facadeinsulationresult) with `d_2m`, `d_2m_nt`, `d_2m_n` (`None` unless `volume` is given) and `r_prime` (`None` unless `surface_level`, `area` and `volume` are all given), plus the low-frequency record when one was produced.
+**Returns:** [`FacadeInsulationResult`](/reference/api/building/insulation/#facadeinsulationresult) with `d_2m`, `d_2m_nt`, `d_2m_n` (`None` unless `volume` is given) and `r_prime` (`None` unless `surface_level`, `area` and `volume` are all given), plus the low-frequency record when one was produced.
 
 **Raises**
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | If band counts differ, if `method` is unknown, if `t2`/`t0`/`area`/`volume` are not positive, if `area` is given without `surface_level`, if `surface_level` and `area` are given without `volume`, if `frequencies` does not carry one band centre per measured band, if inputs are non-finite, if `low_frequency` is given without `frequencies` or with `method="road_traffic"`, if `volume` disagrees with the procedure, or if the 63 Hz octave reverberation time is missing. A room that does not round below 25 m³ is refused where the corner measurements are described, by [`LowFrequencyProcedure`](/phonometry/reference/api/building/low-frequency/#lowfrequencyprocedure) itself. Supplying `surface_level` alone is not an error: `r_prime` simply stays `None`. |
+| ValueError | If band counts differ, if `method` is unknown, if `t2`/`t0`/`area`/`volume` are not positive, if `area` is given without `surface_level`, if `surface_level` and `area` are given without `volume`, if `frequencies` does not carry one band centre per measured band, if inputs are non-finite, if `low_frequency` is given without `frequencies` or with `method="road_traffic"`, if `volume` disagrees with the procedure, or if the 63 Hz octave reverberation time is missing. A room that does not round below 25 m³ is refused where the corner measurements are described, by [`LowFrequencyProcedure`](/reference/api/building/low-frequency/#lowfrequencyprocedure) itself. Supplying `surface_level` alone is not an error: `r_prime` simply stays `None`. |
 | TypeError | if `area`, `t0` or `volume` is not a single number, or `method` is not a text, or `frequencies`, `l1_2m`, `l2`, `surface_level` or `t2` holds a text or a value that is not a real number. |
 
 **Warns**
@@ -488,7 +488,7 @@ and a footer with the identity block and disclaimer.
 | :--- | :--- |
 | `path` | Destination path of the PDF file. |
 | `quantity` | The reported facade quantity: `"d_2m_nt"` (default, the standardized facade level difference `D2m,nT`), `"d_2m_n"` (the normalized facade level difference `D2m,n`; requires the result to carry `d_2m_n`) or `"r_prime"` (the apparent sound reduction index; requires the result to carry `r_prime`). The `r_prime` fiche is labelled `R'45` (Clause 3.12, loudspeaker method) or `R'tr,s` (Clause 3.13, road traffic method) according to the result's `method`. |
-| `metadata` | Optional [`ReportMetadata`](/phonometry/reference/api/building/insulation/#reportmetadata); `None` produces a lightweight fiche (body, rating and disclaimer only). |
+| `metadata` | Optional [`ReportMetadata`](/reference/api/building/insulation/#reportmetadata); `None` produces a lightweight fiche (body, rating and disclaimer only). |
 | `engine` | Rendering back end; only `"reportlab"` is supported. |
 | `verbose` | When `True`, the table shows the ISO 717 evaluation per band (the reported quantity, the shifted reference and the unfavourable deviation) instead of the two-column `f \| value` form. |
 | `language` | Fiche language: `"en"` (default, English) or `"es"` (Spanish, with a comma decimal separator). |
@@ -540,13 +540,13 @@ puts one 63 Hz octave reverberation time in place of the three
 one-third-octave ones. Pass both through `low_frequency`. Part 2 confines
 the corner procedure to the tapping machine (the heading of its Clause 8),
 which is the only impact source this function models; the rubber ball is
-[`phonometry.building.measurement.heavy_impact`](/phonometry/reference/api/building/heavy-impact/).
+[`phonometry.building.measurement.heavy_impact`](/reference/api/building/heavy-impact/).
 
 Clause 8.1 is a *shall*, so a `volume` that rounds below 25 m³ beside a
 `frequencies` vector naming any of the three bands is enough to know
 the procedure was owed. With no `low_frequency` to run it, this function
 answers from the default procedure alone and raises a
-[`LowFrequencyWarning`](/phonometry/reference/api/building/low-frequency/#lowfrequencywarning) naming the bands it found.
+[`LowFrequencyWarning`](/reference/api/building/low-frequency/#lowfrequencywarning) naming the bands it found.
 
 **Parameters**
 
@@ -559,13 +559,13 @@ answers from the default procedure alone and raises a
 | `frequencies` | Band centre frequencies, in Hz; required with `low_frequency`. Without it it still matters: naming any of the 50 Hz, 63 Hz and 80 Hz bands beside a small `volume` is what tells this function the procedure was owed, and what it warns about. The result carries no band axis of its own. |
 | `low_frequency` | Receiving-room corner measurements, volume and 63 Hz octave reverberation time (Clause 8 and Clause 10.4). |
 
-**Returns:** [`ImpactInsulationResult`](/phonometry/reference/api/building/insulation/#impactinsulationresult) with `l_n_t` and `l_n` (the latter `None` unless `volume` is given), plus the low-frequency record when one was produced.
+**Returns:** [`ImpactInsulationResult`](/reference/api/building/insulation/#impactinsulationresult) with `l_n_t` and `l_n` (the latter `None` unless `volume` is given), plus the low-frequency record when one was produced.
 
 **Raises**
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | If the band counts of `li` and `t2` differ, if `t2`/`t0`/`volume` are not positive, if inputs are non-finite, if `low_frequency` is given without `frequencies`, if `volume` disagrees with the procedure, or if the 63 Hz octave reverberation time is missing. A room that does not round below 25 m³ is refused where the corner measurements are described, by [`LowFrequencyProcedure`](/phonometry/reference/api/building/low-frequency/#lowfrequencyprocedure) itself. |
+| ValueError | If the band counts of `li` and `t2` differ, if `t2`/`t0`/`volume` are not positive, if inputs are non-finite, if `low_frequency` is given without `frequencies`, if `volume` disagrees with the procedure, or if the 63 Hz octave reverberation time is missing. A room that does not round below 25 m³ is refused where the corner measurements are described, by [`LowFrequencyProcedure`](/reference/api/building/low-frequency/#lowfrequencyprocedure) itself. |
 | TypeError | if `t0` or `volume` is not a single number, or `frequencies`, `li` or `t2` holds a text or a value that is not a real number. |
 
 **Warns**
@@ -653,7 +653,7 @@ disclaimer.
 | :--- | :--- |
 | `path` | Destination path of the PDF file. |
 | `quantity` | The reported field quantity: `"l_n_t"` (default, the standardized level of Annex C Figure C.1) or `"l_n"` (the normalized level of Figure C.2; requires the result to carry `l_n`). |
-| `metadata` | Optional [`ReportMetadata`](/phonometry/reference/api/building/insulation/#reportmetadata); `None` produces a lightweight fiche (body, rating and disclaimer only). |
+| `metadata` | Optional [`ReportMetadata`](/reference/api/building/insulation/#reportmetadata); `None` produces a lightweight fiche (body, rating and disclaimer only). |
 | `engine` | Rendering back end; only `"reportlab"` is supported. |
 | `verbose` | When `True`, the table shows the measurement chain per band (energy-average `Li`, reverberation time `T` and the quantity) instead of the two-column `f \| value` form. |
 | `language` | Fiche language: `"en"` (default, English) or `"es"` (Spanish, with a comma decimal separator). |

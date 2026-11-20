@@ -17,7 +17,7 @@ IEC 60268-4:2014 defines around a measured free-field frequency response: the
 sound pressure level** at a stated total-harmonic-distortion limit (14.2/15.2),
 the **rated impedance** and the **rated minimum permitted load impedance**
 (10.2/10.3) and the **rated power supply** (9.1). This module bundles those
-into a single [`MicrophoneCharacteristics`](/phonometry/reference/api/electroacoustics/microphone/#microphonecharacteristics) result whose `report` method
+into a single [`MicrophoneCharacteristics`](/reference/api/electroacoustics/microphone/#microphonecharacteristics) result whose `report` method
 renders the IEC 60268-4 rated-characteristics fiche, with the characteristic
 graphs laid out to the IEC 60263:1982 scale conventions.
 
@@ -103,12 +103,12 @@ them, one bundle per clause, so each may be omitted whole.
 | `sensitivity_mv_per_pa` | Rated free-field sensitivity `M` at the reference frequency, in mV/Pa (11.2.1/11.3). |
 | `reference_frequency_hz` | Stated reference frequency, in Hz; the 11.3 standard reference frequency of 1 000 Hz by default. |
 | `tolerance_db` | Half-width of the response tolerance, in dB (default 2), defining the effective frequency range (12.2). |
-| `directivity` | Directional characteristics of Clause 13 as a [`MicrophoneDirectivity`](/phonometry/reference/api/electroacoustics/microphone/#microphonedirectivity): the directional pattern, its stated frequency and the directivity index. |
-| `noise` | Inherent noise of Clause 17 as a [`MicrophoneNoise`](/phonometry/reference/api/electroacoustics/microphone/#microphonenoise): the weighted noise voltage or the stated equivalent noise level, its weighting and the noise spectrum. |
-| `overload` | Limiting characteristic of 15.2 with the 14.2 distortion curve it is read from, as a [`MicrophoneOverload`](/phonometry/reference/api/electroacoustics/microphone/#microphoneoverload). |
-| `electrical` | Electrical impedance (Clause 10) and rated power supply (Clause 9) as a [`MicrophoneElectrical`](/phonometry/reference/api/electroacoustics/microphone/#microphoneelectrical). |
+| `directivity` | Directional characteristics of Clause 13 as a [`MicrophoneDirectivity`](/reference/api/electroacoustics/microphone/#microphonedirectivity): the directional pattern, its stated frequency and the directivity index. |
+| `noise` | Inherent noise of Clause 17 as a [`MicrophoneNoise`](/reference/api/electroacoustics/microphone/#microphonenoise): the weighted noise voltage or the stated equivalent noise level, its weighting and the noise spectrum. |
+| `overload` | Limiting characteristic of 15.2 with the 14.2 distortion curve it is read from, as a [`MicrophoneOverload`](/reference/api/electroacoustics/microphone/#microphoneoverload). |
+| `electrical` | Electrical impedance (Clause 10) and rated power supply (Clause 9) as a [`MicrophoneElectrical`](/reference/api/electroacoustics/microphone/#microphoneelectrical). |
 
-**Returns:** A [`MicrophoneCharacteristics`](/phonometry/reference/api/electroacoustics/microphone/#microphonecharacteristics).
+**Returns:** A [`MicrophoneCharacteristics`](/reference/api/electroacoustics/microphone/#microphonecharacteristics).
 
 **Raises**
 
@@ -269,7 +269,7 @@ requirement is given, and the footer.
 | Name | Description |
 | :--- | :--- |
 | `path` | Destination path of the PDF file. |
-| `metadata` | Optional [`ReportMetadata`](/phonometry/reference/api/building/insulation/#reportmetadata) supplying the header identity and, through `requirement`, a maximum permitted equivalent noise level (dB SPL) the verdict row compares against. |
+| `metadata` | Optional [`ReportMetadata`](/reference/api/building/insulation/#reportmetadata) supplying the header identity and, through `requirement`, a maximum permitted equivalent noise level (dB SPL) the verdict row compares against. |
 | `engine` | Rendering back end; only `"reportlab"` is supported. |
 | `verbose` | Accepted for a uniform `.report()` signature; the fiche has one layout, so it has no effect. |
 | `language` | Fiche language: `"en"` (default) or `"es"`. |
@@ -378,7 +378,7 @@ output voltage, and the band spectrum that voltage was measured over.
 | :--- | :--- |
 | `voltage_v` | Weighted r.m.s. output voltage due to inherent noise, in V (17.2 b); the equivalent noise level is computed from it. |
 | `equivalent_level` | Stated equivalent sound pressure level due to inherent noise, in dB SPL (17.1), when not computed from `voltage_v`. |
-| `weighting` | Weighting of the inherent-noise measurement: `"A"` (default, the IEC 60268-1 6.2.1 A-weighted r.m.s. recommendation) or `"468"` (the 6.2.2 psophometric quasi-peak measurement to ITU-R BS.468-4, which IEC 60268-1 still cites by its earlier name, CCIR Recommendation 468, and which older datasheets quote as dB(CCIR)). These are the two weighted wide-band noise measurements IEC 60268-1 defines; the unweighted band spectrum of 6.2.3 travels in `spectrum` instead. `"468"` is the spelling [`weighting_filter`](/phonometry/reference/api/filters/weighting/#weighting_filter) and [`weighted_thd`](/phonometry/reference/api/electroacoustics/distortion/#weighted_thd) use for the same curve. |
+| `weighting` | Weighting of the inherent-noise measurement: `"A"` (default, the IEC 60268-1 6.2.1 A-weighted r.m.s. recommendation) or `"468"` (the 6.2.2 psophometric quasi-peak measurement to ITU-R BS.468-4, which IEC 60268-1 still cites by its earlier name, CCIR Recommendation 468, and which older datasheets quote as dB(CCIR)). These are the two weighted wide-band noise measurements IEC 60268-1 defines; the unweighted band spectrum of 6.2.3 travels in `spectrum` instead. `"468"` is the spelling [`weighting_filter`](/reference/api/filters/weighting/#weighting_filter) and [`weighted_thd`](/reference/api/electroacoustics/distortion/#weighted_thd) use for the same curve. |
 | `spectrum` | Inherent-noise spectrum as `(frequencies, band_levels)` in (Hz, dB SPL) (17.2 b). |
 
 ## MicrophoneOverload

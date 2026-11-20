@@ -1,6 +1,6 @@
 <!-- Written by `make llms` from site/src/content/docs/devices/noise-control/silencers.mdx: edit that page and its Spanish twin, then run `make llms`. -->
 
-← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/devices/noise-control/silencers/
+← [Documentation index](../../README.md) · Published at https://phonometry.dev/devices/noise-control/silencers/
 
 # Silencers
 
@@ -892,7 +892,7 @@ algebra does not.
   the equivalent-fluid material theory behind dissipative linings.
 - [Loudspeaker Characterisation (IEC 60268-5)](../electroacoustics/loudspeakers.md):
   the radiating piston, the companion radiator model of a duct's open end.
-- API reference: [`noise_control.silencers`](https://docs.jmrp.io/phonometry/reference/api/noise_control/silencers/).
+- API reference: [`noise_control.silencers`](https://phonometry.dev/reference/api/noise_control/silencers/).
 
 ## References
 

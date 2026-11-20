@@ -70,7 +70,7 @@ modelo de una unión que en realidad tiene masa y rigidez rotacional. La
 sección 5 entrega un único número independiente de la frecuencia directamente
 al modelo de EN 12354 en lugar de uno dependiente de la banda; cuando eso
 importe, la contraparte medida es la
-[guía de transmisión por flancos en laboratorio](/phonometry/es/buildings/insulation/flanking-lab/).
+[guía de transmisión por flancos en laboratorio](/es/buildings/insulation/flanking-lab/).
 
 Primero el objeto en sí: una unión en T donde un forjado de hormigón de 140 mm
 muere contra un muro continuo de 200 mm. Un resultado de `junction_transmission`
@@ -245,7 +245,7 @@ tau13 = vibration.straight_transmission_coefficient(theta, chi, psi, "X")
 ```
 
 El clip de abajo ejecuta este experimento en el dominio del tiempo con el
-[esquema FDTD elástico 2D](/phonometry/es/simulation/elastic-waves/) de la
+[esquema FDTD elástico 2D](/es/simulation/elastic-waves/) de la
 biblioteca: un paquete de flexión sobre una placa
 de acero de 10 mm llega a una unión en L con una placa idéntica, y la esquina
 lo divide en las ondas reflejada y transmitida que esta sección tasa en
@@ -404,7 +404,7 @@ print(pred.dominant.label, round(pred.dominant.energy_fraction, 2))   # Dd 0.68
 Una sola unión con un $K_{ij}$ moderado ya recorta 1,6 dB al
 $R_\mathrm{w} = 57\ \text{dB}$ directo; un edificio completo repite esto para cada
 unión, que es la
-[guía de predicción EN 12354](/phonometry/es/buildings/design/insulation-prediction/).
+[guía de predicción EN 12354](/es/buildings/design/insulation-prediction/).
 
 La contraparte de $K_{ij}$ medida según la EN 12354 (a partir de la diferencia
 de niveles de velocidad promediada en dirección) es el
@@ -490,7 +490,7 @@ de abajo son los que deciden si hay resultado o no.
   aproximen condiciones libre-libre es lo que usa la literatura. La carga de
   masa, el amortiguamiento de contacto y la realimentación entre excitador y
   estructura en el punto de excitación son los mismos errores que cuantifica la
-  [sección de transductores](/phonometry/es/vibration/structural/mechanical-mobility/)
+  [sección de transductores](/es/vibration/structural/mechanical-mobility/)
   de la guía de movilidad, y aquí se aplican sin cambios.
 - **Lee el acoplamiento contra el amortiguamiento.** El criterio de aceptación
   de la propia figura: los factores de pérdidas por acoplamiento deben quedar al
@@ -506,7 +506,7 @@ las aproximaciones de Szechenyi en tres regímenes en torno a la
 `ring_frequency` de la Ec. 6.26). La expresión de placa plana
 $n(f) = S\sqrt{12}/(2 c_\mathrm{L} t)$ es la misma magnitud que la
 $n = \pi S f_\mathrm{c} / c_0^2$ de la EN 12354-4 que usa el
-[modelo de flancos](/phonometry/es/buildings/insulation/flanking-lab/), solo que
+[modelo de flancos](/es/buildings/insulation/flanking-lab/), solo que
 parametrizada por la propia placa en vez de por su frecuencia crítica.
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/experimental_sea_clf.svg" alt="Figura de dos paneles. Panel izquierdo: factor de pérdidas por acoplamiento en eje logarítmico frente a las bandas de octava de 125 hercios a 2 kilohercios para dos placas de aluminio en ángulo recto, con la unión lineal soldada cayendo de unos 3 por 10 elevado a menos 3 hasta 8 por 10 elevado a menos 4 como uno partido por la raíz de la frecuencia, la conexión puntual de doce tornillos cayendo el doble de rápido de unos 1,4 por 10 elevado a menos 2 hasta 9 por 10 elevado a menos 4 como uno partido por la frecuencia, y una línea horizontal discontinua que marca un factor de pérdidas interno de 10 elevado a menos 2. Panel derecho: diagrama de barras de los cuatro factores de pérdidas de una plataforma de satélite y su cilindro en la octava de 500 hercios en eje logarítmico, con los factores de pérdidas internos 4,40 por 10 elevado a menos 3 y 2,40 por 10 elevado a menos 3 claramente por encima de los factores de acoplamiento 4,26 por 10 elevado a menos 4 y 3,91 por 10 elevado a menos 4, y la potencia inyectada de 1,31 vatios anotada." width="92%" loading="lazy" />
@@ -639,7 +639,7 @@ Este $K_{ij}$ predicho es una idealización en forma cerrada para una unión
 rígida y simplemente apoyada, no una medición: el $K_{ij}$ medido y empírico a
 partir de una diferencia de niveles de velocidad promediada en dirección (ISO 10848)
 es el `vibration_reduction_index` separado de la [guía de Transmisión por
-flancos en laboratorio](/phonometry/es/buildings/insulation/flanking-lab/). El
+flancos en laboratorio](/es/buildings/insulation/flanking-lab/). El
 coeficiente de tramo recto $\tau_{13}$ no está definido para las geometrías de
 unión T (2) y L, que no tienen una tercera placa colineal, así que ahí solo se
 aplica el camino de esquina. Los coeficientes tabulados suponen además una
@@ -655,17 +655,17 @@ que hace el lector, no una que automatice la biblioteca.
 
 ## Véase también
 
-- [Predicción del aislamiento acústico (EN 12354)](/phonometry/es/buildings/design/insulation-prediction/):
+- [Predicción del aislamiento acústico (EN 12354)](/es/buildings/design/insulation-prediction/):
   el modelo de flancos que consume $K_{ij}$ unión a unión.
-- [Transmisión por flancos en laboratorio (ISO 10848)](/phonometry/es/buildings/insulation/flanking-lab/):
+- [Transmisión por flancos en laboratorio (ISO 10848)](/es/buildings/insulation/flanking-lab/):
   la medición de $K_{ij}$ a partir de diferencias de niveles de velocidad, la
   contraparte empírica de las formas cerradas de esta página.
-- [Potencia acústica estructural de equipos (EN 15657)](/phonometry/es/buildings/design/structure-borne-power/):
+- [Potencia acústica estructural de equipos (EN 15657)](/es/buildings/design/structure-borne-power/):
   la potencia de la fuente que estas transmisiones de unión reparten por el
   edificio.
-- [Movilidad mecánica y la familia de FRF (ISO 7626-1)](/phonometry/es/vibration/structural/mechanical-mobility/):
+- [Movilidad mecánica y la familia de FRF (ISO 7626-1)](/es/vibration/structural/mechanical-mobility/):
   las movilidades de placa tras los parámetros de onda.
-- Referencia de la API: [`vibration`: junction transmission](/phonometry/es/reference/api/vibration/junction-transmission/).
-- Teoría: [Movilidades puntuales y eficiencia de radiación](/phonometry/es/reference/theory/vibration/#movilidades-puntuales-y-eficiencia-de-radiacion-cremer-5-hopkins-29): la descripción en movilidades que hay detrás de una unión, y la eficiencia de radiación que lleva cada elemento.
+- Referencia de la API: [`vibration`: junction transmission](/es/reference/api/vibration/junction-transmission/).
+- Teoría: [Movilidades puntuales y eficiencia de radiación](/es/reference/theory/vibration/#movilidades-puntuales-y-eficiencia-de-radiacion-cremer-5-hopkins-29): la descripción en movilidades que hay detrás de una unión, y la eficiencia de radiación que lleva cada elemento.
 
 </SeeAlso>

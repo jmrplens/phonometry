@@ -1,6 +1,6 @@
 <!-- Written by `make llms` from site/src/content/docs/vibration/structural/building-response.mdx: edit that page and its Spanish twin, then run `make llms`. -->
 
-← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/vibration/structural/building-response/
+← [Documentation index](../../README.md) · Published at https://phonometry.dev/vibration/structural/building-response/
 
 # Predicting a building's own frequency
 

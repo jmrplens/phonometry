@@ -1,6 +1,6 @@
 <!-- Written by `make llms` from site/src/content/docs/perception/speech/speech-transmission.mdx: edit that page and its Spanish twin, then run `make llms`. -->
 
-← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/perception/speech/speech-transmission/
+← [Documentation index](../../README.md) · Published at https://phonometry.dev/perception/speech/speech-transmission/
 
 # Speech Transmission Index (STI)
 
@@ -773,7 +773,7 @@ one. Neither of those is visible in the index.
   roughness of the received sound.
 - [Theory](../../reference/theory/perception.md): the modulation-transfer derivation and the $m$ ↔ STI
   mapping.
-- API reference: [`speech.sti`](https://docs.jmrp.io/phonometry/reference/api/speech/sti/).
+- API reference: [`speech.sti`](https://phonometry.dev/reference/api/speech/sti/).
 - Theory: [Modulation transfer and STI](../../reference/theory/perception.md#modulation-transfer-and-sti-iec-60268-16): the modulation transfer function, why m is a ratio of modulation depths, and how the octave-band m matrix collapses to one index.
 
 ## References

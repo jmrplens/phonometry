@@ -7,7 +7,7 @@ sidebar:
 
 Intermodulation distortion of audio equipment (IEC 60268-3 14.12.7-10).
 
-Where the harmonic metrics of [`phonometry.electroacoustics.distortion`](/phonometry/reference/api/electroacoustics/distortion/)
+Where the harmonic metrics of [`phonometry.electroacoustics.distortion`](/reference/api/electroacoustics/distortion/)
 drive the equipment with a single tone, these drive it with two (or with a
 sine against a square wave) and read the products that a non-linearity puts
 *between* the excitation frequencies: the components a harmonic
@@ -70,8 +70,8 @@ tone or DC read zero.
 
 | Name | Description |
 | :--- | :--- |
-| `x` | Captured signal (1-D). Accepts a [`phonometry.io.Signal`](/phonometry/reference/api/io/io/#signal), whose calibration is applied to the samples and then cancels: this is a ratio of product amplitudes drawn from the same record, so the factor divides out and the answer is the same calibrated or not. |
-| `fs` | Sample rate, in Hz. Required for a bare array; a [`Signal`](/phonometry/reference/api/io/io/#signal) brings its own, and an explicit value that disagrees with it raises instead of silently winning. |
+| `x` | Captured signal (1-D). Accepts a [`phonometry.io.Signal`](/reference/api/io/io/#signal), whose calibration is applied to the samples and then cancels: this is a ratio of product amplitudes drawn from the same record, so the factor divides out and the answer is the same calibrated or not. |
+| `fs` | Sample rate, in Hz. Required for a bare array; a [`Signal`](/reference/api/io/io/#signal) brings its own, and an explicit value that disagrees with it raises instead of silently winning. |
 | `f1` | Lower tone, in Hz. |
 | `f2` | Upper tone, in Hz. |
 | `order` | Product order (2 or 3). |
@@ -111,8 +111,8 @@ sine amplitude.
 
 | Name | Description |
 | :--- | :--- |
-| `x` | Captured signal (1-D). Accepts a [`phonometry.io.Signal`](/phonometry/reference/api/io/io/#signal), whose calibration is applied to the samples and then cancels: this is a ratio of product amplitudes drawn from the same record, so the factor divides out and the answer is the same calibrated or not. |
-| `fs` | Sample rate, in Hz. Required for a bare array; a [`Signal`](/phonometry/reference/api/io/io/#signal) brings its own, and an explicit value that disagrees with it raises instead of silently winning. |
+| `x` | Captured signal (1-D). Accepts a [`phonometry.io.Signal`](/reference/api/io/io/#signal), whose calibration is applied to the samples and then cancels: this is a ratio of product amplitudes drawn from the same record, so the factor divides out and the answer is the same calibrated or not. |
+| `fs` | Sample rate, in Hz. Required for a bare array; a [`Signal`](/reference/api/io/io/#signal) brings its own, and an explicit value that disagrees with it raises instead of silently winning. |
 | `f_sine` | High sine frequency, in Hz (default 15 kHz). |
 | `f_square` | Square-wave fundamental, in Hz (default 3.15 kHz). |
 | `window` | FFT window, a scipy window name or a tuple of a name and its parameters (default `'hann'`). |
@@ -165,13 +165,13 @@ as `smpte`.
 
 | Name | Description |
 | :--- | :--- |
-| `x` | Captured signal (1-D). Accepts a [`phonometry.io.Signal`](/phonometry/reference/api/io/io/#signal), whose calibration is applied to the samples: the distortion ratios are ratios and come out unchanged, while `carrier_amplitude` and `sideband_amplitudes` carry the unit and so land in pascals when the record is calibrated. |
-| `fs` | Sample rate, in Hz. Required for a bare array; a [`Signal`](/phonometry/reference/api/io/io/#signal) brings its own, and an explicit value that disagrees with it raises instead of silently winning. |
+| `x` | Captured signal (1-D). Accepts a [`phonometry.io.Signal`](/reference/api/io/io/#signal), whose calibration is applied to the samples: the distortion ratios are ratios and come out unchanged, while `carrier_amplitude` and `sideband_amplitudes` carry the unit and so land in pascals when the record is calibrated. |
+| `fs` | Sample rate, in Hz. Required for a bare array; a [`Signal`](/reference/api/io/io/#signal) brings its own, and an explicit value that disagrees with it raises instead of silently winning. |
 | `f_low` | Low modulating tone `f1`, in Hz (e.g. 60 Hz). |
 | `f_high` | High carrier tone `f2`, in Hz (e.g. 7 kHz). |
 | `window` | FFT window, a scipy window name or a tuple of a name and its parameters (default `'hann'`). |
 
-**Returns:** A [`ModulationDistortionResult`](/phonometry/reference/api/electroacoustics/intermodulation/#modulationdistortionresult) with `d2`, `d3` and the `smpte` combined RMS.
+**Returns:** A [`ModulationDistortionResult`](/reference/api/electroacoustics/intermodulation/#modulationdistortionresult) with `d2`, `d3` and the `smpte` combined RMS.
 
 **Raises**
 
@@ -227,7 +227,7 @@ Draws the output amplitude at `f2` (the 0 dB reference) and the
 four intermodulation sidebands at $f_2 \pm f_1$ and
 $f_2 \pm 2f_1$ as a stem-style spectrum in dB relative to
 the carrier, the modulation counterpart of
-[`plot`](/phonometry/reference/api/electroacoustics/distortion/#harmonicdistortionresultplot).
+[`plot`](/reference/api/electroacoustics/distortion/#harmonicdistortionresultplot).
 
 **Parameters**
 
@@ -280,8 +280,8 @@ part of it.)
 
 | Name | Description |
 | :--- | :--- |
-| `x` | Captured signal (1-D). Accepts a [`phonometry.io.Signal`](/phonometry/reference/api/io/io/#signal), whose calibration is applied to the samples and then cancels: this is a ratio of product amplitudes drawn from the same record, so the factor divides out and the answer is the same calibrated or not. |
-| `fs` | Sample rate, in Hz. Required for a bare array; a [`Signal`](/phonometry/reference/api/io/io/#signal) brings its own, and an explicit value that disagrees with it raises instead of silently winning. |
+| `x` | Captured signal (1-D). Accepts a [`phonometry.io.Signal`](/reference/api/io/io/#signal), whose calibration is applied to the samples and then cancels: this is a ratio of product amplitudes drawn from the same record, so the factor divides out and the answer is the same calibrated or not. |
+| `fs` | Sample rate, in Hz. Required for a bare array; a [`Signal`](/reference/api/io/io/#signal) brings its own, and an explicit value that disagrees with it raises instead of silently winning. |
 | `f1` | Lower tone, in Hz (default 8 kHz, per 14.12.10.2 b). |
 | `f2` | Upper tone, in Hz (default 11.95 kHz, per 14.12.10.2 b). |
 | `window` | FFT window, a scipy window name or a tuple of a name and its parameters (default `'hann'`). |

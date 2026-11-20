@@ -19,7 +19,7 @@ const RELEASE = Object.freeze({ version: '4.0.0', install: 'pip install "phonome
 
 /** A copy as the header writer opens one, in either language. */
 const copy = (lang) =>
-  ['# A page', '', header({ lang, canonical: 'https://docs.jmrp.io/phonometry/a/', release: RELEASE }), '', 'Text.', ''].join('\n');
+  ['# A page', '', header({ lang, canonical: 'https://phonometry.dev/a/', release: RELEASE }), '', 'Text.', ''].join('\n');
 
 describe('the copies a run removes', () => {
   test('a copy opens with its title and the lead sentence of its language', () => {

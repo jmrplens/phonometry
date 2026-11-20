@@ -1,6 +1,6 @@
 <!-- Written by `make llms` from site/src/content/docs/devices/emission/sound-power-pressure.mdx: edit that page and its Spanish twin, then run `make llms`. -->
 
-← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/devices/emission/sound-power-pressure/
+← [Documentation index](../../README.md) · Published at https://phonometry.dev/devices/emission/sound-power-pressure/
 
 # Sound Power by Pressure Methods
 
@@ -1089,7 +1089,7 @@ with
   behind $L_{W\mathrm{A}}$.
 - [Theory](../../reference/theory/environment-transport.md): the $K_1$/$K_2$
   and $C_1$/$C_2$ derivations.
-- API reference: [`emission.sound_power`](https://docs.jmrp.io/phonometry/reference/api/power/sound-power/).
+- API reference: [`emission.sound_power`](https://phonometry.dev/reference/api/power/sound-power/).
 - Theory: [Sound power determination](../../reference/theory/environment-transport.md#sound-power-determination-iso-374437453746-iso-3741-iso-9614-123): the enveloping-surface derivation of ISO 3744/3746 and the environmental correction it needs.
 
 ## References

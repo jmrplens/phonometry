@@ -407,7 +407,7 @@ One caution about the reference spectra: Annex C reprints Table 2 as its
 Table C.1 and the reprint disagrees with the original in two cells. Table 2 is
 the one that reproduces the annex's own worked results, and it is the one this
 library carries; the discrepancy is registered in
-[ERRATA](/phonometry/reference/errata/).
+[ERRATA](/reference/errata/).
 
 ## Active noise reduction earmuffs (ISO 4869-6)
 
@@ -471,7 +471,7 @@ Table A.3 reproduce exactly, but its $u$ and $U_{95}$ rows are the formula
 applied to the **rounded** row above each ($1.4 / 4 = 0.35$ prints as 0.4),
 which puts six of its eight $U_{95}$ cells a tenth above the value A.1 and A.2
 define. The library returns the defined value; the discrepancy is registered in
-[ERRATA](/phonometry/reference/errata/). Table A.2's typical budget is
+[ERRATA](/reference/errata/). Table A.2's typical budget is
 `hearing.ANR_WITHIN_LABORATORY_UNCERTAINTY`, $U_{95}$ = 1.56 dB.
 
 ### The total attenuation (5.5)
@@ -668,7 +668,7 @@ and `level_stable` and `response_smooth` check that the test signal held within
 The test site is qualified as a random-incidence field or a plane progressive
 wave (5.2), with the fixture removed. The random-incidence field is the diffuse
 field of ISO 8253-2
-([audiometric test methods](/phonometry/perception/hearing/audiometry/)) with
+([audiometric test methods](/perception/hearing/audiometry/)) with
 this standard's own Table 1: six positions 150 mm from the reference point,
 which here is midway between the end faces of the fixture (3.9). They are the
 points of panel B in the drawing under [the test room](#the-test-room-422),
@@ -696,7 +696,7 @@ end-face positions within 2 dB and a directional microphone reading at least
 cup sealed on, at least 50 dB up to 250 Hz, 65 dB from 315 Hz to 4 kHz and
 55 dB above (5.1.4). Table 1 of ISO 4869-3 prints its first row as "> 5" while
 5.2.2 asks for an index "of at least 5 dB"; the library follows the text, and
-the discrepancy is registered in [ERRATA](/phonometry/reference/errata/).
+the discrepancy is registered in [ERRATA](/reference/errata/).
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/hearing_protector_insertion_loss.svg" alt="Left: the insertion loss of an earmuff on the acoustic test fixture from 63 Hz to 8 kHz, drawn increasing downwards, the three fittings as faint lines around the mean, which rises from 7.5 dB at 63 Hz to about 37 dB at 1 kHz and stays between 33 dB and 38 dB above, with the expanded uncertainty of each band as error bars of about 2 dB. Right: the fixture's acoustic isolation, rising from 54 dB at 63 Hz to 74 dB at 1 kHz and falling to 59 dB at 8 kHz, above the stepped requirement of 5.1.4 at 50 dB up to 250 Hz, 65 dB from 315 Hz to 4 kHz and 55 dB above; the fixture qualifies" width="92%" />
 
@@ -804,18 +804,18 @@ not make for you.
 
 ## See also
 
-- [Occupational Noise Exposure (ISO 9612)](/phonometry/perception/hearing/occupational-exposure/):
+- [Occupational Noise Exposure (ISO 9612)](/perception/hearing/occupational-exposure/):
   the daily exposure level the protected level feeds into.
-- [Noise-induced hearing loss (ISO 1999)](/phonometry/perception/hearing/noise-induced-hearing-loss/):
+- [Noise-induced hearing loss (ISO 1999)](/perception/hearing/noise-induced-hearing-loss/):
   what the exposure the protector did not stop does over a working life.
-- [Hearing threshold (age and reference zero)](/phonometry/perception/hearing/hearing-threshold/):
+- [Hearing threshold (age and reference zero)](/perception/hearing/hearing-threshold/):
   the baseline any protected exposure is judged against.
-- [Audiometric Test Methods (ISO 8253-1 and -2)](/phonometry/perception/hearing/audiometry/):
+- [Audiometric Test Methods (ISO 8253-1 and -2)](/perception/hearing/audiometry/):
   the diffuse-field test the site of ISO 4869-3 shares, and the room and the
   rules behind every threshold a protector is measured with.
-- API reference: [`hearing`: real-ear attenuation](/phonometry/reference/api/hearing/real-ear-attenuation/),
-  [`hearing.hearing_protectors`](/phonometry/reference/api/hearing/hearing-protectors/),
-  [`hearing.active_noise_reduction`](/phonometry/reference/api/hearing/active-noise-reduction/)
-  and [`hearing`: earmuff insertion loss](/phonometry/reference/api/hearing/earmuff-insertion-loss/).
+- API reference: [`hearing`: real-ear attenuation](/reference/api/hearing/real-ear-attenuation/),
+  [`hearing.hearing_protectors`](/reference/api/hearing/hearing-protectors/),
+  [`hearing.active_noise_reduction`](/reference/api/hearing/active-noise-reduction/)
+  and [`hearing`: earmuff insertion loss](/reference/api/hearing/earmuff-insertion-loss/).
 
 </SeeAlso>

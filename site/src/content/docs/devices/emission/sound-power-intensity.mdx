@@ -44,13 +44,13 @@ field indicators and per-band achieved grade, the ISO 9614-3 precision
 (grade 1) scan with its tighter criteria, and the accredited-style test
 fiche. The probe itself, its finite-difference bias and the ISO 9614-1
 discrete-point method live in
-[Sound Intensity (p-p)](/phonometry/devices/emission/intensity/); which route fits
-which job is weighed in [Sound Power](/phonometry/devices/emission/sound-power/).
+[Sound Intensity (p-p)](/devices/emission/intensity/); which route fits
+which job is weighed in [Sound Power](/devices/emission/sound-power/).
 
 ## 1. Intensity scanning (ISO 9614-2)
 
 A p-p probe (see the
-[Sound Intensity guide](/phonometry/devices/emission/intensity/)) is swept
+[Sound Intensity guide](/devices/emission/intensity/)) is swept
 continuously over each of $N$ segments of a surface enclosing the source,
 reporting the segment-averaged signed normal intensity
 $\langle I_{\mathrm{n},i} \rangle$: one row per segment, one column per band.
@@ -120,7 +120,7 @@ $$
 
 where $\overline{L_p}$ is the area-weighted surface pressure level over the
 segments. These are the ISO 9614-2 names for the two ISO 9614-1 Annex A
-indicators the [intensity guide](/phonometry/devices/emission/intensity/) calls
+indicators the [intensity guide](/devices/emission/intensity/) calls
 $F_2$ and $F_3$: $F_{pI} \equiv F_3$ and $F_{+/-} \equiv F_3 - F_2$ for
 equal-area segments, so the field indicators there and the qualification
 criteria here are the same two numbers under two standards' notations.
@@ -151,7 +151,7 @@ estimate is.
 When criterion 1 fails, the remedies are cheap before they are expensive:
 enlarge the surface away from the near field, shield or remove the extraneous
 source, fit a **larger spacer** to raise $\delta_{pI0}$ (see
-[Choosing the probe](/phonometry/devices/emission/intensity/#choosing-the-probe)),
+[Choosing the probe](/devices/emission/intensity/#choosing-the-probe)),
 and only then consider better hardware. Dropping the claim from engineering to
 survey grade buys 3 dB of $L_\mathrm{d}$ on its own, because $K$ goes from 10 dB to
 7 dB: the trade-off is the loss of grade.
@@ -239,7 +239,7 @@ partial powers and evaluates criterion 3; `pressure_levels` enables $F_{pI}$;
 `pressure_residual_index` ($\delta_{pI0}$) plus a second sweep enables the
 per-band
 achieved grade. The probe's finite-difference intensity has a
-frequency-dependent bias handled in the [intensity guide](/phonometry/devices/emission/intensity/).
+frequency-dependent bias handled in the [intensity guide](/devices/emission/intensity/).
 
 ### Where the A-weighted total loses bands
 
@@ -294,7 +294,7 @@ Before each series, a class 0 or class 1 IEC 60942 calibrator goes on each probe
 microphone (clause 6.2.1), and the probe-reversal test of clause 6.2.2 confirms
 in situ that the chain agrees on which way is out; both procedures, and what
 their failures mean, are in
-[Sound Intensity](/phonometry/devices/emission/intensity/#measuring-the-residual-index-and-checking-the-probe).
+[Sound Intensity](/devices/emission/intensity/#measuring-the-residual-index-and-checking-the-probe).
 Clause 10.5 makes reporting both of them part of the deliverable.
 
 The environment has limits too. The mean air-flow velocity over the measurement
@@ -551,7 +551,7 @@ not help.
 The intensity-scanning result (`SoundPowerIntensityResult`, ISO 9614-2) writes
 a one-page PDF fiche laid out like a sound-power test sheet through its own
 `.report()`, sharing the layout and the `ReportMetadata` container of the
-[pressure-method fiche](/phonometry/devices/emission/sound-power-pressure/#3-the-measurement-report-report).
+[pressure-method fiche](/devices/emission/sound-power-pressure/#3-the-measurement-report-report).
 The standard-basis line
 names ISO 9614-2:1996 and the measurement grade, the per-band table lists the
 intensity-derived band sound-power level $L_W$, and the boxed $L_{W\mathrm{A}}$ carries
@@ -719,12 +719,12 @@ ISO 9614-1, the discrete fixed-point intensity method, is not one of the
 routes here: it holds the probe still at each position instead of sweeping it,
 and both its power determination and the Annex A field indicators the two
 scanning parts reuse are in the [sound intensity
-guide](/phonometry/devices/emission/intensity/). The probe's
+guide](/devices/emission/intensity/). The probe's
 finite-difference bias
 and the pressure-residual intensity index are measured properties of the
 instrument, covered in the same guide. Choosing among the seven routes, and the
 ISO 4871 declaration a result feeds, live in [Sound
-Power](/phonometry/devices/emission/sound-power/).
+Power](/devices/emission/sound-power/).
 </ScopeClaim>
 </Scope>
 
@@ -732,20 +732,20 @@ Power](/phonometry/devices/emission/sound-power/).
 
 ## See also
 
-- [Sound Power](/phonometry/devices/emission/sound-power/): choosing among the seven
+- [Sound Power](/devices/emission/sound-power/): choosing among the seven
   determination routes, the accuracy grades and the ISO 4871 noise-emission
   declaration.
-- [Sound Intensity (p-p)](/phonometry/devices/emission/intensity/): the two-microphone
+- [Sound Intensity (p-p)](/devices/emission/intensity/): the two-microphone
   probe, its finite-difference bias, the ISO 9614-1 field indicators behind
   the scanning methods and the discrete-point determination those indicators
   qualify.
-- [Sound Power by Pressure Methods (ISO 3744 / ISO 3746 / ISO 3745)](/phonometry/devices/emission/sound-power-pressure/):
+- [Sound Power by Pressure Methods (ISO 3744 / ISO 3746 / ISO 3745)](/devices/emission/sound-power-pressure/):
   the enveloping-surface and anechoic routes for quiet sites.
-- [Sound Power in the Reverberation Room (ISO 3741)](/phonometry/devices/emission/sound-power-reverberation/):
+- [Sound Power in the Reverberation Room (ISO 3741)](/devices/emission/sound-power-reverberation/):
   the precision diffuse-field route in a qualified laboratory room.
-- [Theory](/phonometry/reference/theory/environment-transport/): the
+- [Theory](/reference/theory/environment-transport/): the
   field-indicator derivations.
-- API reference: [`emission`: sound power by intensity scanning](/phonometry/reference/api/power/sound-power-intensity/).
-- Theory: [Sound power determination](/phonometry/reference/theory/environment-transport/#sound-power-determination-iso-374437453746-iso-3741-iso-9614-123): the ISO 9614 scanning derivation and the field indicators that qualify it.
+- API reference: [`emission`: sound power by intensity scanning](/reference/api/power/sound-power-intensity/).
+- Theory: [Sound power determination](/reference/theory/environment-transport/#sound-power-determination-iso-374437453746-iso-3741-iso-9614-123): the ISO 9614 scanning derivation and the field indicators that qualify it.
 
 </SeeAlso>

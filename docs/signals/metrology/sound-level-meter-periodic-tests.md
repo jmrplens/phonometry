@@ -1,6 +1,6 @@
 <!-- Written by `make llms` from site/src/content/docs/signals/metrology/sound-level-meter-periodic-tests.mdx: edit that page and its Spanish twin, then run `make llms`. -->
 
-← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/signals/metrology/sound-level-meter-periodic-tests/
+← [Documentation index](../../README.md) · Published at https://phonometry.dev/signals/metrology/sound-level-meter-periodic-tests/
 
 # Periodic Tests of a Sound Level Meter (IEC 61672-3)
 
@@ -552,7 +552,7 @@ plt.show()
 - [Sound level meter](../sound-level-meter.md): the frequency
   and time weightings, and the design verdict the library gives its own
   chain.
-- API reference: [`metrology.sound_level_meter`](https://docs.jmrp.io/phonometry/reference/api/metrology/sound-level-meter/).
+- API reference: [`metrology.sound_level_meter`](https://phonometry.dev/reference/api/metrology/sound-level-meter/).
 
 ## References
 

@@ -27,9 +27,9 @@ arithmetic.
 
 The other two standardised impedance-tube methods are their own modules, each
 kept in its own sign convention (they are **not** interchangeable):
-[`standing_wave`](/phonometry/reference/api/materials/standing-wave/) for the probe-traverse
+[`standing_wave`](/reference/api/materials/standing-wave/) for the probe-traverse
 standing-wave-ratio method of BS EN ISO 10534-1:2001, and
-[`four_microphone`](/phonometry/reference/api/materials/four-microphone/) for the transmission
+[`four_microphone`](/reference/api/materials/four-microphone/) for the transmission
 transfer-matrix method of ASTM E2611-19, whose air properties are given in
 degrees Celsius and whose forward wave carries the opposite exponent sign.
 
@@ -151,7 +151,7 @@ $H_{12} = H_{12,\text{uncorrected}} / H_\mathrm{c}$.
 | Name | Description |
 | :--- | :--- |
 | `h12_uncorrected` | Uncorrected measured transfer function. |
-| `calibration_factor` | Calibration factor `Hc` from [`microphone_calibration_factor`](/phonometry/reference/api/materials/impedance-tube/#microphone_calibration_factor). |
+| `calibration_factor` | Calibration factor `Hc` from [`microphone_calibration_factor`](/reference/api/materials/impedance-tube/#microphone_calibration_factor). |
 
 **Returns:** Corrected transfer function `H12`. A `complex` when `h12_uncorrected` and `calibration_factor` are both numbers, an array when either is a sequence or an array, a zero-dimensional one included.
 
@@ -173,7 +173,7 @@ For a rectangular cross-section of side lengths `w` and `h` the ratio
 of four times the area to the perimeter reduces to
 $d_\mathrm{h} = 2wh/(w + h)$; a square tube gives `d_h` equal to the side
 length. This is the `d` the Eq. (A.18) attenuation estimate expects for
-rectangular tubes (see [`tube_attenuation_constant`](/phonometry/reference/api/materials/impedance-tube/#tube_attenuation_constant)).
+rectangular tubes (see [`tube_attenuation_constant`](/reference/api/materials/impedance-tube/#tube_attenuation_constant)).
 
 **Parameters**
 
@@ -221,7 +221,7 @@ The trailing fields retain the tube geometry the reduction was run with
 farther microphone, tube `diameter_m` and cross-section `shape`, stored
 canonically as `"circular"`/`"rectangular"`; a `"square"` input is
 kept as `"rectangular"`). The diameter and the shape are `None` when
-they were not supplied to [`two_microphone_impedance`](/phonometry/reference/api/materials/impedance-tube/#two_microphone_impedance); the spacing
+they were not supplied to [`two_microphone_impedance`](/reference/api/materials/impedance-tube/#two_microphone_impedance); the spacing
 and `x1` are always there, because the reduction cannot run without
 them.
 
@@ -308,7 +308,7 @@ to the normal-incidence coefficient reported here).
 | Name | Description |
 | :--- | :--- |
 | `path` | Destination path of the PDF file. |
-| `metadata` | Optional [`ReportMetadata`](/phonometry/reference/api/building/insulation/#reportmetadata); `None` produces a body-and-disclaimer fiche whose header shows only the measured frequency range. The applicable descriptive/geometric fields are `client`, `manufacturer`, `specimen`, `tube_diameter_m`, `tube_shape`, `microphone_spacing_m`, `mounting`, `test_room`, `test_date`, `temperature_c`, `static_pressure_kpa`, `measurement_standard`, `laboratory`, `operator`, `report_id` and `notes`. The `requirement` field is ignored (ISO 10534-2 has no verdict). |
+| `metadata` | Optional [`ReportMetadata`](/reference/api/building/insulation/#reportmetadata); `None` produces a body-and-disclaimer fiche whose header shows only the measured frequency range. The applicable descriptive/geometric fields are `client`, `manufacturer`, `specimen`, `tube_diameter_m`, `tube_shape`, `microphone_spacing_m`, `mounting`, `test_room`, `test_date`, `temperature_c`, `static_pressure_kpa`, `measurement_standard`, `laboratory`, `operator`, `report_id` and `notes`. The `requirement` field is ignored (ISO 10534-2 has no verdict). |
 | `engine` | Rendering back end; only `"reportlab"` is supported. |
 | `verbose` | When `True`, the value table inserts the reflection-factor magnitude `\|r\|` column. |
 | `language` | Fiche language: `"en"` (default, English, decimal point) or `"es"` (Spanish, decimal comma). |
@@ -501,7 +501,7 @@ Side view: loudspeaker at the left (three tube diameters before the
 farther microphone, the Clause 4.3 margin), the two flush microphones at
 `x1` and `x1 - s` from the sample face, the sample against its rigid
 backing at the right, the cross-section emblem, and the plane-wave
-working range of [`plane_wave_frequency_range`](/phonometry/reference/api/materials/impedance-tube/#plane_wave_frequency_range).
+working range of [`plane_wave_frequency_range`](/reference/api/materials/impedance-tube/#plane_wave_frequency_range).
 
 **Parameters**
 
@@ -553,7 +553,7 @@ its thickness, the two downstream microphones at `l2` and `l2 + s2`
 (measured from the front face, the module's locked convention), and the
 changeable termination of the two-load method, with the ASTM working
 range of
-[`plane_wave_frequency_range_astm_e2611`](/phonometry/reference/api/materials/four-microphone/#plane_wave_frequency_range_astm_e2611).
+[`plane_wave_frequency_range_astm_e2611`](/reference/api/materials/four-microphone/#plane_wave_frequency_range_astm_e2611).
 
 **Parameters**
 
@@ -631,10 +631,10 @@ the sample to the **farther** microphone (Clause 7.7).
 
 | Name | Description |
 | :--- | :--- |
-| `h12` | Measured transfer function `H12` between microphone positions 1 and 2 (Clause 7.6, Eq. (14)); complex, scalar or per band. It must already be corrected for microphone mismatch (see [`apply_microphone_calibration`](/phonometry/reference/api/materials/impedance-tube/#apply_microphone_calibration)). |
+| `h12` | Measured transfer function `H12` between microphone positions 1 and 2 (Clause 7.6, Eq. (14)); complex, scalar or per band. It must already be corrected for microphone mismatch (see [`apply_microphone_calibration`](/reference/api/materials/impedance-tube/#apply_microphone_calibration)). |
 | `spacing_m` | Microphone spacing $s = x_1 - x_2$, in metres. |
 | `x1` | Distance from the sample surface to the farther microphone (position 1), in metres. |
-| `wavenumber` | Complex wavenumber `k0` (from [`tube_wavenumber`](/phonometry/reference/api/materials/impedance-tube/#tube_wavenumber)), scalar or per band. |
+| `wavenumber` | Complex wavenumber `k0` (from [`tube_wavenumber`](/reference/api/materials/impedance-tube/#tube_wavenumber)), scalar or per band. |
 
 **Returns:** Complex reflection factor `r` at the reference plane. A `complex` when `h12` and `wavenumber` are both numbers, an array when either is a sequence or an array, a zero-dimensional one included.
 
@@ -754,7 +754,7 @@ porous-wall and object losses and is therefore a lower limit (Clause A.2.1.5).
 | :--- | :--- |
 | `frequency` | Frequency `f`, in hertz (scalar or per band). |
 | `speed_of_sound` | Speed of sound `c0`, in metres per second. |
-| `diameter_m` | Circular-tube diameter `d`, in metres, or the hydraulic diameter `4 * area / perimeter` for a rectangular tube (see [`hydraulic_diameter`](/phonometry/reference/api/materials/impedance-tube/#hydraulic_diameter)). |
+| `diameter_m` | Circular-tube diameter `d`, in metres, or the hydraulic diameter `4 * area / perimeter` for a rectangular tube (see [`hydraulic_diameter`](/reference/api/materials/impedance-tube/#hydraulic_diameter)). |
 
 **Returns:** Attenuation constant `k0''`, in nepers per metre. A `float` for a number, an array for a sequence or an array, a zero-dimensional one included.
 
@@ -801,7 +801,7 @@ constant `k0''` enters with a **minus** sign on the imaginary part
 | :--- | :--- |
 | `frequency` | Frequency `f`, in hertz (scalar or per band). |
 | `speed_of_sound` | Speed of sound `c0`, in metres per second. |
-| `attenuation_np_per_m` | Attenuation constant `k0''`, in nepers per metre (scalar or matching `frequency`); `None` gives the lossless real wavenumber. Obtain a lower-bound estimate from [`tube_attenuation_constant`](/phonometry/reference/api/materials/impedance-tube/#tube_attenuation_constant). |
+| `attenuation_np_per_m` | Attenuation constant `k0''`, in nepers per metre (scalar or matching `frequency`); `None` gives the lossless real wavenumber. Obtain a lower-bound estimate from [`tube_attenuation_constant`](/reference/api/materials/impedance-tube/#tube_attenuation_constant). |
 
 **Returns:** Complex wavenumber `k0`, in reciprocal metres. A `complex` for a number, an array for a sequence or an array, a zero-dimensional one included.
 
@@ -834,7 +834,7 @@ Builds the complex wavenumber (Clause 2.6), the reflection factor
 (Eq. (17)), the surface impedance (Eq. (19)) and the absorption coefficient
 (Eq. (18)) from the measured transfer function `H12`. When `diameter_m` is
 supplied, frequencies outside the plane-wave range (Eqs. (1)-(4)) raise an
-[`ImpedanceTubeWarning`](/phonometry/reference/api/materials/impedance-tube/#impedancetubewarning); the results are still returned.
+[`ImpedanceTubeWarning`](/reference/api/materials/impedance-tube/#impedancetubewarning); the results are still returned.
 
 **Parameters**
 
@@ -844,13 +844,13 @@ supplied, frequencies outside the plane-wave range (Eqs. (1)-(4)) raise an
 | `frequency` | Frequency `f`, in hertz (scalar or array). |
 | `spacing_m` | Microphone spacing `s`, in metres. |
 | `x1` | Distance from the sample to the farther microphone, in metres. |
-| `speed_of_sound` | Speed of sound `c0`, in m/s (see [`speed_of_sound_iso10534`](/phonometry/reference/api/materials/impedance-tube/#speed_of_sound_iso10534)). |
+| `speed_of_sound` | Speed of sound `c0`, in m/s (see [`speed_of_sound_iso10534`](/reference/api/materials/impedance-tube/#speed_of_sound_iso10534)). |
 | `characteristic_impedance` | Characteristic impedance `rho c0`, in rayls. |
-| `attenuation_np_per_m` | Optional tube attenuation constant `k0''`, in nepers/m (see [`tube_attenuation_constant`](/phonometry/reference/api/materials/impedance-tube/#tube_attenuation_constant)). |
+| `attenuation_np_per_m` | Optional tube attenuation constant `k0''`, in nepers/m (see [`tube_attenuation_constant`](/reference/api/materials/impedance-tube/#tube_attenuation_constant)). |
 | `diameter_m` | Optional tube diameter/lateral dimension, in metres, that activates the plane-wave range check. |
 | `shape` | Tube cross-section, `"circular"`, `"rectangular"` or `"square"`. |
 
-**Returns:** An [`ImpedanceTubeResult`](/phonometry/reference/api/materials/impedance-tube/#impedancetuberesult) (the tube geometry is retained on the result).
+**Returns:** An [`ImpedanceTubeResult`](/reference/api/materials/impedance-tube/#impedancetuberesult) (the tube geometry is retained on the result).
 
 **Raises**
 

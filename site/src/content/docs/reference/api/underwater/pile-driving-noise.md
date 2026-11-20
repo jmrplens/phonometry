@@ -10,18 +10,18 @@ Radiated underwater sound from percussive pile driving (ISO 18406:2017).
 Percussive pile driving radiates a train of impulsive acoustic pulses, one per
 hammer strike. ISO 18406 characterises them with:
 
-* [`single_strike_sel`](/phonometry/reference/api/underwater/pile-driving-noise/#single_strike_sel): the single-strike sound exposure level
+* [`single_strike_sel`](/reference/api/underwater/pile-driving-noise/#single_strike_sel): the single-strike sound exposure level
   `SEL_ss` of one pulse (Formulae 3-4), reusing the 1 µPa²·s reference.
-* [`cumulative_sel`](/phonometry/reference/api/underwater/pile-driving-noise/#cumulative_sel) / [`cumulative_sel_identical`](/phonometry/reference/api/underwater/pile-driving-noise/#cumulative_sel_identical): the cumulative
+* [`cumulative_sel`](/reference/api/underwater/pile-driving-noise/#cumulative_sel) / [`cumulative_sel_identical`](/reference/api/underwater/pile-driving-noise/#cumulative_sel_identical): the cumulative
   sound exposure level over N strikes (Formulae 8-9); for N identical strikes
   $\mathrm{SEL}_{\mathrm{cum}} = \mathrm{SEL}_{\mathrm{ss}} + 10 \log_{10} N$.
-* [`pile_strike_metrics`](/phonometry/reference/api/underwater/pile-driving-noise/#pile_strike_metrics): a [`PileStrikeResult`](/phonometry/reference/api/underwater/pile-driving-noise/#pilestrikeresult) bundling the
+* [`pile_strike_metrics`](/reference/api/underwater/pile-driving-noise/#pile_strike_metrics): a [`PileStrikeResult`](/reference/api/underwater/pile-driving-noise/#pilestrikeresult) bundling the
   single-strike SEL, the peak sound pressure level, the SPL/Leq and the
   90 %-energy pulse duration for one recorded strike, with a `.plot()`.
-* [`strike_sel_spectrum`](/phonometry/reference/api/underwater/pile-driving-noise/#strike_sel_spectrum): the same single-strike SEL resolved into
+* [`strike_sel_spectrum`](/reference/api/underwater/pile-driving-noise/#strike_sel_spectrum): the same single-strike SEL resolved into
   fractional-octave bands (ISO 18406 6.4.2.2), the input a marine-mammal
   assessment needs: feed it to
-  [`weighted_exposure`](/phonometry/reference/api/underwater/weighting/#weighted_exposure) to
+  [`weighted_exposure`](/reference/api/underwater/weighting/#weighted_exposure) to
   obtain the weighted cumulative SEL of a piling campaign and its margin
   against the regulatory injury and TTS criteria.
 
@@ -100,10 +100,10 @@ and the 90 %-energy pulse duration of one recorded hammer strike.
 
 | Name | Description |
 | :--- | :--- |
-| `pressure_pa` | Sound-pressure time series of one strike (1-D), in Pa. Accepts a [`phonometry.io.Signal`](/phonometry/reference/api/io/io/#signal), whose calibration is applied to the samples: this quantity is a pressure, and the underwater reference of 1 uPa changes what the decibel is counted from, not what the samples have to be in. |
-| `fs` | Sample rate, in Hz. Required for a bare array; a [`Signal`](/phonometry/reference/api/io/io/#signal) brings its own, and an explicit value that disagrees with it raises instead of silently winning. |
+| `pressure_pa` | Sound-pressure time series of one strike (1-D), in Pa. Accepts a [`phonometry.io.Signal`](/reference/api/io/io/#signal), whose calibration is applied to the samples: this quantity is a pressure, and the underwater reference of 1 uPa changes what the decibel is counted from, not what the samples have to be in. |
+| `fs` | Sample rate, in Hz. Required for a bare array; a [`Signal`](/reference/api/io/io/#signal) brings its own, and an explicit value that disagrees with it raises instead of silently winning. |
 
-**Returns:** A [`PileStrikeResult`](/phonometry/reference/api/underwater/pile-driving-noise/#pilestrikeresult).
+**Returns:** A [`PileStrikeResult`](/reference/api/underwater/pile-driving-noise/#pilestrikeresult).
 
 **Raises**
 
@@ -134,7 +134,7 @@ Per-strike pile-driving metrics (ISO 18406).
 | `peak_spl` | Zero-to-peak sound pressure level, in dB re 1 µPa. |
 | `spl` | Sound pressure level (Leq over the record), in dB re 1 µPa. |
 | `pulse_duration_s` | 90 %-energy pulse duration, in s. |
-| `pressure_pa` | The strike pressure waveform, in Pa, in the type it arrived as: a [`Signal`](/phonometry/reference/api/io/io/#signal) when the input was one (carrying `calibration_factor=1.0` when it was calibrated), a bare array otherwise. |
+| `pressure_pa` | The strike pressure waveform, in Pa, in the type it arrived as: a [`Signal`](/reference/api/io/io/#signal) when the input was one (carrying `calibration_factor=1.0` when it was calibrated), a bare array otherwise. |
 | `fs` | Sample rate, in Hz. |
 
 ### PileStrikeResult.plot()
@@ -181,8 +181,8 @@ pulse, in dB re 1 µPa²·s.
 
 | Name | Description |
 | :--- | :--- |
-| `pressure_pa` | Sound-pressure time series of one strike (1-D), in Pa. Accepts a [`phonometry.io.Signal`](/phonometry/reference/api/io/io/#signal), whose calibration is applied to the samples: this quantity is a pressure, and the underwater reference of 1 uPa changes what the decibel is counted from, not what the samples have to be in. |
-| `fs` | Sample rate, in Hz. Required for a bare array; a [`Signal`](/phonometry/reference/api/io/io/#signal) brings its own, and an explicit value that disagrees with it raises instead of silently winning. |
+| `pressure_pa` | Sound-pressure time series of one strike (1-D), in Pa. Accepts a [`phonometry.io.Signal`](/reference/api/io/io/#signal), whose calibration is applied to the samples: this quantity is a pressure, and the underwater reference of 1 uPa changes what the decibel is counted from, not what the samples have to be in. |
+| `fs` | Sample rate, in Hz. Required for a bare array; a [`Signal`](/reference/api/io/io/#signal) brings its own, and an explicit value that disagrees with it raises instead of silently winning. |
 
 **Returns:** Single-strike SEL, in dB re 1 µPa²·s.
 
@@ -210,24 +210,24 @@ The sound exposure $E = \int p^2 \, dt$ is split between
 fractional-octave bands by integrating the discrete power spectrum over
 each band (Parseval), so
 the energy sum of the returned band levels reproduces the broadband
-[`single_strike_sel`](/phonometry/reference/api/underwater/pile-driving-noise/#single_strike_sel) of the same record to within the energy that
+[`single_strike_sel`](/reference/api/underwater/pile-driving-noise/#single_strike_sel) of the same record to within the energy that
 falls outside `limits`.
 
 Bands narrower than the FFT bin spacing `fs/n` contain no bin and are
-reported as `-inf` dB (see [`StrikeSELSpectrum`](/phonometry/reference/api/underwater/pile-driving-noise/#strikeselspectrum)); the result can be
+reported as `-inf` dB (see [`StrikeSELSpectrum`](/reference/api/underwater/pile-driving-noise/#strikeselspectrum)); the result can be
 handed straight to
-[`weighted_exposure`](/phonometry/reference/api/underwater/weighting/#weighted_exposure).
+[`weighted_exposure`](/reference/api/underwater/weighting/#weighted_exposure).
 
 **Parameters**
 
 | Name | Description |
 | :--- | :--- |
-| `pressure_pa` | Sound-pressure time series of one strike (1-D), in Pa. Accepts a [`phonometry.io.Signal`](/phonometry/reference/api/io/io/#signal), whose calibration is applied to the samples: this quantity is a pressure, and the underwater reference of 1 uPa changes what the decibel is counted from, not what the samples have to be in. |
-| `fs` | Sample rate, in Hz. Required for a bare array; a [`Signal`](/phonometry/reference/api/io/io/#signal) brings its own, and an explicit value that disagrees with it raises instead of silently winning. |
+| `pressure_pa` | Sound-pressure time series of one strike (1-D), in Pa. Accepts a [`phonometry.io.Signal`](/reference/api/io/io/#signal), whose calibration is applied to the samples: this quantity is a pressure, and the underwater reference of 1 uPa changes what the decibel is counted from, not what the samples have to be in. |
+| `fs` | Sample rate, in Hz. Required for a bare array; a [`Signal`](/reference/api/io/io/#signal) brings its own, and an explicit value that disagrees with it raises instead of silently winning. |
 | `fraction` | Bandwidth fraction: 1 (octave) or 3 (one-third octave). |
 | `limits` | Lower and upper band-centre limits, in Hz. |
 
-**Returns:** A [`StrikeSELSpectrum`](/phonometry/reference/api/underwater/pile-driving-noise/#strikeselspectrum).
+**Returns:** A [`StrikeSELSpectrum`](/reference/api/underwater/pile-driving-noise/#strikeselspectrum).
 
 **Raises**
 
@@ -256,7 +256,7 @@ Single-strike sound exposure level resolved into fractional-octave bands.
 | Name | Description |
 | :--- | :--- |
 | `frequencies` | Nominal band centre frequencies, in Hz. |
-| `band_sel` | Per-band single-strike SEL, in dB re 1 µPa²·s. A band that contains no discrete-spectrum bin (which happens whenever the band is narrower than the FFT bin spacing `fs/n`, i.e. in the lowest bands of a short record) holds no energy at all and is reported as `-inf`, the level of zero exposure. That is the neutral element of an energy sum, so such bands pass straight through [`weighted_exposure`](/phonometry/reference/api/underwater/weighting/#weighted_exposure) without contributing. |
+| `band_sel` | Per-band single-strike SEL, in dB re 1 µPa²·s. A band that contains no discrete-spectrum bin (which happens whenever the band is narrower than the FFT bin spacing `fs/n`, i.e. in the lowest bands of a short record) holds no energy at all and is reported as `-inf`, the level of zero exposure. That is the neutral element of an energy sum, so such bands pass straight through [`weighted_exposure`](/reference/api/underwater/weighting/#weighted_exposure) without contributing. |
 | `total_sel` | Energy sum of `band_sel` over the covered bands, in dB re 1 µPa²·s. |
 | `broadband_sel` | The broadband single-strike SEL of the whole record, in dB re 1 µPa²·s (equal to `total_sel` when the bands span the signal's whole occupied spectrum). |
 | `fraction` | Bandwidth fraction (1 for octaves, 3 for one-third octaves). |

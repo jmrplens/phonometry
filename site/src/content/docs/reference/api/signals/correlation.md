@@ -24,10 +24,10 @@ Measurement Procedures* (4th ed., 2010) and Knapp & Carter (1976):
   large-`T` normalized random error of the estimate for bandwidth-limited
   Gaussian data,
   $\varepsilon[\hat{R}_{xy}(\tau)] = [1 + \rho_{xy}^{-2}(\tau)]^{1/2} / \sqrt{2BT}$
-  (Eqs. 8.109/8.112), exposed as [`correlation_random_error`](/phonometry/reference/api/signals/correlation/#correlation_random_error);
+  (Eqs. 8.109/8.112), exposed as [`correlation_random_error`](/reference/api/signals/correlation/#correlation_random_error);
 * **time-delay estimation**: the peak of the cross-correlation locates the
   delay of a common signal between two sensors (B&P Section 5.1.4,
-  Eq. 5.21). [`time_delay`](/phonometry/reference/api/signals/correlation/#time_delay) implements the direct correlator, the
+  Eq. 5.21). [`time_delay`](/reference/api/signals/correlation/#time_delay) implements the direct correlator, the
   weighted-phase-slope estimator of the cross-spectrum (Eq. 5.101b) and the
   **generalized cross-correlation** of Knapp & Carter (1976): the averaged
   cross-spectrum is weighted by $\psi(f)$ before the inverse
@@ -49,7 +49,7 @@ Measurement Procedures* (4th ed., 2010) and Knapp & Carter (1976):
   fractional shift in the frequency domain.
 
 The GCC estimators run on the same Welch core (segmentation, tapering,
-overlap policy) as [`phonometry.signals.spectra`](/phonometry/reference/api/signals/spectra/), so a GCC and a
+overlap policy) as [`phonometry.signals.spectra`](/reference/api/signals/spectra/), so a GCC and a
 cross-spectral density computed with the same segment length are mutually
 consistent bin by bin.
 
@@ -71,7 +71,7 @@ align_impulse_responses(
 Align an impulse response onto a reference by its estimated delay.
 
 Estimates the sub-sample delay of `ir` relative to `reference`
-([`impulse_response_delay`](/phonometry/reference/api/signals/correlation/#impulse_response_delay)) and removes it with an exact
+([`impulse_response_delay`](/reference/api/signals/correlation/#impulse_response_delay)) and removes it with an exact
 band-limited fractional shift (frequency-domain phase ramp over a
 zero-padded record). Use it to average IR ensembles or to compare
 measurements taken at slightly different distances.
@@ -80,13 +80,13 @@ measurements taken at slightly different distances.
 
 | Name | Description |
 | :--- | :--- |
-| `ir` | Impulse response to align, 1-D. Accepts a [`phonometry.io.Signal`](/phonometry/reference/api/io/io/#signal), whose calibration is applied to the samples, so the aligned pair comes out in Pa and each record comes back as a Signal if it went in as one. The delay between them is scale-free and does not move. |
-| `reference` | Reference impulse response, same length. Accepts a [`phonometry.io.Signal`](/phonometry/reference/api/io/io/#signal), whose calibration is applied to the samples, so the aligned pair comes out in Pa and each record comes back as a Signal if it went in as one. The delay between them is scale-free and does not move. |
-| `fs` | Sample rate, in Hz. Required when both records are bare arrays; either may be a [`Signal`](/phonometry/reference/api/io/io/#signal) and supply it, and two Signals recorded at different rates are refused rather than arbitrated. |
+| `ir` | Impulse response to align, 1-D. Accepts a [`phonometry.io.Signal`](/reference/api/io/io/#signal), whose calibration is applied to the samples, so the aligned pair comes out in Pa and each record comes back as a Signal if it went in as one. The delay between them is scale-free and does not move. |
+| `reference` | Reference impulse response, same length. Accepts a [`phonometry.io.Signal`](/reference/api/io/io/#signal), whose calibration is applied to the samples, so the aligned pair comes out in Pa and each record comes back as a Signal if it went in as one. The delay between them is scale-free and does not move. |
+| `fs` | Sample rate, in Hz. Required when both records are bare arrays; either may be a [`Signal`](/reference/api/io/io/#signal) and supply it, and two Signals recorded at different rates are refused rather than arbitrated. |
 | `interpolation` | `'parabolic'` (default) or `'none'`. |
 | `upsample` | Integer local-upsampling factor (default 8). |
 
-**Returns:** An [`AlignedImpulseResponseResult`](/phonometry/reference/api/signals/correlation/#alignedimpulseresponseresult).
+**Returns:** An [`AlignedImpulseResponseResult`](/reference/api/signals/correlation/#alignedimpulseresponseresult).
 
 **Raises**
 
@@ -120,7 +120,7 @@ An impulse response aligned onto a reference.
 | `fs` | Sample rate, in Hz. |
 
 Each record comes back in the type it arrived as: a
-[`Signal`](/phonometry/reference/api/io/io/#signal) when it was one (in pascals and carrying
+[`Signal`](/reference/api/io/io/#signal) when it was one (in pascals and carrying
 `calibration_factor=1.0` when it was calibrated), a bare array
 otherwise.
 
@@ -180,13 +180,13 @@ Normalizations:
 
 | Name | Description |
 | :--- | :--- |
-| `x` | First signal, 1-D. Accepts a [`phonometry.io.Signal`](/phonometry/reference/api/io/io/#signal), whose calibration is applied to the samples, so the correlation values come out in Pa². The normalized `coefficient` divides them out and does not move. |
-| `y` | Second signal, same length, or `None` for autocorrelation. Accepts a [`phonometry.io.Signal`](/phonometry/reference/api/io/io/#signal), whose calibration is applied to the samples, so the correlation values come out in Pa². The normalized `coefficient` divides them out and does not move. |
-| `fs` | Sample rate, in Hz. Required when both records are bare arrays; either may be a [`Signal`](/phonometry/reference/api/io/io/#signal) and supply it, and two Signals recorded at different rates are refused rather than arbitrated. |
+| `x` | First signal, 1-D. Accepts a [`phonometry.io.Signal`](/reference/api/io/io/#signal), whose calibration is applied to the samples, so the correlation values come out in Pa². The normalized `coefficient` divides them out and does not move. |
+| `y` | Second signal, same length, or `None` for autocorrelation. Accepts a [`phonometry.io.Signal`](/reference/api/io/io/#signal), whose calibration is applied to the samples, so the correlation values come out in Pa². The normalized `coefficient` divides them out and does not move. |
+| `fs` | Sample rate, in Hz. Required when both records are bare arrays; either may be a [`Signal`](/reference/api/io/io/#signal) and supply it, and two Signals recorded at different rates are refused rather than arbitrated. |
 | `normalization` | See above (default `'unbiased'`). One of `"biased"`, `"unbiased"` or `"coefficient"`. |
 | `max_lag` | Largest lag magnitude to keep, in seconds (default: the full `N-1` samples). |
 
-**Returns:** A [`CorrelationResult`](/phonometry/reference/api/signals/correlation/#correlationresult).
+**Returns:** A [`CorrelationResult`](/reference/api/signals/correlation/#correlationresult).
 
 **Raises**
 
@@ -364,9 +364,9 @@ default `upsample=8`).
 
 | Name | Description |
 | :--- | :--- |
-| `ir` | Impulse response, 1-D. Accepts a [`phonometry.io.Signal`](/phonometry/reference/api/io/io/#signal), whose calibration is applied to the samples, though a delay is scale-free: nothing in the result moves with the factor. |
-| `fs` | Sample rate, in Hz. Required when both records are bare arrays; either may be a [`Signal`](/phonometry/reference/api/io/io/#signal) and supply it, and two Signals recorded at different rates are refused rather than arbitrated. |
-| `reference` | Optional reference IR (same length) the delay is measured against. Accepts a [`phonometry.io.Signal`](/phonometry/reference/api/io/io/#signal), which may be the side that supplies `fs`; a delay is scale-free, so its calibration does not move the result. |
+| `ir` | Impulse response, 1-D. Accepts a [`phonometry.io.Signal`](/reference/api/io/io/#signal), whose calibration is applied to the samples, though a delay is scale-free: nothing in the result moves with the factor. |
+| `fs` | Sample rate, in Hz. Required when both records are bare arrays; either may be a [`Signal`](/reference/api/io/io/#signal) and supply it, and two Signals recorded at different rates are refused rather than arbitrated. |
+| `reference` | Optional reference IR (same length) the delay is measured against. Accepts a [`phonometry.io.Signal`](/reference/api/io/io/#signal), which may be the side that supplies `fs`; a delay is scale-free, so its calibration does not move the result. |
 | `interpolation` | `'parabolic'` (default) or `'none'`. |
 | `upsample` | Integer local-upsampling factor (default 8). |
 
@@ -408,7 +408,7 @@ $y(t) = \alpha x(t - \tau_0) + n(t)$ (B&P Section 5.1.4):
   function (Eq. 5.21);
 * `'gcc'`: the peak of the generalized cross-correlation of
   Knapp & Carter (1976), in which the Welch-averaged cross-spectrum (shared
-  core with [`cross_spectral_density`](/phonometry/reference/api/signals/spectra/#cross_spectral_density))
+  core with [`cross_spectral_density`](/reference/api/signals/spectra/#cross_spectral_density))
   is weighted by $\psi(f)$ before the inverse transform.
   Weightings (Table I): `'none'` (plain correlator), `'roth'`
   ($1/G_{xx}$,
@@ -446,9 +446,9 @@ interval (Eq. 8.130).
 
 | Name | Description |
 | :--- | :--- |
-| `x` | Reference record, 1-D. Accepts a [`phonometry.io.Signal`](/phonometry/reference/api/io/io/#signal), whose calibration is applied to the samples, though a delay is scale-free: the Signal is taken here for the rate it carries, and nothing in the result moves with the factor. |
-| `y` | Delayed record, 1-D, same length. Accepts a [`phonometry.io.Signal`](/phonometry/reference/api/io/io/#signal), whose calibration is applied to the samples, though a delay is scale-free: the Signal is taken here for the rate it carries, and nothing in the result moves with the factor. |
-| `fs` | Sample rate, in Hz. Required when both records are bare arrays; either may be a [`Signal`](/phonometry/reference/api/io/io/#signal) and supply it, and two Signals recorded at different rates are refused rather than arbitrated. |
+| `x` | Reference record, 1-D. Accepts a [`phonometry.io.Signal`](/reference/api/io/io/#signal), whose calibration is applied to the samples, though a delay is scale-free: the Signal is taken here for the rate it carries, and nothing in the result moves with the factor. |
+| `y` | Delayed record, 1-D, same length. Accepts a [`phonometry.io.Signal`](/reference/api/io/io/#signal), whose calibration is applied to the samples, though a delay is scale-free: the Signal is taken here for the rate it carries, and nothing in the result moves with the factor. |
+| `fs` | Sample rate, in Hz. Required when both records are bare arrays; either may be a [`Signal`](/reference/api/io/io/#signal) and supply it, and two Signals recorded at different rates are refused rather than arbitrated. |
 | `method` | `'gcc'` (default), `'direct'` or `'phase'`. |
 | `weighting` | GCC weighting (default `'phat'`; ignored otherwise). One of `"none"`, `"roth"`, `"scot"`, `"phat"` or `"ml"`. |
 | `window` | Welch taper for `'gcc'`/`'phase'`, a scipy window name or a tuple of a name and its parameters (default Hann). |
@@ -459,7 +459,7 @@ interval (Eq. 8.130).
 | `upsample` | Integer local-upsampling factor (default 1: off). |
 | `signal_bandwidth` | Signal bandwidth `B` in Hz for the Eq. 8.129 delay uncertainty (`None`: no error reported). |
 
-**Returns:** A [`TimeDelayResult`](/phonometry/reference/api/signals/correlation/#timedelayresult).
+**Returns:** A [`TimeDelayResult`](/reference/api/signals/correlation/#timedelayresult).
 
 **Raises**
 
@@ -496,7 +496,7 @@ Time-delay estimate between two records.
 | `delay_samples` | The same delay in (fractional) samples. |
 | `method` | `'direct'`, `'gcc'` or `'phase'`. |
 | `weighting` | GCC weighting name (`None` unless `method='gcc'`). One of `"none"`, `"roth"`, `"scot"`, `"phat"` or `"ml"`. |
-| `lags` | Lag axis of [`correlation`](/phonometry/reference/api/signals/correlation/#correlation), in seconds. |
+| `lags` | Lag axis of [`correlation`](/reference/api/signals/correlation/#correlation), in seconds. |
 | `correlation` | The correlation function whose peak was located: the correlation coefficient $\hat{\rho}_{xy}(\tau)$ for `'direct'`, the weighted GCC $\hat{R}_\psi(\tau)$ (normalized to unit peak magnitude) for `'gcc'`, and the unweighted equivalent for `'phase'` (whose estimate comes from Eq. 5.101b, not from this curve). |
 | `peak_correlation` | Plain correlation coefficient $\hat{\rho}_{xy}$ at the estimated delay (rounded to the nearest sample), the quantity entering the B&P error formulas, whatever the method. |
 | `delay_standard_deviation` | Standard deviation of the peak-location estimate, $\sigma(\hat{\tau}_0) \approx (3/4)^{1/4} \sqrt{\varepsilon} / (\pi B)$ (Eq. 8.129), in seconds; `None` unless `signal_bandwidth` was given. |

@@ -38,11 +38,11 @@ own occupants, and converts a target speech-to-noise ratio into an absorption
 area per table. Measurement first, design second; the two halves share
 nothing but the room. The impulse responses and levels
 behind it are acquired as in
-[Measuring the Room Impulse Response](/phonometry/buildings/rooms/room-impulse-response/);
+[Measuring the Room Impulse Response](/buildings/rooms/room-impulse-response/);
 the per-position STI comes from the
-[Speech Transmission Index guide](/phonometry/perception/speech/speech-transmission/);
+[Speech Transmission Index guide](/perception/speech/speech-transmission/);
 the closed-room decay parameters live in
-[Room Acoustics](/phonometry/buildings/rooms/room-acoustics/).
+[Room Acoustics](/buildings/rooms/room-acoustics/).
 
 ## Speech privacy along a line of workstations
 
@@ -272,7 +272,7 @@ noise**, meeting the omnidirectionality requirements of ISO 3382-1 (the
 standard is explicit about why: people in an open-plan office do not
 continuously speak in any fixed direction). A deterministic pink-spectrum
 signal (an MLS or a sweep, acquired as in the
-[room impulse response guide](/phonometry/buildings/rooms/room-impulse-response/))
+[room impulse response guide](/buildings/rooms/room-impulse-response/))
 is an accepted substitute, and the results are derived from the impulse
 response. Its sound power is verified as in ISO 3382-1, with the source at
 1.2 m, and clause 6.2 sets the level: high enough in each octave band that the
@@ -392,7 +392,7 @@ print(round(chain.d2s, 1), round(chain.lp_as_4m, 1))     # 4.7 42.9
 ```
 
 The band arithmetic itself (A-weighting and energetic summation) is the
-same as in [Levels](/phonometry/signals/levels/levels/).
+same as in [Levels](/signals/levels/levels/).
 
 ### `open_plan_metrics()` parameters
 
@@ -408,7 +408,7 @@ fields and marks `rd` / `rp`.
 `d2s`/`lp_as_4m` are `nan` if fewer than two positions fall in 2–16 m;
 `rd`/`rp` are `nan` when STI does not decrease with distance. The per-position
 STI can itself be measured with the STIPA tools in the
-[Speech Transmission Index guide](/phonometry/perception/speech/speech-transmission/).
+[Speech Transmission Index guide](/perception/speech/speech-transmission/).
 
 ## ISO 3382-3 report (`.report()`)
 
@@ -429,7 +429,7 @@ acceptable $D_\mathrm{2,S}$ in dB, reflecting the informative quality ranges of
 Annex A where a larger spatial decay is better; the room passes at or above
 it). It uses the same `ReportMetadata` container and rendering engine as the
 [ISO 3382-1/-2 room-acoustics
-fiche](/phonometry/buildings/rooms/room-acoustics/#iso-3382-report-report); the
+fiche](/buildings/rooms/room-acoustics/#iso-3382-report-report); the
 open-plan-specific fields `area` (floor area), `n_source_positions` and
 `n_receiver_positions` (the number of measurement positions) populate the header,
 alongside `client`, `test_room` (the office or zone), `specimen` (the
@@ -600,10 +600,10 @@ plt.legend(); plt.show()
 **Where $A_\text{tab}$ itself comes from.** For a room that exists, measure the
 reverberation time to ISO 3382-2 and invert Sabine: $A = 0.161\,V/T$ (the same
 convention ISO 354 defines). The
-[room impulse response](/phonometry/buildings/rooms/room-impulse-response/)
-and [Room Acoustics](/phonometry/buildings/rooms/room-acoustics/) guides
+[room impulse response](/buildings/rooms/room-impulse-response/)
+and [Room Acoustics](/buildings/rooms/room-acoustics/) guides
 supply $T$. For a room being designed, take it off surface by surface as in
-[Sound absorption in enclosed spaces](/phonometry/buildings/rooms/enclosed-space-absorption/).
+[Sound absorption in enclosed spaces](/buildings/rooms/enclosed-space-absorption/).
 Either way $A_\text{tab} = A/N$ with $N$ the number of **simultaneously
 occupied** tables (not the covers, and not the tables installed). That is what
 makes a half-full restaurant a different room from a full one at the same
@@ -675,14 +675,14 @@ quoted here for planning and reading. Long's *Architectural Acoustics* 2e
 Chapter 17 crowd self-noise model (Eqs. (17.50) to (17.54)) through
 `room.crowd_noise` and its parts, with the Eq. (17.53)-(17.54) design window
 and its closure condition. The
-[conformance report](/phonometry/reference/conformance/) holds $D_\mathrm{2,S}$
+[conformance report](/reference/conformance/) holds $D_\mathrm{2,S}$
 to the standard's own definition of it.
 </ScopeClaim>
 
 <ScopeClaim status="not-covered" label="Not covered">
 ISO 3382-3's per-position STI is taken as an input to `open_plan_metrics`
 rather than computed inside it: measure it with the STIPA tools of the [Speech
-Transmission Index guide](/phonometry/perception/speech/speech-transmission/).
+Transmission Index guide](/perception/speech/speech-transmission/).
 The fourth required single number, the average A-weighted background noise
 $L_{p,\mathrm{A,B}}$, is likewise not computed here. It is the energetic A-weighted
 average of the per-position octave-band background levels, and it belongs in
@@ -708,19 +708,19 @@ a given table sits.
 
 ## See also
 
-- [Room Acoustics](/phonometry/buildings/rooms/room-acoustics/): the ISO 3382-1/2
+- [Room Acoustics](/buildings/rooms/room-acoustics/): the ISO 3382-1/2
   decay parameters of the same room.
-- [Measuring the Room Impulse Response](/phonometry/buildings/rooms/room-impulse-response/):
+- [Measuring the Room Impulse Response](/buildings/rooms/room-impulse-response/):
   the acquisition behind the per-position levels.
-- [Speech Transmission Index](/phonometry/perception/speech/speech-transmission/): the
+- [Speech Transmission Index](/perception/speech/speech-transmission/): the
   STI/STIPA measurement that feeds the per-position `sti_values`.
-- [Speech Intelligibility Index](/phonometry/perception/speech/speech-intelligibility/):
+- [Speech Intelligibility Index](/perception/speech/speech-intelligibility/):
   the ANSI S3.5 view of the same intelligibility question.
-- [Levels](/phonometry/signals/levels/levels/): the A-weighted levels behind the
+- [Levels](/signals/levels/levels/): the A-weighted levels behind the
   spatial decay.
-- [Theory](/phonometry/reference/theory/rooms-buildings/): the room-acoustic
+- [Theory](/reference/theory/rooms-buildings/): the room-acoustic
   derivations this page builds on.
-- API reference: [`room.open_plan`](/phonometry/reference/api/rooms/open-plan/).
-- Theory: [Impulse response and room-acoustic parameters](/phonometry/reference/theory/rooms-buildings/#impulse-response-and-room-acoustic-parameters-iso-18233-iso-3382-1-2-3): the decay and absorption theory the ISO 3382-3 distraction distance is measured against.
+- API reference: [`room.open_plan`](/reference/api/rooms/open-plan/).
+- Theory: [Impulse response and room-acoustic parameters](/reference/theory/rooms-buildings/#impulse-response-and-room-acoustic-parameters-iso-18233-iso-3382-1-2-3): the decay and absorption theory the ISO 3382-3 distraction distance is measured against.
 
 </SeeAlso>

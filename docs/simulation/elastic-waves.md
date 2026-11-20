@@ -1,6 +1,6 @@
 <!-- Written by `make llms` from site/src/content/docs/simulation/elastic-waves.mdx: edit that page and its Spanish twin, then run `make llms`. -->
 
-← [Documentation index](../README.md) · Published at https://docs.jmrp.io/phonometry/simulation/elastic-waves/
+← [Documentation index](../README.md) · Published at https://phonometry.dev/simulation/elastic-waves/
 
 # Elastic waves and fluid-solid coupling
 
@@ -848,7 +848,7 @@ res = simulation.write_elastic_fdtd_animation(
 - [Underwater sound propagation](../underwater/underwater-propagation.md):
   the fluid-bottom Rayleigh reflection model whose missing shear physics §5
   quantifies.
-- API reference: [`simulation.elastic-fdtd`](https://docs.jmrp.io/phonometry/reference/api/simulation/elastic-fdtd/).
+- API reference: [`simulation.elastic-fdtd`](https://phonometry.dev/reference/api/simulation/elastic-fdtd/).
 
 ## Quick answers
 

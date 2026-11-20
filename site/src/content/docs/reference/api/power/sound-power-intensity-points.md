@@ -47,11 +47,11 @@ $$
 I_{\mathrm{n}i} = I_0 \times 10^{XX/10}, \qquad I_{\mathrm{n}i} = -I_0 \times 10^{XX/10}
 $$
 
-with $I_0 = 10^{-12}$ W/m^2. [`normal_intensity_from_levels`](/phonometry/reference/api/power/sound-power-intensity-points/#normal_intensity_from_levels) takes
+with $I_0 = 10^{-12}$ W/m^2. [`normal_intensity_from_levels`](/reference/api/power/sound-power-intensity-points/#normal_intensity_from_levels) takes
 both forms; its `negative` argument is the `(-)` of the print.
 
 The four Annex A field indicators come from
-[`phonometry.emission.field_indicators`](/phonometry/reference/api/power/intensity/#field_indicators), which is written for this part of
+[`phonometry.emission.field_indicators`](/reference/api/power/intensity/#field_indicators), which is written for this part of
 ISO 9614 and averages over positions without area weighting, exactly as
 equations (A.4), (A.5), (A.7) and (A.9) do. What this module adds is Annex B:
 the qualification of the surface and of the position set, and what to change
@@ -81,7 +81,7 @@ The third gate is unnumbered in the print: it appears in Figure B.1 and shares
 the second row of Table B.3 with criterion 1, and it is *not* a "criterion 3".
 Only Figure B.1's first failing gate is acted on, because every action box in
 the figure returns to the next measurement rather than to the gate below it, so
-[`DiscretePointIntensityResult.required_actions`](/phonometry/reference/api/power/sound-power-intensity-points/#discretepointintensityresultrequired_actions) reports one action set per
+[`DiscretePointIntensityResult.required_actions`](/reference/api/power/sound-power-intensity-points/#discretepointintensityresultrequired_actions) reports one action set per
 band and stops there.
 
 **Grade 3 is an A-weighted determination only.** Table B.2 tabulates the
@@ -109,7 +109,7 @@ $$
 10 \log_{10}\!\left( 1 \pm \frac{2 F_4}{\sqrt{N}} \right)~\text{dB} \tag{Eq. B.3}
 $$
 
-[`partial_power_concentration`](/phonometry/reference/api/power/sound-power-intensity-points/#partial_power_concentration) is the optional procedure of clause 8.3.2
+[`partial_power_concentration`](/reference/api/power/sound-power-intensity-points/#partial_power_concentration) is the optional procedure of clause 8.3.2
 and B.1.3: where criterion 1 holds, criterion 2 does not and
 $F_3 - F_2 \le 1$ dB, most of the power may pass through a minority of
 the segments, and adding positions only there is cheaper than densifying the
@@ -120,10 +120,10 @@ discrete-point survey fails.
 Two things this module does not do. It does not scan: the continuous sweep of
 ISO 9614-2:1996 and ISO 9614-3:2002, whose indicators are area weighted and
 whose criteria are numbered differently, is
-[`phonometry.emission.sound_power_intensity`](/phonometry/reference/api/power/sound-power-intensity/#sound_power_intensity). And it does not grade the
+[`phonometry.emission.sound_power_intensity`](/reference/api/power/sound-power-intensity/#sound_power_intensity). And it does not grade the
 instrument: $\delta_{pI0}$ is a property of the probe-spacer-analyser
 chain, classified against IEC 61043:1993 Table 2 by
-[`phonometry.emission.verify_intensity_class`](/phonometry/reference/api/power/intensity-compliance/#verify_intensity_class).
+[`phonometry.emission.verify_intensity_class`](/reference/api/power/intensity-compliance/#verify_intensity_class).
 
 > Auto-generated from the source docstrings by `scripts/generate_api_docs.py` (`make api-docs`). Do not edit by hand.
 
@@ -192,7 +192,7 @@ determination. Footnote 3 calls the grade-3 figure tentative.
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | On the same mismatches [`position_count_factor`](/phonometry/reference/api/power/sound-power-intensity-points/#position_count_factor) refuses. |
+| ValueError | On the same mismatches [`position_count_factor`](/reference/api/power/sound-power-intensity-points/#position_count_factor) refuses. |
 | TypeError | if `fraction` is not an integer (a word, a flag or a float), or `frequency` is not a single number, or `grade` is not a text. |
 
 ## DiscretePointIntensityResult
@@ -369,8 +369,8 @@ ISO 9614-3, because the quantity is the same one: the band sound power
 level, with the bands of non-positive net power (clause 9.2) hatched as
 unusable and the A-weighted total in the title. The field indicators
 behind the qualification have their own figure, on the
-[`FieldIndicators`](/phonometry/reference/api/power/intensity/#fieldindicators) that
-[`field_indicators`](/phonometry/reference/api/power/intensity/#field_indicators) returns.
+[`FieldIndicators`](/reference/api/power/intensity/#fieldindicators) that
+[`field_indicators`](/reference/api/power/intensity/#field_indicators) returns.
 
 Requires matplotlib (the `[plot]` extra); returns the
 `Axes`.
@@ -410,9 +410,9 @@ Action (d) is the one Table B.3 conditions on the operator: it applies
 when criterion 2 fails with $F_3 - F_2 \le 1$ dB and the optional
 procedure of clause 8.3.2 "either fails or is not selected". Not
 selecting it is the default, so it is reported here; see
-[`partial_power_concentration`](/phonometry/reference/api/power/sound-power-intensity-points/#partial_power_concentration) for the alternative.
+[`partial_power_concentration`](/reference/api/power/sound-power-intensity-points/#partial_power_concentration) for the alternative.
 
-**Returns:** One tuple of [`ActionCode`](/phonometry/reference/api/power/sound-power-intensity-points/#actioncode) per band.
+**Returns:** One tuple of [`ActionCode`](/reference/api/power/sound-power-intensity-points/#actioncode) per band.
 
 **Raises**
 
@@ -584,7 +584,7 @@ budget, and the procedure cannot help.
 | `areas` | Segment areas $S_i$ in m^2, one per position (1D). |
 | `grade` | The grade whose Table B.1 $\Delta$ is spent: `'precision'` (0.20), `'engineering'` (0.29) or `'survey'` (0.60, A-weighted). |
 
-**Returns:** A [`PartialPowerConcentration`](/phonometry/reference/api/power/sound-power-intensity-points/#partialpowerconcentration).
+**Returns:** A [`PartialPowerConcentration`](/reference/api/power/sound-power-intensity-points/#partialpowerconcentration).
 
 **Raises**
 
@@ -697,7 +697,7 @@ band sound power and its level $L_W = 10 \lg(\sum_i P_i / P_0)$
 it (clause 9.2).
 
 A single position may carry inward flow and usually does. Levels printed as
-`(-) XX dB` are converted by [`normal_intensity_from_levels`](/phonometry/reference/api/power/sound-power-intensity-points/#normal_intensity_from_levels), whose
+`(-) XX dB` are converted by [`normal_intensity_from_levels`](/reference/api/power/sound-power-intensity-points/#normal_intensity_from_levels), whose
 `negative` argument is that `(-)`.
 
 A.2.3 conditions the Annex A indicators on a different quantity, the
@@ -740,7 +740,7 @@ achieved grade rather than the requested one, which is the grade clause
 | `fraction` | The band set, 3 for one-third octaves (default) or 1 for octaves, the column of Tables B.2 and 2 the frequencies are read in. One of `1` or `3`. |
 | `grade` | `'precision'` (grade 1), `'engineering'` (grade 2, default) or `'survey'` (grade 3). |
 
-**Returns:** A [`DiscretePointIntensityResult`](/phonometry/reference/api/power/sound-power-intensity-points/#discretepointintensityresult).
+**Returns:** A [`DiscretePointIntensityResult`](/reference/api/power/sound-power-intensity-points/#discretepointintensityresult).
 
 **Raises**
 

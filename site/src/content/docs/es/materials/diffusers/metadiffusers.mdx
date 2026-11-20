@@ -70,7 +70,7 @@ import ThemeImage from '../../../../../components/ThemeImage.astro';
 import Video from '../../../../../components/Video.astro';
 
 Un difusor de Schroeder se gana la difusión con profundidad: las
-[ecuaciones de diseño](/phonometry/es/materials/diffusers/diffusers/) convierten una
+[ecuaciones de diseño](/es/materials/diffusers/diffusers/) convierten una
 secuencia de fases en pozos cuya profundidad máxima se acerca a la mitad
 de la longitud de onda de diseño, así que un difusor para las centenas bajas
 de hercios mide decenas de
@@ -90,7 +90,7 @@ sublongitud de onda profunda.
 
 La celda unidad es la misma con la que se construye el
 [absorbente de sonido
-lento](/phonometry/es/materials/absorbers/metamaterial-absorbers/):
+lento](/es/materials/absorbers/metamaterial-absorbers/):
 una ranura de altura $h_n$ recorre la profundidad $L$ del panel y está
 cargada, a lo largo de su pared superior, por una red de resonadores de
 Helmholtz con paso de red $a$. La cadena de la ranura se evalúa con el
@@ -123,7 +123,7 @@ absorbentes:
   una rejilla clásica escribe con profundidad, el metadifusor lo escribe con
   la sintonía de los resonadores.
 - **El acoplamiento crítico añade un tercer estado.** Llevar una ranura al
-  [acoplamiento crítico](/phonometry/es/materials/absorbers/metamaterial-absorbers/)
+  [acoplamiento crítico](/es/materials/absorbers/metamaterial-absorbers/)
   equilibra su pérdida viscotérmica con su fuga y produce un cero de
   reflexión: $R_n \approx 0$. Las secuencias ternarias (valores de reflexión
   $+1$, $-1$, $0$) necesitan exactamente ese estado perfectamente
@@ -135,7 +135,7 @@ y devuelve la reflexión compleja por pozo $R_n(f)$;
 `metadiffuser_polar_response` y `metadiffuser_diffusion_spectrum` reducen ese
 perfil espacial con el mismo campo lejano de Fraunhofer y el mismo
 coeficiente ISO 17497-2 que los
-[diseños clásicos](/phonometry/es/materials/diffusers/diffusers/). Una entrada `None` en
+[diseños clásicos](/es/materials/diffusers/diffusers/). Una entrada `None` en
 la secuencia de pozos representa una franja rígida plana ($R = 1$), el estado
 $+1$ de los diseños ternarios.
 
@@ -153,7 +153,7 @@ ranura en acoplamiento
 crítico que una secuencia *ternaria* necesita como estado `0` es esa misma
 clase de celda llevada a propósito a resonancia en la frecuencia de trabajo,
 que es lo que resuelve
-[`critical_coupling_design`](/phonometry/es/materials/absorbers/metamaterial-absorbers/).
+[`critical_coupling_design`](/es/materials/absorbers/metamaterial-absorbers/).
 Este panel publicado es el caso QRD, y a 2 kHz dispersa
 como el difusor de 27,4 cm de profundidad al que imita.
 
@@ -338,7 +338,7 @@ de pozos frente a 2 cm de ranuras.*
 
 Diseñar un metadifusor es una traducción en dos pasos. Primero se elige la
 secuencia de Schroeder exactamente igual que para un
-[diseño clásico](/phonometry/es/materials/diffusers/diffusers/): los residuos
+[diseño clásico](/es/materials/diffusers/diffusers/): los residuos
 cuadráticos
 $s_n = n^2 \bmod N$ dan las profundidades de pozo objetivo
 $d_n = s_n \lambda_0/(2N)$ y con ellas las fases de reflexión objetivo
@@ -563,11 +563,11 @@ devuelve exactamente lo que daría una medición con dos micrófonos de esa celd
 en un tubo de impedancia rectangular de un periodo de ancho, incluida
 `well_absorption`, así que una sola ranura se puede comprobar antes de
 comprometer el panel; ese es el método del
-[tubo de impedancia](/phonometry/es/materials/absorbers/impedance-tube/) sin
+[tubo de impedancia](/es/materials/absorbers/impedance-tube/) sin
 cambios. El panel entero se califica en un goniómetro ISO 17497-2, que necesita
 el array de seis periodos y 2,1 m y un panel plano de referencia de la misma
 huella medido con la cadena idéntica; la
-[guía de difusores](/phonometry/es/materials/diffusers/diffusers/) da ese
+[guía de difusores](/es/materials/diffusers/diffusers/) da ese
 procedimiento. Como el diseño está sintonizado a una frecuencia, la nota honesta
 es el $d_\mathrm{n}$ banda a banda de esa medición, y no el coeficiente a
 2 kHz.
@@ -599,7 +599,7 @@ de borde, así que valora diseños en lugar de sustituir una medición ISO
 de fase objetivo) no está automatizado; el flujo de la sección 3 iguala fases
 por evaluación. El cálculo de diseño con acoplamiento crítico para una sola
 ranura vive en
-[Metaabsorbentes](/phonometry/es/materials/absorbers/metamaterial-absorbers/).
+[Metaabsorbentes](/es/materials/absorbers/metamaterial-absorbers/).
 </ScopeClaim>
 </Scope>
 
@@ -607,20 +607,20 @@ ranura vive en
 
 ## Véase también
 
-- [Difusores y sus coeficientes](/phonometry/es/materials/diffusers/diffusers/): los
+- [Difusores y sus coeficientes](/es/materials/diffusers/diffusers/): los
   coeficientes ISO 17497-1/-2 con los que se valora este panel, y los
   diseños clásicos de Schroeder cuyas secuencias de fase toma prestadas.
-- [Metaabsorbentes](/phonometry/es/materials/absorbers/metamaterial-absorbers/): la misma
+- [Metaabsorbentes](/es/materials/absorbers/metamaterial-absorbers/): la misma
   celda de ranura y resonador sintonizada para absorción perfecta en lugar
   de fase controlada, con la teoría del acoplamiento crítico tras el estado
   ternario `0`.
-- [Absorbentes porosos y multicapa](/phonometry/es/materials/absorbers/porous-absorbers/):
+- [Absorbentes porosos y multicapa](/es/materials/absorbers/porous-absorbers/):
   las capas clásicas de fluido equivalente y resonantes con las que se
   construyen las celdas de metamaterial.
-- [Simulación de ondas FDTD 2D](/phonometry/es/simulation/fdtd-simulation/): el
+- [Simulación de ondas FDTD 2D](/es/simulation/fdtd-simulation/): el
   simulación de ondas tras la animación de arriba, que malla la geometría
   real de ranuras y resonadores.
-- Referencia de la API: [`materials.diffusers.metadiffuser`](/phonometry/es/reference/api/materials/metadiffuser/) y [`materials.diffusers.design`](/phonometry/es/reference/api/materials/design/).
-- Teoría: [Dispersión superficial y difusión](/phonometry/es/reference/theory/materials-surfaces/#dispersion-superficial-y-difusion-iso-17497-1-iso-17497-2): los coeficientes de dispersión y de difusión con los que se juzgan los diseños en sublongitud de onda profunda.
+- Referencia de la API: [`materials.diffusers.metadiffuser`](/es/reference/api/materials/metadiffuser/) y [`materials.diffusers.design`](/es/reference/api/materials/design/).
+- Teoría: [Dispersión superficial y difusión](/es/reference/theory/materials-surfaces/#dispersion-superficial-y-difusion-iso-17497-1-iso-17497-2): los coeficientes de dispersión y de difusión con los que se juzgan los diseños en sublongitud de onda profunda.
 
 </SeeAlso>

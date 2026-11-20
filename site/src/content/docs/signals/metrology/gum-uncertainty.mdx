@@ -407,7 +407,7 @@ rating, is a separate, domain-specific budget.
 
 A budget is only as honest as the record behind it: every averaged input
 assumes stationarity, and
-[Data qualification](/phonometry/signals/metrology/data-qualification/) provides the
+[Data qualification](/signals/metrology/data-qualification/) provides the
 Bendat & Piersol tests that check it before the propagation starts.
 
 ## Where the library consumes this machinery
@@ -418,7 +418,7 @@ general form; use this page whenever your measurement model is not one of
 those standardized cases:
 
 - **Calibration.** The calibrator's class tolerance and the pre/post drift
-  bound of [Calibration](/phonometry/signals/metrology/calibration/) are textbook
+  bound of [Calibration](/signals/metrology/calibration/) are textbook
   Type B inputs. Both are stated as **half-widths**, so build them with
   `rectangular`, which applies the $a/\sqrt{3}$ divisor for you:
   `metrology.rectangular(0.0, 0.4, name="Calibrator class 1")` for the IEC 60942
@@ -427,18 +427,18 @@ those standardized cases:
   argument is already a *standard* uncertainty, which overstates the term by a
   factor 1.73 and nothing downstream will notice.
 - **Environmental levels.** The ISO 1996-2 combined uncertainty of the
-  [Environmental Levels](/phonometry/environment/assessment/environmental-levels/) page is
+  [Environmental Levels](/environment/assessment/environmental-levels/) page is
   Formula (2) of that standard: the same quadrature sum with the standard's
   own sensitivity coefficients.
 - **Building acoustics.** The per-band and single-number uncertainties of
-  [field insulation measurements](/phonometry/buildings/insulation/insulation-field/)
+  [field insulation measurements](/buildings/insulation/insulation-field/)
   apply the tabulated reproducibility terms of ISO 12999-1, a standardized
   budget for one specific model.
-- **Absorption.** The [absorption-measurement page](/phonometry/materials/absorbers/absorption-measurement/)
+- **Absorption.** The [absorption-measurement page](/materials/absorbers/absorption-measurement/)
   carries the ISO 12999-2 absorption uncertainty, the same construction
   for the reverberation-room method.
 - **Occupational exposure.** The ISO 9612 uncertainty of
-  [occupational measurements](/phonometry/perception/hearing/occupational-exposure/)
+  [occupational measurements](/perception/hearing/occupational-exposure/)
   budgets sampling, instrument and position contributions in exactly this
   way.
 
@@ -474,9 +474,9 @@ implemented on their own pages, listed above, and are not derived here.
 
 ## See also
 
-- [Data qualification](/phonometry/signals/metrology/data-qualification/): the stationarity checks every averaged input silently assumes.
-- [Calibration](/phonometry/signals/metrology/calibration/): the tolerance and drift inputs of every calibrated chain.
-- API reference: [`metrology.uncertainty`](/phonometry/reference/api/metrology/uncertainty/).
-- Theory: [Measurement uncertainty (GUM)](/phonometry/reference/theory/signal-analysis/#measurement-uncertainty-isoiec-guide-98-3-gum-and-supplement-1): the law of propagation of uncertainty, the coverage factor and where the Monte Carlo supplement takes over.
+- [Data qualification](/signals/metrology/data-qualification/): the stationarity checks every averaged input silently assumes.
+- [Calibration](/signals/metrology/calibration/): the tolerance and drift inputs of every calibrated chain.
+- API reference: [`metrology.uncertainty`](/reference/api/metrology/uncertainty/).
+- Theory: [Measurement uncertainty (GUM)](/reference/theory/signal-analysis/#measurement-uncertainty-isoiec-guide-98-3-gum-and-supplement-1): the law of propagation of uncertainty, the coverage factor and where the Monte Carlo supplement takes over.
 
 </SeeAlso>

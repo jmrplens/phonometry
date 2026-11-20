@@ -1,6 +1,6 @@
 <!-- Written by `make llms` from site/src/content/docs/signals/spectra/test-signals.mdx: edit that page and its Spanish twin, then run `make llms`. -->
 
-← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/signals/spectra/test-signals/
+← [Documentation index](../../README.md) · Published at https://phonometry.dev/signals/spectra/test-signals/
 
 # Test signals and sample-rate tools
 
@@ -311,7 +311,7 @@ and smearing them.
 - [Spectral analysis](spectral-analysis.md): the colored-noise verification and the window metrics.
 - [Room acoustics](../../buildings/rooms/room-acoustics.md): the MLS and exponential-sweep excitations of the family portrait, as ISO 18233 uses them.
 - [System measurement](system-measurement.md): the Golay pair and the shaped sweep, the other two members of the family.
-- API reference: [`signals`: test signals](https://docs.jmrp.io/phonometry/reference/api/signals/test-signals/).
+- API reference: [`signals`: test signals](https://phonometry.dev/reference/api/signals/test-signals/).
 
 ## References
 

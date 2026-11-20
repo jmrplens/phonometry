@@ -26,13 +26,13 @@ describe('agentPaths', () => {
 			'/robots.txt',
 			'/phonometry/robots.txt',
 			'/sitemap*.xml',
-			'/phonometry/*.xml',
+			'/phonometry/sitemap*.xml',
 		]);
 		assert.equal(BEACON_PATH, '/_v');
 	});
 
 	test('at the root the duplicates fold away', () => {
-		assert.deepEqual(agentPaths(''), ['/_v', '/index.md', '/*/index.md', '/llms*.txt', '/robots.txt', '/sitemap*.xml', '/*.xml']);
+		assert.deepEqual(agentPaths(''), ['/_v', '/index.md', '/*/index.md', '/llms*.txt', '/robots.txt', '/sitemap*.xml']);
 	});
 
 	test('Static Assets takes at most 100 patterns, each starting with /', () => {
@@ -73,6 +73,23 @@ describe('the matcher reads a pattern as Static Assets does', () => {
 	];
 	for (const [path, expected] of cases) {
 		test(`${path} ${expected ? 'runs' : 'does not run'} the Worker`, () => assert.equal(runsWorker(path, patterns), expected));
+	}
+
+	// At the root, where the site is served: a scanner's XML probe, or any
+	// XML file that is no sitemap, is answered by Static Assets.
+	const atRoot = agentPaths('');
+	const rootCases = [
+		['/index.md', true],
+		['/signals/index.md', true],
+		['/llms/llms-signals.txt', true],
+		['/sitemap-0.xml', true],
+		['/wlwmanifest.xml', false],
+		['/feed.xml', false],
+		['/signals/', false],
+		['/media/clip.webm', false],
+	];
+	for (const [path, expected] of rootCases) {
+		test(`at the root, ${path} ${expected ? 'runs' : 'does not run'} the Worker`, () => assert.equal(runsWorker(path, atRoot), expected));
 	}
 
 	test('the copy of generateGlobOnlyRuleRegExp is still the one wrangler ships', { skip: !existsSync(ROUTER) && 'wrangler is not installed' }, () => {

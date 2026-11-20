@@ -43,7 +43,7 @@ import SeeAlso from '../../../components/SeeAlso.astro';
 import ThemeImage from '../../../components/ThemeImage.astro';
 
 The closed-form propagation loss of
-[Underwater sound propagation](/phonometry/underwater/underwater-propagation/)
+[Underwater sound propagation](/underwater/underwater-propagation/)
 knows nothing of the sound-speed profile, the seabed or the surface. When
 refraction and boundaries decide the answer, the field has to be
 **computed**: this guide covers the four numerical solvers of the
@@ -276,7 +276,7 @@ understates the loss of any real seabed, and the gap widens with range because
 it accumulates over bounces. The rigid option is the opposite extreme, offered
 for the same validation reason and not as a sediment model. For a real bottom in
 shallow water, price the seabed with the Weston regimes of
-[Underwater sound propagation](/phonometry/underwater/underwater-propagation/#westons-shallow-water-regimes),
+[Underwater sound propagation](/underwater/underwater-propagation/#westons-shallow-water-regimes),
 whose critical angle and reflection-loss gradient encode exactly what these
 boundary conditions omit, and read the modal answer as an upper bound on the
 received level. Or hand `gaussian_beams` the fluid seabed itself (section 4),
@@ -692,7 +692,7 @@ level beyond a few kilometres at sonar frequencies is optimistic. Passing
 `absorption` (`"francois-garrison"`, `"ainslie-mccolm"` or `"thorp"`, or a
 `VolumeAbsorption` naming its own water; the same names, arguments and
 defaults as
-[`seawater_absorption`](/phonometry/underwater/underwater-propagation/#propagation-loss))
+[`seawater_absorption`](/underwater/underwater-propagation/#propagation-loss))
 multiplies each beam by $\mathrm{e}^{-\alpha s}$ with $s$ the **arc length along its
 central ray**, which is Jensen §3.6.2 as printed: perturbing the eikonal with
 the complex sound speed a volume loss implies leaves the real rays standing
@@ -711,7 +711,7 @@ water the dominant one: a perfect bottom hands every steep multiple back
 undiminished, when what the seabed keeps is most of what decides real
 shallow-water propagation loss. Passing a `FluidSeabed` as the `bottom`
 (the same fluid description
-[`seabed_reflection`](/phonometry/underwater/underwater-propagation/#seabed-reflection-loss)
+[`seabed_reflection`](/underwater/underwater-propagation/#seabed-reflection-loss)
 takes, with `water_density` for the water above it) replaces the perfect
 reflector
 with the Rayleigh coefficient at each beam's own grazing angle: every bottom
@@ -981,12 +981,12 @@ question, "how much level survives the path", at a different price in
 physics. Terminology throughout follows ISO 18405:2017 (propagation loss,
 source level, levels re 1 µPa). The sound-speed and absorption models named
 below are implemented and referenced in
-[Underwater sound propagation](/phonometry/underwater/underwater-propagation/).
+[Underwater sound propagation](/underwater/underwater-propagation/).
 
 **Sound speed.** The four equations agree to within about 1 m/s inside the
 domain they share: 0.98 m/s at 25 °C, 35 ppt and 1000 m, and 0.52 m/s over the
 upper kilometre of a full profile, as the
-[model comparison](/phonometry/underwater/underwater-propagation/#speed-of-sound-in-sea-water)
+[model comparison](/underwater/underwater-propagation/#speed-of-sound-in-sea-water)
 on the propagation page shows, so the choice is about *validity range*, not
 accuracy. The
 default **UNESCO / Chen-Millero** form (as recast by Wong & Zhu 1995) covers
@@ -1021,7 +1021,7 @@ and the bottom (or in the SOFAR channel) that can only expand in range. The
 physically of the order of the water (or channel) depth: spherical while the
 wavefront has not yet filled the duct, cylindrical once it has. In the 10 kHz
 example of the
-[propagation-loss section](/phonometry/underwater/underwater-propagation/#propagation-loss) the
+[propagation-loss section](/underwater/underwater-propagation/#propagation-loss) the
 choice is not cosmetic: against the same figure of merit of 87 dB,
 spherical-only spreading predicts detection out to about 8.7 km while the
 practical law with $R_0 = 1000$ m stretches it to about 15.8 km. When the
@@ -1058,10 +1058,10 @@ Chain the pieces end to end: a 140 dB re 1 µPa²/Hz source at 10 kHz, a 60 dB
 ambient spectrum level, a 15 dB array gain and an 8 dB detection threshold give
 the figure of merit $FOM = 140 - (60 - 15) - 8 = 87$ dB, computed by
 `passive_sonar_equation` in the
-[sonar-equation section](/phonometry/underwater/underwater-propagation/#sonar-equation)
+[sonar-equation section](/underwater/underwater-propagation/#sonar-equation)
 of the propagation guide. Every term then moves the crossing of the
 propagation-loss curve of that guide's
-[propagation-loss section](/phonometry/underwater/underwater-propagation/#propagation-loss)
+[propagation-loss section](/underwater/underwater-propagation/#propagation-loss)
 (10 °C, 35 ppt, 100 m), and that crossing *is* the predicted detection range.
 
 ```python
@@ -1190,7 +1190,7 @@ alternative (Ch. 3, §3.3.5.5) with the KMAH index and the Weinberg-Keenan
 width floor is not implemented. The PE is the standard small-angle (Tappert)
 form, not a wide-angle Padé variant. For the elastic seabed physics these fluid solvers
 leave out, see [Elastic waves and fluid-solid
-coupling](/phonometry/simulation/elastic-waves/).
+coupling](/simulation/elastic-waves/).
 </ScopeClaim>
 </Scope>
 
@@ -1198,19 +1198,19 @@ coupling](/phonometry/simulation/elastic-waves/).
 
 ## See also
 
-- [Underwater sound propagation](/phonometry/underwater/underwater-propagation/):
+- [Underwater sound propagation](/underwater/underwater-propagation/):
   the closed forms these solvers replace when refraction and boundaries
   matter, and the sound-speed profiles they consume.
-- [Underwater acoustics: radiated noise and pile driving](/phonometry/underwater/underwater-acoustics/):
+- [Underwater acoustics: radiated noise and pile driving](/underwater/underwater-acoustics/):
   the ISO 18405 reference levels in which every propagation loss here is
   expressed.
-- [Atmospheric refraction: rays and the GFPE](/phonometry/environment/propagation/atmospheric-refraction/):
+- [Atmospheric refraction: rays and the GFPE](/environment/propagation/atmospheric-refraction/):
   the airborne siblings of these solvers, with the same ray bending and a
   Green's-function PE marched over ground impedance instead of a seabed.
-- [2D FDTD wave simulation](/phonometry/simulation/fdtd-simulation/): the
+- [2D FDTD wave simulation](/simulation/fdtd-simulation/): the
   time-domain alternative behind the SOFAR ducting animation of the
   propagation guide.
-- API reference: [`underwater.propagation.numerical`](/phonometry/reference/api/underwater/numerical/).
+- API reference: [`underwater.propagation.numerical`](/reference/api/underwater/numerical/).
 
 </SeeAlso>
 

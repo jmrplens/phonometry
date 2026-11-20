@@ -57,7 +57,7 @@ import Video from '../../../components/Video.astro';
 
 A fluid carries one wave; a solid carries a family of them. This guide
 covers the elastic companion of the
-[2D FDTD wave simulation](/phonometry/simulation/fdtd-simulation/):
+[2D FDTD wave simulation](/simulation/fdtd-simulation/):
 `elastic_fdtd_simulation` integrates the plane-strain velocity-stress
 system of Virieux (1986) on the same staggered grid as the acoustic solver,
 and with it the compressional **P wave**, the shear **S wave**, the
@@ -71,14 +71,14 @@ its exact closed form by the validation suite.
 
 The guide assumes the acoustic solver's vocabulary (sources, probes,
 obstacle masks, sponges and the Courant bound); read
-[2D FDTD wave simulation](/phonometry/simulation/fdtd-simulation/) first if
+[2D FDTD wave simulation](/simulation/fdtd-simulation/) first if
 those are new. The closed forms this solver cross-checks live in the
 building, vibration and underwater guides: the mass law of
-[panel sound insulation](/phonometry/buildings/design/panel-sound-insulation/), the
+[panel sound insulation](/buildings/design/panel-sound-insulation/), the
 flexural waves of
-[bending-wave transmission at plate junctions](/phonometry/vibration/structural/junction-transmission/),
+[bending-wave transmission at plate junctions](/vibration/structural/junction-transmission/),
 and the shear-supporting seabed that the fluid-bottom reflection model of
-[underwater sound propagation](/phonometry/underwater/underwater-propagation/)
+[underwater sound propagation](/underwater/underwater-propagation/)
 cannot represent.
 
 ## 1. The P-SV velocity-stress scheme
@@ -118,7 +118,7 @@ machinery, and a frozen `ElasticFDTDResult` with the same `.plot()`. What
 the run writes down travels as one `ElasticRecording` (the probe cells and
 their fields, the snapshot cadence, the snapshot's field and its
 `snapshot_decimation=d`, which keeps one cell in `d` along each axis, as
-section 7 of [Where a simulation runs](/phonometry/simulation/compute/)
+section 7 of [Where a simulation runs](/simulation/compute/)
 explains) and how the domain ends
 as one `ElasticBoundaries` (the sides and the sponge thickness). Like the
 acoustic `FDTDRecording`, the recording refuses a malformed probe, field or
@@ -191,7 +191,7 @@ CuPy with one more argument. On such a device the engine's own fields,
 computes from the two normal stresses:
 `-(sim.numpy_field("txx") + sim.numpy_field("tyy")) / 2` is the pressure in
 NumPy. `sim.run(...)` returns its frames as NumPy arrays, and a result holds
-NumPy arrays whatever device stepped. [Where a simulation runs](/phonometry/simulation/compute/) covers the devices, what each needs
+NumPy arrays whatever device stepped. [Where a simulation runs](/simulation/compute/) covers the devices, what each needs
 installed and what is promised about the numbers on each.
 
 ```py
@@ -202,8 +202,8 @@ print(on_gpu.provenance.device, on_gpu.provenance.gpu)   # cupy, and the card's 
 ```
 
 With a `host` the same run goes to another machine: see
-[Sending a simulation to a remote node](/phonometry/simulation/remote-node/).
-[Where heavy work runs](/phonometry/simulation/where-it-runs/) maps the
+[Sending a simulation to a remote node](/simulation/remote-node/).
+[Where heavy work runs](/simulation/where-it-runs/) maps the
 devices, the nodes and the encoders in one place.
 
 ## 2. Fluids inside the elastic solver
@@ -391,7 +391,7 @@ bending waves the closed form prices at $\tau_{12}(0°) = 0.5$, plus the fast
 in-plane precursor that races ahead down the receiving plate. This mode
 conversion the pinned-junction model deliberately leaves out is the reason
 this page needs an elastic solver rather than a flexural one. The
-[bending-wave transmission guide](/phonometry/vibration/structural/junction-transmission/)
+[bending-wave transmission guide](/vibration/structural/junction-transmission/)
 reads the same run against the transmission coefficient $\tau_{12}(0°)$.
 
 <Video
@@ -505,7 +505,7 @@ plt.show()
 ### A solid from a catalogue
 
 A solid's catalogue row goes wherever a `Material` does, one of
-`solids.PUBLISHED_SOLIDS` or one of [your own catalogues](/phonometry/io/material-catalogues/): the solver
+`solids.PUBLISHED_SOLIDS` or one of [your own catalogues](/io/material-catalogues/): the solver
 reads the row's bulk longitudinal speed, its transverse speed and its
 density, and never the plate or bar speed a table prints beside them. The
 mild steel of Bies Table C.1 is the row `STEEL` was taken from, and Long's
@@ -646,7 +646,7 @@ on each panel, for that.
 
 This is exactly the shear physics that the
 fluid-bottom `reflection_coefficient` of the
-[underwater module](/phonometry/underwater/underwater-propagation/) cannot
+[underwater module](/underwater/underwater-propagation/) cannot
 represent, and the reason a shear-supporting seabed loses more energy than
 its equivalent-fluid model.
 
@@ -840,7 +840,7 @@ The air below the plate is drawn on both panels with one display gain,
 measured off the settled field of the two runs together
 (×150, that is +44 dB) and printed on the canvas: read the *annotations*
 for levels, not the brightness. The
-[panel sound insulation guide](/phonometry/buildings/design/panel-sound-insulation/)
+[panel sound insulation guide](/buildings/design/panel-sound-insulation/)
 reads the same run against the oblique mass law.
 
 <Video
@@ -861,7 +861,7 @@ steps the run and draws the field its recording's `snapshot_field` names,
 the pressure or a velocity component, into a WebM, an MP4 or a GIF as it is
 computed, one frame at t = 0 and one every `snapshot_every` steps. It stores
 no snapshots, so the result it returns holds the probes and the times only.
-[Writing animations and FDTD runs to video](/phonometry/io/videos/) says how a
+[Writing animations and FDTD runs to video](/io/videos/) says how a
 frame is drawn and its colour scale found, which encoder writes the file, and
 how the same call steps on a GPU or goes to a node.
 
@@ -922,22 +922,22 @@ dedicated closed-form oracle here.
 
 ## See also
 
-- [2D FDTD wave simulation](/phonometry/simulation/fdtd-simulation/): the
+- [2D FDTD wave simulation](/simulation/fdtd-simulation/): the
   acoustic solver this guide extends, with the staggered grid, the Courant
   bound, the sources, probes and boundary machinery shared by both.
-- [Where a simulation runs](/phonometry/simulation/compute/): both solvers on
+- [Where a simulation runs](/simulation/compute/): both solvers on
   an NVIDIA GPU through CuPy or on PyTorch, and what is promised about their
   numbers.
-- [Predicting Panel Sound Insulation](/phonometry/buildings/design/panel-sound-insulation/):
+- [Predicting Panel Sound Insulation](/buildings/design/panel-sound-insulation/):
   the mass law and coincidence closed forms; the immersed-plate run of §7
   is their full-wave cross-check.
-- [Bending-wave transmission at plate junctions](/phonometry/vibration/structural/junction-transmission/):
+- [Bending-wave transmission at plate junctions](/vibration/structural/junction-transmission/):
   the flexural-wave closed forms of the building model; the Kirchhoff
   dispersion validated in §3 is the wave they transport.
-- [Underwater sound propagation](/phonometry/underwater/underwater-propagation/):
+- [Underwater sound propagation](/underwater/underwater-propagation/):
   the fluid-bottom Rayleigh reflection model whose missing shear physics §5
   quantifies.
-- API reference: [`simulation.elastic-fdtd`](/phonometry/reference/api/simulation/elastic-fdtd/).
+- API reference: [`simulation.elastic-fdtd`](/reference/api/simulation/elastic-fdtd/).
 
 </SeeAlso>
 

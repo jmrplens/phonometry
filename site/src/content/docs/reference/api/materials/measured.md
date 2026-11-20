@@ -28,7 +28,7 @@ dimensionless and bounded by the surface it belongs to; an area per person
 is a quantity in square metres that is added, not multiplied. Holding both
 under one field name would put a number in square metres behind a name that
 says otherwise, so they are two classes and two catalogues,
-[`PUBLISHED_ABSORPTION`](/phonometry/reference/api/materials/measured/#published_absorption) and [`PUBLISHED_ABSORPTION_AREAS`](/phonometry/reference/api/materials/measured/#published_absorption_areas), and the
+[`PUBLISHED_ABSORPTION`](/reference/api/materials/measured/#published_absorption) and [`PUBLISHED_ABSORPTION_AREAS`](/reference/api/materials/measured/#published_absorption_areas), and the
 data file tells them apart by the fields each row carries.
 
 The band is the field
@@ -36,12 +36,12 @@ The band is the field
 Each octave band is a field of its own, `absorption_coefficient_125` and so
 on, with the band's centre frequency in hertz as the suffix. That is not the
 tidiest shape for a spectrum and it is the right one for a catalogue: every
-hedge of [`CatalogueRow`](/phonometry/reference/api/io/io/#cataloguerow) is keyed by
+hedge of [`CatalogueRow`](/reference/api/io/io/#cataloguerow) is keyed by
 field name, so a cell the page prints as a range, or leaves empty, or prints
 wrong, is handled the way the same cell is handled in every other catalogue,
-and [`why_missing`](/phonometry/reference/api/io/io/#cataloguerowwhy_missing) answers
-for a band the way it answers for a modulus. [`AbsorptionSpectrum.bands`](/phonometry/reference/api/materials/measured/#absorptionspectrumbands)
-and [`AbsorptionSpectrum.spectrum`](/phonometry/reference/api/materials/measured/#absorptionspectrumspectrum) give the row back as a spectrum for
+and [`why_missing`](/reference/api/io/io/#cataloguerowwhy_missing) answers
+for a band the way it answers for a modulus. [`AbsorptionSpectrum.bands`](/reference/api/materials/measured/#absorptionspectrumbands)
+and [`AbsorptionSpectrum.spectrum`](/reference/api/materials/measured/#absorptionspectrumspectrum) give the row back as a spectrum for
 the caller who wants one.
 
 What the numbers are worth
@@ -51,7 +51,7 @@ the room, which is why ISO 354 fixes all three and why a coefficient above 1
 is common and not an error. Bies prints no mounting; Long prints the ASTM
 C423 mounting on most rows and the same fibreglass board twice, on the
 test-room floor and over a 400 mm airspace, with a different spectrum each
-time, and [`AbsorptionSpectrum.mounting`](/phonometry/reference/api/materials/measured/#absorptionspectrum) keeps that apart. The books
+time, and [`AbsorptionSpectrum.mounting`](/reference/api/materials/measured/#absorptionspectrum) keeps that apart. The books
 that print a thickness print it in the name. A row is therefore a
 representative value for a finish of that description on that mount, useful
 for a reverberation estimate and for a sanity check on a measurement, and
@@ -101,15 +101,15 @@ behalf.
 | Name | Description |
 | :--- | :--- |
 | `name` | A fragment of the printed name, matched without case. |
-| `catalogue` | The rows to search in place of [`PUBLISHED_ABSORPTION`](/phonometry/reference/api/materials/measured/#published_absorption): a catalogue of your own that [`phonometry.io.read_catalogue`](/phonometry/reference/api/io/io/#read_catalogue) returns, `PUBLISHED_ABSORPTION \| mine` to search both at once, or any mapping of key to row (Default: `None`, which searches [`PUBLISHED_ABSORPTION`](/phonometry/reference/api/materials/measured/#published_absorption)). |
+| `catalogue` | The rows to search in place of [`PUBLISHED_ABSORPTION`](/reference/api/materials/measured/#published_absorption): a catalogue of your own that [`phonometry.io.read_catalogue`](/reference/api/io/io/#read_catalogue) returns, `PUBLISHED_ABSORPTION \| mine` to search both at once, or any mapping of key to row (Default: `None`, which searches [`PUBLISHED_ABSORPTION`](/reference/api/materials/measured/#published_absorption)). |
 
-**Returns:** The rows whose [`AbsorptionSpectrum.name`](/phonometry/reference/api/materials/measured/#absorptionspectrum) contains it, in catalogue order, which is empty when no row has one.
+**Returns:** The rows whose [`AbsorptionSpectrum.name`](/reference/api/materials/measured/#absorptionspectrum) contains it, in catalogue order, which is empty when no row has one.
 
 **Raises**
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | for a *catalogue* that is not a mapping, or that holds a row that is not an [`AbsorptionSpectrum`](/phonometry/reference/api/materials/measured/#absorptionspectrum), naming its key. |
+| TypeError | for a *catalogue* that is not a mapping, or that holds a row that is not an [`AbsorptionSpectrum`](/reference/api/materials/measured/#absorptionspectrum), naming its key. |
 
 ## AbsorptionAreaSpectrum
 
@@ -173,7 +173,7 @@ that a number from here cannot be mistaken for a coefficient.
 | `variant` | Which specimen or condition this row is, when the page prints several under one name: `"chemically pure"`, `"direction x"`, `"0.68 mm diameter"`. Empty when the page prints one. |
 | `source` | Document, table, PDF page and printed folio. |
 | `table` | The data file this row was read from, without the extension, which is also the first half of its key in the catalogue that holds it. |
-| `basis` | What the source says a value is: a field name, or `"row"` for the whole row, to one of [`CATALOGUE_BASES`](/phonometry/reference/api/io/io/#catalogue_bases). Hopkins marks most of his Poisson ratios "Estimate", and those cells hold `"estimated"`; a datasheet that declares a class under a product standard would hold `"declared"`. A field with no entry takes the row's, and a row with neither is one whose source does not say, which is a different answer from any of the five. `basis_of` reads it. Independent of `derived`: this is what the source claims for a cell, that is what this library computed. |
+| `basis` | What the source says a value is: a field name, or `"row"` for the whole row, to one of [`CATALOGUE_BASES`](/reference/api/io/io/#catalogue_bases). Hopkins marks most of his Poisson ratios "Estimate", and those cells hold `"estimated"`; a datasheet that declares a class under a product standard would hold `"declared"`. A field with no entry takes the row's, and a row with neither is one whose source does not say, which is a different answer from any of the five. `basis_of` reads it. Independent of `derived`: this is what the source claims for a cell, that is what this library computed. |
 | `approximate` | Fields the page prints with a `~`. Not an estimate and not an interval: a number the author rounded on purpose. |
 | `derived` | Field to how it was computed, for the ones this library worked out from the cells the page did print. A derived value is never stored as if it had been read, and on every row the library builds it follows again from the row's own cells: `from_printed` writes it, and nothing else in the library does. One a caller passes to the literal constructor is the caller's word, which the row keeps and `printed_fields` leaves out with its value, as it leaves out every derived one. When the printed cells a value rests on do not all have one `basis`, the text names the basis of each, so a modulus worked out from a plate speed and a Poisson ratio Hopkins marks as an estimate says it rests on that estimate. A value converted from the unit the page prints is not derived (`converted` holds it), and neither is one the page gives by reference to another of its rows (`carried` does). |
 | `converted` | Field to `(figure, unit)`, the page's figure and the unit it is in, for a value this row holds in a unit the page does not use. Ver and Beranek print their damping materials in degrees Fahrenheit and pounds per square inch, and the row holds degrees Celsius and pascals, so `("3e5", "psi")` sits beside a modulus in pascals. The figure is kept as the page writes it, so the cell can always be read back in the page's own terms. The unit is the one the page prints with the figure or over its column. Long prints the figures of his musician bare, and the sabins recorded for them are a reading of the table, which is set in inches and pounds and names sabins on the next row; that row's note says so. A figure written in another unit of the same kind as the field's (`thickness_m` for `thickness_mm`, `flow_resistivity_kpa_s_m2` for `flow_resistivity_pa_s_m2`) is converted by `from_printed` and recorded here, whether it is a value, the end of a range or one of several readings; for a range the figure is the printed end of a bound, or both ends as `"5 to 10"`, and for readings the list as the page gives it. A packaged table transcribed in the base unit with only its SI prefix changed, such as the megapascals of Rossing Table 15.5, holds no entry here, and the table's `about` says so. |
@@ -192,13 +192,13 @@ that a number from here cannot be mistaken for a coefficient.
 | `provenance` | The document the row was read from, for a row read from a caller's catalogue file: its kind, version, the day it was consulted, the laboratory and the report. `None` on every packaged row, whose `source` cites a page. A refusal names the document by its kind (`"the datasheet prints an upper bound of ..."`), where a row without one says `"the page"`; and the fields of its `field_test_standards` are fields of the row. |
 
 A table set in feet prints its areas in sabins, and
-[`from_printed`](/phonometry/reference/api/io/io/#cataloguerowfrom_printed) takes them under the
+[`from_printed`](/reference/api/io/io/#cataloguerowfrom_printed) takes them under the
 band's field name with `_ft2` in place of `_m2`, or
 `_ft2_per_1000_ft3` for sabins per thousand cubic feet, which then
 needs `per` written beside it, because its default is a person.
 The page's figure is converted on its digits with the exact factor of
 the 1959 foot and rounded once, and
-[`converted`](/phonometry/reference/api/io/io/#cataloguerow) keeps the figure and its
+[`converted`](/reference/api/io/io/#cataloguerow) keeps the figure and its
 unit, so the page's own number is never more than a lookup away. It is
 not a derivation: the value is the page's, in another unit.
 
@@ -216,7 +216,7 @@ The bands this row prints a value for, in hertz.
 AbsorptionAreaSpectrum.basis_of(field_name: str) -> str
 ```
 
-What the source says this field is, one of [`CATALOGUE_BASES`](/phonometry/reference/api/io/io/#catalogue_bases).
+What the source says this field is, one of [`CATALOGUE_BASES`](/reference/api/io/io/#catalogue_bases).
 
 The five are `measured`, `declared`, `calculated`, `estimated`
 and `extended`.
@@ -246,7 +246,7 @@ unit of the same kind as its field (`thickness_m` for
 `thickness_mm`, `flow_resistivity_kpa_s_m2` for
 `flow_resistivity_pa_s_m2`), or in a unit the class takes as an
 alias of its own (an
-[`AbsorptionAreaSpectrum`](/phonometry/reference/api/materials/measured/#absorptionareaspectrum) takes
+[`AbsorptionAreaSpectrum`](/reference/api/materials/measured/#absorptionareaspectrum) takes
 `absorption_area_125_ft2` for `absorption_area_125_m2`), is
 converted on its digits with an exact factor and rounded once,
 whether it is a value or stands as the key of a hedge (the ends of a
@@ -398,7 +398,7 @@ The row as `{band_hz: value}` over the bands it prints.
 
 A band the page left empty, or printed as something other than a
 number, is left out rather than filled with a zero;
-[`why_missing`](/phonometry/reference/api/io/io/#cataloguerowwhy_missing) on that band's field says which it
+[`why_missing`](/reference/api/io/io/#cataloguerowwhy_missing) on that band's field says which it
 was.
 
 ### AbsorptionAreaSpectrum.values_at()
@@ -430,7 +430,7 @@ bands: a sixth of an octave for octave bands, an eighteenth for
 one-third octave bands. That takes the nominal centre, the exact
 base-ten one and the exact base-two one alike (160 Hz, 158.49 Hz and
 157.49 Hz are one band) and never reaches the next band. A band the
-row does not print is refused, as [`printed`](/phonometry/reference/api/io/io/#cataloguerowprinted)
+row does not print is refused, as [`printed`](/reference/api/io/io/#cataloguerowprinted)
 refuses it, with what the page had there; it is never read as zero
 and never filled from its neighbours.
 
@@ -524,7 +524,7 @@ AbsorptionSpectrum(
 
 One finish of a published table, with its coefficient in each band.
 
-The hedges of [`CatalogueRow`](/phonometry/reference/api/io/io/#cataloguerow) apply
+The hedges of [`CatalogueRow`](/reference/api/io/io/#cataloguerow) apply
 to each band as to any other field, and the material's thickness,
 density or mounting are part of `name`, as the page prints them,
 because the books print them there and pulling them into fields would
@@ -547,7 +547,7 @@ mean deciding what "heavy carpet on concrete" is a thickness of.
 | `variant` | Which specimen or condition this row is, when the page prints several under one name: `"chemically pure"`, `"direction x"`, `"0.68 mm diameter"`. Empty when the page prints one. |
 | `source` | Document, table, PDF page and printed folio. |
 | `table` | The data file this row was read from, without the extension, which is also the first half of its key in the catalogue that holds it. |
-| `basis` | What the source says a value is: a field name, or `"row"` for the whole row, to one of [`CATALOGUE_BASES`](/phonometry/reference/api/io/io/#catalogue_bases). Hopkins marks most of his Poisson ratios "Estimate", and those cells hold `"estimated"`; a datasheet that declares a class under a product standard would hold `"declared"`. A field with no entry takes the row's, and a row with neither is one whose source does not say, which is a different answer from any of the five. `basis_of` reads it. Independent of `derived`: this is what the source claims for a cell, that is what this library computed. |
+| `basis` | What the source says a value is: a field name, or `"row"` for the whole row, to one of [`CATALOGUE_BASES`](/reference/api/io/io/#catalogue_bases). Hopkins marks most of his Poisson ratios "Estimate", and those cells hold `"estimated"`; a datasheet that declares a class under a product standard would hold `"declared"`. A field with no entry takes the row's, and a row with neither is one whose source does not say, which is a different answer from any of the five. `basis_of` reads it. Independent of `derived`: this is what the source claims for a cell, that is what this library computed. |
 | `approximate` | Fields the page prints with a `~`. Not an estimate and not an interval: a number the author rounded on purpose. |
 | `derived` | Field to how it was computed, for the ones this library worked out from the cells the page did print. A derived value is never stored as if it had been read, and on every row the library builds it follows again from the row's own cells: `from_printed` writes it, and nothing else in the library does. One a caller passes to the literal constructor is the caller's word, which the row keeps and `printed_fields` leaves out with its value, as it leaves out every derived one. When the printed cells a value rests on do not all have one `basis`, the text names the basis of each, so a modulus worked out from a plate speed and a Poisson ratio Hopkins marks as an estimate says it rests on that estimate. A value converted from the unit the page prints is not derived (`converted` holds it), and neither is one the page gives by reference to another of its rows (`carried` does). |
 | `converted` | Field to `(figure, unit)`, the page's figure and the unit it is in, for a value this row holds in a unit the page does not use. Ver and Beranek print their damping materials in degrees Fahrenheit and pounds per square inch, and the row holds degrees Celsius and pascals, so `("3e5", "psi")` sits beside a modulus in pascals. The figure is kept as the page writes it, so the cell can always be read back in the page's own terms. The unit is the one the page prints with the figure or over its column. Long prints the figures of his musician bare, and the sabins recorded for them are a reading of the table, which is set in inches and pounds and names sabins on the next row; that row's note says so. A figure written in another unit of the same kind as the field's (`thickness_m` for `thickness_mm`, `flow_resistivity_kpa_s_m2` for `flow_resistivity_pa_s_m2`) is converted by `from_printed` and recorded here, whether it is a value, the end of a range or one of several readings; for a range the figure is the printed end of a bound, or both ends as `"5 to 10"`, and for readings the list as the page gives it. A packaged table transcribed in the base unit with only its SI prefix changed, such as the megapascals of Rossing Table 15.5, holds no entry here, and the table's `about` says so. |
@@ -577,7 +577,7 @@ The coefficient in one band, or a refusal that says what the page had.
 
 | Name | Description |
 | :--- | :--- |
-| `band_hz` | An octave-band centre frequency from [`ABSORPTION_BANDS_HZ`](/phonometry/reference/api/materials/measured/#absorption_bands_hz). |
+| `band_hz` | An octave-band centre frequency from [`ABSORPTION_BANDS_HZ`](/reference/api/materials/measured/#absorption_bands_hz). |
 
 **Returns:** The printed coefficient, as a float.
 
@@ -601,7 +601,7 @@ The bands this row prints a value for, in hertz.
 AbsorptionSpectrum.basis_of(field_name: str) -> str
 ```
 
-What the source says this field is, one of [`CATALOGUE_BASES`](/phonometry/reference/api/io/io/#catalogue_bases).
+What the source says this field is, one of [`CATALOGUE_BASES`](/reference/api/io/io/#catalogue_bases).
 
 The five are `measured`, `declared`, `calculated`, `estimated`
 and `extended`.
@@ -631,7 +631,7 @@ unit of the same kind as its field (`thickness_m` for
 `thickness_mm`, `flow_resistivity_kpa_s_m2` for
 `flow_resistivity_pa_s_m2`), or in a unit the class takes as an
 alias of its own (an
-[`AbsorptionAreaSpectrum`](/phonometry/reference/api/materials/measured/#absorptionareaspectrum) takes
+[`AbsorptionAreaSpectrum`](/reference/api/materials/measured/#absorptionareaspectrum) takes
 `absorption_area_125_ft2` for `absorption_area_125_m2`), is
 converted on its digits with an exact factor and rounded once,
 whether it is a value or stands as the key of a hedge (the ends of a
@@ -783,7 +783,7 @@ The row as `{band_hz: value}` over the bands it prints.
 
 A band the page left empty, or printed as something other than a
 number, is left out rather than filled with a zero;
-[`why_missing`](/phonometry/reference/api/io/io/#cataloguerowwhy_missing) on that band's field says which it
+[`why_missing`](/reference/api/io/io/#cataloguerowwhy_missing) on that band's field says which it
 was.
 
 ### AbsorptionSpectrum.values_at()
@@ -815,7 +815,7 @@ bands: a sixth of an octave for octave bands, an eighteenth for
 one-third octave bands. That takes the nominal centre, the exact
 base-ten one and the exact base-two one alike (160 Hz, 158.49 Hz and
 157.49 Hz are one band) and never reaches the next band. A band the
-row does not print is refused, as [`printed`](/phonometry/reference/api/io/io/#cataloguerowprinted)
+row does not print is refused, as [`printed`](/reference/api/io/io/#cataloguerowprinted)
 refuses it, with what the page had there; it is never read as zero
 and never filled from its neighbours.
 

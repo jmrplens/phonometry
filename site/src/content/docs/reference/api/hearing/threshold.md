@@ -57,7 +57,7 @@ quantile of `fractile` and the spread is the upper one for `z >= 0`
 | `fractile` | Population fractile in the open interval (0, 1); `0.5` gives the median. |
 | `frequencies` | Optional subset of the audiometric frequencies, in hertz; `None` uses all eleven (125 Hz to 8000 Hz). |
 
-**Returns:** An [`AgeThresholdResult`](/phonometry/reference/api/hearing/threshold/#agethresholdresult) with the distribution and `.plot()`.
+**Returns:** An [`AgeThresholdResult`](/reference/api/hearing/threshold/#agethresholdresult) with the distribution and `.plot()`.
 
 **Raises**
 
@@ -83,7 +83,7 @@ AgeThresholdResult(
 
 Age-related hearing threshold distribution (ISO 7029:2017).
 
-All arrays are in dB and aligned with [`AUDIOMETRIC_FREQUENCIES_HZ`](/phonometry/reference/api/hearing/threshold/#audiometric_frequencies_hz).
+All arrays are in dB and aligned with [`AUDIOMETRIC_FREQUENCIES_HZ`](/reference/api/hearing/threshold/#audiometric_frequencies_hz).
 
 **Attributes**
 
@@ -181,7 +181,7 @@ standard prints two tables rather than one.
 | Name | Description |
 | :--- | :--- |
 | `earphone` | `"DT 48"` or `"TDH 39"` (Table 1, on the IEC 60303 coupler), or `"other supra-aural"` (Table 2, on the IEC 60318 artificial ear, for an earphone meeting the requirements of 4.3). |
-| `frequencies` | Optional subset of [`RETSPL_FREQUENCIES_HZ`](/phonometry/reference/api/hearing/threshold/#retspl_frequencies_hz), in hertz; `None` uses all twenty-three. |
+| `frequencies` | Optional subset of [`RETSPL_FREQUENCIES_HZ`](/reference/api/hearing/threshold/#retspl_frequencies_hz), in hertz; `None` uses all twenty-three. |
 
 **Returns:** The reference level, in dB, aligned with the frequencies. A `float` for a number, an array for a sequence or an array, a zero-dimensional one included, and every frequency without frequencies.
 
@@ -252,8 +252,8 @@ is a decibel more in the coupler.
 | Name | Description |
 | :--- | :--- |
 | `hearing_level` | The audiogram, in dB HL, one value per frequency. |
-| `earphone` | As in [`earphone_reference_level`](/phonometry/reference/api/hearing/threshold/#earphone_reference_level). One of `"DT 48"`, `"TDH 39"` or `"other supra-aural"`. |
-| `frequencies` | The frequencies the audiogram was taken at; `None` uses all twenty-three of [`RETSPL_FREQUENCIES_HZ`](/phonometry/reference/api/hearing/threshold/#retspl_frequencies_hz). |
+| `earphone` | As in [`earphone_reference_level`](/reference/api/hearing/threshold/#earphone_reference_level). One of `"DT 48"`, `"TDH 39"` or `"other supra-aural"`. |
+| `frequencies` | The frequencies the audiogram was taken at; `None` uses all twenty-three of [`RETSPL_FREQUENCIES_HZ`](/reference/api/hearing/threshold/#retspl_frequencies_hz). |
 
 **Returns:** The equivalent sound pressure level in the coupler, in dB. A `float` when `hearing_level` and `frequencies` are both numbers, an array when either is a sequence or an array, a zero-dimensional one included.
 

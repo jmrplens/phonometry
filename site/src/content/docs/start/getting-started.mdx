@@ -16,7 +16,7 @@ levels to a calibrator tone, which is what turns them into a measurement.
 
 ## Installation
 
-The commands below are pip's. [Environments](/phonometry/start/environments/)
+The commands below are pip's. [Environments](/start/environments/)
 takes uv, conda, Jupyter, JupyterLite, Docker and type checkers in turn.
 
 ### From PyPI (recommended)
@@ -30,7 +30,7 @@ If phonometry 3.x is already installed, upgrade it with
 (`pip install -U "phonometry[full]"` for all four where `[full]` installs);
 3.x has a different import layout and `from phonometry import filters` fails
 on it. Code written for 3.x needs changes to run on 4.x; the
-[upgrade guide](/phonometry/start/upgrading/) maps each of them.
+[upgrade guide](/start/upgrading/) maps each of them.
 
 phonometry needs Python 3.12 or newer, with NumPy 2.0.2 and SciPy 1.14.0
 or later. Each of those floors, and each floor of the extras, is the oldest
@@ -71,7 +71,7 @@ not supported there, nor `[full]`, which holds it;
 `pip install "phonometry[plot,report,audio]"` installs the other three extras
 there. The same holds on 32-bit Linux, where numba's last wheels, of 0.56.4,
 are for Python 3.10 at most and numba supports the platform no longer; [Docker
-and servers](/phonometry/start/environments/docker/) says what the other three
+and servers](/start/environments/docker/) says what the other three
 build there. A plain install takes the newest releases, which have wheels on
 the other three platforms but numba's on musl and on macOS on Intel, where a
 plain `[perf]` install builds numba and llvmlite on every Python, and
@@ -150,9 +150,9 @@ pip install "phonometry[torch]"
 Adding that index with `--extra-index-url` is not enough: pip takes the
 newest torch it finds on either index, PyPI's CUDA build included.
 
-[Where a simulation runs](/phonometry/simulation/compute/) says what each device of the FDTD engines
+[Where a simulation runs](/simulation/compute/) says what each device of the FDTD engines
 needs, CuPy's wheel for an NVIDIA GPU among them, and [pip and
-uv](/phonometry/start/environments/pip-and-uv/) what each extra brings and how
+uv](/start/environments/pip-and-uv/) what each extra brings and how
 uv installs them.
 
 ### From a clone
@@ -164,7 +164,7 @@ pip install .
 ```
 
 pip builds the wheel without a compiler; [pip and
-uv](/phonometry/start/environments/pip-and-uv/#from-a-clone) has the rest.
+uv](/start/environments/pip-and-uv/#from-a-clone) has the rest.
 
 ### As a git submodule
 
@@ -199,9 +199,9 @@ no weighting, so they are Z (unweighted); no ballistics, so each band is one
 r.m.s. value over the whole record. "Give the samples physical meaning" below
 puts the first stage back, and each stage is an independent function or class
 you can use on its own; the guides cover them left to right
-([Calibration](/phonometry/signals/metrology/calibration/) →
-[Frequency Weighting](/phonometry/signals/levels/weighting/) → [Filter Banks](/phonometry/signals/filters/filter-banks/) →
-[Time Weighting](/phonometry/signals/levels/time-weighting/) → [Levels](/phonometry/signals/levels/levels/)).
+([Calibration](/signals/metrology/calibration/) →
+[Frequency Weighting](/signals/levels/weighting/) → [Filter Banks](/signals/filters/filter-banks/) →
+[Time Weighting](/signals/levels/time-weighting/) → [Levels](/signals/levels/levels/)).
 
 ## A first analysis: one-third-octave bands (uncalibrated)
 
@@ -236,7 +236,7 @@ same bands: pass `nominal=True` and `freq` comes back as `['12.5', '16', …,
 values are what you want when computing with them. There are 33 bands because
 the default range is 12 Hz to 20 kHz; `limits=[f_min, f_max]` narrows it, and
 narrowing it is usually worth doing; see [Filter
-Banks](/phonometry/signals/filters/filter-banks/) for the grid.
+Banks](/signals/filters/filter-banks/) for the grid.
 
 **Read the spectrum before trusting it.** Two of the 33 bands hold the signal:
 90.71 dB at 100 Hz and 90.94 dB at 1 kHz, both within 0.3 dB of 90.97 dB, the
@@ -251,7 +251,7 @@ the skirts of the adjacent filters, 26 to 34 dB down; the slow climb from
 plus the numerical floor. The rule of thumb that follows: in a band spectrum,
 treat anything more than about 40 dB below the loudest band as an artefact of
 the analysis until a background measurement says otherwise. [Filter Class
-Verification](/phonometry/signals/filters/filter-compliance/) is the mask that
+Verification](/signals/filters/filter-compliance/) is the mask that
 fixes how far down those skirts must be.
 
 **These are not yet physical levels.** `octave_filter` always returns
@@ -263,7 +263,7 @@ wrong for a recording, whose sample values are whatever the converter and the
 gain staging happened to produce. There are two honest ways to get a level you
 can defend. Pass the pascals-per-digital-unit factor obtained from a calibrator
 tone via `calibration=filters.LevelCalibration(factor=S)` (see
-[Calibration and dBFS](/phonometry/signals/metrology/calibration/)), or, when
+[Calibration and dBFS](/signals/metrology/calibration/)), or, when
 the signal never had a physical scale, ask for `LevelCalibration(dbfs=True)` and
 read levels relative to digital full scale, which come out negative and cannot
 be mistaken for an SPL.
@@ -334,7 +334,7 @@ spl, freq = filtered.levels, filtered.frequencies
 
 </details>
 
-[Filter Architecture Gallery](/phonometry/signals/filters/filter-gallery/) has
+[Filter Architecture Gallery](/signals/filters/filter-gallery/) has
 the same plate for the other four architectures.
 
 ## Give the samples physical meaning
@@ -392,7 +392,7 @@ target_spl=94.0, fs=fs)` returns the same factor and, on the way, checks the
 recorded tone's short-term stability the way IEC 60942 qualifies the calibrator
 itself, so a badly coupled microphone is caught here instead of silently
 corrupting every level downstream. [Calibration and
-dBFS](/phonometry/signals/metrology/calibration/) carries that call, the
+dBFS](/signals/metrology/calibration/) carries that call, the
 pre/post drift rule and the digital dBFS alternative for signals that never had
 a physical scale.
 
@@ -416,9 +416,9 @@ one-line form of the two lines above and applies the weighting internally, so
 never A-weight the signal first and then pass it to a level function; that
 weights it twice. The Fast and Slow envelopes, $L_{\mathrm{A}E}$, $L_\mathrm{Cpeak}$ and the
 percentile levels are the same kind of call: [Time
-Weighting](/phonometry/signals/levels/time-weighting/) and [Integrated and
-Statistical Levels](/phonometry/signals/levels/levels/) have them, and [Build a
-sound level meter](/phonometry/signals/sound-level-meter/) runs the whole chain
+Weighting](/signals/levels/time-weighting/) and [Integrated and
+Statistical Levels](/signals/levels/levels/) have them, and [Build a
+sound level meter](/signals/sound-level-meter/) runs the whole chain
 from a calibrator tone to all of them on one page.
 
 ## Read a sound level meter WAV
@@ -448,7 +448,7 @@ EXTENSIBLE, overnight RF64. It warns if the file is a compressed listening
 copy rather than a linear recording. Write the factor into the sidecar once
 (`io.write_sidecar("measurement.wav", cal)`) and from then on
 `io.read("measurement.wav")` comes back calibrated with no arguments at
-all. [Reading and writing measurement audio](/phonometry/io/audio-files/)
+all. [Reading and writing measurement audio](/io/audio-files/)
 is the full workflow: provenance, streaming, BWF writing and lossless
 conversion.
 
@@ -520,7 +520,7 @@ channels)` array, and the bank reads a 2D array as `(channels, samples)`. Pass a
 stereo file as it comes and nothing raises. A 2400-sample stereo array returns
 an `spl` of shape `(2400, 33)`, one spectrum per *pair of samples*, and a
 one-second file takes minutes to produce meaningless numbers. See
-[Multichannel and Performance](/phonometry/signals/filters/multichannel/) for
+[Multichannel and Performance](/signals/filters/multichannel/) for
 the convention, and for the case where several calibrated channels are analysed
 at once, each with its own sensitivity.
 
@@ -535,7 +535,7 @@ absorb it: a sensitivity determined from a calibrator recording *in the same
 integer format* already carries the factor. Mixing the two (a float-read
 calibrator and an integer-read measurement, or the reverse) is wrong by 90 dB
 with no symptom. The rules are in
-[Calibration and dBFS](/phonometry/signals/metrology/calibration/).
+[Calibration and dBFS](/signals/metrology/calibration/).
 
 **One number per band, over the whole file.** `octave_filter` returns a single
 r.m.s. level per band for the entire array, with the mean removed first
@@ -588,7 +588,7 @@ Jupyter shows it under the cell as this table:
 <div class="phonometry-record"><table style="border-collapse:collapse;margin:0"><caption style="caption-side:top;text-align:left;padding:2px 0"><strong>OctaveFilterResult</strong></caption><thead><tr><th style="text-align:left;vertical-align:top">field</th><th style="text-align:left;vertical-align:top">value</th><th style="text-align:left;vertical-align:top">unit</th></tr></thead><tbody><tr><td style="text-align:left;vertical-align:top"><code>levels</code></td><td style="text-align:left;vertical-align:top">array 31 float64, 17.125 to 82.986</td><td style="text-align:left;vertical-align:top">dB</td></tr><tr><td style="text-align:left;vertical-align:top"><code>frequencies</code></td><td style="text-align:left;vertical-align:top">tuple of 31 numbers, 19.953 to 19953</td><td style="text-align:left;vertical-align:top">Hz</td></tr><tr><td style="text-align:left;vertical-align:top"><code>bands</code></td><td style="text-align:left;vertical-align:top">None</td><td style="text-align:left;vertical-align:top"></td></tr></tbody></table><div style="font-size:smaller;opacity:0.8;padding-top:2px">plot()</div></div>
 
 A verdict, in a cell of its own, shows its outcome in the title. This one
-applies Annex G.4 of ISO 10140-1 to a [lining test](/phonometry/buildings/insulation/lab-application-rules/) on a masonry wall:
+applies Annex G.4 of ISO 10140-1 to a [lining test](/buildings/insulation/lab-application-rules/) on a masonry wall:
 the measurements without and with the lining may be a day apart only once the
 wall has cured for two weeks, or for at least three times that lag, and
 2.9 days is neither:
@@ -630,9 +630,9 @@ ax = bank.plot()    # drawn under the cell; in a script, plt.show()
 *The figure `bank.plot()` draws under the cell: the one-third-octave spectrum
 of the 1 kHz tone over noise.*
 
-[Jupyter and JupyterLab](/phonometry/start/environments/jupyter/) carries on
+[Jupyter and JupyterLab](/start/environments/jupyter/) carries on
 from here: SVG figures, videos, fiches and how a warning shows in a cell, and
-[JupyterLite and Pyodide](/phonometry/start/environments/jupyterlite/) the same
+[JupyterLite and Pyodide](/start/environments/jupyterlite/) the same
 notebook in a browser.
 
 ## Where to go next
@@ -645,12 +645,12 @@ simulation. Every result object exposes a one-line
 `.plot(language="en"|"es")` figure and, where a standard defines a reporting
 format, a `.report()` method that renders the normative PDF fiche.
 
-- [Build a sound level meter](/phonometry/signals/sound-level-meter/): the same chain run end to end, from the calibrator tone to $L_\mathrm{AF}(t)$, $L_\mathrm{Aeq}$, $L_{\mathrm{A}E}$, $L_\mathrm{Cpeak}$, the percentile levels and the class check of every stage
-- [All guides](/phonometry/start/guides/): the map, every guide grouped by topic with a line on each
-- [Glossary](/phonometry/reference/glossary/): a symbol, its unit, its defining clause and the guide that computes it
-- [Filter Architecture Gallery](/phonometry/signals/filters/filter-gallery/): choose an architecture and inspect responses
-- [Calibration and dBFS](/phonometry/signals/metrology/calibration/): get real-world SPL values
-- [Why phonometry](/phonometry/start/why-phonometry/): the conformance-first design philosophy
-- [Conformance report](/phonometry/reference/conformance/): the expected and computed value of all {totalChecks} checks
-- [API Reference](/phonometry/reference/api/): every parameter of every function
-- [Bibliography](/phonometry/reference/bibliography/): every work the guides cite, with the pages that cite it and its link where it has one
+- [Build a sound level meter](/signals/sound-level-meter/): the same chain run end to end, from the calibrator tone to $L_\mathrm{AF}(t)$, $L_\mathrm{Aeq}$, $L_{\mathrm{A}E}$, $L_\mathrm{Cpeak}$, the percentile levels and the class check of every stage
+- [All guides](/start/guides/): the map, every guide grouped by topic with a line on each
+- [Glossary](/reference/glossary/): a symbol, its unit, its defining clause and the guide that computes it
+- [Filter Architecture Gallery](/signals/filters/filter-gallery/): choose an architecture and inspect responses
+- [Calibration and dBFS](/signals/metrology/calibration/): get real-world SPL values
+- [Why phonometry](/start/why-phonometry/): the conformance-first design philosophy
+- [Conformance report](/reference/conformance/): the expected and computed value of all {totalChecks} checks
+- [API Reference](/reference/api/): every parameter of every function
+- [Bibliography](/reference/bibliography/): every work the guides cite, with the pages that cite it and its link where it has one

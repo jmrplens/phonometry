@@ -38,7 +38,7 @@ function beacon(body, { method = 'POST', origin = ORIGIN, site = 'same-origin', 
 	return new Request(`${ORIGIN}/_v`, { method, headers, body: method === 'POST' ? body : undefined });
 }
 
-const VIEW = JSON.stringify({ p: '/phonometry/signals/', q: '', r: 'https://www.google.com/', n: 'navigate', t: 300, w: 1920, h: 1080, vw: 1280, vh: 720, dpr: 1, lg: 'en', tz: 'UTC', wd: 0, nf: 0 });
+const VIEW = JSON.stringify({ p: '/signals/', q: '', r: 'https://www.google.com/', n: 'navigate', t: 300, w: 1920, h: 1080, vw: 1280, vh: 720, dpr: 1, lg: 'en', tz: 'UTC', wd: 0, nf: 0 });
 
 describe('the beacon', () => {
 	test('a page view: 204 at once, one data point after, marked beacon', async () => {
@@ -48,7 +48,7 @@ describe('the beacon', () => {
 		assert.equal(response.headers.get('cache-control'), 'no-store');
 		await b.settle();
 		assert.equal(b.points.length, 1);
-		assert.equal(b.points[0].blobs[0], '/phonometry/signals/');
+		assert.equal(b.points[0].blobs[0], '/signals/');
 		assert.equal(b.points[0].blobs[11], 'beacon');
 		assert.equal(b.points[0].doubles.length, 15);
 		assert.deepEqual(b.keys, ['203.0.113.7']);
@@ -96,7 +96,7 @@ describe('the beacon', () => {
 
 	test('the 404 page at an agent path: refused, the Worker logged that miss already', async () => {
 		const b = bindings();
-		const body = JSON.stringify({ ...JSON.parse(VIEW), p: '/phonometry/no-such-page/index.md', nf: 1 });
+		const body = JSON.stringify({ ...JSON.parse(VIEW), p: '/no-such-page/index.md', nf: 1 });
 		const response = await worker.fetch(beacon(body), b.env, b.ctx);
 		assert.equal(response.status, 400);
 		await b.settle();
@@ -107,17 +107,17 @@ describe('the beacon', () => {
 
 	test('the 404 page anywhere else is a page view with status 404', async () => {
 		const b = bindings();
-		const body = JSON.stringify({ ...JSON.parse(VIEW), p: '/phonometry/no-such-page/', nf: 1 });
+		const body = JSON.stringify({ ...JSON.parse(VIEW), p: '/no-such-page/', nf: 1 });
 		assert.equal((await worker.fetch(beacon(body), b.env, b.ctx)).status, 204);
 		await b.settle();
-		assert.equal(b.points[0].blobs[0], '/phonometry/no-such-page/');
+		assert.equal(b.points[0].blobs[0], '/no-such-page/');
 		assert.equal(b.points[0].blobs[10], '404');
 		assert.equal(b.points[0].blobs[11], 'beacon');
 	});
 
 	test('an agent-file path from an ordinary page is not refused (only the 404 page skips)', async () => {
 		const b = bindings();
-		const body = JSON.stringify({ ...JSON.parse(VIEW), p: '/phonometry/signals/index.md', nf: 0 });
+		const body = JSON.stringify({ ...JSON.parse(VIEW), p: '/signals/index.md', nf: 0 });
 		assert.equal((await worker.fetch(beacon(body), b.env, b.ctx)).status, 204);
 	});
 
@@ -136,9 +136,9 @@ describe('the beacon', () => {
 
 describe('an agent file', () => {
 	test('the binding answers, the response goes out as it came, one point', async () => {
-		const sent = new Response('# signals', { status: 200, headers: { 'content-type': 'text/markdown; charset=utf-8', link: '<https://docs.jmrp.io/phonometry/signals/>; rel="canonical"' } });
+		const sent = new Response('# signals', { status: 200, headers: { 'content-type': 'text/markdown; charset=utf-8', link: '<https://phonometry.dev/signals/>; rel="canonical"' } });
 		const b = bindings({ assets: () => sent });
-		const request = new Request(`${ORIGIN}/phonometry/signals/index.md`, { headers: { 'user-agent': 'GPTBot/1.2', accept: 'text/markdown' } });
+		const request = new Request(`${ORIGIN}/signals/index.md`, { headers: { 'user-agent': 'GPTBot/1.2', accept: 'text/markdown' } });
 		const response = await worker.fetch(request, b.env, b.ctx);
 		assert.equal(response, sent, 'the very object the binding returned');
 		assert.equal(b.fetched[0], request, 'the very request the client sent');
@@ -156,7 +156,7 @@ describe('an agent file', () => {
 		const text = '# signals\n\nAcoustic signals, \u00e9t\u00e9.\n'.repeat(500);
 		const sent = new Response(text, { status: 200, headers: { 'content-type': 'text/markdown; charset=utf-8' } });
 		const b = bindings({ assets: () => sent });
-		const response = await worker.fetch(new Request(`${ORIGIN}/phonometry/signals/index.md`, { headers: { 'user-agent': 'ClaudeBot/1.0' } }), b.env, b.ctx);
+		const response = await worker.fetch(new Request(`${ORIGIN}/signals/index.md`, { headers: { 'user-agent': 'ClaudeBot/1.0' } }), b.env, b.ctx);
 		assert.equal(response, sent, 'the very object the binding returned');
 		assert.equal(response.headers.get('content-length'), null, 'no header is added to what the client gets');
 		assert.equal(await response.text(), text, 'the client reads the whole body');
@@ -185,8 +185,8 @@ describe('an agent file', () => {
 	});
 
 	test('a retired copy: the 301 of _redirects, logged as redirect', async () => {
-		const b = bindings({ assets: () => new Response(null, { status: 301, headers: { location: '/phonometry/start/about/index.md' } }) });
-		const response = await worker.fetch(new Request(`${ORIGIN}/phonometry/about/index.md`), b.env, b.ctx);
+		const b = bindings({ assets: () => new Response(null, { status: 301, headers: { location: '/start/about/index.md' } }) });
+		const response = await worker.fetch(new Request(`${ORIGIN}/about/index.md`), b.env, b.ctx);
 		assert.equal(response.status, 301);
 		await b.settle();
 		assert.equal(b.points[0].blobs[10], '301');
@@ -195,7 +195,7 @@ describe('an agent file', () => {
 
 	test('a missing copy: the 404 page, logged with its status', async () => {
 		const b = bindings({ assets: () => new Response('not found', { status: 404 }) });
-		assert.equal((await worker.fetch(new Request(`${ORIGIN}/phonometry/nope/index.md`), b.env, b.ctx)).status, 404);
+		assert.equal((await worker.fetch(new Request(`${ORIGIN}/nope/index.md`), b.env, b.ctx)).status, 404);
 		await b.settle();
 		assert.equal(b.points[0].blobs[10], '404');
 		assert.equal(b.points[0].blobs[11], 'asset');

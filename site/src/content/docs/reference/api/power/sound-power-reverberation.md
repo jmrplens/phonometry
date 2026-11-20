@@ -120,7 +120,7 @@ octave is the 50, 63 and 80 Hz thirds and the 8 kHz octave the 6.3, 8 and
 | `levels` | Band levels in decibels, with the bands on the last axis (`(NB,)`, or `(..., NB)` for several spectra at once). |
 | `frequencies` | The `NB` nominal one-third-octave mid-band frequencies of `levels`, in hertz, from 50 Hz to 10 kHz. |
 
-**Returns:** The octave mid-band frequencies, ascending, and the octave-band levels with the octaves on the last axis, as an [`OctaveBandLevels`](/phonometry/reference/api/power/sound-power-reverberation/#octavebandlevels).
+**Returns:** The octave mid-band frequencies, ascending, and the octave-band levels with the octaves on the last axis, as an [`OctaveBandLevels`](/reference/api/power/sound-power-reverberation/#octavebandlevels).
 
 **Raises**
 
@@ -140,7 +140,7 @@ OctaveBandLevels(
 
 Octave-band levels summed from one-third-octave bands (ISO 3741 Annex F).
 
-What [`octave_band_levels`](/phonometry/reference/api/power/sound-power-reverberation/#octave_band_levels) returns: the octave centres and the
+What [`octave_band_levels`](/reference/api/power/sound-power-reverberation/#octave_band_levels) returns: the octave centres and the
 levels, named, where a `(frequencies, levels)` tuple used to be
 unpacked by position.
 
@@ -226,7 +226,7 @@ is held at the criterion value and the corrected level is an upper bound.
 
 Other standards reach for this one by name rather than repeat it:
 ISO 11957:1996 asks for a correction "in accordance with ISO 3741" four
-times over, and [`phonometry.noise_control.cabin_insulation`](/phonometry/reference/api/noise_control/cabin-insulation/#cabin_insulation) calls
+times over, and [`phonometry.noise_control.cabin_insulation`](/reference/api/noise_control/cabin-insulation/#cabin_insulation) calls
 this.
 
 **Parameters**
@@ -275,7 +275,7 @@ equations state it. `mean_event_level` is the mean corrected single event
 time-integrated level in the room $\overline{L_E(\text{ST})}$
 (Eq. 27). `absorption_area`, `waterhouse_correction`, `c1`, `c2`,
 `speed_of_sound` and `background_correction` are what they are in
-[`ReverberationSoundPowerResult`](/phonometry/reference/api/power/sound-power-reverberation/#reverberationsoundpowerresult), the background correction being
+[`ReverberationSoundPowerResult`](/reference/api/power/sound-power-reverberation/#reverberationsoundpowerresult), the background correction being
 the per-band shift of the mean level after each position was corrected by
 its own `K1i` (Eq. 25/26). `sound_energy_level_a` is the A-weighted
 total `LJA` (Annex F Eq. F.5), computed only when `frequencies` are
@@ -416,7 +416,7 @@ and the speed of sound.
 | Name | Description |
 | :--- | :--- |
 | `path` | Destination path of the PDF file. |
-| `metadata` | Optional [`ReportMetadata`](/phonometry/reference/api/building/insulation/#reportmetadata) supplying the header (`client`, `specimen` the noise source, `test_room` the reverberation test room, `instrumentation`, `temperature_c`, `relative_humidity_percent`, `pressure`, `test_date`), the footer identity (`laboratory`, `operator`, `report_id`, `notes`) and, via `requirement`, a declared A-weighted sound-power limit the fiche checks the result against (lower is better). |
+| `metadata` | Optional [`ReportMetadata`](/reference/api/building/insulation/#reportmetadata) supplying the header (`client`, `specimen` the noise source, `test_room` the reverberation test room, `instrumentation`, `temperature_c`, `relative_humidity_percent`, `pressure`, `test_date`), the footer identity (`laboratory`, `operator`, `report_id`, `notes`) and, via `requirement`, a declared A-weighted sound-power limit the fiche checks the result against (lower is better). |
 | `engine` | Rendering back end; only `"reportlab"` is supported. |
 | `verbose` | When `True` the per-band table adds the background correction `K1` and, for the direct method, the equivalent absorption area `A` and the Waterhouse boundary correction `Cw`. |
 | `language` | Fiche language: `"en"` (default) or `"es"`. |
@@ -454,7 +454,7 @@ Sound energy level in a reverberation room, comparison method
 A reference sound source of known per-band sound power `reference_sound_power_levels` runs
 steadily at the same microphone positions as the source under test, whose
 single event levels `levels` take any of the forms
-[`sound_energy_reverberation`](/phonometry/reference/api/power/sound-power-reverberation/#sound_energy_reverberation) accepts. The sound energy level in each
+[`sound_energy_reverberation`](/reference/api/power/sound-power-reverberation/#sound_energy_reverberation) accepts. The sound energy level in each
 band follows Eq. (31):
 
 $$
@@ -465,9 +465,9 @@ where $\overline{L_E(\text{ST})}$ is the mean corrected single event
 level of the source under test (Eq. 27), $\overline{L_p(\text{RSS})}$
 the mean corrected time-averaged level of the reference source (Eq. 17) and
 `C2` the radiation-impedance correction. The room terms and `C1` cancel
-between the two sources exactly as in [`sound_power_comparison`](/phonometry/reference/api/power/sound-power-reverberation/#sound_power_comparison). The
+between the two sources exactly as in [`sound_power_comparison`](/reference/api/power/sound-power-reverberation/#sound_power_comparison). The
 source under test is background-corrected as in
-[`sound_energy_reverberation`](/phonometry/reference/api/power/sound-power-reverberation/#sound_energy_reverberation) (its background compared as an exposure
+[`sound_energy_reverberation`](/reference/api/power/sound-power-reverberation/#sound_energy_reverberation) (its background compared as an exposure
 over `integration_time`); the reference source, being steady, by the
 time-averaged correction of 9.1.2.
 
@@ -477,7 +477,7 @@ time-averaged correction of 9.1.2.
 | :--- | :--- |
 | `levels` | Single event levels of the source under test, in decibels. |
 | `reference_levels` | Mean room SPL per band (1D) or `(NM, NB)` per-position time-averaged levels of the reference sound source, in decibels. |
-| `reference_sound_power_levels` | Known sound power level `LW(RSS)` per band, in decibels, under the meteorological conditions of the test (Eq. 31), or the [`ReferenceSourceCalibration`](/phonometry/reference/api/power/reference-sound-source/#referencesourcecalibration) of ISO 6926, read in the one-third octave bands at `frequencies` and carried from the reference conditions to those of the test by its own `C2`. |
+| `reference_sound_power_levels` | Known sound power level `LW(RSS)` per band, in decibels, under the meteorological conditions of the test (Eq. 31), or the [`ReferenceSourceCalibration`](/reference/api/power/reference-sound-source/#referencesourcecalibration) of ISO 6926, read in the one-third octave bands at `frequencies` and carried from the reference conditions to those of the test by its own `C2`. |
 | `frequencies` | Band mid-frequencies (Hz) for the `K1` criterion and the A-weighted total. |
 | `n_events` | The number of events `Ne` one measurement encompasses (Eq. 23); `None` when `levels` is per event or already the mean of one event. |
 | `background_levels` | Time-averaged background levels for the `K1` correction of `levels` (per position, or a single spectrum). |
@@ -486,7 +486,7 @@ time-averaged correction of 9.1.2.
 | `temperature_c` | Air temperature `theta` in the room, in degrees Celsius. |
 | `static_pressure_kpa` | Static pressure `ps` in the room, in kilopascals. |
 
-**Returns:** [`ReverberationSoundEnergyResult`](/phonometry/reference/api/power/sound-power-reverberation/#reverberationsoundenergyresult) (`method='comparison'`).
+**Returns:** [`ReverberationSoundEnergyResult`](/reference/api/power/sound-power-reverberation/#reverberationsoundenergyresult) (`method='comparison'`).
 
 **Raises**
 
@@ -533,7 +533,7 @@ $$
 L_J = \overline{L_E(\text{ST})} + \left[ 10 \log_{10}\frac{A}{A_0} + 4.34 \frac{A}{S} + 10 \log_{10}\!\left( 1 + \frac{S c}{8 V f} \right) + C_1 + C_2 - 6 \right]
 $$
 
-with every term of the bracket exactly as in [`sound_power_reverberation`](/phonometry/reference/api/power/sound-power-reverberation/#sound_power_reverberation)
+with every term of the bracket exactly as in [`sound_power_reverberation`](/reference/api/power/sound-power-reverberation/#sound_power_reverberation)
 (Eq. 20), so the level is stated under the reference meteorological
 conditions of clause 4. The background is the time-averaged level the
 standard has measured over the same integration time $T$ as the
@@ -557,7 +557,7 @@ NOTE 1), so that the energies Eq. (25) subtracts share one reference;
 | `temperature_c` | Air temperature `theta` in the room, in degrees Celsius. |
 | `static_pressure_kpa` | Static pressure `ps` in the room, in kilopascals. |
 
-**Returns:** [`ReverberationSoundEnergyResult`](/phonometry/reference/api/power/sound-power-reverberation/#reverberationsoundenergyresult) (`method='direct'`).
+**Returns:** [`ReverberationSoundEnergyResult`](/reference/api/power/sound-power-reverberation/#reverberationsoundenergyresult) (`method='direct'`).
 
 **Raises**
 
@@ -603,14 +603,14 @@ the two sources, so the room absorption need not be known.
 | :--- | :--- |
 | `levels` | Mean room SPL per band (1D) or `(NM, NB)` per-position levels of the source under test, in decibels. |
 | `reference_levels` | Same, for the reference sound source, in decibels. |
-| `reference_sound_power_levels` | Known sound power level `LW(RSS)` per band, in decibels, under the meteorological conditions of the test (Eq. 21), or the [`ReferenceSourceCalibration`](/phonometry/reference/api/power/reference-sound-source/#referencesourcecalibration) of ISO 6926, read in the one-third octave bands at `frequencies` and carried from the reference conditions to those of the test by its own `C2`. |
+| `reference_sound_power_levels` | Known sound power level `LW(RSS)` per band, in decibels, under the meteorological conditions of the test (Eq. 21), or the [`ReferenceSourceCalibration`](/reference/api/power/reference-sound-source/#referencesourcecalibration) of ISO 6926, read in the one-third octave bands at `frequencies` and carried from the reference conditions to those of the test by its own `C2`. |
 | `frequencies` | Band mid-frequencies (Hz) for the A-weighted total; required with a calibration. |
 | `background_levels` | Background levels for the `K1` correction of `levels` (per position, or a single spectrum; applied per position per Eq. 14/15 before the Eq. 16 average when `levels` is 2D). |
 | `reference_background_levels` | Background levels matching `reference_levels`. |
 | `temperature_c` | Air temperature `theta` in the room, in degrees Celsius. |
 | `static_pressure_kpa` | Static pressure `ps` in the room, in kilopascals. |
 
-**Returns:** [`ReverberationSoundPowerResult`](/phonometry/reference/api/power/sound-power-reverberation/#reverberationsoundpowerresult) (`method='comparison'`).
+**Returns:** [`ReverberationSoundPowerResult`](/reference/api/power/sound-power-reverberation/#reverberationsoundpowerresult) (`method='comparison'`).
 
 **Raises**
 
@@ -665,7 +665,7 @@ reference meteorological conditions (clause 4).
 | `temperature_c` | Air temperature `theta` in the room, in degrees Celsius. |
 | `static_pressure_kpa` | Static pressure `ps` in the room, in kilopascals. |
 
-**Returns:** [`ReverberationSoundPowerResult`](/phonometry/reference/api/power/sound-power-reverberation/#reverberationsoundpowerresult).
+**Returns:** [`ReverberationSoundPowerResult`](/reference/api/power/sound-power-reverberation/#reverberationsoundpowerresult).
 
 **Raises**
 

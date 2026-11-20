@@ -627,7 +627,7 @@ Un suelo exterior es mucho más resistivo que los materiales fibrosos con los
 que se ajustaron los dos modelos, así que todas las octavas de aquí quedan por
 debajo de su rango de ajuste publicado, y la llamada emite un
 `PorousAbsorberWarning` que dice que la regresión es ahí una extrapolación;
-[Elección de la impedancia del suelo](/phonometry/es/environment/propagation/ground-barriers/#eleccion-de-la-impedancia-del-suelo)
+[Elección de la impedancia del suelo](/es/environment/propagation/ground-barriers/#eleccion-de-la-impedancia-del-suelo)
 explica lo que eso cuesta y por qué Miki es el modelo que conviene preferir por
 debajo del rango.
 
@@ -985,7 +985,7 @@ elegir un `row_type`.
   `ThirdOctaveAbsorptionSpectrum` el $\alpha_\mathrm{s}$ por tercios de
   octava de un informe de ensayo, cada uno con la valoración que imprime la
   hoja; no escribas ninguno de los dos en `AbsorptionSpectrum`.
-  [Cómo leer la hoja de características de un material](/phonometry/es/materials/reading-a-datasheet/)
+  [Cómo leer la hoja de características de un material](/es/materials/reading-a-datasheet/)
   distingue los tres en la página.
 - `TransmissionLossSpectrum` guarda la pérdida por transmisión de una
   construcción tal como la recopila un libro, por bandas de octava, a partir
@@ -1140,7 +1140,7 @@ Un documento nombra su esquema en una clave `$schema` de primer nivel, que
 el lector admite y no lee nunca: un archivo a su lado, como arriba, o el
 esquema de todas las clases de fila que publica la biblioteca, que sirve el
 sitio de la documentación en
-`https://docs.jmrp.io/phonometry/schemas/phonometry-catalogue-1.json`.
+`https://phonometry.dev/schemas/phonometry-catalogue-1.json`.
 También se le puede decir a un editor qué archivos son catálogos, y dejarlos
 sin esa clave; en Visual Studio Code basta un ajuste:
 
@@ -1149,7 +1149,7 @@ sin esa clave; en Visual Studio Code basta un ajuste:
   "json.schemas": [
     {
       "fileMatch": ["*.catalogue.json", "*.csv.phonometry.json"],
-      "url": "https://docs.jmrp.io/phonometry/schemas/phonometry-catalogue-1.json"
+      "url": "https://phonometry.dev/schemas/phonometry-catalogue-1.json"
     }
   ]
 }
@@ -1218,15 +1218,15 @@ issue o en una pull request nunca se incorpora.
 
 ## Véase también
 
-- [Archivos](/phonometry/es/io/): qué lee y escribe la capa de archivos de la biblioteca, y por qué.
-- [Catálogos publicados](/phonometry/es/reference/catalogues/): todas las tablas que la biblioteca ha leído de una página, las mismas clases de fila con las celdas del libro.
-- [Cómo leer la hoja de características de un material](/phonometry/es/materials/reading-a-datasheet/): qué es cada número de una hoja de características y qué clase de fila lo guarda.
-- [Absorbentes porosos y multicapa](/phonometry/es/materials/absorbers/porous-absorbers/): los modelos en los que entra una fila `PorousMaterial`.
-- [Rigidez dinámica de materiales resilientes](/phonometry/es/materials/resilient/dynamic-stiffness/): $s'$, $s'_\mathrm{t}$ y el apartado 8.2 al completo.
-- [Predicción del aislamiento de paneles](/phonometry/es/buildings/design/panel-sound-insulation/): el método de la meseta que dibuja una fila `PlateauMaterial`.
-- [Ondas elásticas y acoplamiento fluido-sólido](/phonometry/es/simulation/elastic-waves/): el FDTD elástico en el que la fila de un sólido es un medio.
-- [Efecto suelo esférico y barreras avanzadas](/phonometry/es/environment/propagation/ground-barriers/): los modelos en los que entra el `medium()` de una fila de suelo.
-- [Predicción detallada por bandas (ISO 12354)](/phonometry/es/buildings/design/detailed-prediction/): la cadena de la ISO 12354 en la que entra un elemento de `from_solid`.
-- Referencia de la API: [`phonometry.io`](/phonometry/es/reference/api/io/io/).
+- [Archivos](/es/io/): qué lee y escribe la capa de archivos de la biblioteca, y por qué.
+- [Catálogos publicados](/es/reference/catalogues/): todas las tablas que la biblioteca ha leído de una página, las mismas clases de fila con las celdas del libro.
+- [Cómo leer la hoja de características de un material](/es/materials/reading-a-datasheet/): qué es cada número de una hoja de características y qué clase de fila lo guarda.
+- [Absorbentes porosos y multicapa](/es/materials/absorbers/porous-absorbers/): los modelos en los que entra una fila `PorousMaterial`.
+- [Rigidez dinámica de materiales resilientes](/es/materials/resilient/dynamic-stiffness/): $s'$, $s'_\mathrm{t}$ y el apartado 8.2 al completo.
+- [Predicción del aislamiento de paneles](/es/buildings/design/panel-sound-insulation/): el método de la meseta que dibuja una fila `PlateauMaterial`.
+- [Ondas elásticas y acoplamiento fluido-sólido](/es/simulation/elastic-waves/): el FDTD elástico en el que la fila de un sólido es un medio.
+- [Efecto suelo esférico y barreras avanzadas](/es/environment/propagation/ground-barriers/): los modelos en los que entra el `medium()` de una fila de suelo.
+- [Predicción detallada por bandas (ISO 12354)](/es/buildings/design/detailed-prediction/): la cadena de la ISO 12354 en la que entra un elemento de `from_solid`.
+- Referencia de la API: [`phonometry.io`](/es/reference/api/io/io/).
 
 </SeeAlso>

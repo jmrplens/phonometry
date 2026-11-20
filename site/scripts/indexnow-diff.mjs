@@ -174,8 +174,12 @@ export const DEPLOY_BRANCH = 'main';
 const PER_PAGE = 100;
 /** The most pages of artifacts read before giving up, far more than a record kept 90 days can fill. */
 const MAX_PAGES = 50;
-/** The environment .github/workflows/docs.yml deploys the site to. */
-export const PAGES_ENVIRONMENT = 'github-pages';
+/**
+ * The environment the site is deployed to: that of the job of
+ * .github/workflows/site-deploy.yml, which docs.yml calls (the name is the
+ * one the environment was created with, when phonometry.dev was a preview).
+ */
+export const PAGES_ENVIRONMENT = 'phonometry-preview';
 /**
  * The states, as the GitHub GraphQL API names them, of a deployment whose
  * pages never went out, so that the site still serves the deploy before it.

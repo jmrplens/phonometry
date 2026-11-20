@@ -1,6 +1,6 @@
 <!-- Written by `make llms` from site/src/content/docs/underwater/marine-mammal-exposure.mdx: edit that page and its Spanish twin, then run `make llms`. -->
 
-← [Documentation index](../README.md) · Published at https://docs.jmrp.io/phonometry/underwater/marine-mammal-exposure/
+← [Documentation index](../README.md) · Published at https://phonometry.dev/underwater/marine-mammal-exposure/
 
 # Marine-mammal noise exposure
 
@@ -575,7 +575,7 @@ regulatory guidance, not a whole campaign.
 - [Underwater sound propagation](underwater-propagation.md):
   the propagation loss and figure-of-merit machinery that turns a criterion
   into a range.
-- API reference: [`underwater.bioacoustics.weighting`](https://docs.jmrp.io/phonometry/reference/api/underwater/weighting/) and [`underwater.bioacoustics.audiograms`](https://docs.jmrp.io/phonometry/reference/api/underwater/audiograms/).
+- API reference: [`underwater.bioacoustics.weighting`](https://phonometry.dev/reference/api/underwater/weighting/) and [`underwater.bioacoustics.audiograms`](https://phonometry.dev/reference/api/underwater/audiograms/).
 
 ## References
 

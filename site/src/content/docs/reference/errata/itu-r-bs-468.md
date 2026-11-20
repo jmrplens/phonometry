@@ -8,7 +8,7 @@ corrects:
 
 <!-- Generated from docs/ERRATA.md by scripts/generate_site_reports.py (`make site-reports`). Edit the source document, never this page. -->
 
-This is the entry of the [errata registry](/phonometry/reference/errata/) on ITU-R BS.468-4. The registry's introduction says how each claim is checked against the printed page and what the status of an entry means.
+This is the entry of the [errata registry](/reference/errata/) on ITU-R BS.468-4. The registry's introduction says how each claim is checked against the printed page and what the status of an entry means.
 
 ## ITU-R BS.468-4, Table 2, 5 ms upper limit (the dB cell should read −6.7)
 

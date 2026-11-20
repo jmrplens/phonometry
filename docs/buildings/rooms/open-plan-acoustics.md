@@ -1,6 +1,6 @@
 <!-- Written by `make llms` from site/src/content/docs/buildings/rooms/open-plan-acoustics.mdx: edit that page and its Spanish twin, then run `make llms`. -->
 
-← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/buildings/rooms/open-plan-acoustics/
+← [Documentation index](../../README.md) · Published at https://phonometry.dev/buildings/rooms/open-plan-acoustics/
 
 # Open-Plan Office Acoustics (ISO 3382-3)
 
@@ -687,7 +687,7 @@ and `absorption_per_table` are callable directly.
   spatial decay.
 - [Theory](../../reference/theory/rooms-buildings.md): the room-acoustic
   derivations this page builds on.
-- API reference: [`room.open_plan`](https://docs.jmrp.io/phonometry/reference/api/rooms/open-plan/).
+- API reference: [`room.open_plan`](https://phonometry.dev/reference/api/rooms/open-plan/).
 - Theory: [Impulse response and room-acoustic parameters](../../reference/theory/rooms-buildings.md#impulse-response-and-room-acoustic-parameters-iso-18233-iso-3382-1-2-3): the decay and absorption theory the ISO 3382-3 distraction distance is measured against.
 
 ## References

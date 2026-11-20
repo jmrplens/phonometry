@@ -1,6 +1,6 @@
 <!-- Written by `make llms` from site/src/content/docs/fluids/index.mdx: edit that page and its Spanish twin, then run `make llms`. -->
 
-← [Documentation index](../README.md) · Published at https://docs.jmrp.io/phonometry/fluids/
+← [Documentation index](../README.md) · Published at https://phonometry.dev/fluids/
 
 # The medium
 
@@ -45,7 +45,7 @@ domain may import `fluids` without an architecture edge, and a catalogue here
 that reached into `materials`, `building` and `simulation` would make the
 medium depend on three of the domains that stand on it. The comparison is a
 documentation artefact instead, and the [published
-catalogues](https://docs.jmrp.io/phonometry/reference/catalogues/) page lists all four side by
+catalogues](https://phonometry.dev/reference/catalogues/) page lists all four side by
 side.
 
 What `fluids.PUBLISHED_FLUIDS` does hold is the states this library read from

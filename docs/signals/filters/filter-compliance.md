@@ -1,6 +1,6 @@
 <!-- Written by `make llms` from site/src/content/docs/signals/filters/filter-compliance.mdx: edit that page and its Spanish twin, then run `make llms`. -->
 
-← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/signals/filters/filter-compliance/
+← [Documentation index](../../README.md) · Published at https://phonometry.dev/signals/filters/filter-compliance/
 
 # Filter Class Verification (IEC 61260-1)
 
@@ -825,9 +825,9 @@ Class 0 is retained by the IEC 61260:1995 / ANSI S1.11-2004 edition (edition='19
 - [Conformance report](../../CONFORMANCE.md):
   the verified configurations behind the class claims of this page.
 - API reference:
-  [`filters.compliance`](https://docs.jmrp.io/phonometry/reference/api/filters/compliance/),
-  [`filters.time_invariance`](https://docs.jmrp.io/phonometry/reference/api/filters/time-invariance/)
-  and [`filters.periodic_tests`](https://docs.jmrp.io/phonometry/reference/api/filters/periodic-tests/).
+  [`filters.compliance`](https://phonometry.dev/reference/api/filters/compliance/),
+  [`filters.time_invariance`](https://phonometry.dev/reference/api/filters/time-invariance/)
+  and [`filters.periodic_tests`](https://phonometry.dev/reference/api/filters/periodic-tests/).
 - Theory: [Octave Band Frequencies](../../reference/theory/signal-analysis.md#octave-band-frequencies-ansi-s111--iec-61260): the band-edge definitions the IEC 61260-1 mask is drawn around.
 
 ## Quick answers

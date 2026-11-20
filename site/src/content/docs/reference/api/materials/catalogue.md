@@ -7,7 +7,7 @@ sidebar:
 
 Porous specimens as the pages that print them have them.
 
-The five-parameter models of [`porous`](/phonometry/reference/api/materials/porous/)
+The five-parameter models of [`porous`](/reference/api/materials/porous/)
 take a flow resistivity, a porosity, a tortuosity and two characteristic
 lengths, and a caller who has not characterised a specimen to ISO 9053 and
 ISO 10534-2 has nowhere to get them. They get them here, from a book, with
@@ -22,15 +22,15 @@ the input to a worked example, and one of the rows prints the word `model`
 in three of its cells because the quantity there is frequency dependent and no
 single number stands for it. A catalogue that turned that word into a float
 would be inventing a tortuosity nobody published, so
-[`unquantified`](/phonometry/reference/api/io/io/#cataloguerow) carries the word instead and
-[`why_missing`](/phonometry/reference/api/io/io/#cataloguerowwhy_missing) hands it back.
+[`unquantified`](/reference/api/io/io/#cataloguerow) carries the word instead and
+[`why_missing`](/reference/api/io/io/#cataloguerowwhy_missing) hands it back.
 
 The same applies to the elastic constants. Table 6.1 prints a complex shear
 modulus, `220(1 + j0.1)` N/cm2, and Table 11.8 prints the same specimen as a
 Young's modulus of 4.4 MPa with a structural loss factor of 0.1; they agree,
 because `E / (2(1 + nu))` is the real part of the first. A row therefore
 stores the real modulus and the loss factor separately, which is the form the
-poroelastic models take them in, and [`PorousMaterial.frame_constants`](/phonometry/reference/api/materials/catalogue/#porousmaterialframe_constants)
+poroelastic models take them in, and [`PorousMaterial.frame_constants`](/reference/api/materials/catalogue/#porousmaterialframe_constants)
 puts the complex number back together.
 
 Two kinds of row
@@ -47,7 +47,7 @@ only the range the measurements fall in, and a row that answered with the
 midpoint of that range would be inventing a measurement.
 
 The two kinds sit in one catalogue because they answer one question between
-them: [`porous_materials_named`](/phonometry/reference/api/materials/catalogue/#porous_materials_named) asks a name of every book at once, and a
+them: [`porous_materials_named`](/reference/api/materials/catalogue/#porous_materials_named) asks a name of every book at once, and a
 specimen that falls outside the range its class is compiled in is worth
 knowing about. What tells them apart is what a row holds: a specimen carries
 several quantities, a compiled row carries one, and the compiled one carries
@@ -79,7 +79,7 @@ FrameConstants(shear_modulus_pa: complex, poisson_ratio: float)
 
 The in-vacuo frame constants of a porous material, as its source prints them.
 
-What [`PorousMaterial.frame_constants`](/phonometry/reference/api/materials/catalogue/#porousmaterialframe_constants) returns: the shear modulus and
+What [`PorousMaterial.frame_constants`](/reference/api/materials/catalogue/#porousmaterialframe_constants) returns: the shear modulus and
 the Poisson ratio, named, where an `(N, nu)` tuple used to be unpacked
 by position.
 
@@ -115,15 +115,15 @@ two ranges Cox compiles for it.
 | Name | Description |
 | :--- | :--- |
 | `name` | The specimen name as a table prints it, matched without regard to case: `"Foam"`, `"foam"`. |
-| `catalogue` | The rows to search in place of [`PUBLISHED_POROUS_MATERIALS`](/phonometry/reference/api/materials/catalogue/#published_porous_materials): a catalogue of your own that [`phonometry.io.read_catalogue`](/phonometry/reference/api/io/io/#read_catalogue) returns, `PUBLISHED_POROUS_MATERIALS \| mine` to search both at once, or any mapping of key to row (Default: `None`, which searches [`PUBLISHED_POROUS_MATERIALS`](/phonometry/reference/api/materials/catalogue/#published_porous_materials)). |
+| `catalogue` | The rows to search in place of [`PUBLISHED_POROUS_MATERIALS`](/reference/api/materials/catalogue/#published_porous_materials): a catalogue of your own that [`phonometry.io.read_catalogue`](/reference/api/io/io/#read_catalogue) returns, `PUBLISHED_POROUS_MATERIALS \| mine` to search both at once, or any mapping of key to row (Default: `None`, which searches [`PUBLISHED_POROUS_MATERIALS`](/reference/api/materials/catalogue/#published_porous_materials)). |
 
-**Returns:** The rows whose [`PorousMaterial.name`](/phonometry/reference/api/materials/catalogue/#porousmaterial) matches, in catalogue order, which is empty when no row names it.
+**Returns:** The rows whose [`PorousMaterial.name`](/reference/api/materials/catalogue/#porousmaterial) matches, in catalogue order, which is empty when no row names it.
 
 **Raises**
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | for a *catalogue* that is not a mapping, or that holds a row that is not a [`PorousMaterial`](/phonometry/reference/api/materials/catalogue/#porousmaterial), naming its key. |
+| TypeError | for a *catalogue* that is not a mapping, or that holds a row that is not a [`PorousMaterial`](/reference/api/materials/catalogue/#porousmaterial), naming its key. |
 
 ## PorousMaterial
 
@@ -178,7 +178,7 @@ length, a chapter on the transfer matrix prints both lengths and a Young's
 modulus, and the one anisotropic table prints two flow resistivities and
 no elastic constant the isotropic models can take. A field is `None`
 when the page had nothing to put there, and
-[`why_missing`](/phonometry/reference/api/io/io/#cataloguerowwhy_missing) says what
+[`why_missing`](/reference/api/io/io/#cataloguerowwhy_missing) says what
 it had instead.
 
 The name, the citation, the variant and the hedges a cell can carry
@@ -191,7 +191,7 @@ instead of a number are the ones every catalogue row has.
 | `flow_resistivity_pa_s_m2` | Airflow resistivity `sigma`, in Pa s/m2. The books print it as N s/m4, N m-4 s or rayl/m, which are three spellings of the same unit. |
 | `porosity` | Open porosity `phi`. |
 | `tortuosity` | Tortuosity `alpha_inf`. |
-| `viscous_length_um` | Viscous characteristic length `Lambda`, in micrometres, the unit the tables print it in. The `viscous_length_m` parameter of [`johnson_champoux_allard`](/phonometry/reference/api/materials/porous/#johnson_champoux_allard) is in **metres**, so this field is not passed to it directly: `medium` makes the conversion, once, and a caller who assembles the argument list by hand divides by a million first. |
+| `viscous_length_um` | Viscous characteristic length `Lambda`, in micrometres, the unit the tables print it in. The `viscous_length_m` parameter of [`johnson_champoux_allard`](/reference/api/materials/porous/#johnson_champoux_allard) is in **metres**, so this field is not passed to it directly: `medium` makes the conversion, once, and a caller who assembles the argument list by hand divides by a million first. |
 | `thermal_length_um` | Thermal characteristic length `Lambda'`, in micrometres. Metres at the model's `thermal_length_m`, as above. |
 | `thermal_permeability_m2` | Static thermal permeability `q'_0`, in m2, which two of the tables print beside the thermal length. |
 | `fiber_diameter_um` | Fibre diameter `d`, in micrometres, for the materials a table describes by the fibre rather than by the pore. |
@@ -208,7 +208,7 @@ instead of a number are the ones every catalogue row has.
 | `variant` | Which specimen or condition this row is, when the page prints several under one name: `"chemically pure"`, `"direction x"`, `"0.68 mm diameter"`. Empty when the page prints one. |
 | `source` | Document, table, PDF page and printed folio. |
 | `table` | The data file this row was read from, without the extension, which is also the first half of its key in the catalogue that holds it. |
-| `basis` | What the source says a value is: a field name, or `"row"` for the whole row, to one of [`CATALOGUE_BASES`](/phonometry/reference/api/io/io/#catalogue_bases). Hopkins marks most of his Poisson ratios "Estimate", and those cells hold `"estimated"`; a datasheet that declares a class under a product standard would hold `"declared"`. A field with no entry takes the row's, and a row with neither is one whose source does not say, which is a different answer from any of the five. `basis_of` reads it. Independent of `derived`: this is what the source claims for a cell, that is what this library computed. |
+| `basis` | What the source says a value is: a field name, or `"row"` for the whole row, to one of [`CATALOGUE_BASES`](/reference/api/io/io/#catalogue_bases). Hopkins marks most of his Poisson ratios "Estimate", and those cells hold `"estimated"`; a datasheet that declares a class under a product standard would hold `"declared"`. A field with no entry takes the row's, and a row with neither is one whose source does not say, which is a different answer from any of the five. `basis_of` reads it. Independent of `derived`: this is what the source claims for a cell, that is what this library computed. |
 | `approximate` | Fields the page prints with a `~`. Not an estimate and not an interval: a number the author rounded on purpose. |
 | `derived` | Field to how it was computed, for the ones this library worked out from the cells the page did print. A derived value is never stored as if it had been read, and on every row the library builds it follows again from the row's own cells: `from_printed` writes it, and nothing else in the library does. One a caller passes to the literal constructor is the caller's word, which the row keeps and `printed_fields` leaves out with its value, as it leaves out every derived one. When the printed cells a value rests on do not all have one `basis`, the text names the basis of each, so a modulus worked out from a plate speed and a Poisson ratio Hopkins marks as an estimate says it rests on that estimate. A value converted from the unit the page prints is not derived (`converted` holds it), and neither is one the page gives by reference to another of its rows (`carried` does). |
 | `converted` | Field to `(figure, unit)`, the page's figure and the unit it is in, for a value this row holds in a unit the page does not use. Ver and Beranek print their damping materials in degrees Fahrenheit and pounds per square inch, and the row holds degrees Celsius and pascals, so `("3e5", "psi")` sits beside a modulus in pascals. The figure is kept as the page writes it, so the cell can always be read back in the page's own terms. The unit is the one the page prints with the figure or over its column. Long prints the figures of his musician bare, and the sabins recorded for them are a reading of the table, which is set in inches and pounds and names sabins on the next row; that row's note says so. A figure written in another unit of the same kind as the field's (`thickness_m` for `thickness_mm`, `flow_resistivity_kpa_s_m2` for `flow_resistivity_pa_s_m2`) is converted by `from_printed` and recorded here, whether it is a value, the end of a range or one of several readings; for a range the figure is the printed end of a bound, or both ends as `"5 to 10"`, and for readings the list as the page gives it. A packaged table transcribed in the base unit with only its SI prefix changed, such as the megapascals of Rossing Table 15.5, holds no entry here, and the table's `about` says so. |
@@ -232,7 +232,7 @@ instead of a number are the ones every catalogue row has.
 PorousMaterial.basis_of(field_name: str) -> str
 ```
 
-What the source says this field is, one of [`CATALOGUE_BASES`](/phonometry/reference/api/io/io/#catalogue_bases).
+What the source says this field is, one of [`CATALOGUE_BASES`](/reference/api/io/io/#catalogue_bases).
 
 The five are `measured`, `declared`, `calculated`, `estimated`
 and `extended`.
@@ -254,9 +254,9 @@ PorousMaterial.frame_constants() -> FrameConstants
 The in-vacuo frame constants `(N, nu)` the source prints.
 
 The complex shear modulus and the Poisson ratio are what
-[`biot_waves`](/phonometry/reference/api/materials/biot/#biot_waves),
-[`frame_quarter_wave_resonance`](/phonometry/reference/api/materials/biot/#frame_quarter_wave_resonance) and
-[`PoroelasticLayer`](/phonometry/reference/api/materials/layered/#poroelasticlayer) take together, and a
+[`biot_waves`](/reference/api/materials/biot/#biot_waves),
+[`frame_quarter_wave_resonance`](/reference/api/materials/biot/#frame_quarter_wave_resonance) and
+[`PoroelasticLayer`](/reference/api/materials/layered/#poroelasticlayer) take together, and a
 table that prints one prints the other, so they are asked for together
 and a specimen characterised as a rigid frame alone says so here
 rather than handing out a `None` that fails further down.
@@ -266,7 +266,7 @@ form the page prints and the models take, rebuilt from the real
 modulus and the loss factor the row stores separately. A row whose
 page printed a Young's modulus instead has had its shear modulus
 derived through the Poisson ratio, and
-[`derived`](/phonometry/reference/api/io/io/#cataloguerow) says so.
+[`derived`](/reference/api/io/io/#cataloguerow) says so.
 
 The loss factor is asked for like the other two. A row whose page
 prints the moduli and no loss factor is refused rather than handed
@@ -274,7 +274,7 @@ a frame with `eta_s = 0`: a lossless frame is a claim about the
 material, and a cell the page left empty is not a zero. Every
 published row that prints both moduli prints the loss factor too.
 
-**Returns:** The complex shear modulus and the Poisson ratio, as a [`FrameConstants`](/phonometry/reference/api/materials/catalogue/#frameconstants).
+**Returns:** The complex shear modulus and the Poisson ratio, as a [`FrameConstants`](/reference/api/materials/catalogue/#frameconstants).
 
 **Raises**
 
@@ -299,7 +299,7 @@ unit of the same kind as its field (`thickness_m` for
 `thickness_mm`, `flow_resistivity_kpa_s_m2` for
 `flow_resistivity_pa_s_m2`), or in a unit the class takes as an
 alias of its own (an
-[`AbsorptionAreaSpectrum`](/phonometry/reference/api/materials/measured/#absorptionareaspectrum) takes
+[`AbsorptionAreaSpectrum`](/reference/api/materials/measured/#absorptionareaspectrum) takes
 `absorption_area_125_ft2` for `absorption_area_125_m2`), is
 converted on its digits with an exact factor and rounded once,
 whether it is a value or stands as the key of a hedge (the ends of a
@@ -393,7 +393,7 @@ The equivalent fluid of this specimen.
 
 The characteristic lengths are stored in the micrometres the tables
 print and converted, here and once, to the metres
-[`johnson_champoux_allard`](/phonometry/reference/api/materials/porous/#johnson_champoux_allard) takes.
+[`johnson_champoux_allard`](/reference/api/materials/porous/#johnson_champoux_allard) takes.
 
 **Parameters**
 
@@ -401,9 +401,9 @@ print and converted, here and once, to the metres
 | :--- | :--- |
 | `frequency` | Frequency `f`, in hertz (scalar or array). |
 | `model` | `"johnson_champoux_allard"` (Default), `"delany_bazley"` or `"miki"`. The last two read the flow resistivity alone, so they describe a coarser specimen than the one the other four parameters pin. |
-| `fluid` | The medium, a [`Fluid`](/phonometry/reference/api/fluids/fluids/#fluid) (Default: [`ABSORBER_AIR`](/phonometry/reference/api/materials/porous/#absorber_air)). |
+| `fluid` | The medium, a [`Fluid`](/reference/api/fluids/fluids/#fluid) (Default: [`ABSORBER_AIR`](/reference/api/materials/porous/#absorber_air)). |
 
-**Returns:** A [`PorousMediumResult`](/phonometry/reference/api/materials/porous/#porousmediumresult).
+**Returns:** A [`PorousMediumResult`](/reference/api/materials/porous/#porousmediumresult).
 
 **Raises**
 

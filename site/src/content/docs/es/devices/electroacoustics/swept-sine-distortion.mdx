@@ -344,7 +344,7 @@ sesgo sub-muestra residual.
 
 Las grabaciones hechas con el **barrido sinusoidal exponencial (ESS)** simple de
 `phonometry.sweep_signal` (la excitación de ISO 18233 que usa
-[`impulse_response`](/phonometry/es/buildings/rooms/room-acoustics/)) se analizan con
+[`impulse_response`](/es/buildings/rooms/room-acoustics/)) se analizan con
 `method="farina"`: el mismo enventanado sobre el filtro inverso invertido en
 el tiempo y compensado en amplitud de Farina (2000). Las **magnitudes**
 armónicas y la THD son correctas (el oráculo de Chebyshev pasa igual), pero
@@ -530,11 +530,11 @@ gruesas.
 
 ## Relación con otras herramientas
 
-- [`impulse_response`](/phonometry/es/buildings/rooms/room-acoustics/) recupera la
+- [`impulse_response`](/es/buildings/rooms/room-acoustics/) recupera la
   RI *lineal* de la misma grabación de barrido y simplemente descarta los
   productos de distorsión a tiempos negativos; `swept_sine_distortion` es
   la herramienta que los lee.
-- [`thd` / `harmonic_analysis`](/phonometry/es/devices/electroacoustics/electroacoustics/)
+- [`thd` / `harmonic_analysis`](/es/devices/electroacoustics/electroacoustics/)
   miden la distorsión de un tono estacionario a una frecuencia; el
   separador por barrido devuelve las mismas razones como función continua
   de la frecuencia, con una sola medición. La rapidez es la menor de las
@@ -552,7 +552,7 @@ gruesas.
   para evitar.
 - Las utilidades de fase operan sobre cualquier respuesta unilateral
   *compleja*: una `rfft` de una RI medida, o la `response` de una estimación con
-  [`transfer_function`](/phonometry/es/devices/electroacoustics/electroacoustics/) sobre una
+  [`transfer_function`](/es/devices/electroacoustics/electroacoustics/) sobre una
   malla uniforme. Solo `min_phase` acepta además un array de magnitud
   a secas, p. ej. una magnitud objetivo de diseño para ecualización.
 
@@ -577,7 +577,7 @@ Bendat y Piersol mediante el cepstrum real.
 <ScopeClaim status="not-covered" label="No cubierto">
 La distorsión de intermodulación y la intermodulación dinámica (IEC 60268-3,
 apartados 14.12.7-10) se miden a partir de tonos estacionarios en la página de
-[electroacústica](/phonometry/es/devices/electroacoustics/electroacoustics/),
+[electroacústica](/es/devices/electroacoustics/electroacoustics/),
 no con un barrido; esta página separa solo los órdenes armónicos. La
 monografía de medición con barridos de Müller y Massarani se cita como
 contexto de práctica (fundidos, técnica del filtro inverso), no como una
@@ -595,16 +595,16 @@ cola quedan a cargo de quien opera, que además tiene que informar de ellos.
 
 ## Véase también
 
-- [Electroacústica](/phonometry/es/devices/electroacoustics/electroacoustics/): el
+- [Electroacústica](/es/devices/electroacoustics/electroacoustics/): el
   conjunto de $\mathrm{THD}$ con tono estacionario, THD+N e intermodulación de
   IEC 60268-3 que este barrido complementa, y el punto de funcionamiento en el
   que están todos definidos.
-- [Caracterización de altavoces (IEC 60268-5)](/phonometry/es/devices/electroacoustics/loudspeakers/):
+- [Caracterización de altavoces (IEC 60268-5)](/es/devices/electroacoustics/loudspeakers/):
   la curva de THD(f) que se produce aquí es el panel de distorsión de ese
   informe de características nominales.
-- [Acústica de salas](/phonometry/es/buildings/rooms/room-acoustics/):
+- [Acústica de salas](/es/buildings/rooms/room-acoustics/):
   `impulse_response`, que es la mitad lineal de la misma grabación.
-- Referencia de la API: [`electroacoustics.swept_sine`](/phonometry/es/reference/api/electroacoustics/swept-sine/)
-  y [`signals.phase`](/phonometry/es/reference/api/signals/phase/).
+- Referencia de la API: [`electroacoustics.swept_sine`](/es/reference/api/electroacoustics/swept-sine/)
+  y [`signals.phase`](/es/reference/api/signals/phase/).
 
 </SeeAlso>

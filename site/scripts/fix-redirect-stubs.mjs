@@ -4,7 +4,7 @@
 // Two things about the stub Astro writes fail `html-validate`, which the site
 // runs over every built page. The doctype is lowercase where the rest of the
 // site's is upper, and the title is the destination spelled out in full,
-// `Redirecting to: /phonometry/es/perception/psychoacoustics/...`, which runs
+// `Redirecting to: /es/perception/psychoacoustics/...`, which runs
 // past the 70-character limit of the `long-title` rule on any address more
 // than four segments deep. That cost nothing while there were eight stubs and
 // all of them were shallow; the redirect map covers every address the site has
@@ -24,9 +24,10 @@
 // pass to the page it moved to. Without it, the instant refresh and the
 // canonical say the same thing, which Google reads as a permanent redirect
 // ("Redirects and Google Search"). Hugo dropped the same tag from its alias
-// pages for the same reason. On docs.jmrp.io these addresses answer a real 301
-// at the edge (scripts/cloudflare-redirects.mjs); the stubs are what anyone
-// reaching GitHub Pages directly gets.
+// pages for the same reason. On phonometry.dev these addresses answer a real
+// 301 from the `_redirects` file the Worker's staging writes
+// (scripts/cloudflare-redirects.mjs); the stubs are what a host without it
+// serves.
 //
 // Every rewrite is guarded on the exact shape Astro emits, so they are
 // idempotent and cannot touch a real page. check-redirects.mjs fails a stub

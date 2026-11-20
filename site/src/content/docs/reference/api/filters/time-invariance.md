@@ -26,15 +26,15 @@ in a periodic test.
 
 This module has three things for it:
 
-* [`swept_band_level`](/phonometry/reference/api/filters/time-invariance/#swept_band_level), Formula (17) itself, which IEC 61260-2 and -3
+* [`swept_band_level`](/reference/api/filters/time-invariance/#swept_band_level), Formula (17) itself, which IEC 61260-2 and -3
   Annex B work through to $L_\mathrm{c} = 107.97$ dB;
-* [`swept_level_uncertainty`](/phonometry/reference/api/filters/time-invariance/#swept_level_uncertainty), the standard uncertainty of that level
+* [`swept_level_uncertainty`](/reference/api/filters/time-invariance/#swept_level_uncertainty), the standard uncertainty of that level
   from the uncertainties of the sweep (Annex A of IEC 61260-2 and -3,
   Formula (A.2)); the annexes print $u = 0.057$ dB for their example,
   which this reproduces, while the printed Formula (A.2) drops the square on
   the coefficient of its frequency terms (see the errata registry);
-* [`verify_time_invariance`](/phonometry/reference/api/filters/time-invariance/#verify_time_invariance), the test run on an
-  [`OctaveFilterBank`](/phonometry/reference/api/filters/core/#octavefilterbank): the sweep of Formulas (A.3)
+* [`verify_time_invariance`](/reference/api/filters/time-invariance/#verify_time_invariance), the test run on an
+  [`OctaveFilterBank`](/reference/api/filters/core/#octavefilterbank): the sweep of Formulas (A.3)
   and (A.4) goes through every band exactly as the bank filters a signal, the
   polyphase decimation of a multirate bank included, so it tests what the
   transfer functions alone cannot.
@@ -108,7 +108,7 @@ swept_level_uncertainty(
 ) -> float
 ```
 
-The standard uncertainty of [`swept_band_level`](/phonometry/reference/api/filters/time-invariance/#swept_band_level), from the sweep.
+The standard uncertainty of [`swept_band_level`](/reference/api/filters/time-invariance/#swept_band_level), from the sweep.
 
 Annex A of IEC 61260-2:2016 and of IEC 61260-3:2016 propagates the
 standard uncertainties of the input level, the sweep time, the averaging
@@ -173,7 +173,7 @@ TimeInvarianceResult(
 
 The time-invariance verdict of a filter bank, IEC 61260-1:2014 5.14.
 
-What [`verify_time_invariance`](/phonometry/reference/api/filters/time-invariance/#verify_time_invariance) returns. For every sweep rate and
+What [`verify_time_invariance`](/reference/api/filters/time-invariance/#verify_time_invariance) returns. For every sweep rate and
 every band it holds the time-averaged output level of the bank driven by
 an exponential sweep and the level Formula (17) predicts for it,
 
@@ -263,7 +263,7 @@ Test the time-invariant operation of a bank, IEC 61260-1:2014 5.14.
 
 The swept-frequency test of IEC 61260-2:2016 7.4, run on the bank itself:
 an exponential sweep of effective value 1 (Formulas (A.3) and (A.4))
-goes through every band exactly as [`OctaveFilterBank.filter`](/phonometry/reference/api/filters/core/#octavefilterbankfilter)
+goes through every band exactly as [`OctaveFilterBank.filter`](/reference/api/filters/core/#octavefilterbankfilter)
 processes it, the polyphase decimation of a multirate bank included, and
 each band's time-averaged output is compared with the level
 $L_\mathrm{c}$ of Formula (17). A bank whose bands do what their
@@ -282,7 +282,7 @@ more.
   band's impulse response has lost all but $10^{-9}$ of its energy
   after the sweep ends (7.4.4).
 * The reference attenuation is each band's attenuation at its exact
-  mid-band frequency, as [`verify_filter_class`](/phonometry/reference/api/filters/compliance/#verify_filter_class) takes it.
+  mid-band frequency, as [`verify_filter_class`](/reference/api/filters/compliance/#verify_filter_class) takes it.
 
 A time-invariant design is an optional claim: 5.14.4 has the instruction
 manual state the bandwidths and frequency ranges it applies to, and the
@@ -295,7 +295,7 @@ verdict here is for the bank as configured.
 | `bank` | The filter bank; its designed sections and decimation factors are run, and a stateful bank's carried state is left alone. |
 | `seconds_per_decade` | The sweep rates to run, one decade in so many seconds, each within the 2 s to 5 s for which 5.14.3 sets its limits. The default runs both ends of that range. |
 
-**Returns:** A [`TimeInvarianceResult`](/phonometry/reference/api/filters/time-invariance/#timeinvarianceresult).
+**Returns:** A [`TimeInvarianceResult`](/reference/api/filters/time-invariance/#timeinvarianceresult).
 
 **Raises**
 

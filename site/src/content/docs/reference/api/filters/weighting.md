@@ -116,8 +116,8 @@ Splits signal into low and high bands with flat sum response.
 
 | Name | Description |
 | :--- | :--- |
-| `x` | Input signal, or a [`phonometry.io.Signal`](/phonometry/reference/api/io/io/#signal) read from a measurement file. A calibrated Signal is split in pascals, so both bands come back in pascals. |
-| `fs` | Sample rate. Required for a bare array; a [`Signal`](/phonometry/reference/api/io/io/#signal) brings its own, and an explicit value that disagrees with it raises. |
+| `x` | Input signal, or a [`phonometry.io.Signal`](/reference/api/io/io/#signal) read from a measurement file. A calibrated Signal is split in pascals, so both bands come back in pascals. |
+| `fs` | Sample rate. Required for a bare array; a [`Signal`](/reference/api/io/io/#signal) brings its own, and an explicit value that disagrees with it raises. |
 | `frequency` | Crossover frequency, in Hz. Keyword-only and required: it sits behind an optional `fs`, and a default here would be a signature that lies about what the call needs. |
 | `order` | Total order (must be even, typically 2 or 4). |
 
@@ -154,12 +154,12 @@ Apply time weighting to a signal (Exponential averaging).
 
 | Name | Description |
 | :--- | :--- |
-| `x` | Input signal (raw pressure/voltage), or a [`phonometry.io.Signal`](/phonometry/reference/api/io/io/#signal) read from a measurement file. The function squares it internally, so a calibrated Signal yields a mean-square envelope in Pa2 rather than in digital units squared. |
-| `fs` | Sample rate. Required for a bare array; a [`Signal`](/phonometry/reference/api/io/io/#signal) brings its own, and an explicit value that disagrees with it raises. |
+| `x` | Input signal (raw pressure/voltage), or a [`phonometry.io.Signal`](/reference/api/io/io/#signal) read from a measurement file. The function squares it internally, so a calibrated Signal yields a mean-square envelope in Pa2 rather than in digital units squared. |
+| `fs` | Sample rate. Required for a bare array; a [`Signal`](/reference/api/io/io/#signal) brings its own, and an explicit value that disagrees with it raises. |
 | `mode` | 'fast' (125ms), 'slow' (1000ms), 'impulse' (35ms rise, 1500ms fall). |
 | `initial_state` | Previous mean-square output state `y[-1]`. Use None/'zero' for zero initialization (default), 'first' to initialize from the first input energy, or a scalar/array broadcastable to the input shape without the time axis. |
 
-**Returns:** The time-weighted mean square. A bare array in gives a bare array back; a [`Signal`](/phonometry/reference/api/io/io/#signal) gives a [`TimeWeightedEnvelope`](/phonometry/reference/api/filters/weighting/#timeweightedenvelope), which stands in for that array everywhere it was used and adds the rate and a level plot. It is not a Signal, because a mean square is not a pressure record.
+**Returns:** The time-weighted mean square. A bare array in gives a bare array back; a [`Signal`](/reference/api/io/io/#signal) gives a [`TimeWeightedEnvelope`](/reference/api/filters/weighting/#timeweightedenvelope), which stands in for that array everywhere it was used and adds the rate and a level plot. It is not a Signal, because a mean square is not a pressure record.
 
 **Raises**
 
@@ -182,10 +182,10 @@ TimeWeightedEnvelope(
 
 The exponentially averaged mean square of a record, and its rate.
 
-What [`time_weighting`](/phonometry/reference/api/filters/weighting/#time_weighting) computes is not a waveform: it is the
+What [`time_weighting`](/reference/api/filters/weighting/#time_weighting) computes is not a waveform: it is the
 running mean SQUARE, in pascals squared when the record was calibrated,
 which is why it cannot come back as a
-[`Signal`](/phonometry/reference/api/io/io/#signal). That class means a record of pressure,
+[`Signal`](/reference/api/io/io/#signal). That class means a record of pressure,
 and labelling a squared quantity as one would be the kind of quiet lie
 the calibration contract exists to prevent.
 
@@ -269,7 +269,7 @@ TimeWeighting(fs: float, mode: Literal['fast', 'slow', 'impulse'] = 'fast')
 
 Stateful time weighting for block processing.
 
-Wraps [`time_weighting`](/phonometry/reference/api/filters/weighting/#time_weighting) carrying the exponential integrator state
+Wraps [`time_weighting`](/reference/api/filters/weighting/#time_weighting) carrying the exponential integrator state
 across blocks, so concatenated block outputs equal a single continuous call.
 
 **Parameters**
@@ -295,11 +295,11 @@ TimeWeighting.process(x: NumericArrayLike) -> NDArray[np.float64]
 
 Apply time weighting to a block, continuing from the previous block.
 
-The block form of [`time_weighting`](/phonometry/reference/api/filters/weighting/#time_weighting), and it returns the same
+The block form of [`time_weighting`](/reference/api/filters/weighting/#time_weighting), and it returns the same
 thing on the same terms: a mean square, in pascals squared when the
 record was calibrated, wrapped in a
-[`TimeWeightedEnvelope`](/phonometry/reference/api/filters/weighting/#timeweightedenvelope) when the block arrived as a
-[`Signal`](/phonometry/reference/api/io/io/#signal) and left as a bare array otherwise.
+[`TimeWeightedEnvelope`](/reference/api/filters/weighting/#timeweightedenvelope) when the block arrived as a
+[`Signal`](/reference/api/io/io/#signal) and left as a bare array otherwise.
 The envelope stands in for that array, so a loop that concatenates
 the blocks keeps working either way.
 
@@ -307,7 +307,7 @@ the blocks keeps working either way.
 
 | Name | Description |
 | :--- | :--- |
-| `x` | The block, or a [`phonometry.io.Signal`](/phonometry/reference/api/io/io/#signal). A Signal at another rate than this integrator was built for is refused; a calibrated one is squared in pascals, exactly as [`time_weighting`](/phonometry/reference/api/filters/weighting/#time_weighting) does. |
+| `x` | The block, or a [`phonometry.io.Signal`](/reference/api/io/io/#signal). A Signal at another rate than this integrator was built for is refused; a calibrated one is squared in pascals, exactly as [`time_weighting`](/reference/api/filters/weighting/#time_weighting) does. |
 
 **Returns:** Time-weighted mean-square envelope of the block.
 
@@ -351,12 +351,12 @@ Apply a frequency weighting to a signal.
 
 | Name | Description |
 | :--- | :--- |
-| `x` | Input signal, or a [`phonometry.io.Signal`](/phonometry/reference/api/io/io/#signal) read from a measurement file. A calibrated Signal is weighted in pascals, so the weighted samples come back in pascals too; a bare array keeps whatever unit it arrived in. |
-| `fs` | Sample rate. Required for a bare array; a [`Signal`](/phonometry/reference/api/io/io/#signal) brings its own, and an explicit value that disagrees with it raises instead of silently winning. |
+| `x` | Input signal, or a [`phonometry.io.Signal`](/reference/api/io/io/#signal) read from a measurement file. A calibrated Signal is weighted in pascals, so the weighted samples come back in pascals too; a bare array keeps whatever unit it arrived in. |
+| `fs` | Sample rate. Required for a bare array; a [`Signal`](/reference/api/io/io/#signal) brings its own, and an explicit value that disagrees with it raises instead of silently winning. |
 | `weighting` | 'A', 'C' (IEC 61672-1), 'B' (ANSI S1.4-1983, historical), 'D' (withdrawn IEC 537 aircraft-noise weighting), 'G' (ISO 7196 infrasound), 'AU' (IEC 61012), '468' (ITU-R BS.468-4 psophometric noise weighting) or 'Z' (bypass). |
-| `high_accuracy` | Design the filter by fitting the analog prototype at *fs* (default True), rather than by the plain bilinear transform, which warps frequency and loses class 1 below 44.1 kHz. See [`WeightingFilter.__init__`](/phonometry/reference/api/filters/weighting/#weightingfilter) for what each design costs. The '468' curve requires the fitted design and refuses False. |
+| `high_accuracy` | Design the filter by fitting the analog prototype at *fs* (default True), rather than by the plain bilinear transform, which warps frequency and loses class 1 below 44.1 kHz. See [`WeightingFilter.__init__`](/reference/api/filters/weighting/#weightingfilter) for what each design costs. The '468' curve requires the fitted design and refuses False. |
 
-**Returns:** The weighted record. A bare array in gives a bare array back; a [`Signal`](/phonometry/reference/api/io/io/#signal) gives a Signal, whose samples are already in pascals and whose factor therefore reads 1.0.
+**Returns:** The weighted record. A bare array in gives a bare array back; a [`Signal`](/reference/api/io/io/#signal) gives a Signal, whose samples are already in pascals and whose factor therefore reads 1.0.
 
 **Raises**
 
@@ -413,9 +413,9 @@ Apply the weighting filter to a signal.
 
 | Name | Description |
 | :--- | :--- |
-| `x` | Input signal (1D or 2D [channels, samples]), or a [`phonometry.io.Signal`](/phonometry/reference/api/io/io/#signal). A Signal recorded at another rate than this filter was designed for is refused rather than weighted by the wrong response; a calibrated one is weighted in pascals, exactly as [`weighting_filter`](/phonometry/reference/api/filters/weighting/#weighting_filter) does, so the two entry points cannot disagree about the same recording. |
+| `x` | Input signal (1D or 2D [channels, samples]), or a [`phonometry.io.Signal`](/reference/api/io/io/#signal). A Signal recorded at another rate than this filter was designed for is refused rather than weighted by the wrong response; a calibrated one is weighted in pascals, exactly as [`weighting_filter`](/reference/api/filters/weighting/#weighting_filter) does, so the two entry points cannot disagree about the same recording. |
 
-**Returns:** The weighted record. A bare array in gives a bare array back; a [`Signal`](/phonometry/reference/api/io/io/#signal) gives a Signal, on the same terms as [`weighting_filter`](/phonometry/reference/api/filters/weighting/#weighting_filter), so the object and the function cannot disagree about the same recording.
+**Returns:** The weighted record. A bare array in gives a bare array back; a [`Signal`](/reference/api/io/io/#signal) gives a Signal, on the same terms as [`weighting_filter`](/reference/api/filters/weighting/#weighting_filter), so the object and the function cannot disagree about the same recording.
 
 **Raises**
 

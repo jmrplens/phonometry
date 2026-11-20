@@ -67,7 +67,7 @@ being neglected. And a massless pinned beam is a poor model of a junction that
 in reality carries mass and rotational stiffness. Section 5 hands one
 frequency-independent number straight to the EN 12354 model in place of a
 band-dependent one; when that matters, the measured counterpart is the
-[Laboratory Flanking Transmission guide](/phonometry/buildings/insulation/flanking-lab/).
+[Laboratory Flanking Transmission guide](/buildings/insulation/flanking-lab/).
 
 The object itself first: a T-junction where a 140 mm concrete floor runs into
 a continuous 200 mm wall. A `junction_transmission` result retains its plates,
@@ -240,7 +240,7 @@ tau13 = vibration.straight_transmission_coefficient(theta, chi, psi, "X")
 ```
 
 The clip below runs this experiment in the time domain with the library's 2D
-[elastic FDTD solver](/phonometry/simulation/elastic-waves/): a bending packet on a 10 mm steel plate reaches an
+[elastic FDTD solver](/simulation/elastic-waves/): a bending packet on a 10 mm steel plate reaches an
 L-junction with an identical plate, and the corner splits it into the
 reflected and transmitted waves this section prices at $\tau_{12}(0°) = 0.5$.
 The fast in-plane precursor racing down the receiving plate is the mode
@@ -393,7 +393,7 @@ print(pred.dominant.label, round(pred.dominant.energy_fraction, 2))   # Dd 0.68
 
 One junction with a moderate $K_{ij}$ already trims 1.6 dB off the direct
 $R_\mathrm{w} = 57\ \text{dB}$; a full building repeats this for every junction, which
-is the [EN 12354 prediction guide](/phonometry/buildings/design/insulation-prediction/).
+is the [EN 12354 prediction guide](/buildings/design/insulation-prediction/).
 
 The measured, EN 12354 counterpart of $K_{ij}$ (from the direction-averaged
 velocity level difference) is the separate flanking-transmission
@@ -473,7 +473,7 @@ requirements below are the ones that decide whether a result exists.
   supports or foam pads approximating free-free conditions are what the
   literature uses. Mass loading, contact damping and exciter-structure feedback
   at the drive point are the same errors the mobility guide's
-  [transducer section](/phonometry/vibration/structural/mechanical-mobility/)
+  [transducer section](/vibration/structural/mechanical-mobility/)
   quantifies, and they apply here unchanged.
 - **Read the coupling against the damping.** The figure's own acceptance test:
   the coupling loss factors should sit at least an order of magnitude below the
@@ -487,7 +487,7 @@ Norton Section 6.4.1 alongside it: `flat_plate_modal_density` (Eq. 6.25),
 in three regimes about the `ring_frequency` of Eq. 6.26). The flat-plate
 expression $n(f) = S\sqrt{12}/(2 c_\mathrm{L} t)$ is the same quantity as EN 12354-4's
 $n = \pi S f_\mathrm{c} / c_0^2$ used by the
-[flanking model](/phonometry/buildings/insulation/flanking-lab/), only
+[flanking model](/buildings/insulation/flanking-lab/), only
 parametrised by the plate itself rather than by its critical frequency.
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/experimental_sea_clf.svg" alt="Two-panel figure. Left panel: coupling loss factor on a logarithmic axis against the octave bands from 125 hertz to 2 kilohertz for two aluminium plates at right angles, with the welded line junction falling from about 3 times 10 to the minus 3 to 8 times 10 to the minus 4 as one over the square root of frequency, the twelve-bolt point connection falling twice as steeply from about 1.4 times 10 to the minus 2 to 9 times 10 to the minus 4 as one over frequency, and a dashed horizontal line marking an internal loss factor of 10 to the minus 2. Right panel: a bar chart of the four loss factors of a satellite platform and cylinder in the 500 hertz octave on a logarithmic axis, the internal loss factors 4.40 times 10 to the minus 3 and 2.40 times 10 to the minus 3 clearly above the coupling loss factors 4.26 times 10 to the minus 4 and 3.91 times 10 to the minus 4, with the injected power of 1.31 watts annotated." width="92%" loading="lazy" />
@@ -615,7 +615,7 @@ This predicted $K_{ij}$ is a closed-form idealisation for a rigid, simply
 supported junction, not a measurement: the measured, empirical $K_{ij}$ from a
 direction-averaged velocity level difference (ISO 10848) is the separate
 `vibration_reduction_index` of the [Laboratory Flanking Transmission
-guide](/phonometry/buildings/insulation/flanking-lab/). The straight-section
+guide](/buildings/insulation/flanking-lab/). The straight-section
 coefficient $\tau_{13}$ is undefined for the T-junction (2) and L-junction
 geometries, which have no collinear third plate, so only the corner path
 applies there. The tabulated coefficients also assume a *symmetric* junction
@@ -630,16 +630,16 @@ consistency check the reader performs rather than one the library automates.
 
 ## See also
 
-- [Predicting Sound Insulation (EN 12354)](/phonometry/buildings/design/insulation-prediction/):
+- [Predicting Sound Insulation (EN 12354)](/buildings/design/insulation-prediction/):
   the flanking model that consumes $K_{ij}$ junction by junction.
-- [Laboratory Flanking Transmission (ISO 10848)](/phonometry/buildings/insulation/flanking-lab/):
+- [Laboratory Flanking Transmission (ISO 10848)](/buildings/insulation/flanking-lab/):
   the measurement of $K_{ij}$ from velocity level differences, the empirical
   counterpart of this page's closed forms.
-- [Structure-borne sound power of equipment (EN 15657)](/phonometry/buildings/design/structure-borne-power/):
+- [Structure-borne sound power of equipment (EN 15657)](/buildings/design/structure-borne-power/):
   the source power that these junction transmissions carry through a building.
-- [Mechanical mobility and the FRF family (ISO 7626-1)](/phonometry/vibration/structural/mechanical-mobility/):
+- [Mechanical mobility and the FRF family (ISO 7626-1)](/vibration/structural/mechanical-mobility/):
   the plate mobilities behind the wave parameters.
-- API reference: [`vibration`: junction transmission](/phonometry/reference/api/vibration/junction-transmission/).
-- Theory: [Point mobilities and radiation efficiency](/phonometry/reference/theory/vibration/#point-mobilities-and-radiation-efficiency-cremer-5-hopkins-29): the mobility picture behind a junction, and the radiation efficiency each element carries.
+- API reference: [`vibration`: junction transmission](/reference/api/vibration/junction-transmission/).
+- Theory: [Point mobilities and radiation efficiency](/reference/theory/vibration/#point-mobilities-and-radiation-efficiency-cremer-5-hopkins-29): the mobility picture behind a junction, and the radiation efficiency each element carries.
 
 </SeeAlso>

@@ -58,7 +58,7 @@ from the sky rather than from a tapping machine, so the laboratory has to make
 its own rain.
 
 The measurements themselves are the ones of
-[Laboratory Insulation Measurement](/phonometry/buildings/insulation/insulation-lab/):
+[Laboratory Insulation Measurement](/buildings/insulation/insulation-lab/):
 $R$ to ISO 10140-2 and $L_\mathrm{n}$ to ISO 10140-3, in a suite where flanking
 is suppressed. What this page adds is what the annexes do with them, and the
 single numbers that make two laboratories agree about a product whose effect
@@ -393,7 +393,7 @@ cover.report("covering.pdf", metadata=ReportMetadata(
 The form also asks for $C_\mathrm{I,r,50\text{-}2500}$, a term of the
 reference floor with the covering from 50 Hz, which the reference floors of
 ISO 717-2:2020 Table 4 cannot give: they start at 100 Hz (see the
-[errata registry](/phonometry/reference/errata/)). The sheet says so where the number would
+[errata registry](/reference/errata/)). The sheet says so where the number would
 go.
 
 <ReportPreview
@@ -692,7 +692,7 @@ are added energetically (K.4.2). The 18 bands from 100 Hz to 5000 Hz combine
 into the A-weighted level,
 $L_{I\mathrm{A}} = 10 \log_{10} \sum_j 10^{0.1(L_{Ij} + C_j)}$
 (Formula (K.2)), whose 18 corrections $C_j$ of Table K.2 are the A-weighting
-of IEC 61672-1:2013, the [frequency weighting](/phonometry/signals/levels/weighting/)
+of IEC 61672-1:2013, the [frequency weighting](/signals/levels/weighting/)
 of the library, at the exact midband frequencies of the bands, rounded to
 0.1 dB (`building.RAINFALL_A_WEIGHTING`).
 K.4.3 allows the intensity to be measured directly with a probe over a surface
@@ -892,7 +892,7 @@ them, are conformance rows:
 - The **ISO 717-2 Annex C example**, carried end to end through the Annex H
   front end: $\Delta L_\mathrm{w} = 15$ dB as printed, and
   $C_{\mathrm{I}\Delta} = -9$ dB from the Table 4 floor, where the example's
-  own chain gives −8 dB (see the [errata registry](/phonometry/reference/errata/)).
+  own chain gives −8 dB (see the [errata registry](/reference/errata/)).
 - The **G.4 example**: measurements within 1 d that start 3 d after
   construction pass, and 2.9 d fails. The bound is inclusive on any input:
   2.1 d after 6.3 d passes as well, although 3 × 2.1 comes out a rounding
@@ -1003,11 +1003,11 @@ the 3 mm of J.4, which J.5.2 h) allows for comparisons, is read with `at_gap`
 but not drawn. The wooden mock-up of H.6.2
 has no reference curve of its own. The form of Figure H.4 asks for a
 $C_{\mathrm{I,r,50\text{–}2500}}$ that the reference floor cannot give, since
-Table 4 starts at 100 Hz (recorded in the [errata registry](/phonometry/reference/errata/));
+Table 4 starts at 100 Hz (recorded in the [errata registry](/reference/errata/));
 the sheet says so in its place, and the bare floor's own enlarged-range term is
 available from `weighted_impact_rating_extended`. The measurements that feed
 these annexes, $R$, $L_\mathrm{n}$ and the reverberation times, are those of
-[Laboratory Insulation Measurement](/phonometry/buildings/insulation/insulation-lab/), and the other annexes
+[Laboratory Insulation Measurement](/buildings/insulation/insulation-lab/), and the other annexes
 of ISO 10140-1 are mounting rules for that $R$ and $L_\mathrm{n}$ (walls,
 doors, windows, glazing, small technical elements, floors, shutters).
 </ScopeClaim>
@@ -1017,24 +1017,24 @@ doors, windows, glazing, small technical elements, floors, shutters).
 
 ## See also
 
-- [Laboratory Insulation Measurement](/phonometry/buildings/insulation/insulation-lab/):
+- [Laboratory Insulation Measurement](/buildings/insulation/insulation-lab/):
   the $R$ and $L_\mathrm{n}$ of ISO 10140-2 and -3 that every annex here starts
   from.
-- [Insulation Ratings (ISO 717)](/phonometry/buildings/insulation/insulation-ratings/):
+- [Insulation Ratings (ISO 717)](/buildings/insulation/insulation-ratings/):
   the reference-curve engine that rates both reference curves.
-- [Heavy and Soft Impact Sources](/phonometry/buildings/insulation/heavy-impact-sources/):
+- [Heavy and Soft Impact Sources](/buildings/insulation/heavy-impact-sources/):
   the rubber ball of H.6.1 and its single number.
-- [Floor-Covering Impact Improvement (ISO 16251-1)](/phonometry/buildings/design/impact-improvement/):
+- [Floor-Covering Impact Improvement (ISO 16251-1)](/buildings/design/impact-improvement/):
   the small-mock-up alternative for soft coverings.
-- [Predicting Resilient-Layer Performance](/phonometry/buildings/design/resilient-layers/):
+- [Predicting Resilient-Layer Performance](/buildings/design/resilient-layers/):
   the ISO 12354 prediction of a lining's improvement from its resonance, and
   its transfer from the laboratory to the field.
-- [Sound Insulation by Intensity (ISO 15186)](/phonometry/buildings/insulation/insulation-intensity/):
+- [Sound Insulation by Intensity (ISO 15186)](/buildings/insulation/insulation-intensity/):
   the intensity method K.4.3 allows for rain.
 - API reference:
-  [`building.measurement.laboratory_improvement`](/phonometry/reference/api/building/laboratory-improvement/),
-  [`building.measurement.joint_insulation`](/phonometry/reference/api/building/joint-insulation/),
-  [`building`: rainfall sound](/phonometry/reference/api/building/rainfall-sound/)
-  and [`building.measurement.ratings`](/phonometry/reference/api/building/ratings/).
+  [`building.measurement.laboratory_improvement`](/reference/api/building/laboratory-improvement/),
+  [`building.measurement.joint_insulation`](/reference/api/building/joint-insulation/),
+  [`building`: rainfall sound](/reference/api/building/rainfall-sound/)
+  and [`building.measurement.ratings`](/reference/api/building/ratings/).
 
 </SeeAlso>

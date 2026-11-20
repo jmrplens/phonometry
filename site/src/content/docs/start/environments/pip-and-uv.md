@@ -62,7 +62,7 @@ NumPy, SciPy, matplotlib or Pillow, so pip builds them from source there, and
 32-bit ones, so `[perf]` and `[full]` are not supported there, and torch
 publishes no wheel for any of the six and no source, so `[torch]` does not
 install there from PyPI; [Docker and
-servers](/phonometry/start/environments/docker/) says what the rest takes.
+servers](/start/environments/docker/) says what the rest takes.
 Without numba the `impulse` time weighting runs as plain Python and says
 nothing about it. A feature whose extra is missing says which one to install,
 with its pip and its conda spelling:
@@ -73,7 +73,7 @@ ImportError: Plotting requires matplotlib. Install it with: pip install "phonome
 
 The oldest release of each dependency the library is tested with, on each
 Python, is listed in [Getting
-Started](/phonometry/start/getting-started/#from-pypi-recommended). On Windows
+Started](/start/getting-started/#from-pypi-recommended). On Windows
 on ARM, on Linux with musl, on macOS on Intel and on 32-bit Windows, some of
 those releases have no wheel, and pip builds them from source there, as even a
 plain install does with SciPy on 32-bit Windows, and as `[plot]` does with
@@ -104,7 +104,7 @@ python -m pip install "phonometry[torch]"
 
 The environment then holds the CPU build of torch and no NVIDIA package, and
 an FDTD run on `Compute(device="torch:cpu")` gives the same pressures as the
-NumPy run. [Where a simulation runs](/phonometry/simulation/compute/) covers the
+NumPy run. [Where a simulation runs](/simulation/compute/) covers the
 other devices.
 
 ## From a clone
@@ -152,7 +152,7 @@ On 32-bit Windows and 32-bit Linux, where `[full]` is not supported, name
 `[plot,report,audio]` in its place, with `uv pip install` as with `uv add`; uv
 builds from source there what pip does, SciPy, matplotlib and kiwisolver on
 32-bit Windows, and on 32-bit Linux the packages [Docker and
-servers](/phonometry/start/environments/docker/) names.
+servers](/start/environments/docker/) names.
 
 ### torch from the CPU index in a project
 

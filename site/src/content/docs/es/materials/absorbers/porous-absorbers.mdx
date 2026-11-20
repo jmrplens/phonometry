@@ -97,7 +97,7 @@ import ThemeImage from '../../../../../components/ThemeImage.astro';
 import Video from '../../../../../components/Video.astro';
 
 A partir de la **resistividad al flujo** de un material poroso (la magnitud
-que mide el [banco de flujo](/phonometry/es/materials/absorbers/airflow-resistance/)) los modelos
+que mide el [banco de flujo](/es/materials/absorbers/airflow-resistance/)) los modelos
 clásicos de fluido equivalente predicen su impedancia característica y su
 número de onda complejos, y una pila de capas por **matrices de
 transferencia** (mantas porosas, cámaras de aire, paneles perforados y
@@ -111,14 +111,14 @@ esqueleto flexible por debajo de la frecuencia de desacoplo, y la capa
 poroelástica de Biot completa, cuya onda del esqueleto produce una resonancia
 de cuarto de onda que ningún fluido equivalente puede reproducir. Las
 contrapartes de medida están en las guías del
-[tubo de impedancia](/phonometry/es/materials/absorbers/impedance-tube/) y de la
-[cámara reverberante](/phonometry/es/materials/absorbers/absorption-measurement/); la
+[tubo de impedancia](/es/materials/absorbers/impedance-tube/) y de la
+[cámara reverberante](/es/materials/absorbers/absorption-measurement/); la
 valoración del espectro predicho vive en la
-[sección ISO 11654](/phonometry/es/materials/absorbers/absorption-measurement/#3-valoracion-ponderada-y-clase-de-absorcion-iso-11654)
+[sección ISO 11654](/es/materials/absorbers/absorption-measurement/#3-valoracion-ponderada-y-clase-de-absorcion-iso-11654)
 de esta última; y los parientes de metamaterial resonante de estas
 construcciones, paneles ranurados de sonido lento que alcanzan la absorción
 perfecta en el acoplamiento crítico, tienen su propia guía,
-[Metaabsorbentes](/phonometry/es/materials/absorbers/metamaterial-absorbers/).
+[Metaabsorbentes](/es/materials/absorbers/metamaterial-absorbers/).
 
 ## 1. Modelos de fluido equivalente de un material poroso
 
@@ -252,7 +252,7 @@ Delany–Bazley (Cox & D'Antonio, figs. 6.19–6.21, hacen la misma
 comparación); JCA extiende la predicción con base física fuera de él. Un
 `PorousMediumResult` construido con datos medidos (por ejemplo los $Z_\mathrm{c}$,
 $k$ recuperados por la
-[reducción de matriz de transferencia ASTM E2611](/phonometry/es/materials/absorbers/impedance-tube/))
+[reducción de matriz de transferencia ASTM E2611](/es/materials/absorbers/impedance-tube/))
 se conecta al modelo de capas exactamente igual que uno modelado.
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/porous_model_comparison.svg" alt="Panel izquierdo: la impedancia característica normalizada de un material de 20 kPa s por metro cuadrado con Delany-Bazley, Miki y Johnson-Champoux-Allard de 20 hercios a 20 kilohercios en ejes log-log, con la ventana de ajuste de 0,01 a 1 en la variable del absorbente sombreada; las tres curvas se superponen dentro de la ventana y se separan por debajo. Panel derecho: la parte real de la impedancia de entrada de una capa de 50 mm con respaldo rígido con los mismos tres modelos, donde la curva de Delany-Bazley se hace negativa por debajo de 74,6 hercios mientras que Miki y JCA siguen positivas" width="90%" />
@@ -296,7 +296,7 @@ tenga una muestra real ha de sacar los otros cuatro de algún sitio.
 
 **La resistividad al flujo $\sigma$** es la única que tiene una norma detrás:
 ISO 9053-1 o -2, en la
-[guía de resistencia al flujo de aire](/phonometry/es/materials/absorbers/airflow-resistance/).
+[guía de resistencia al flujo de aire](/es/materials/absorbers/airflow-resistance/).
 Es además la primera que hay que volver a medir cuando un modelo y una medida
 discrepan.
 
@@ -329,7 +329,7 @@ como fig. 5.5). Fíjate en la relación: ahí $\Lambda'/\Lambda \approx 1{,}8$, 
 que hay que *encontrar*, no que suponer. Cuando no se dispone de un banco
 ultrasónico, la vía práctica es un ajuste inverso contra una impedancia
 superficial medida a incidencia normal, la magnitud que devuelve el
-[tubo de impedancia](/phonometry/es/materials/absorbers/impedance-tube/); y cuando
+[tubo de impedancia](/es/materials/absorbers/impedance-tube/); y cuando
 ni siquiera eso está al alcance, el recurso en forma cerrada
 $\Lambda = \Lambda' = \sqrt{8\alpha_\infty\eta/(\phi\sigma)}$ con
 $\alpha_\infty = 1$ hace que JCA vuelva a caer sobre Delany–Bazley dentro de su
@@ -830,7 +830,7 @@ $|\mu_\mathrm{a}| > 40$ por encima de 50 Hz y $\mu_\mathrm{b}$ cae de 1,0 en 50 
 la frase impresa diga «el módulo del cociente»: el modelo da
 $\mu_\mathrm{b}(1500) = 0,811 + 0,473j$, cuya parte real queda a un 1,1 % del valor
 impreso mientras su módulo, 0,939, se aparta un 14,5 %. Queda registrado en
-[Erratas](/phonometry/es/reference/errata/), junto con el barrido de parámetros
+[Erratas](/es/reference/errata/), junto con el barrido de parámetros
 que no logra acercar $|\mu_\mathrm{b}|$ a 0,82. El pico de impedancia de la muestra más
 delgada del libro está impreso como 860 Hz y sale en 863,5 Hz con la regla del
 máximo de $\mathrm{Im}(Z_\mathrm{s})$. Todo lo demás, incluido el comportamiento en
@@ -918,7 +918,7 @@ velocidad (se ve en la curva separada quedando por debajo de la pegada a 1 kHz),
 y sobre una superficie grande hay que compartimentar la cámara o el campo se
 propaga lateralmente por dentro en incidencia oblicua. Esta es la contraparte de
 predicción de los
-[montajes tipo E-*xxx* y G-*xxx*](/phonometry/es/materials/absorbers/absorption-measurement/#12-la-probeta-y-su-montaje-apartado-62-y-anexo-b)
+[montajes tipo E-*xxx* y G-*xxx*](/es/materials/absorbers/absorption-measurement/#12-la-probeta-y-su-montaje-apartado-62-y-anexo-b)
 de ISO 354, cuyo sufijo es exactamente esta $d$.
 
 <Video
@@ -951,7 +951,7 @@ admitancias numéricamente robusta (inmune al desbordamiento
 $\mathrm{e}^{|\mathrm{Im}(k_x)| d}$ de las entradas matriciales en bruto en capas
 extremadamente atenuantes) y aun así expone la matriz de cadena completa
 (recíproca por construcción, $\det T = 1$) en `transfer_matrix`, lista para
-la [maquinaria ASTM E2611](/phonometry/es/materials/absorbers/impedance-tube/)
+la [maquinaria ASTM E2611](/es/materials/absorbers/impedance-tube/)
 (`TransferMatrix`).
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/porous_absorber_designs.svg" alt="Absorción predicha en incidencia normal de cuatro construcciones de 50 mm: una capa porosa absorbe en banda ancha desde frecuencias medias, un panel microperforado sobre cámara presenta su pico cerca de 700 Hz, un panel perforado sobre poroso cerca de 500 Hz y una membrana sobre cámara con poroso cerca de 175 Hz; las líneas verticales punteadas marcan las resonancias de forma cerrada de Helmholtz y de membrana" width="80%" loading="eager" />
@@ -1067,7 +1067,7 @@ porosa donde la velocidad de partícula es alta, es decir, contra la placa
 perforada y no tumbada sobre el respaldo rígido, y apuntar a una resistencia
 total al flujo del orden de $\rho_0 c_0$. Ese mismo enunciado leído como
 adaptación de impedancia es la condición de acoplamiento crítico de la
-[guía de metaabsorbentes](/phonometry/es/materials/absorbers/metamaterial-absorbers/).
+[guía de metaabsorbentes](/es/materials/absorbers/metamaterial-absorbers/).
 
 ### Las clases de lámina: parámetros
 
@@ -1331,7 +1331,7 @@ dentro de la capa, así que $\alpha_\mathrm{dif}$ supera al $\alpha(0°)$ de
 incidencia normal justo donde la capa es delgada frente a la longitud de
 onda. Es la contraparte de modelo de la discusión tubo frente a cámara
 reverberante de
-[Medida y clasificación de la absorción sonora](/phonometry/es/materials/absorbers/absorption-measurement/).*
+[Medida y clasificación de la absorción sonora](/es/materials/absorbers/absorption-measurement/).*
 
 <details>
 <summary>Mostrar el código de esta figura</summary>
@@ -1415,7 +1415,7 @@ ranuras submilimétricas cargadas con resonadores de Helmholtz que
 ralentizan el sonido y alcanzan la absorción perfecta ($\alpha = 1$) en el
 acoplamiento crítico con paneles de solo $\lambda/38$ de profundidad, se
 mudaron a su propia guía:
-[Metaabsorbentes](/phonometry/es/materials/absorbers/metamaterial-absorbers/) cubre el
+[Metaabsorbentes](/es/materials/absorbers/metamaterial-absorbers/) cubre el
 modelo de matrices de transferencia, el diseño por
 acoplamiento crítico y la comprobación cruzada FDTD de la celda mallada.
 
@@ -1456,7 +1456,7 @@ dígito a las tablas de coeficientes impresas (Bies tabla D.1, Miki
 ecs. 30–34), el modelo multicapa a las formas cerradas anteriores y a la
 recuperación por `TransferMatrix` de la
 [página del tubo de
-impedancia](/phonometry/es/materials/absorbers/impedance-tube/), el MPP a
+impedancia](/es/materials/absorbers/impedance-tube/), el MPP a
 la propia aproximación de Maa (acuerdo declarado de ~6 % con la ec. 2
 exacta), a su ejemplo de diseño y a su tabla I, y la integral de Paris a su
 forma cerrada de reacción local. Las erratas encontradas en las fuentes
@@ -1497,12 +1497,12 @@ efecto de borde. El libro de Cox y D'Antonio trata tanto difusores como
 absorbentes, pero esta guía solo implementa la mitad de absorbentes. La
 predicción del difusor de rejilla de fase de Schroeder vive en un módulo
 aparte (`materials.diffusers.design`), documentada en [Difusores y sus
-coeficientes](/phonometry/es/materials/diffusers/diffusers/) y, para los
+coeficientes](/es/materials/diffusers/diffusers/) y, para los
 paneles en sublongitud de onda profunda cargados con resonadores, en
-[Metadifusores](/phonometry/es/materials/diffusers/metadiffusers/). El
+[Metadifusores](/es/materials/diffusers/metadiffusers/). El
 absorbente de ranura con resonador de Helmholtz de acoplamiento crítico
 (`slit_helmholtz_absorber`, `critical_coupling_design`) es el tema de
-[Metaabsorbentes](/phonometry/es/materials/absorbers/metamaterial-absorbers/).
+[Metaabsorbentes](/es/materials/absorbers/metamaterial-absorbers/).
 </ScopeClaim>
 </Scope>
 
@@ -1510,19 +1510,19 @@ absorbente de ranura con resonador de Helmholtz de acoplamiento crítico
 
 ## Véase también
 
-- [Resistencia al flujo de aire](/phonometry/es/materials/absorbers/airflow-resistance/),
-  [Tubo de impedancia](/phonometry/es/materials/absorbers/impedance-tube/) y
-  [Medida y clasificación de la absorción sonora](/phonometry/es/materials/absorbers/absorption-measurement/):
+- [Resistencia al flujo de aire](/es/materials/absorbers/airflow-resistance/),
+  [Tubo de impedancia](/es/materials/absorbers/impedance-tube/) y
+  [Medida y clasificación de la absorción sonora](/es/materials/absorbers/absorption-measurement/):
   las normas de medida con las que conectan estos modelos de predicción, a
   saber, ISO 9053-1/-2 (resistividad al flujo), ISO 10534-1/-2 y ASTM E2611
   (tubo de impedancia) e ISO 354 / ISO 11654 (absorción de incidencia
   aleatoria y su valoración).
-- [Metaabsorbentes](/phonometry/es/materials/absorbers/metamaterial-absorbers/): los
+- [Metaabsorbentes](/es/materials/absorbers/metamaterial-absorbers/): los
   paneles ranurados de sonido lento y la condición de acoplamiento crítico
   que llevan la absorción perfecta al régimen de sublongitud de onda
   profunda.
-- Teoría: [Caracterización de materiales acústicos](/phonometry/es/reference/theory/materials-surfaces/#caracterizacion-de-materiales-acusticos-iso-11654-iso-9053-12-iso-10534-12-astm-e2611): las magnitudes de caracterización que estos modelos empíricos y fenomenológicos toman como entrada.
-- [Catálogos publicados](/phonometry/es/reference/catalogues/porous-materials/): la
+- Teoría: [Caracterización de materiales acústicos](/es/reference/theory/materials-surfaces/#caracterizacion-de-materiales-acusticos-iso-11654-iso-9053-12-iso-10534-12-astm-e2611): las magnitudes de caracterización que estos modelos empíricos y fenomenológicos toman como entrada.
+- [Catálogos publicados](/es/reference/catalogues/porous-materials/): la
   resistividad al flujo, la porosidad y la tortuosidad que imprimen los
   libros, de especímenes concretos y de clases enteras de material.
 

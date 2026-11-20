@@ -7,7 +7,7 @@ sidebar:
 
 Integrated and statistical sound levels (Leq, LAeq, LN percentiles).
 
-Every function here accepts a [`phonometry.io.Signal`](/phonometry/reference/api/io/io/#signal) in place of
+Every function here accepts a [`phonometry.io.Signal`](/reference/api/io/io/#signal) in place of
 the bare `(x, fs)` pair: the object read from a measurement file
 already knows its sample rate and, when calibrated, its
 digital-to-pascal factor, so asking the caller to repeat either is
@@ -38,9 +38,9 @@ A-weighted equivalent continuous sound level (LAeq).
 
 | Name | Description |
 | :--- | :--- |
-| `x` | Input signal (1D or 2D [channels, samples]) in raw pressure units, or a [`phonometry.io.Signal`](/phonometry/reference/api/io/io/#signal) read from a measurement file. |
-| `fs` | Sample rate in Hz. Required for a bare array; a [`Signal`](/phonometry/reference/api/io/io/#signal) brings its own, and an explicit value that disagrees with it raises instead of silently winning. |
-| `calibration_factor` | Multiplier converting digital units to Pascals. Precedence as in [`leq`](/phonometry/reference/api/signals/levels/#leq): explicit value, then a calibrated Signal's own factor, then 1.0. |
+| `x` | Input signal (1D or 2D [channels, samples]) in raw pressure units, or a [`phonometry.io.Signal`](/reference/api/io/io/#signal) read from a measurement file. |
+| `fs` | Sample rate in Hz. Required for a bare array; a [`Signal`](/reference/api/io/io/#signal) brings its own, and an explicit value that disagrees with it raises instead of silently winning. |
+| `calibration_factor` | Multiplier converting digital units to Pascals. Precedence as in [`leq`](/reference/api/signals/levels/#leq): explicit value, then a calibrated Signal's own factor, then 1.0. |
 | `dbfs` | If True, return dBFS instead of dB SPL. |
 
 **Returns:** Scalar for 1D input, array of shape (channels,) for 2D input.
@@ -77,9 +77,9 @@ maximum is taken, recovering the inter-sample peak to within about
 
 | Name | Description |
 | :--- | :--- |
-| `x` | Input signal (1D or 2D [channels, samples]) in raw pressure units, or a [`phonometry.io.Signal`](/phonometry/reference/api/io/io/#signal) read from a measurement file. |
-| `fs` | Sample rate in Hz. Required for a bare array; a [`Signal`](/phonometry/reference/api/io/io/#signal) brings its own, and an explicit value that disagrees with it raises instead of silently winning. |
-| `calibration_factor` | Multiplier converting digital units to Pascals. Precedence as in [`leq`](/phonometry/reference/api/signals/levels/#leq): explicit value, then a calibrated Signal's own factor, then 1.0. |
+| `x` | Input signal (1D or 2D [channels, samples]) in raw pressure units, or a [`phonometry.io.Signal`](/reference/api/io/io/#signal) read from a measurement file. |
+| `fs` | Sample rate in Hz. Required for a bare array; a [`Signal`](/reference/api/io/io/#signal) brings its own, and an explicit value that disagrees with it raises instead of silently winning. |
+| `calibration_factor` | Multiplier converting digital units to Pascals. Precedence as in [`leq`](/reference/api/signals/levels/#leq): explicit value, then a calibrated Signal's own factor, then 1.0. |
 | `dbfs` | If True, return dBFS (0 dB = peak 1.0) instead of dB SPL. |
 | `oversample` | Integer oversampling factor applied before peak detection (default 8, the audit-validated value). Use 1 to disable oversampling and detect the peak on the original sample grid. |
 
@@ -108,8 +108,8 @@ Equivalent continuous sound level (Leq) over the whole signal.
 
 | Name | Description |
 | :--- | :--- |
-| `x` | Input signal (1D or 2D [channels, samples]) in raw pressure units, or a [`phonometry.io.Signal`](/phonometry/reference/api/io/io/#signal) read from a measurement file. |
-| `calibration_factor` | Multiplier converting digital units to Pascals. Precedence: an explicit value always wins; `None` (the default) takes the factor a calibrated [`Signal`](/phonometry/reference/api/io/io/#signal) carries, and falls back to 1.0 (levels in digital units) for everything else. |
+| `x` | Input signal (1D or 2D [channels, samples]) in raw pressure units, or a [`phonometry.io.Signal`](/reference/api/io/io/#signal) read from a measurement file. |
+| `calibration_factor` | Multiplier converting digital units to Pascals. Precedence: an explicit value always wins; `None` (the default) takes the factor a calibrated [`Signal`](/reference/api/io/io/#signal) carries, and falls back to 1.0 (levels in digital units) for everything else. |
 | `dbfs` | If True, return dBFS (0 dB = RMS 1.0) instead of dB SPL; calibration does not apply. |
 
 **Returns:** Scalar for 1D input, array of shape (channels,) for 2D input.
@@ -137,10 +137,10 @@ and LEX,8h of ISO 1999 (BS EN 61252:1995, 3.3 NOTES 5-6).
 
 | Name | Description |
 | :--- | :--- |
-| `x` | Input signal in raw pressure units (1D or 2D), or a [`phonometry.io.Signal`](/phonometry/reference/api/io/io/#signal) read from a measurement file. |
-| `fs` | Sample rate in Hz. Required for a bare array; a [`Signal`](/phonometry/reference/api/io/io/#signal) brings its own, and an explicit value that disagrees with it raises instead of silently winning. |
+| `x` | Input signal in raw pressure units (1D or 2D), or a [`phonometry.io.Signal`](/reference/api/io/io/#signal) read from a measurement file. |
+| `fs` | Sample rate in Hz. Required for a bare array; a [`Signal`](/reference/api/io/io/#signal) brings its own, and an explicit value that disagrees with it raises instead of silently winning. |
 | `duration_hours` | Exposure period the input represents, in hours. Default: the recording duration itself. |
-| `calibration_factor` | Multiplier converting digital units to Pascals. Precedence as in [`leq`](/phonometry/reference/api/signals/levels/#leq): explicit value, then a calibrated Signal's own factor, then 1.0. |
+| `calibration_factor` | Multiplier converting digital units to Pascals. Precedence as in [`leq`](/reference/api/signals/levels/#leq): explicit value, then a calibrated Signal's own factor, then 1.0. |
 
 **Returns:** LEX,8h in dB (scalar or per-channel array).
 
@@ -168,12 +168,12 @@ distribution), L90 the level exceeded 90% of the time, etc.
 
 | Name | Description |
 | :--- | :--- |
-| `x` | Input signal (1D or 2D [channels, samples]) in raw pressure units, or a [`phonometry.io.Signal`](/phonometry/reference/api/io/io/#signal) read from a measurement file. |
-| `fs` | Sample rate in Hz. Required for a bare array; a [`Signal`](/phonometry/reference/api/io/io/#signal) brings its own, and an explicit value that disagrees with it raises instead of silently winning. |
+| `x` | Input signal (1D or 2D [channels, samples]) in raw pressure units, or a [`phonometry.io.Signal`](/reference/api/io/io/#signal) read from a measurement file. |
+| `fs` | Sample rate in Hz. Required for a bare array; a [`Signal`](/reference/api/io/io/#signal) brings its own, and an explicit value that disagrees with it raises instead of silently winning. |
 | `n` | Percentile exceedance values, e.g. (10, 50, 90). |
 | `mode` | Time weighting for the envelope: 'fast', 'slow' or 'impulse'. |
-| `weighting` | The frequency weighting, any curve accepted by [`weighting_filter`](/phonometry/reference/api/filters/weighting/#weighting_filter): 'A', 'B', 'C', 'D', 'G', 'AU', '468' or 'Z' (the default), which leaves the signal unweighted. |
-| `calibration_factor` | Multiplier converting digital units to Pascals. Precedence as in [`leq`](/phonometry/reference/api/signals/levels/#leq): explicit value, then a calibrated Signal's own factor, then 1.0. |
+| `weighting` | The frequency weighting, any curve accepted by [`weighting_filter`](/reference/api/filters/weighting/#weighting_filter): 'A', 'B', 'C', 'D', 'G', 'AU', '468' or 'Z' (the default), which leaves the signal unweighted. |
+| `calibration_factor` | Multiplier converting digital units to Pascals. Precedence as in [`leq`](/reference/api/signals/levels/#leq): explicit value, then a calibrated Signal's own factor, then 1.0. |
 | `dbfs` | If True, return dBFS instead of dB SPL. |
 
 **Returns:** Dict mapping each N to its level (scalar for 1D input, array (channels,) for 2D input).
@@ -209,10 +209,10 @@ reference responses, Equation 8, in the test suite).
 
 | Name | Description |
 | :--- | :--- |
-| `x` | Input signal covering the whole event (1D or 2D), or a [`phonometry.io.Signal`](/phonometry/reference/api/io/io/#signal) read from a measurement file. |
-| `fs` | Sample rate in Hz. Required for a bare array; a [`Signal`](/phonometry/reference/api/io/io/#signal) brings its own, and an explicit value that disagrees with it raises instead of silently winning. |
-| `weighting` | The frequency weighting, any curve accepted by [`weighting_filter`](/phonometry/reference/api/filters/weighting/#weighting_filter): 'A', 'B', 'C', 'D', 'G', 'AU', '468' or 'Z' (the default), which leaves the signal unweighted. |
-| `calibration_factor` | Multiplier converting digital units to Pascals. Precedence as in [`leq`](/phonometry/reference/api/signals/levels/#leq): explicit value, then a calibrated Signal's own factor, then 1.0. |
+| `x` | Input signal covering the whole event (1D or 2D), or a [`phonometry.io.Signal`](/reference/api/io/io/#signal) read from a measurement file. |
+| `fs` | Sample rate in Hz. Required for a bare array; a [`Signal`](/reference/api/io/io/#signal) brings its own, and an explicit value that disagrees with it raises instead of silently winning. |
+| `weighting` | The frequency weighting, any curve accepted by [`weighting_filter`](/reference/api/filters/weighting/#weighting_filter): 'A', 'B', 'C', 'D', 'G', 'AU', '468' or 'Z' (the default), which leaves the signal unweighted. |
+| `calibration_factor` | Multiplier converting digital units to Pascals. Precedence as in [`leq`](/reference/api/signals/levels/#leq): explicit value, then a calibrated Signal's own factor, then 1.0. |
 | `dbfs` | If True, reference digital full scale instead of 20 uPa. |
 
 **Returns:** Scalar for 1D input, array of shape (channels,) for 2D input.
@@ -247,10 +247,10 @@ BS EN 61252:1995 (3.3 NOTE 4): 3.2 Pa²h \<-> LEX,8h of exactly 90 dB.
 
 | Name | Description |
 | :--- | :--- |
-| `x` | Input signal in raw pressure units (1D or 2D), or a [`phonometry.io.Signal`](/phonometry/reference/api/io/io/#signal) read from a measurement file. |
-| `fs` | Sample rate in Hz. Required for a bare array; a [`Signal`](/phonometry/reference/api/io/io/#signal) brings its own, and an explicit value that disagrees with it raises instead of silently winning. |
+| `x` | Input signal in raw pressure units (1D or 2D), or a [`phonometry.io.Signal`](/reference/api/io/io/#signal) read from a measurement file. |
+| `fs` | Sample rate in Hz. Required for a bare array; a [`Signal`](/reference/api/io/io/#signal) brings its own, and an explicit value that disagrees with it raises instead of silently winning. |
 | `duration_hours` | Exposure period the input represents, in hours. Default: the recording duration itself. |
-| `calibration_factor` | Multiplier converting digital units to Pascals. Precedence as in [`leq`](/phonometry/reference/api/signals/levels/#leq): explicit value, then a calibrated Signal's own factor, then 1.0. |
+| `calibration_factor` | Multiplier converting digital units to Pascals. Precedence as in [`leq`](/reference/api/signals/levels/#leq): explicit value, then a calibrated Signal's own factor, then 1.0. |
 
 **Returns:** Exposure in Pa²·h (scalar or per-channel array).
 

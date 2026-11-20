@@ -17,10 +17,10 @@ amplitude-modulated at 4 Hz. There is no ISO standard for fluctuation strength.
 
 Two routes are provided:
 
-* [`fluctuation_strength_am_noise`](/phonometry/reference/api/psychoacoustics/fluctuation-strength/#fluctuation_strength_am_noise): the closed form (Fastl & Zwicker
+* [`fluctuation_strength_am_noise`](/reference/api/psychoacoustics/fluctuation-strength/#fluctuation_strength_am_noise): the closed form (Fastl & Zwicker
   Eq. 10.2) for a sinusoidally amplitude-modulated broadband noise, exact in the
   modulation factor, level and modulation frequency.
-* [`fluctuation_strength`](/phonometry/reference/api/psychoacoustics/fluctuation-strength/#fluctuation_strength): the signal model of Osses, García &
+* [`fluctuation_strength`](/reference/api/psychoacoustics/fluctuation-strength/#fluctuation_strength): the signal model of Osses, García &
   Kohlrausch (2016), which estimates `F` from an arbitrary calibrated pressure
   signal. It sums specific contributions over 47 auditory filters,
   $F = C_\mathrm{FS} \sum_i (m^*_i)^{p_m} |k_{i-2} k_i|^{p_k} g(z_i)^{p_g}$
@@ -82,7 +82,7 @@ anchors this signal model. It is implemented clean-room from the Osses
 Table 1) and the 1-vacil calibration point within a documented
 tolerance; the reference method itself only agrees qualitatively for
 FM tones. For an exact figure on AM broadband noise use
-[`fluctuation_strength_am_noise`](/phonometry/reference/api/psychoacoustics/fluctuation-strength/#fluctuation_strength_am_noise).
+[`fluctuation_strength_am_noise`](/reference/api/psychoacoustics/fluctuation-strength/#fluctuation_strength_am_noise).
 
 **Calibration.** The constant `C_FS` (Eq. 1) is not the paper's literal
 0.2490, which was fitted to the paper's own 4096-tap FIR front-end. Here
@@ -110,10 +110,10 @@ the reference method itself overestimates it above 4 Hz.
 
 | Name | Description |
 | :--- | :--- |
-| `x` | Calibrated sound-pressure signal (1-D), in Pa. Accepts a [`phonometry.io.Signal`](/phonometry/reference/api/io/io/#signal), which is where that calibration comes from without arithmetic: the model reads excitation levels, so an uncalibrated record is taken as if one digital unit were one pascal and `F` comes out wrong by however far that is from true. |
+| `x` | Calibrated sound-pressure signal (1-D), in Pa. Accepts a [`phonometry.io.Signal`](/reference/api/io/io/#signal), which is where that calibration comes from without arithmetic: the model reads excitation levels, so an uncalibrated record is taken as if one digital unit were one pascal and `F` comes out wrong by however far that is from true. |
 | `fs` | Sample rate, in Hz (resampled to the model rate if needed). |
 
-**Returns:** A [`FluctuationStrengthResult`](/phonometry/reference/api/psychoacoustics/fluctuation-strength/#fluctuationstrengthresult).
+**Returns:** A [`FluctuationStrengthResult`](/reference/api/psychoacoustics/fluctuation-strength/#fluctuationstrengthresult).
 
 **Raises**
 

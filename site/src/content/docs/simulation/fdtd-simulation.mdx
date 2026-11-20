@@ -68,7 +68,7 @@ operation in a fixed order, so on NumPy in float64 the same inputs produce
 bit-identical outputs on the same platform, and on CuPy in float64 the fields
 came out bit-identical to NumPy's over the scenarios measured on one GPU,
 driver and CuPy release
-([what is promised on each device](/phonometry/simulation/compute/#6-what-is-promised-on-each-device)).
+([what is promised on each device](/simulation/compute/#6-what-is-promised-on-each-device)).
 It is the engine behind the FDTD animations of this documentation, promoted
 to a public API with sources, pressure probes, rasterised obstacles,
 per-side boundary conditions and a frozen result object.
@@ -175,7 +175,7 @@ res.plot()                       # probe pressure histories (figure in section 5
 
 The run stepped on NumPy in float64, and `res.provenance` records that. The
 same call steps on an NVIDIA GPU through CuPy, or on PyTorch, with one more
-argument; [Where a simulation runs](/phonometry/simulation/compute/) covers
+argument; [Where a simulation runs](/simulation/compute/) covers
 the devices, what each needs installed, how a whole script picks one and what
 is promised about the numbers on each.
 
@@ -185,8 +185,8 @@ print(on_gpu.provenance.device, on_gpu.provenance.gpu)   # cupy, and the card's 
 ```
 
 With a `host` the same run goes to another machine: see
-[Sending a simulation to a remote node](/phonometry/simulation/remote-node/).
-[Where heavy work runs](/phonometry/simulation/where-it-runs/) maps the
+[Sending a simulation to a remote node](/simulation/remote-node/).
+[Where heavy work runs](/simulation/where-it-runs/) maps the
 devices, the nodes and the encoders in one place.
 
 The time step is not an input. It follows from `cfl` and the largest sound
@@ -416,7 +416,7 @@ The stepping engine `FDTD2D` is public too: it exposes `step()`, `run()`,
 the field arrays and the energy, for callers that need frame-by-frame access
 (the documentation animations use it directly). It takes the same
 `compute=` as `fdtd_simulation`, and without one it follows `use()` and
-`PHONOMETRY_COMPUTE` ([Where a simulation runs](/phonometry/simulation/compute/));
+`PHONOMETRY_COMPUTE` ([Where a simulation runs](/simulation/compute/));
 it steps in this process, so a placement that names a host raises
 `ValueError`. Off NumPy, `sim.p`, `sim.vx` and `sim.vy` are that device's own
 arrays. The blocks on this page step on NumPy and hand the fields to NumPy as
@@ -570,7 +570,7 @@ run that was *computed* wrongly, and every one of them is a line or two:
 A three-row rigid-walled domain is a plane-wave tube, and with the per-cell
 `damping` map a porous sample becomes an equivalent fluid, which turns the
 solver itself into a measurable specimen: the
-[impedance-tube guide](/phonometry/materials/absorbers/impedance-tube/) runs the
+[impedance-tube guide](/materials/absorbers/impedance-tube/) runs the
 ISO 10534-2 and ASTM E2611 measurements virtually on exactly that domain,
 animations included, and recovers the analytic absorption and transmission
 loss of the modelled sample through the library's own reduction chains (the
@@ -740,7 +740,7 @@ The far-field chain is what finally closes the metadiffuser loop end to
 end: the Table-1 panel of the paper (every slit, neck and cavity meshed
 at 0.5 mm) is driven to steady state by a plane wave, captured on a contour,
 and transformed against the
-[`metadiffuser_polar_response`](/phonometry/reference/api/materials/metadiffuser/)
+[`metadiffuser_polar_response`](/reference/api/materials/metadiffuser/)
 model (TMM + Fraunhofer) of the materials module. That is the library-side
 counterpart of the TMM-vs-FEM comparison the metadiffuser paper itself
 reports, small discrepancies included: the transfer-matrix model
@@ -949,7 +949,7 @@ nobody names: each one is another 8 bytes per cell in float64, so
 `snapshot_every=1` on that scene would ask for roughly 38 GB. A float32 run
 halves that, and `snapshot_decimation=d`, the third field of an
 `FDTDRecording`, keeps one cell in $d^2$
-([Where a simulation runs](/phonometry/simulation/compute/), sections 1
+([Where a simulation runs](/simulation/compute/), sections 1
 and 7). Choose the cadence from the number of frames you actually want; the
 animations in this documentation use a few hundred. For a video,
 `write_fdtd_animation` draws each frame as it is computed and stores none
@@ -1133,7 +1133,7 @@ Virieux (1986) on the same grid, adding shear waves, stress-imaging free
 surfaces with Rayleigh waves, and fluid-solid coupling with mode
 conversion, Scholte interface waves and immersed-plate transmission. That
 solver has its own guide,
-[Elastic waves and fluid-solid coupling](/phonometry/simulation/elastic-waves/).
+[Elastic waves and fluid-solid coupling](/simulation/elastic-waves/).
 
 ## Writing the run to a video
 
@@ -1143,7 +1143,7 @@ one of section 1, is refused with `ValueError`.
 `simulation.write_fdtd_animation` steps it and draws its pressure field into
 a WebM, an MP4 or a GIF as it is computed, a frame every `snapshot_every`
 steps, without storing the snapshots.
-[Writing animations and FDTD runs to video](/phonometry/io/videos/) says how a
+[Writing animations and FDTD runs to video](/io/videos/) says how a
 frame is drawn and its colour scale found, which encoder writes the file, and
 how the same call steps on a GPU or goes to a node.
 
@@ -1206,7 +1206,7 @@ modelled, and the only impedance boundary is the frequency-independent real
 one of Eqs. 4.33-4.35. Elastic media are not covered here: the P-SV companion
 solver, its free surfaces and its fluid-solid physics have their own guide,
 [Elastic waves and fluid-solid
-coupling](/phonometry/simulation/elastic-waves/).
+coupling](/simulation/elastic-waves/).
 </ScopeClaim>
 </Scope>
 
@@ -1214,21 +1214,21 @@ coupling](/phonometry/simulation/elastic-waves/).
 
 ## See also
 
-- [Elastic waves and fluid-solid coupling](/phonometry/simulation/elastic-waves/):
+- [Elastic waves and fluid-solid coupling](/simulation/elastic-waves/):
   the P-SV companion solver on the same staggered grid, with Rayleigh and
   Scholte waves, mode conversion and immersed plates.
-- [Where a simulation runs](/phonometry/simulation/compute/): the same run on
+- [Where a simulation runs](/simulation/compute/): the same run on
   an NVIDIA GPU through CuPy or on PyTorch, and what is promised about its
   numbers.
-- [Writing animations and FDTD runs to video](/phonometry/io/videos/): the
+- [Writing animations and FDTD runs to video](/io/videos/): the
   frame, its colour scale and the encoder of `write_fdtd_animation`.
-- [Conformance report](/phonometry/reference/conformance/): the box mode and
+- [Conformance report](/reference/conformance/): the box mode and
   the free-field arrival of section 6, and the ripple and level of the
   near-to-far-field monopole of section 4, run there.
-- API reference: [`simulation.fdtd`](/phonometry/reference/api/simulation/fdtd/),
-  [`simulation.ntff`](/phonometry/reference/api/simulation/ntff/),
-  [`simulation.compute`](/phonometry/reference/api/simulation/compute/),
-  [`simulation.video`](/phonometry/reference/api/simulation/video/).
+- API reference: [`simulation.fdtd`](/reference/api/simulation/fdtd/),
+  [`simulation.ntff`](/reference/api/simulation/ntff/),
+  [`simulation.compute`](/reference/api/simulation/compute/),
+  [`simulation.video`](/reference/api/simulation/video/).
 
 </SeeAlso>
 

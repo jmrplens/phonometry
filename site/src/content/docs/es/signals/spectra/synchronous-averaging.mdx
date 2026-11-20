@@ -355,7 +355,7 @@ bloques se trocean directamente y una señal periódica sin ruido se recupera
 con precisión de máquina (`interpolated` es `False`). Cuando $f_\mathrm{s} T$ no es
 entero las fronteras caen entre muestras; cada bloque se alinea entonces a una
 malla entera común mediante el retardo fraccionario de banda limitada de
-[`fractional_delay`](/phonometry/es/signals/spectra/test-signals/), y la forma de onda
+[`fractional_delay`](/es/signals/spectra/test-signals/), y la forma de onda
 se recupera dentro de ese error de interpolación (`interpolated` es `True`):
 
 ```python
@@ -375,7 +375,7 @@ del peine devuelta.
 
 La alineación de banda limitada comparte su núcleo con la alineación
 submuestral de respuestas al impulso de la
-[página de señales de prueba](/phonometry/es/signals/spectra/test-signals/), y la forma
+[página de señales de prueba](/es/signals/spectra/test-signals/), y la forma
 de onda recuperada, al ser exactamente un periodo, puede repetirse para
 reconstruir la parte síncrona de la señal, para restarla o para análisis de
 órdenes.
@@ -390,11 +390,11 @@ competir:
   una velocidad de eje fiable) y devuelve *la forma de onda misma*, una
   revolución completa: la herramienta cuando quieres ver qué hace un eje o
   un engranaje concreto por vuelta, diente a diente.
-- **El [cepstrum](/phonometry/es/signals/spectra/cepstrum-echoes/)** no necesita
+- **El [cepstrum](/es/signals/spectra/cepstrum-echoes/)** no necesita
   referencia y detecta *cualquier* familia periódica del espectro
   (armónicos, bandas laterales): la herramienta cuando el periodo es
   desconocido o varias familias se solapan y hay que separarlas.
-- **El [espectro de la envolvente](/phonometry/es/signals/spectra/cepstrum-echoes/#5-el-espectro-de-la-envolvente-modulaciones-como-lineas)**
+- **El [espectro de la envolvente](/es/signals/spectra/cepstrum-echoes/#5-el-espectro-de-la-envolvente-modulaciones-como-lineas)**
   encuentra periodicidades de la *amplitud*: la herramienta para los fallos
   de rodamiento, cuya tasa de repetición modula una resonancia de alta
   frecuencia en lugar de aparecer como un tono grave.
@@ -412,7 +412,7 @@ la bola, la jaula, la frecuencia de engrane y sus bandas laterales a la
 frecuencia de eje, el paso de pala, el deslizamiento del motor y el paso de
 polos) se calculan a partir de la geometría y la velocidad de eje, y se dibujan
 sobre el espectro de la envolvente medido en
-[frecuencias de fallo de máquinas](/phonometry/es/vibration/machinery/machine-diagnostics/).
+[frecuencias de fallo de máquinas](/es/vibration/machinery/machine-diagnostics/).
 Como esas familias se expresan en *órdenes del eje*, la misma señal de
 tacómetro que fija el periodo de promediado fija también las frecuencias de las
 familias: un error de velocidad corrompe a la vez el promediado y la
@@ -436,10 +436,10 @@ cuando $f_\mathrm{s} T$ no es entero.
 <ScopeClaim status="not-covered" label="No cubierto">
 El TSA necesita un periodo conocido; encontrar ese periodo, o detectar
 familias periódicas sin conocerlo, es tarea del
-[cepstrum](/phonometry/es/signals/spectra/cepstrum-echoes/), no de esta
+[cepstrum](/es/signals/spectra/cepstrum-echoes/), no de esta
 página. Localizar periodicidades de modulación de amplitud, como los fallos de
 rodamiento, es el [espectro de la
-envolvente](/phonometry/es/signals/spectra/cepstrum-echoes/#5-el-espectro-de-la-envolvente-modulaciones-como-lineas),
+envolvente](/es/signals/spectra/cepstrum-echoes/#5-el-espectro-de-la-envolvente-modulaciones-como-lineas),
 también fuera de esta página. El artículo de McFadden no es una norma de
 certificación, así que no hay ningún apartado de cumplimiento contra el que
 comprobar la implementación.
@@ -450,10 +450,10 @@ comprobar la implementación.
 
 ## Véase también
 
-- [Cepstrum y ecos](/phonometry/es/signals/spectra/cepstrum-echoes/): detección sin referencia de familias de armónicos y bandas laterales, y el espectro de la envolvente.
-- [Correlación y retardo](/phonometry/es/signals/spectra/correlation-delay/): la envolvente de Hilbert que sustenta el análisis de envolvente.
-- [Señales de prueba](/phonometry/es/signals/spectra/test-signals/): el núcleo de retardo fraccionario que usa la alineación de periodo no entero.
-- [Frecuencias de fallo de máquinas](/phonometry/es/vibration/machinery/machine-diagnostics/): las familias de rodamientos y engranajes contra las que se lee el espectro de la envolvente del residuo.
-- Referencia de la API: [`signals.synchronous_average`](/phonometry/es/reference/api/signals/synchronous-average/).
+- [Cepstrum y ecos](/es/signals/spectra/cepstrum-echoes/): detección sin referencia de familias de armónicos y bandas laterales, y el espectro de la envolvente.
+- [Correlación y retardo](/es/signals/spectra/correlation-delay/): la envolvente de Hilbert que sustenta el análisis de envolvente.
+- [Señales de prueba](/es/signals/spectra/test-signals/): el núcleo de retardo fraccionario que usa la alineación de periodo no entero.
+- [Frecuencias de fallo de máquinas](/es/vibration/machinery/machine-diagnostics/): las familias de rodamientos y engranajes contra las que se lee el espectro de la envolvente del residuo.
+- Referencia de la API: [`signals.synchronous_average`](/es/reference/api/signals/synchronous-average/).
 
 </SeeAlso>

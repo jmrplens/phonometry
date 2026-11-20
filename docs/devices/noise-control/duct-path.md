@@ -1,6 +1,6 @@
 <!-- Written by `make llms` from site/src/content/docs/devices/noise-control/duct-path.mdx: edit that page and its Spanish twin, then run `make llms`. -->
 
-← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/devices/noise-control/duct-path/
+← [Documentation index](../../README.md) · Published at https://phonometry.dev/devices/noise-control/duct-path/
 
 # Duct-Borne Noise: Fan to Room
 
@@ -1112,9 +1112,9 @@ survive past cut-on.
 - [Steady-state room field](../../buildings/rooms/room-image-sources.md): the
   room constant behind the room effect and the plenum reverberant term.
 - API reference:
-  [`noise_control`: duct path](https://docs.jmrp.io/phonometry/reference/api/noise_control/duct-path/),
-  [`noise_control.duct_modes`](https://docs.jmrp.io/phonometry/reference/api/noise_control/duct-modes/),
-  [`noise_control.hvac`](https://docs.jmrp.io/phonometry/reference/api/noise_control/hvac/).
+  [`noise_control`: duct path](https://phonometry.dev/reference/api/noise_control/duct-path/),
+  [`noise_control.duct_modes`](https://phonometry.dev/reference/api/noise_control/duct-modes/),
+  [`noise_control.hvac`](https://phonometry.dev/reference/api/noise_control/hvac/).
 
 ## References
 

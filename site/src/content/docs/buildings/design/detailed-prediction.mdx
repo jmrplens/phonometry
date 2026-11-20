@@ -39,7 +39,7 @@ import SeeAlso from '../../../../components/SeeAlso.astro';
 import ThemeImage from '../../../../components/ThemeImage.astro';
 
 The simplified model of
-[Predicting Sound Insulation (EN 12354)](/phonometry/buildings/design/insulation-prediction/) returns one
+[Predicting Sound Insulation (EN 12354)](/buildings/design/insulation-prediction/) returns one
 number, $R'_\mathrm{w}$ or $L'_\mathrm{n,w}$, and hides everything that happens inside the
 spectrum. The **detailed model** (ISO 12354-1:2017 Clause 4.2 airborne,
 ISO 12354-2:2017 Clause 4.2 impact) carries every quantity through the
@@ -234,8 +234,8 @@ r_flanking = building.resonant_sound_reduction_index(r_situ, frequencies=bands,
 | :--- | :--- |
 | $R$, $L_\mathrm{n}$ per band | ISO 10140-2 / ISO 10140-3 test report (**with the laboratory structural reverberation time from the same report**) |
 | $\Delta R$ of a lining | ISO 10140-1 Annex G, or ISO 12354-1 Annex D |
-| $\Delta L$ of a covering | [ISO 16251-1](/phonometry/buildings/design/impact-improvement/) or ISO 10140-3 |
-| $K_{ij}$ per junction | ISO 10848-1/-4, or the [Annex E catalogue](/phonometry/buildings/design/insulation-prediction/) |
+| $\Delta L$ of a covering | [ISO 16251-1](/buildings/design/impact-improvement/) or ISO 10140-3 |
+| $K_{ij}$ per junction | ISO 10848-1/-4, or the [Annex E catalogue](/buildings/design/insulation-prediction/) |
 | $m'$, $f_\mathrm{c}$, $\eta_\mathrm{int}$, $c_\mathrm{L}$ | the material data sheet, or Annex B Table B.1 |
 | Areas and coupling lengths | the drawings, measured **surface to surface** |
 
@@ -255,7 +255,7 @@ mineral wool, two 365 mm autoclaved aerated concrete external walls and two
 junctions. Together they print about twenty per-band tables, one per
 intermediate quantity, which makes the example a complete oracle for the
 model. Eight defects of those printed tables are recorded in
-[Errata](/phonometry/reference/errata/), and the fixture below takes the
+[Errata](/reference/errata/), and the fixture below takes the
 corrected readings.
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_iso12354_annexl.svg" alt="The ISO 12354-1 Annex L worked building: a section through two stacked dwellings showing the 220 mm separating floor with its floating screed, the two external and two internal walls with their masses and critical frequencies and the Kij of each junction, and a plan of the separating floor with the four coupling lengths dimensioned and the thirteen transmission paths counted" width="92%" />
@@ -312,7 +312,7 @@ The element's $m'$ and $f_\mathrm{c}$ follow from its material and its
 thickness, $m' = \rho t$ and $f_\mathrm{c} = c_\mathrm{o}^2 / (1.8\, c_\mathrm{L} t)$
 with the density and the quasi-longitudinal phase velocity of Table B.3, and
 `HomogeneousElement.from_solid` works both out from a solid's catalogue row,
-a published one or one of [your own catalogues](/phonometry/io/material-catalogues/). The internal loss factor
+a published one or one of [your own catalogues](/io/material-catalogues/). The internal loss factor
 is never read from the row, which may hold four, so it is given here as the
 element specification gives it. The unrounded $f_\mathrm{c}$ is the one the
 standard's footnote says its calculation used:
@@ -573,7 +573,7 @@ four inputs are per-band arrays over `bands` that come from somewhere specific.
 only because a flanking path carries free bending waves alone. `dv_n` is the
 **normalized** direction-averaged velocity level difference of the junction in
 dB, measured per
-[ISO 10848-2](/phonometry/buildings/insulation/flanking-lab/) and referred to a
+[ISO 10848-2](/buildings/insulation/flanking-lab/) and referred to a
 reference length of 1 m. `dnf_13` is the normalized flanking level difference
 $D_\mathrm{n,f}$ of a junction measured in a laboratory, in dB, which the call re-scales
 by the ratio of the site and laboratory coupling lengths. And `lnf_13` is its
@@ -703,11 +703,11 @@ neglected.
 <ScopeClaim status="not-covered" label="Not covered">
 Only homogeneous Annex B elements are calculated here; the spectrum of a
 lightweight, double or composite element is an input, from [Predicting Panel
-Sound Insulation](/phonometry/buildings/design/panel-sound-insulation/) or
+Sound Insulation](/buildings/design/panel-sound-insulation/) or
 from a test report. The Annex E junction catalogue itself lives on [Predicting
-Sound Insulation](/phonometry/buildings/design/insulation-prediction/), and the
+Sound Insulation](/buildings/design/insulation-prediction/), and the
 Part 1 Annex D lining improvement on [Predicting Resilient-Layer
-Performance](/phonometry/buildings/design/resilient-layers/); the Annex D and F
+Performance](/buildings/design/resilient-layers/); the Annex D and F
 default tables of EN 12354-5 are implemented nowhere. The Type B branch is
 shown from its standard inputs rather than worked end to end. Airborne
 transmission through cavities and suspended ceilings is not carried at all,
@@ -721,18 +721,18 @@ one-third octaves, or 125 Hz to 2000 Hz in octaves.
 
 ## See also
 
-- [Predicting Sound Insulation (EN 12354)](/phonometry/buildings/design/insulation-prediction/): the
+- [Predicting Sound Insulation (EN 12354)](/buildings/design/insulation-prediction/): the
   simplified single-number model and the Annex E junction catalogue this page
   builds on.
-- [Laboratory Flanking Transmission (ISO 10848)](/phonometry/buildings/insulation/flanking-lab/): where the
+- [Laboratory Flanking Transmission (ISO 10848)](/buildings/insulation/flanking-lab/): where the
   measured $K_{ij}$ and the equivalent absorption length come from.
-- [Insulation Ratings (ISO 717)](/phonometry/buildings/insulation/insulation-ratings/): the reference-curve
+- [Insulation Ratings (ISO 717)](/buildings/insulation/insulation-ratings/): the reference-curve
   engine that turns the predicted spectrum into $R'_\mathrm{w}$ / $L'_\mathrm{n,w}$.
-- [Field Insulation Measurement (ISO 16283)](/phonometry/buildings/insulation/insulation-field/): the built
+- [Field Insulation Measurement (ISO 16283)](/buildings/insulation/insulation-field/): the built
   result the prediction is checked against.
-- [Dynamic stiffness of resilient materials (EN 29052-1)](/phonometry/materials/resilient/dynamic-stiffness/):
+- [Dynamic stiffness of resilient materials (EN 29052-1)](/materials/resilient/dynamic-stiffness/):
   the $s'$ behind the floating floor's resonance frequency.
-- API reference: [`building.prediction.detailed_model`](/phonometry/reference/api/building/detailed-model/).
-- Theory: [Sound insulation and absorption, predicted](/phonometry/reference/theory/rooms-buildings/#sound-insulation-and-absorption-predicted-en-12354-1-2-6-bies-cremer-hopkins): the direct and flanking path algebra the detailed model itemises.
+- API reference: [`building.prediction.detailed_model`](/reference/api/building/detailed-model/).
+- Theory: [Sound insulation and absorption, predicted](/reference/theory/rooms-buildings/#sound-insulation-and-absorption-predicted-en-12354-1-2-6-bies-cremer-hopkins): the direct and flanking path algebra the detailed model itemises.
 
 </SeeAlso>

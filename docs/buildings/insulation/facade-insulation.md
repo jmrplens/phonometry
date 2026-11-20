@@ -1,6 +1,6 @@
 <!-- Written by `make llms` from site/src/content/docs/buildings/insulation/facade-insulation.mdx: edit that page and its Spanish twin, then run `make llms`. -->
 
-← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/buildings/insulation/facade-insulation/
+← [Documentation index](../../README.md) · Published at https://phonometry.dev/buildings/insulation/facade-insulation/
 
 # Façade Sound Insulation
 
@@ -724,7 +724,7 @@ decides the result.
   onwards from the radiating side of EN 12354-4.
 - [Theory](../../reference/theory/rooms-buildings.md): the reference-curve
   derivation behind the weighted single-number ratings.
-- API reference: [`building.prediction.facade`](https://docs.jmrp.io/phonometry/reference/api/building/facade/) and [`building.measurement.insulation`](https://docs.jmrp.io/phonometry/reference/api/building/insulation/).
+- API reference: [`building.prediction.facade`](https://phonometry.dev/reference/api/building/facade/) and [`building.measurement.insulation`](https://phonometry.dev/reference/api/building/insulation/).
 
 ## References
 

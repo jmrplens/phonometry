@@ -82,7 +82,7 @@ que las implementan, las curvas de ponderación frecuencial, la integración
 temporal, las métricas de nivel, de evento y de exposición, la intensidad
 acústica y el marco de incertidumbre del GUM que sustenta cada magnitud
 medida. Forma parte de la [referencia de
-teoría](/phonometry/es/reference/theory/).
+teoría](/es/reference/theory/).
 
 ## Frecuencias de banda de octava (ANSI S1.11 / IEC 61260)
 
@@ -335,7 +335,7 @@ orden aprieta el ajuste a la máscara y alarga el transitorio del filtro, que es
 lo que cuantifica la regla de establecimiento de más abajo.
 `verify_filter_class` comprueba un banco diseñado contra las máscaras;
 consulta [Verificación de clase de
-filtro](/phonometry/es/signals/filters/filter-compliance/).
+filtro](/es/signals/filters/filter-compliance/).
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/filter_type_comparison.svg" alt="Comparación de la respuesta en magnitud de las cinco arquitecturas de filtro para la banda de octava de 1 kHz, con un zoom en el cruce de −3 dB" width="88%" />
 
@@ -418,10 +418,10 @@ las bandas del banco lejos de ese régimen:
    conformidad debería salir de la pasada única hacia delante.
 
 Consulta la [guía de bancos de
-filtros](/phonometry/es/signals/filters/filter-banks/) para su uso, la [galería
-de arquitecturas de filtro](/phonometry/es/signals/filters/filter-gallery/) para
+filtros](/es/signals/filters/filter-banks/) para su uso, la [galería
+de arquitecturas de filtro](/es/signals/filters/filter-gallery/) para
 ver las cinco arquitecturas una al lado de otra y [Verificación de clase de
-filtros](/phonometry/es/signals/filters/filter-compliance/) para comprobar un
+filtros](/es/signals/filters/filter-compliance/) para comprobar un
 banco diseñado contra las máscaras de IEC 61260-1.
 
 <span id="curvas-de-ponderacion-iec-61672-1"></span>
@@ -438,7 +438,7 @@ Ese origen es además su dominio de validez: como la A está anclada en 40 fonio
 subestima progresivamente el contenido de baja frecuencia de las fuentes
 fuertes, que es justo la razón de ser de los modelos de sonoridad, de los picos
 ponderados C y de la curva G de más abajo. Las líneas en sí están en [Líneas
-isofónicas](/phonometry/es/reference/theory/perception/#lineas-isofonicas-iso-2262023).
+isofónicas](/es/reference/theory/perception/#lineas-isofonicas-iso-2262023).
 
 La función de transferencia de la ponderación A:
 
@@ -462,11 +462,11 @@ modo `high_accuracy` por defecto no aplica esa transformación al prototipo
 impreso: ajusta un prototipo de la misma estructura cuya respuesta *en las
 frecuencias deformadas* es la del impreso en las verdaderas, y transforma ese;
 consulta
-[Ponderación frecuencial](/phonometry/es/signals/levels/weighting/).
+[Ponderación frecuencial](/es/signals/levels/weighting/).
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/weighting_responses.svg" alt="Curvas de ponderación A, C y Z de IEC 61672-1 con zoom de la región positiva de la curva A (+1,27 dB a 2,5 kHz)" width="80%" />
 
-*Las tres curvas de ponderación de IEC 61672-1 que aplica la biblioteca, con la pequeña región positiva de la curva A ampliada. Las curvas especiales B, D y AU están en [Ponderaciones especiales](/phonometry/es/signals/levels/special-weightings/).*
+*Las tres curvas de ponderación de IEC 61672-1 que aplica la biblioteca, con la pequeña región positiva de la curva A ampliada. Las curvas especiales B, D y AU están en [Ponderaciones especiales](/es/signals/levels/special-weightings/).*
 
 <span id="integracion-temporal"></span>
 
@@ -507,7 +507,7 @@ energía entre intervalos.
 La condición inicial por defecto es $y[-1] = 0$. Usa `initial_state='first'`
 para partir de la energía de la primera muestra, o pasa un escalar/array con el
 estado cuadrático medio anterior. Consulta
-[Por qué phonometry](/phonometry/es/start/why-phonometry/) para la
+[Por qué phonometry](/es/start/why-phonometry/) para la
 verificación de esta implementación con ráfagas tonales de IEC 61672-1.
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/time_weighting_analysis.svg" alt="Respuestas de las ponderaciones temporales Fast, Slow e Impulse a una ráfaga de ruido" width="80%" />
@@ -546,7 +546,7 @@ Los infrasonidos necesitan su propia curva porque, cerca del umbral de audición
 
 Como G actúa sobre 0,25 Hz – 315 Hz, muy por debajo de la frecuencia de Nyquist a las frecuencias de muestreo de audio, la deformación en frecuencia de la transformación bilineal simple (aplicada sin precompensación) es despreciable en ese rango: en torno al 0,014 % a 315 Hz con $f_\mathrm{s} = 48$ kHz, menos de 0,01 dB en la respuesta. El diseño por defecto ajusta igualmente el prototipo a la frecuencia de muestreo, como hace con A y C: aquí no cuesta nada y sí importa a las frecuencias bajas a las que se suele grabar infrasonido, donde 315 Hz se acerca a Nyquist.
 
-Consulta la [guía de ponderaciones especiales](/phonometry/es/signals/levels/special-weightings/) para su uso.
+Consulta la [guía de ponderaciones especiales](/es/signals/levels/special-weightings/) para su uso.
 
 <span id="metricas-de-evento-y-de-dosis"></span>
 
@@ -578,11 +578,11 @@ $$
 L_\mathrm{EX,8h} = 10 \log_{10}\left(\frac{E}{8\ \text{h} \cdot p_0^2}\right), \qquad p_0 = 20\ \mu\text{Pa}
 $$
 
-Es idéntico al $L_\mathrm{EP,d}$ de la Directiva 86/188/CEE y al $L_\mathrm{EX,8h}$ de ISO 1999 (IEC 61252, 3.3 NOTAS 5–6). El ancla de IEC 61252 (3.3 NOTA 4): una exposición de **3,2 Pa²h corresponde a un $L_\mathrm{EX,8h}$ de exactamente 90 dB**. ISO 9612 prescribe cómo muestrear una jornada de trabajo para obtenerlo y cómo acotar el resultado; consulta [Exposición al ruido en el trabajo](/phonometry/es/reference/theory/environment-transport/#exposicion-al-ruido-en-el-trabajo-iso-9612).
+Es idéntico al $L_\mathrm{EP,d}$ de la Directiva 86/188/CEE y al $L_\mathrm{EX,8h}$ de ISO 1999 (IEC 61252, 3.3 NOTAS 5–6). El ancla de IEC 61252 (3.3 NOTA 4): una exposición de **3,2 Pa²h corresponde a un $L_\mathrm{EX,8h}$ de exactamente 90 dB**. ISO 9612 prescribe cómo muestrear una jornada de trabajo para obtenerlo y cómo acotar el resultado; consulta [Exposición al ruido en el trabajo](/es/reference/theory/environment-transport/#exposicion-al-ruido-en-el-trabajo-iso-9612).
 
 **$L_\mathrm{Cpeak}$** (IEC 61672-1:2013, apartado 5.13) es el máximo absoluto de la presión acústica ponderada C expresado en dB, $L_\mathrm{Cpeak} = 20\log_{10}(\max|p_\mathrm{C}(t)|/p_0)$, la magnitud detrás de los límites de acción laborales de 135/137/140 dB(C). La implementación se verifica contra las respuestas de referencia de un ciclo y de medio ciclo de la Tabla 5.
 
-Consulta la [guía de niveles](/phonometry/es/signals/levels/levels/) para su uso y la [guía de calibración](/phonometry/es/signals/metrology/calibration/) para configurar la escala absoluta.
+Consulta la [guía de niveles](/es/signals/levels/levels/) para su uso y la [guía de calibración](/es/signals/metrology/calibration/) para configurar la escala absoluta.
 
 <span id="intensidad-acustica-iec-61043"></span>
 
@@ -646,13 +646,13 @@ medición.
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_residual_intensity_check.svg" alt="Tres paneles. Primero, el dispositivo de ensayo de intensidad residual de IEC 61043: un pequeño acoplador que lleva ruido rosa o blanco a las dos cápsulas de la sonda al mismo nivel dentro de más menos 0,1 decibelios, del que se lee el índice residual como el nivel de presión menos el nivel de intensidad indicado. Segundo, un calibrador acústico de clase 0 o clase 1 según IEC 60942 aplicado a un micrófono cada vez, con el instrumento ajustado dentro de más menos 0,1 decibelios en los dos canales. Tercero, el ensayo in situ de inversión de la sonda: la sonda sobre la superficie de medición marcando una intensidad normal positiva y después girada 180 grados alrededor de su centro acústico marcando una negativa, aceptado cuando las dos tienen signos opuestos y difieren menos de 1,5 decibelios en la banda de nivel máximo" width="92%" />
 
-*El párrafo anterior es el primer panel: el dispositivo de ensayo del apartado 10.2 de IEC 61043, con ruido rosa o blanco en todo o parte del rango de 45 Hz a 7,1 kHz y las dos cápsulas al mismo nivel dentro de ±0,1 dB (al menos de 45 Hz a 1 kHz), del que se lee $\delta_{pI0}$. Los otros dos paneles son comprobaciones que esta página no desarrolla: la comprobación de presión de cada canal con un calibrador acústico, ajustada a ±0,1 dB (IEC 61043, apartado 14 b; ISO 9614-1, apartado 6.2.1), y la inversión de la sonda sobre la superficie de medición, en la que las dos lecturas deben tener signos opuestos y diferir menos de 1,5 dB en la banda de nivel máximo (apartado 6.2.2 de ISO 9614-1 y de ISO 9614-2). La [guía de intensidad sonora](/phonometry/es/devices/emission/intensity/) recorre las dos.*
+*El párrafo anterior es el primer panel: el dispositivo de ensayo del apartado 10.2 de IEC 61043, con ruido rosa o blanco en todo o parte del rango de 45 Hz a 7,1 kHz y las dos cápsulas al mismo nivel dentro de ±0,1 dB (al menos de 45 Hz a 1 kHz), del que se lee $\delta_{pI0}$. Los otros dos paneles son comprobaciones que esta página no desarrolla: la comprobación de presión de cada canal con un calibrador acústico, ajustada a ±0,1 dB (IEC 61043, apartado 14 b; ISO 9614-1, apartado 6.2.1), y la inversión de la sonda sobre la superficie de medición, en la que las dos lecturas deben tener signos opuestos y diferir menos de 1,5 dB en la banda de nivel máximo (apartado 6.2.2 de ISO 9614-1 y de ISO 9614-2). La [guía de intensidad sonora](/es/devices/emission/intensity/) recorre las dos.*
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_pp_probe.svg" alt="Una sonda p-p de intensidad acústica de dos micrófonos: dos micrófonos de presión con un espaciador entre ellos, a partir de los cuales se estiman el gradiente de presión y con él la intensidad normal" width="88%" />
 
 El **índice presión-intensidad** $\delta_{pI} = L_p - L_I$ mide cuán reactivo es el campo: en una onda plana progresiva libre vale $10 \log_{10}(\rho_0 c / 400) = 0{,}14$ dB, mientras que valores grandes delatan campos reactivos o ruidosos en los que domina el error de fase entre canales. El Anexo A de ISO 9614-1:1993 lo generaliza sobre una superficie de medición como el indicador F2 (con F3 para la potencia parcial negativa y F4 para la no uniformidad del campo), y la **capacidad dinámica** del instrumento $L_\mathrm{d} = \delta_{pI0} - K$ (índice presión-intensidad residual menos el factor de error de sesgo: 10 dB para los grados 1/2, 7 dB para el grado 3) debe superar F2 para que la medición sea válida (criterio 1).
 
-Consulta la [guía de intensidad acústica](/phonometry/es/devices/emission/intensity/) para su uso.
+Consulta la [guía de intensidad acústica](/es/devices/emission/intensity/) para su uso.
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/intensity_demo.svg" alt="Niveles de presión e intensidad en tercios de octava para una onda plana progresiva frente a una onda estacionaria" width="92%" />
 
@@ -708,4 +708,4 @@ el apartado 8 llama validación; cuando el modelo es no lineal o la salida
 visiblemente no gaussiana, el histograma se separa de la curva y el intervalo se
 lee de los fractiles en su lugar.*
 
-Consulta la [guía de incertidumbre de medida](/phonometry/es/signals/metrology/gum-uncertainty/) para su uso.
+Consulta la [guía de incertidumbre de medida](/es/signals/metrology/gum-uncertainty/) para su uso.

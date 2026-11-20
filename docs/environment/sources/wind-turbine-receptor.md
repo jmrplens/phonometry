@@ -1,6 +1,6 @@
 <!-- Written by `make llms` from site/src/content/docs/environment/sources/wind-turbine-receptor.mdx: edit that page and its Spanish twin, then run `make llms`. -->
 
-← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/environment/sources/wind-turbine-receptor/
+← [Documentation index](../../README.md) · Published at https://phonometry.dev/environment/sources/wind-turbine-receptor/
 
 # Wind turbine sound at a dwelling: IEC TS 61400-11-2
 
@@ -582,7 +582,7 @@ plt.show()
 - [Outdoor Sound Propagation](../propagation/outdoor-propagation.md): ISO 9613-1 air absorption and the ISO 9613-2 chain.
 - [Impulsive-sound prominence](../assessment/impulsive-sound.md): the ISO/PAS 1996-3 adjustment of A.4.
 - [Fluctuation strength and roughness](../../perception/psychoacoustics/sound-quality.md): the psychoacoustic view of modulation.
-- API reference: [`environment.assessment.wind_turbine_receptor`](https://docs.jmrp.io/phonometry/reference/api/environment/wind-turbine-receptor/) and [`environment.assessment.wind_turbine_modulation`](https://docs.jmrp.io/phonometry/reference/api/environment/wind-turbine-modulation/).
+- API reference: [`environment.assessment.wind_turbine_receptor`](https://phonometry.dev/reference/api/environment/wind-turbine-receptor/) and [`environment.assessment.wind_turbine_modulation`](https://phonometry.dev/reference/api/environment/wind-turbine-modulation/).
 
 ## References
 

@@ -22,8 +22,8 @@ sensitivity to minimise the averaged deviation of its free-field response from
 the incident level over the whole frequency range, then applies the
 recommended calibrator and reads $L_4$. The adjustment value quoted in
 the manual is $\Delta L = L_1 - L_4$, $L_1$ being the level stated
-for the calibrator. [`adjustment_value`](/phonometry/reference/api/metrology/free-field-corrections/#adjustment_value) makes the fit and returns an
-[`AdjustmentValue`](/phonometry/reference/api/metrology/free-field-corrections/#adjustmentvalue).
+for the calibrator. [`adjustment_value`](/reference/api/metrology/free-field-corrections/#adjustment_value) makes the fit and returns an
+[`AdjustmentValue`](/reference/api/metrology/free-field-corrections/#adjustmentvalue).
 
 **The corrections, Annexes D, E and F.** Each compares the meter with a
 laboratory standard microphone of type LS2P, in a free field and on the
@@ -34,27 +34,27 @@ $$
 C_\mathrm{FF,SLM} = (L_\mathrm{ind1} - L_\mathrm{ind3}) - (L_\mathrm{ind2} - L_\mathrm{ind4}) - (L_{p,\mathrm{F1}} - L_{p,\mathrm{F2}}) + (L_{p,\mathrm{P1}} - L_{p,\mathrm{P2}}) + C_\mathrm{FF,RM} \tag{D.7}
 $$
 
-for a multi-frequency sound calibrator ([`sound_calibrator_correction`](/phonometry/reference/api/metrology/free-field-corrections/#sound_calibrator_correction)),
-Formula (E.6) for a comparison coupler ([`comparison_coupler_correction`](/phonometry/reference/api/metrology/free-field-corrections/#comparison_coupler_correction)),
+for a multi-frequency sound calibrator ([`sound_calibrator_correction`](/reference/api/metrology/free-field-corrections/#sound_calibrator_correction)),
+Formula (E.6) for a comparison coupler ([`comparison_coupler_correction`](/reference/api/metrology/free-field-corrections/#comparison_coupler_correction)),
 and Formula (F.13), normalised to the calibration check frequency, for an
-electrostatic actuator ([`electrostatic_actuator_correction`](/phonometry/reference/api/metrology/free-field-corrections/#electrostatic_actuator_correction)). All three
-return a [`FreeFieldCorrection`](/phonometry/reference/api/metrology/free-field-corrections/#freefieldcorrection), which averages the determinations of
+electrostatic actuator ([`electrostatic_actuator_correction`](/reference/api/metrology/free-field-corrections/#electrostatic_actuator_correction)). All three
+return a [`FreeFieldCorrection`](/reference/api/metrology/free-field-corrections/#freefieldcorrection), which averages the determinations of
 the combinations clause 7 asks for and keeps the range of the corrections over
 the microphones, the quantity clauses 12 to 14 judge.
 
 **The uncertainty, Annex I and clauses 9 to 14.**
-[`correction_uncertainty_budget`](/phonometry/reference/api/metrology/free-field-corrections/#correction_uncertainty_budget) builds the budget of Table I.1 on
-[`uncertainty_propagation`](/phonometry/reference/api/metrology/uncertainty/#uncertainty_propagation): its 15 components, each
+[`correction_uncertainty_budget`](/reference/api/metrology/free-field-corrections/#correction_uncertainty_budget) builds the budget of Table I.1 on
+[`uncertainty_propagation`](/reference/api/metrology/uncertainty/#uncertainty_propagation): its 15 components, each
 divided by the divisor its distribution sets, and the effective degrees of
 freedom by Welch-Satterthwaite, which choose the coverage factor for a level of
-confidence of 95 %. [`verify_correction_uncertainty`](/phonometry/reference/api/metrology/free-field-corrections/#verify_correction_uncertainty) judges the expanded
+confidence of 95 %. [`verify_correction_uncertainty`](/reference/api/metrology/free-field-corrections/#verify_correction_uncertainty) judges the expanded
 uncertainty at each frequency against the maximum permitted by the clause the
-correction belongs to, [`max_expanded_uncertainty`](/phonometry/reference/api/metrology/free-field-corrections/#max_expanded_uncertainty), and for clauses
+correction belongs to, [`max_expanded_uncertainty`](/reference/api/metrology/free-field-corrections/#max_expanded_uncertainty), and for clauses
 12 to 14 the range of the corrections over the microphones against the same
 maximum.
 
 **The exact frequencies, Annex H.** The corrections are reported at exact
-base-ten frequencies, [`exact_frequencies`](/phonometry/reference/api/metrology/free-field-corrections/#exact_frequencies).
+base-ten frequencies, [`exact_frequencies`](/reference/api/metrology/free-field-corrections/#exact_frequencies).
 
 Three readings the text leaves to the implementer
 -------------------------------------------------
@@ -62,7 +62,7 @@ Three readings the text leaves to the implementer
 **The fit of Annex A.** The text asks for the sensitivity that minimises "the
 averaged deviation" of the free-field response, with the tolerance limits of
 IEC 61672-1, which vary with frequency, "taken into account", and prints no
-formula. [`adjustment_value`](/phonometry/reference/api/metrology/free-field-corrections/#adjustment_value) takes the least-squares reading: the
+formula. [`adjustment_value`](/reference/api/metrology/free-field-corrections/#adjustment_value) takes the least-squares reading: the
 sensitivity adjustment $s$ minimises $\sum_i w_i (d_i + s)^2$,
 $d_i$ the deviation at frequency $i$ and $w_i = 1/t_i^2$
 for a tolerance $t_i$, so a frequency with a tight tolerance pulls the
@@ -78,7 +78,7 @@ $L_{p,\mathrm{P2}}$ at the meter. Equations (E.4) to (E.6) are written
 the other way round, as (D.5) to (D.7) are for a calibrator, and with the
 figure's definitions they do not follow from (E.1) to (E.3B): they come out
 $2(\Delta L_\mathrm{P,SLM} - \Delta L_\mathrm{P,RM})$ away from the
-correction. [`comparison_coupler_correction`](/phonometry/reference/api/metrology/free-field-corrections/#comparison_coupler_correction) names its inputs by what
+correction. [`comparison_coupler_correction`](/reference/api/metrology/free-field-corrections/#comparison_coupler_correction) names its inputs by what
 each reading is of, so neither labelling reaches it, and the defect is in
 `docs/ERRATA.md`.
 
@@ -143,7 +143,7 @@ text asks for.
 | `pressure_indicated_level` | What the meter indicates in a pressure field of level $L_1$ at each frequency, in dB, before the adjustment, for the pressure-to-free-field correction and $L_3$ (Default: None). |
 | `check_frequency_hz` | $f_\mathrm{R}$, in Hz (Default: 1000). |
 
-**Returns:** The [`AdjustmentValue`](/phonometry/reference/api/metrology/free-field-corrections/#adjustmentvalue).
+**Returns:** The [`AdjustmentValue`](/reference/api/metrology/free-field-corrections/#adjustmentvalue).
 
 **Raises**
 
@@ -338,13 +338,13 @@ correction is their mean.
 | `coupler_level_difference` | the sound pressure level at the meter less that at the reference in the coupler, in dB (Default: 0). |
 | `microphones` | The microphone of each determination, one label per row (Default: None, every determination a microphone of its own). |
 
-**Returns:** The [`FreeFieldCorrection`](/phonometry/reference/api/metrology/free-field-corrections/#freefieldcorrection).
+**Returns:** The [`FreeFieldCorrection`](/reference/api/metrology/free-field-corrections/#freefieldcorrection).
 
 **Raises**
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | as [`sound_calibrator_correction`](/phonometry/reference/api/metrology/free-field-corrections/#sound_calibrator_correction). |
+| ValueError | as [`sound_calibrator_correction`](/reference/api/metrology/free-field-corrections/#sound_calibrator_correction). |
 | TypeError | if `coupler_level_difference`, `free_field_level_difference`, `frequencies` or `reference_free_field_correction` holds a text or a value that is not a real number. |
 
 ## correction_uncertainty_budget
@@ -372,7 +372,7 @@ correction of the reference microphone (a7), and the standard uncertainty
 from repeated measurements for the repeatability (a15). The divisors of
 Table I.1, $\sqrt{3}$, 2 and 1, turn them into standard
 uncertainties; the combination is
-[`uncertainty_propagation`](/phonometry/reference/api/metrology/uncertainty/#uncertainty_propagation) on Formula (E.6), every
+[`uncertainty_propagation`](/reference/api/metrology/uncertainty/#uncertainty_propagation) on Formula (E.6), every
 component a correction with a sensitivity of $\pm 1$; the effective
 degrees of freedom are Welch-Satterthwaite's, with only the repeatability
 finite; and the coverage factor is the Student factor for them at a level
@@ -397,10 +397,10 @@ adds its own, which `additional_components` carries.
 | `frequency_hz` | The frequency, in Hz, which sets the clause 6 component and the maximum the budget is judged against. |
 | `correction` | The correction the budget is for, in dB (Default: 0). |
 | `static_pressure_kpa` | The static pressure the measurements were made at, in kPa (Default: None). Below 97 kPa clause 6 adds a component of expanded uncertainty 0.15 dB up to 3 kHz and 0.25 dB above ($k = 2$); outside 80 kPa to 105 kPa it refuses. |
-| `additional_components` | Further components the laboratory's own method needs, as [`Quantity`](/phonometry/reference/api/metrology/uncertainty/#quantity) objects of estimate 0 and sensitivity 1, named (Default: none). |
+| `additional_components` | Further components the laboratory's own method needs, as [`Quantity`](/reference/api/metrology/uncertainty/#quantity) objects of estimate 0 and sensitivity 1, named (Default: none). |
 | `coverage` | The level of confidence (Default: 0.95, clause 5). |
 
-**Returns:** The [`CorrectionUncertaintyBudget`](/phonometry/reference/api/metrology/free-field-corrections/#correctionuncertaintybudget).
+**Returns:** The [`CorrectionUncertaintyBudget`](/reference/api/metrology/free-field-corrections/#correctionuncertaintybudget).
 
 **Raises**
 
@@ -445,7 +445,7 @@ effective degrees of freedom at the stated level of confidence.
 | `stated_uncertainties_db` | the value each component is stated as, in dB: a half-width, an expanded uncertainty or a standard uncertainty, as its divisor says. |
 | `divisors` | the divisor of each component. |
 | `dofs` | the degrees of freedom of each component (`inf` for a Type B estimate). |
-| `uncertainty` | the [`UncertaintyResult`](/phonometry/reference/api/metrology/uncertainty/#uncertaintyresult) of the combination, which has to be the combination of the components the other columns state. |
+| `uncertainty` | the [`UncertaintyResult`](/reference/api/metrology/uncertainty/#uncertaintyresult) of the combination, which has to be the combination of the components the other columns state. |
 | `coverage` | the level of confidence, 0.95 by clause 5. |
 
 ### CorrectionUncertaintyBudget.combined_uncertainty_db
@@ -536,7 +536,7 @@ expanded uncertainty at a frequency, the microphone is unsuitable for the
 source unless more samples show otherwise. Both are "shall not exceed", so
 a value equal to its maximum passes, and so does one that lands on it
 through floating-point arithmetic: the comparison is the one
-[`verify_conformance`](/phonometry/reference/api/metrology/conformance/#verify_conformance) makes for the IEC TC 29
+[`verify_conformance`](/reference/api/metrology/conformance/#verify_conformance) makes for the IEC TC 29
 instrument standards, which forgives an excess of one part in
 $10^9$. The maximum is derived from the clause and the frequencies,
 `max_uncertainty_db`, so a verdict cannot be judged against a
@@ -551,7 +551,7 @@ maximum its clause does not give.
 | `expanded_uncertainty_db` | the actual expanded uncertainty at each frequency, in dB. |
 | `correction` | the corrections, in dB, which the documentation of clause 15 states with their uncertainty; `None` if not given. |
 | `coverage_factor` | the coverage factor of each expanded uncertainty, which clause 15 asks to be stated; `None` if not given. |
-| `correction_range_db` | the range of the corrections over the microphones at each frequency, in dB (clauses 12 to 14), such as [`FreeFieldCorrection.range_db`](/phonometry/reference/api/metrology/free-field-corrections/#freefieldcorrectionrange_db); `None` if not given. |
+| `correction_range_db` | the range of the corrections over the microphones at each frequency, in dB (clauses 12 to 14), such as [`FreeFieldCorrection.range_db`](/reference/api/metrology/free-field-corrections/#freefieldcorrectionrange_db); `None` if not given. |
 
 ### CorrectionUncertaintyVerification.failing_frequencies_hz
 
@@ -571,7 +571,7 @@ negative where it fails.
 *property*
 
 The maximum permitted at each frequency by the clause, in dB,
-[`max_expanded_uncertainty`](/phonometry/reference/api/metrology/free-field-corrections/#max_expanded_uncertainty).
+[`max_expanded_uncertainty`](/reference/api/metrology/free-field-corrections/#max_expanded_uncertainty).
 
 ### CorrectionUncertaintyVerification.passes
 
@@ -642,7 +642,7 @@ maximum permitted values.
 | Name | Description |
 | :--- | :--- |
 | `path` | Destination path of the PDF file. |
-| `metadata` | Optional [`ReportMetadata`](/phonometry/reference/api/building/insulation/#reportmetadata); `None` produces a bare fiche. |
+| `metadata` | Optional [`ReportMetadata`](/reference/api/building/insulation/#reportmetadata); `None` produces a bare fiche. |
 | `engine` | Rendering back end; only `"reportlab"` is supported. |
 | `verbose` | Accepted for a uniform signature; it has no effect. |
 | `language` | Fiche language: `"en"` (default) or `"es"`. |
@@ -723,13 +723,13 @@ actuator clause 7 asks for.
 | `check_frequency_hz` | $f_0$, in Hz (Default: 1000). |
 | `microphones` | The microphone of each determination, one label per row (Default: None, every determination a microphone of its own). |
 
-**Returns:** The [`FreeFieldCorrection`](/phonometry/reference/api/metrology/free-field-corrections/#freefieldcorrection), zero at $f_0$.
+**Returns:** The [`FreeFieldCorrection`](/reference/api/metrology/free-field-corrections/#freefieldcorrection), zero at $f_0$.
 
 **Raises**
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | as [`sound_calibrator_correction`](/phonometry/reference/api/metrology/free-field-corrections/#sound_calibrator_correction), or for an $f_0$ that is not among the frequencies. |
+| ValueError | as [`sound_calibrator_correction`](/reference/api/metrology/free-field-corrections/#sound_calibrator_correction), or for an $f_0$ that is not among the frequencies. |
 | TypeError | if `check_frequency_hz` is not a single number, or `actuator_level`, `free_field_level_difference`, `frequencies`, `reference_channel_gain_db`, `reference_free_field_level`, `reference_sensitivity_level`, `slm_actuator_level` or `slm_free_field_level` holds a text or a value that is not a real number. |
 
 ## exact_frequencies
@@ -999,7 +999,7 @@ taken over the three microphones and not over the calibrators as well.
 | `calibrator_level_difference` | $L_{p,\mathrm{P1}} - L_{p,\mathrm{P2}}$, the calibrator's level on the meter less that on the reference, in dB (Default: 0, a stable calibrator; NOTE 3). |
 | `microphones` | The microphone of each determination, one label per row, such as `[1, 1, 1, 2, 2, 2, 3, 3, 3]` for three microphones each on three calibrators (Default: None, every determination a microphone of its own). |
 
-**Returns:** The [`FreeFieldCorrection`](/phonometry/reference/api/metrology/free-field-corrections/#freefieldcorrection).
+**Returns:** The [`FreeFieldCorrection`](/reference/api/metrology/free-field-corrections/#freefieldcorrection).
 
 **Raises**
 
@@ -1050,13 +1050,13 @@ maxima of their clause (IEC 62585:2012, clauses 5 and 9 to 14).
 
 The actual expanded uncertainty at each frequency, at a level of
 confidence of 95 % with the coverage factor stated (clause 5), has not to
-exceed [`max_expanded_uncertainty`](/phonometry/reference/api/metrology/free-field-corrections/#max_expanded_uncertainty) of the clause; for a
+exceed [`max_expanded_uncertainty`](/reference/api/metrology/free-field-corrections/#max_expanded_uncertainty) of the clause; for a
 calibrator, a coupler or an actuator (clauses 12 to 14) the range of the
 corrections over three microphones has not to exceed it either. A
-[`FreeFieldCorrection`](/phonometry/reference/api/metrology/free-field-corrections/#freefieldcorrection) knows its clause, [`clause`](/phonometry/reference/api/metrology/free-field-corrections/#freefieldcorrectionclause),
-and its range over the microphones, [`range_db`](/phonometry/reference/api/metrology/free-field-corrections/#freefieldcorrectionrange_db),
+[`FreeFieldCorrection`](/reference/api/metrology/free-field-corrections/#freefieldcorrection) knows its clause, [`clause`](/reference/api/metrology/free-field-corrections/#freefieldcorrectionclause),
+and its range over the microphones, [`range_db`](/reference/api/metrology/free-field-corrections/#freefieldcorrectionrange_db),
 once it knows which determinations share a microphone; a
-[`CorrectionUncertaintyBudget`](/phonometry/reference/api/metrology/free-field-corrections/#correctionuncertaintybudget) per frequency gives the expanded
+[`CorrectionUncertaintyBudget`](/reference/api/metrology/free-field-corrections/#correctionuncertaintybudget) per frequency gives the expanded
 uncertainty and the coverage factor. A value that reaches its maximum
 through floating-point arithmetic is on it, not above it.
 
@@ -1069,9 +1069,9 @@ through floating-point arithmetic is on it, not above it.
 | `clause` | The clause the corrections belong to: 9 (case and diffraction), 10 (microphone response), 11 (windscreens and accessories), 12 (sound calibrator), 13 (comparison coupler) or 14 (electrostatic actuator). |
 | `correction` | The corrections, in dB, for the documentation of clause 15 (Default: None). |
 | `coverage_factor` | The coverage factor of each expanded uncertainty, for the same documentation (Default: None). |
-| `correction_range_db` | The range of the corrections over the microphones at each frequency, in dB, such as [`FreeFieldCorrection.range_db`](/phonometry/reference/api/metrology/free-field-corrections/#freefieldcorrectionrange_db); clauses 12 to 14 only (Default: None, not judged). |
+| `correction_range_db` | The range of the corrections over the microphones at each frequency, in dB, such as [`FreeFieldCorrection.range_db`](/reference/api/metrology/free-field-corrections/#freefieldcorrectionrange_db); clauses 12 to 14 only (Default: None, not judged). |
 
-**Returns:** The [`CorrectionUncertaintyVerification`](/phonometry/reference/api/metrology/free-field-corrections/#correctionuncertaintyverification).
+**Returns:** The [`CorrectionUncertaintyVerification`](/reference/api/metrology/free-field-corrections/#correctionuncertaintyverification).
 
 **Raises**
 

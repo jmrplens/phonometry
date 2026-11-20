@@ -63,11 +63,11 @@ masks, a reading of what a class actually buys in a measurement (passband
 error, stopband leakage, uncertainty budget), the periodic tests a laboratory
 runs on an instrument and how their results are graded, and the one-page
 accredited fiche that turns the verdict into a document. The design half, the band mathematics and the
-parameter reference, is [Filter Banks](/phonometry/signals/filters/filter-banks/),
+parameter reference, is [Filter Banks](/signals/filters/filter-banks/),
 and the five architectures with their compared responses are
-[Filter Architecture Gallery](/phonometry/signals/filters/filter-gallery/); the same
+[Filter Architecture Gallery](/signals/filters/filter-gallery/); the same
 machinery applied to the frequency weightings is section 6 of
-[Frequency Weighting](/phonometry/signals/levels/weighting/).
+[Frequency Weighting](/signals/levels/weighting/).
 
 ## 1. Verifying the class against IEC 61260-1:2014
 
@@ -305,7 +305,7 @@ three bands or more, and `result.requirements` says whether it was. The printed
 Formula (3) and the words of 7.2.4.3 and of 5.16 take the difference in
 opposite directions, which with limits this lopsided is not the same test; the
 verifier applies the limits to the formula as printed, as 7.2.4.5 instructs,
-and the [errata registry](/phonometry/reference/errata/) records the conflict.
+and the [errata registry](/reference/errata/) records the conflict.
 
 ```python
 from phonometry import filters
@@ -483,7 +483,7 @@ print(max(b["bandwidth_deviation_db"] for b in result.bands))   # about +0.05 dB
 print(result.points_per_bandwidth)   # 36: 5.3.3 raised S from 24
 ```
 
-Two defects of the printed edition are in the [errata registry](/phonometry/reference/errata/): the normalizing
+Two defects of the printed edition are in the [errata registry](/reference/errata/): the normalizing
 constant of 3.15 carries a stray factor of ten, and the words of 4.9 and 5.8.3
 take the summation difference the other way round from equation (19), which
 the library follows as 5.8.5 instructs.
@@ -663,8 +663,8 @@ is inherited by every measurement made with the library's filters, and a
 hardware chain adds a verdict of its own. Name both. The equivalent regime for
 sound level *meters* (IEC 61672-3 periodic tests, and IEC 60942 for the
 calibrator) is in
-[Periodic tests of a sound level meter](/phonometry/signals/metrology/sound-level-meter-periodic-tests/)
-and [Calibration and dBFS](/phonometry/signals/metrology/calibration/).
+[Periodic tests of a sound level meter](/signals/metrology/sound-level-meter-periodic-tests/)
+and [Calibration and dBFS](/signals/metrology/calibration/).
 
 **Grading a periodic test.** The tests are the laboratory's to run; the
 verdict on what it measured is arithmetic, and `verify_filter_periodic` does
@@ -870,21 +870,21 @@ raise `fs`.
 
 ## See also
 
-- [Filter Banks](/phonometry/signals/filters/filter-banks/): the band mathematics and
+- [Filter Banks](/signals/filters/filter-banks/): the band mathematics and
   the architectures whose class is verified here.
-- [Frequency Weighting](/phonometry/signals/levels/weighting/): the companion
+- [Frequency Weighting](/signals/levels/weighting/): the companion
   verification of the A, C and Z curves against the IEC 61672-1 tolerance
   tables, with the G, B, D and AU curves covered in
-  [Special Weightings](/phonometry/signals/levels/special-weightings/).
-- [Sound Level Meter](/phonometry/signals/sound-level-meter/): the instrument
+  [Special Weightings](/signals/levels/special-weightings/).
+- [Sound Level Meter](/signals/sound-level-meter/): the instrument
   chain whose spectrum stage this class applies to.
-- [Conformance report](/phonometry/reference/conformance/):
+- [Conformance report](/reference/conformance/):
   the verified configurations behind the class claims of this page.
 - API reference:
-  [`filters.compliance`](/phonometry/reference/api/filters/compliance/),
-  [`filters.time_invariance`](/phonometry/reference/api/filters/time-invariance/)
-  and [`filters.periodic_tests`](/phonometry/reference/api/filters/periodic-tests/).
-- Theory: [Octave Band Frequencies](/phonometry/reference/theory/signal-analysis/#octave-band-frequencies-ansi-s111--iec-61260): the band-edge definitions the IEC 61260-1 mask is drawn around.
+  [`filters.compliance`](/reference/api/filters/compliance/),
+  [`filters.time_invariance`](/reference/api/filters/time-invariance/)
+  and [`filters.periodic_tests`](/reference/api/filters/periodic-tests/).
+- Theory: [Octave Band Frequencies](/reference/theory/signal-analysis/#octave-band-frequencies-ansi-s111--iec-61260): the band-edge definitions the IEC 61260-1 mask is drawn around.
 
 </SeeAlso>
 

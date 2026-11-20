@@ -1,6 +1,6 @@
 <!-- Written by `make llms` from site/src/content/docs/signals/spectra/synchronous-averaging.mdx: edit that page and its Spanish twin, then run `make llms`. -->
 
-← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/signals/spectra/synchronous-averaging/
+← [Documentation index](../../README.md) · Published at https://phonometry.dev/signals/spectra/synchronous-averaging/
 
 # Time synchronous averaging
 
@@ -400,7 +400,7 @@ error corrupts the averaging and the identification together.
 - [Correlation and delay](correlation-delay.md): the Hilbert envelope behind envelope analysis.
 - [Test signals](test-signals.md): the fractional-delay kernel the non-integer period alignment uses.
 - [Machine fault frequencies](../../vibration/machinery/machine-diagnostics.md): the bearing and gear families the residual's envelope spectrum is read against.
-- API reference: [`signals.synchronous_average`](https://docs.jmrp.io/phonometry/reference/api/signals/synchronous-average/).
+- API reference: [`signals.synchronous_average`](https://phonometry.dev/reference/api/signals/synchronous-average/).
 
 ## References
 

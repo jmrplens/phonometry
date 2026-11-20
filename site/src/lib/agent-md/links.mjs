@@ -1,9 +1,9 @@
 /**
  * Root-relative links made absolute.
  *
- * The site's pages link each other as `/phonometry/...`, which the browser
- * resolves against the page. A Markdown copy is read away from the site, in a
- * chat context, a corpus or a file on disk, where `](/phonometry/...)`
+ * The site's pages link each other root-relative, `/signals/...`, which the
+ * browser resolves against the page. A Markdown copy is read away from the
+ * site, in a chat context, a corpus or a file on disk, where `](/signals/...)`
  * resolves nowhere. Every URL a writer composes is already absolute; this
  * pass covers the links the author wrote in the page's own Markdown.
  *
@@ -202,7 +202,7 @@ function destinations(markdown, wanted, { images = true } = {}) {
  * Every root-relative link in a Markdown document, made absolute.
  *
  * @param {string} markdown
- * @param {string} origin  Site origin, such as `https://docs.jmrp.io`; a
+ * @param {string} origin  Site origin, such as `https://phonometry.dev`; a
  *   trailing slash is tolerated.
  * @returns {string}
  */

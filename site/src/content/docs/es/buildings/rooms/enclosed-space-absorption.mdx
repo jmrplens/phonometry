@@ -46,7 +46,7 @@ una sala y su **tiempo de reverberación** a partir de la absorción de sus
 superficies y objetos, la contraparte de diseño del tiempo de reverberación
 medido. Es el miembro de absorción de la familia de acústica de la edificación
 EN 12354 (los miembros de aislamiento aéreo y de impacto están en
-[Predicción del aislamiento acústico (EN 12354)](/phonometry/es/buildings/design/insulation-prediction/)).
+[Predicción del aislamiento acústico (EN 12354)](/es/buildings/design/insulation-prediction/)).
 phonometry implementa el modelo normativo del apartado 4. (El método
 informativo del Anexo D para recintos irregulares queda fuera de alcance.)
 
@@ -136,7 +136,7 @@ $55{,}3/c_0$ sea el familiar $0{,}16$.
 El 55,3 es $24\ln 10 = 55{,}262$, la constante que sale del decaimiento en campo
 difuso cuando el recorrido libre medio es $4V/S$ y el decaimiento se extrapola a
 una caída completa de 60 dB (la
-[derivación clásica](/phonometry/es/buildings/rooms/reverberation-prediction/#1-sabine-eyring-y-millington-sette)).
+[derivación clásica](/es/buildings/rooms/reverberation-prediction/#1-sabine-eyring-y-millington-sette)).
 La Fórmula 5 es, por tanto, la ley de Sabine aplicada al volumen *libre* que
 queda después de que los objetos hayan desplazado su parte, y el $c_0$ inusual de
 la norma es una convención de redondeo más que una afirmación sobre la
@@ -275,9 +275,9 @@ El `ReverberationResult` lleva el área de absorción y el tiempo de reverberaci
 por banda, el volumen y la fracción de objetos, y su `.plot()` dibuja el espectro
 del tiempo de reverberación. Es la contraparte de predicción del tiempo de
 reverberación medido en
-[Acústica de salas](/phonometry/es/buildings/rooms/room-acoustics/)
+[Acústica de salas](/es/buildings/rooms/room-acoustics/)
 (ISO 3382) y de la absorción en cámara reverberante de
-[Medida y clasificación de la absorción sonora](/phonometry/es/materials/absorbers/absorption-measurement/) (ISO 354).
+[Medida y clasificación de la absorción sonora](/es/materials/absorbers/absorption-measurement/) (ISO 354).
 
 ## 2b. Diseñar hacia un objetivo
 
@@ -333,7 +333,7 @@ ANSI/ASA S12.60-1:2010 limita las aulas principales desocupadas y amuebladas a
 pasillos y las escaleras se especifican por *área de absorción* y no por tiempo
 de reverberación, que es el propio consejo del apartado 4.5 (§3); y los espacios
 para música necesitan tiempos más largos de lo que esta norma pretende cubrir. La
-[guía de predicción clásica](/phonometry/es/buildings/rooms/reverberation-prediction/#a-que-valor-apuntar)
+[guía de predicción clásica](/es/buildings/rooms/reverberation-prediction/#a-que-valor-apuntar)
 recoge las mismas referencias con sus reglas de forma en frecuencia.
 
 <span id="3-de-donde-salen-los-datos-de-entrada"></span>
@@ -343,7 +343,7 @@ recoge las mismas referencias con sus reglas de forma en frecuencia.
 **Coeficientes de superficie.** La norma espera que los $\alpha_{\mathrm{s},i}$
 procedan de mediciones de laboratorio según EN ISO 354, el método de cámara
 reverberante de
-[Medida y clasificación de la absorción sonora](/phonometry/es/materials/absorbers/absorption-measurement/); se admiten
+[Medida y clasificación de la absorción sonora](/es/materials/absorbers/absorption-measurement/); se admiten
 valores teóricos, empíricos o de campo siempre que se declare la fuente de
 los datos. ISO 354 entrega datos en tercios de octava, y un cálculo en
 bandas de octava toma como entrada la media aritmética de los tres tercios.
@@ -375,7 +375,7 @@ cifra «Clase A» que imprimiría su hoja de características. Toma la tabla por
 octava del informe de ensayo ISO 354 y promedia los tres tercios en cada octava;
 cuando solo se disponga de una valoración, trata la predicción como orientativa y
 dilo en el informe. La valoración en sí está definida en
-[Medida y clasificación de la absorción sonora](/phonometry/es/materials/absorbers/absorption-measurement/).
+[Medida y clasificación de la absorción sonora](/es/materials/absorbers/absorption-measurement/).
 
 **Mobiliario y ocupantes.** Los objetos contribuyen por tres vías: un área
 de absorción equivalente medida $A_\mathrm{obj}$ cuando existe (personas y
@@ -459,7 +459,7 @@ tiempos de reverberación medidos de hasta el doble de la predicción en
 salas de baja difusividad. Las alternativas clásicas para esos casos viven
 en
 [Predicción del tiempo de
-reverberación](/phonometry/es/buildings/rooms/reverberation-prediction/).
+reverberación](/es/buildings/rooms/reverberation-prediction/).
 
 Por encima de esos límites numéricos hay dos declaraciones de alcance. El
 apartado 1 dice que el modelo está basado en la experiencia con salas de
@@ -613,25 +613,25 @@ EN 12354-6 da una estimación de campo difuso, y un objetivo pasado por
 
 ## Véase también
 
-- [Predicción del tiempo de reverberación (Sabine, Arau)](/phonometry/es/buildings/rooms/reverberation-prediction/):
+- [Predicción del tiempo de reverberación (Sabine, Arau)](/es/buildings/rooms/reverberation-prediction/):
   la familia clásica, y los modelos a los que recurrir cuando fallan los límites
   del apartado 4.6.
-- [Parámetros acústicos de salas (ISO 3382-1/2)](/phonometry/es/buildings/rooms/room-acoustics/):
+- [Parámetros acústicos de salas (ISO 3382-1/2)](/es/buildings/rooms/room-acoustics/):
   la contraparte medida del tiempo de reverberación que aquí se predice.
-- [Medida y clasificación de la absorción sonora](/phonometry/es/materials/absorbers/absorption-measurement/):
+- [Medida y clasificación de la absorción sonora](/es/materials/absorbers/absorption-measurement/):
   de dónde salen los $\alpha_\mathrm{s}$ (ISO 354) y dónde se define $\alpha_\mathrm{w}$
   (ISO 11654), la valoración que el §3 prohíbe como entrada.
-- [Predicción del aislamiento acústico (EN 12354)](/phonometry/es/buildings/design/insulation-prediction/):
+- [Predicción del aislamiento acústico (EN 12354)](/es/buildings/design/insulation-prediction/):
   el miembro de la familia que consume la $A$ que aquí se calcula, a través de
   $D_{\mathrm{n}T} = D + 10\lg(T/T_0)$ y $R' = D + 10\lg(S/A)$.
-- [Informe de conformidad](/phonometry/es/reference/conformance/):
+- [Informe de conformidad](/es/reference/conformance/):
   los tres casos del Anexo E frente a los que se comprueban estas
   implementaciones.
-- [Propagación del sonido en exteriores](/phonometry/es/environment/propagation/outdoor-propagation/):
+- [Propagación del sonido en exteriores](/es/environment/propagation/outdoor-propagation/):
   el modelo completo de absorción atmosférica de ISO 9613-1, para
   condiciones o frecuencias que los seis perfiles climáticos integrados no
   cubren, mediante `environment.propagation.air_absorption`.
-- Referencia de la API: [`room.enclosed_space_absorption`](/phonometry/es/reference/api/rooms/enclosed-space-absorption/).
-- Teoría: [Aislamiento acústico y absorción, predichos](/phonometry/es/reference/theory/rooms-buildings/#aislamiento-acustico-y-absorcion-predichos-en-12354-1-2-6-bies-cremer-hopkins): la definición de área de absorción equivalente que calcula el procedimiento de EN 12354-6.
+- Referencia de la API: [`room.enclosed_space_absorption`](/es/reference/api/rooms/enclosed-space-absorption/).
+- Teoría: [Aislamiento acústico y absorción, predichos](/es/reference/theory/rooms-buildings/#aislamiento-acustico-y-absorcion-predichos-en-12354-1-2-6-bies-cremer-hopkins): la definición de área de absorción equivalente que calcula el procedimiento de EN 12354-6.
 
 </SeeAlso>

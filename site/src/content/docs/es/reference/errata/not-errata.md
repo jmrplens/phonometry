@@ -6,7 +6,7 @@ searchWeight: 0.8
 
 <!-- Generated from docs/ERRATA.es.md by scripts/generate_site_reports.py (`make site-reports`). Edit the source document, never this page. -->
 
-El [registro de erratas](/phonometry/es/reference/errata/) recoge también propiedades de las fuentes publicadas que parecen defectos y no lo son: una diferencia que la propia fuente declara, un redondeo que comparte con su familia, un valor correcto para una forma del material que los otros libros no describen. Se guardan aquí para que nadie, en el futuro, «corrija» la biblioteca para ajustarse a ellas.
+El [registro de erratas](/es/reference/errata/) recoge también propiedades de las fuentes publicadas que parecen defectos y no lo son: una diferencia que la propia fuente declara, un redondeo que comparte con su familia, un valor correcto para una forma del material que los otros libros no describen. Se guardan aquí para que nadie, en el futuro, «corrija» la biblioteca para ajustarse a ellas.
 
 ## Propiedades de las fuentes, relacionadas, que no son erratas
 

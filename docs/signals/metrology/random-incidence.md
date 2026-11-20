@@ -1,6 +1,6 @@
 <!-- Written by `make llms` from site/src/content/docs/signals/metrology/random-incidence.mdx: edit that page and its Spanish twin, then run `make llms`. -->
 
-← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/signals/metrology/random-incidence/
+← [Documentation index](../../README.md) · Published at https://phonometry.dev/signals/metrology/random-incidence/
 
 # Random-Incidence and Diffuse-Field Response (IEC 61183)
 
@@ -359,7 +359,7 @@ plt.show()
   a transducer on its own.
 - [Build a sound level meter](../sound-level-meter.md): the
   whole measurement chain on one runnable page.
-- API reference: [`metrology.random_incidence`](https://docs.jmrp.io/phonometry/reference/api/metrology/random-incidence/).
+- API reference: [`metrology.random_incidence`](https://phonometry.dev/reference/api/metrology/random-incidence/).
 
 ## References
 

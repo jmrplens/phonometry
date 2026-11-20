@@ -1,6 +1,6 @@
 <!-- Written by `make llms` from site/src/content/docs/io/audio-files.mdx: edit that page and its Spanish twin, then run `make llms`. -->
 
-← [Documentation index](../README.md) · Published at https://docs.jmrp.io/phonometry/io/audio-files/
+← [Documentation index](../README.md) · Published at https://phonometry.dev/io/audio-files/
 
 # Reading and writing measurement audio
 
@@ -545,7 +545,7 @@ libsndfile under the LGPL, which the base install deliberately avoids.
 - [Block processing](../signals/filters/block-processing.md): the stateful machinery `read_blocks` feeds.
 - [Programme loudness](../devices/broadcast/program-loudness.md): the BS.1770 implementation behind `bext="loudness"`.
 - [Build a sound level meter](../signals/sound-level-meter.md): the whole chain this page's files enter and leave.
-- API reference: [`phonometry.io`](https://docs.jmrp.io/phonometry/reference/api/io/io/).
+- API reference: [`phonometry.io`](https://phonometry.dev/reference/api/io/io/).
 
 ## References
 

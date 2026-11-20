@@ -1,6 +1,6 @@
 <!-- Written by `make llms` from site/src/content/docs/buildings/rooms/reverberation-prediction.mdx: edit that page and its Spanish twin, then run `make llms`. -->
 
-← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/buildings/rooms/reverberation-prediction/
+← [Documentation index](../../README.md) · Published at https://phonometry.dev/buildings/rooms/reverberation-prediction/
 
 # Reverberation-time prediction (Sabine, Eyring, Arau)
 
@@ -611,9 +611,9 @@ Reverberation-time prediction fiche (ReverberationModelResult.report), the five-
 - [Modes of a rectangular room](room-image-sources.md#3-modes-of-a-rectangular-room):
   what is below the Schroeder frequency, where none of these five formulae
   applies.
-- API reference: [`room.reverberation_prediction`](https://docs.jmrp.io/phonometry/reference/api/rooms/reverberation-prediction/) and [`environment.propagation.air_absorption`](https://docs.jmrp.io/phonometry/reference/api/environment/air-absorption/).
+- API reference: [`room.reverberation_prediction`](https://phonometry.dev/reference/api/rooms/reverberation-prediction/) and [`environment.propagation.air_absorption`](https://phonometry.dev/reference/api/environment/air-absorption/).
 - Theory: [Sound insulation and absorption, predicted](../../reference/theory/rooms-buildings.md#sound-insulation-and-absorption-predicted-en-12354-1-2-6-bies-cremer-hopkins): the diffuse-field assumption every Sabine-family formula makes, and where it stops holding.
-- [Published catalogues](https://docs.jmrp.io/phonometry/reference/catalogues/absorption-coefficients/): the
+- [Published catalogues](https://phonometry.dev/reference/catalogues/absorption-coefficients/): the
   band-by-band absorption coefficients the books print, with the mounting each
   one was measured on.
 

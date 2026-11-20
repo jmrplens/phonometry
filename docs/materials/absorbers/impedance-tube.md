@@ -1,6 +1,6 @@
 <!-- Written by `make llms` from site/src/content/docs/materials/absorbers/impedance-tube.mdx: edit that page and its Spanish twin, then run `make llms`. -->
 
-← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/materials/absorbers/impedance-tube/
+← [Documentation index](../../README.md) · Published at https://phonometry.dev/materials/absorbers/impedance-tube/
 
 # Impedance Tube
 
@@ -942,7 +942,7 @@ resolve.
   the virtual tubes of section 5.
 - [Calibration](../../signals/metrology/calibration.md): microphone calibration ahead
   of the two-microphone transfer function.
-- API reference: [`materials.absorbers.impedance_tube`](https://docs.jmrp.io/phonometry/reference/api/materials/impedance-tube/).
+- API reference: [`materials.absorbers.impedance_tube`](https://phonometry.dev/reference/api/materials/impedance-tube/).
 - Theory: [Acoustic material characterisation](../../reference/theory/materials-surfaces.md#acoustic-material-characterisation-iso-11654-iso-9053-12-iso-10534-12-astm-e2611): the transfer-function derivation of ISO 10534-2 and the ASTM E2611 four-microphone extension.
 
 ## References

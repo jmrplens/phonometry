@@ -59,7 +59,7 @@ impactos que cae del cielo en lugar de una máquina de impactos, así que el
 laboratorio tiene que fabricar su propia lluvia.
 
 Las mediciones en sí son las de
-[Medición del aislamiento en laboratorio](/phonometry/es/buildings/insulation/insulation-lab/):
+[Medición del aislamiento en laboratorio](/es/buildings/insulation/insulation-lab/):
 $R$ según ISO 10140-2 y $L_\mathrm{n}$ según ISO 10140-3, en una instalación
 con la transmisión por flancos suprimida. Lo que añade esta página es lo que
 hacen los anexos con ellas, y las magnitudes globales que ponen de acuerdo a
@@ -408,7 +408,7 @@ cover.report("covering.pdf", metadata=ReportMetadata(
 El formulario pide también $C_\mathrm{I,r,50\text{-}2500}$, un término del suelo
 de referencia con el revestimiento desde 50 Hz, que los suelos de referencia de
 la Tabla 4 de ISO 717-2:2020 no pueden dar: empiezan en 100 Hz (véase el
-[registro de erratas](/phonometry/es/reference/errata/)). La ficha lo dice
+[registro de erratas](/es/reference/errata/)). La ficha lo dice
 donde iría el número.
 
 <ReportPreview
@@ -717,7 +717,7 @@ llueve desde tres posiciones cuyos niveles se suman energéticamente (K.4.2).
 Las 18 bandas de 100 Hz a 5000 Hz se combinan en el nivel ponderado A,
 $L_{I\mathrm{A}} = 10 \log_{10} \sum_j 10^{0{,}1(L_{Ij} + C_j)}$
 (Fórmula (K.2)), cuyas 18 correcciones $C_j$ de la Tabla K.2 son la ponderación
-A de IEC 61672-1:2013, la [ponderación frecuencial](/phonometry/es/signals/levels/weighting/)
+A de IEC 61672-1:2013, la [ponderación frecuencial](/es/signals/levels/weighting/)
 de la biblioteca, en las frecuencias centrales exactas de las bandas,
 redondeada a 0,1 dB (`building.RAINFALL_A_WEIGHTING`). K.4.3 admite medir la intensidad
 directamente con una sonda sobre una superficie $S_\mathrm{m}$,
@@ -930,7 +930,7 @@ apoyan, son filas de conformidad:
   entrada del Anexo H: $\Delta L_\mathrm{w} = 15$ dB tal como está impreso, y
   $C_{\mathrm{I}\Delta} = -9$ dB con el suelo de la Tabla 4, donde la cadena
   del propio ejemplo da −8 dB (véase el
-  [registro de erratas](/phonometry/es/reference/errata/)).
+  [registro de erratas](/es/reference/errata/)).
 - El **ejemplo de G.4**: mediciones hechas en un día que empiezan 3 d después
   de la construcción pasan, y con 2,9 d no. El límite se incluye con cualquier
   dato: 2,1 d tras 6,3 d también pasa, aunque 3 × 2,1 salga en aritmética
@@ -1054,11 +1054,11 @@ no se dibuja. La maqueta de madera de H.6.2 no
 tiene curva de referencia propia. El formulario de la Figura H.4 pide un
 $C_{\mathrm{I,r,50\text{–}2500}}$ que el suelo de referencia no puede dar,
 porque la Tabla 4 empieza en 100 Hz (anotado en el
-[registro de erratas](/phonometry/es/reference/errata/)); la ficha lo dice en su
+[registro de erratas](/es/reference/errata/)); la ficha lo dice en su
 lugar, y el término de rango ampliado del propio suelo desnudo sale de
 `weighted_impact_rating_extended`. Las mediciones de las que parten estos
 anexos, $R$, $L_\mathrm{n}$ y los tiempos de reverberación, son las de
-[Medición del aislamiento en laboratorio](/phonometry/es/buildings/insulation/insulation-lab/),
+[Medición del aislamiento en laboratorio](/es/buildings/insulation/insulation-lab/),
 y los demás anexos de ISO 10140-1 son reglas de montaje para ese $R$ y ese
 $L_\mathrm{n}$ (paredes, puertas, ventanas, acristalamientos, elementos técnicos
 pequeños, suelos, persianas).
@@ -1069,24 +1069,24 @@ pequeños, suelos, persianas).
 
 ## Véase también
 
-- [Medición del aislamiento en laboratorio](/phonometry/es/buildings/insulation/insulation-lab/):
+- [Medición del aislamiento en laboratorio](/es/buildings/insulation/insulation-lab/):
   el $R$ y el $L_\mathrm{n}$ de ISO 10140-2 y -3 de los que parten todos los
   anexos de esta página.
-- [Índices de aislamiento (ISO 717)](/phonometry/es/buildings/insulation/insulation-ratings/):
+- [Índices de aislamiento (ISO 717)](/es/buildings/insulation/insulation-ratings/):
   el motor de curva de referencia que valora las dos curvas de referencia.
-- [Fuentes de impacto pesadas y blandas](/phonometry/es/buildings/insulation/heavy-impact-sources/):
+- [Fuentes de impacto pesadas y blandas](/es/buildings/insulation/heavy-impact-sources/):
   la pelota de caucho de H.6.1 y su magnitud global.
-- [Mejora a impactos de revestimientos de suelo (ISO 16251-1)](/phonometry/es/buildings/design/impact-improvement/):
+- [Mejora a impactos de revestimientos de suelo (ISO 16251-1)](/es/buildings/design/impact-improvement/):
   la alternativa de la maqueta pequeña para revestimientos blandos.
-- [Predicción del comportamiento de capas elásticas](/phonometry/es/buildings/design/resilient-layers/):
+- [Predicción del comportamiento de capas elásticas](/es/buildings/design/resilient-layers/):
   la predicción de ISO 12354 de la mejora de un trasdosado a partir de su
   resonancia, y su traslado del laboratorio a la obra.
-- [Aislamiento acústico por intensidad (ISO 15186)](/phonometry/es/buildings/insulation/insulation-intensity/):
+- [Aislamiento acústico por intensidad (ISO 15186)](/es/buildings/insulation/insulation-intensity/):
   el método de intensidad que admite K.4.3 para la lluvia.
 - Referencia de la API:
-  [`building.measurement.laboratory_improvement`](/phonometry/es/reference/api/building/laboratory-improvement/),
-  [`building.measurement.joint_insulation`](/phonometry/es/reference/api/building/joint-insulation/),
-  [`building`: rainfall sound](/phonometry/es/reference/api/building/rainfall-sound/)
-  y [`building.measurement.ratings`](/phonometry/es/reference/api/building/ratings/).
+  [`building.measurement.laboratory_improvement`](/es/reference/api/building/laboratory-improvement/),
+  [`building.measurement.joint_insulation`](/es/reference/api/building/joint-insulation/),
+  [`building`: rainfall sound](/es/reference/api/building/rainfall-sound/)
+  y [`building.measurement.ratings`](/es/reference/api/building/ratings/).
 
 </SeeAlso>

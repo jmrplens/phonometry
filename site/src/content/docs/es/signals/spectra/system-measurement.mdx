@@ -46,7 +46,7 @@ import ScopeClaim from '../../../../../components/ScopeClaim.astro';
 import SeeAlso from '../../../../../components/SeeAlso.astro';
 import ThemeImage from '../../../../../components/ThemeImage.astro';
 
-La [guía de acústica de salas](/phonometry/es/buildings/rooms/room-acoustics/)
+La [guía de acústica de salas](/es/buildings/rooms/room-acoustics/)
 recupera respuestas al impulso con los dos caballos de batalla de la
 ISO 18233: el barrido exponencial y la MLS. Esta página añade la capa de
 ingeniería de medición a su alrededor, tomada de la literatura de medición de
@@ -69,7 +69,7 @@ y otro con el micrófono, y solo se diferencian en la excitación y en la
 deconvolución. El par de Golay del §1 recupera la respuesta por correlación con
 los códigos; el barrido conformado del §2, por división espectral; y la vía de
 ruido de banda ancha que el propio diagrama anota, que pertenece a la
-[guía de electroacústica](/phonometry/es/devices/electroacoustics/electroacoustics/),
+[guía de electroacústica](/es/devices/electroacoustics/electroacoustics/),
 por el estimador $H_1 = G_{xy}/G_{xx}$ con una coherencia que lo vigila. La
 inversión regularizada del §3 trabaja después sobre la respuesta medida que
 salga de cualquiera de ellas.
@@ -98,7 +98,7 @@ periódicamente, grabar un periodo en régimen estacionario, y lo mismo con
 $b$ - y suma las dos correlaciones cruzadas circulares (Ec. (4)): para un
 sistema lineal e invariante en el tiempo sin ruido, la respuesta al impulso
 vuelve con precisión de máquina, una identidad de forma cerrada que los tests
-y el [informe de conformidad](/phonometry/es/reference/conformance/) fijan
+y el [informe de conformidad](/es/reference/conformance/) fijan
 en `1e-13`.
 
 ```python
@@ -171,10 +171,10 @@ plt.show()
 </details>
 
 El resultado es el mismo
-[`ImpulseResponseResult`](/phonometry/es/reference/api/rooms/impulse-response/)
+[`ImpulseResponseResult`](/es/reference/api/rooms/impulse-response/)
 que devuelven los frontales de barrido y MLS, así que todo lo que viene después -
-[parámetros de sala](/phonometry/es/buildings/rooms/room-acoustics/), curvas de
-caída, [STI](/phonometry/es/perception/speech/speech-transmission/) - lo consume sin
+[parámetros de sala](/es/buildings/rooms/room-acoustics/), curvas de
+caída, [STI](/es/perception/speech/speech-transmission/) - lo consume sin
 cambios. Las grabaciones de varios periodos se promedian síncronamente, de
 modo que el ruido de fondo no correlacionado cae 3 dB por duplicación mientras la
 parte determinista permanece exacta. Los compromisos son un espejo de la
@@ -208,7 +208,7 @@ discrepancia de una sola muestra destruye la cancelación de lóbulos laterales
 sobre la que se apoya todo el método, dejando un suelo levantado que parece
 ruido. Consigue el desplazamiento una vez con un canal de retorno (graba la
 excitación eléctrica junto al micrófono y mídelo con `time_delay` de la página de
-[estimación de retardos](/phonometry/es/signals/spectra/correlation-delay/)) y
+[estimación de retardos](/es/signals/spectra/correlation-delay/)) y
 después aplica el mismo corte a los dos.
 
 **Nivel y fondo.** Ajusta el amplificador de modo que el pico del código deje
@@ -315,7 +315,7 @@ posprocesado puede recuperar (Müller y Massarani, Sec. 3).
 
 La deconvolución no necesita nada nuevo: el resultado actúa como su propio
 array de referencia para el
-[método espectral](/phonometry/es/buildings/rooms/room-acoustics/) de
+[método espectral](/es/buildings/rooms/room-acoustics/) de
 `impulse_response`, que divide de nuevo la coloración del barrido:
 
 ```python
@@ -379,7 +379,7 @@ una medida. Cinco decisiones la convierten en una.
   más tiempo en las frecuencias bajas reparte los paquetes armónicos de otra
   manera que la permanencia constante por octava del barrido exponencial. Esos
   paquetes separados se leen en
-  [distorsión con barrido sinusoidal](/phonometry/es/devices/electroacoustics/swept-sine-distortion/).
+  [distorsión con barrido sinusoidal](/es/devices/electroacoustics/swept-sine-distortion/).
 
 ## 3. Inversión espectral regularizada
 
@@ -388,7 +388,7 @@ una medida. Cinco decisiones la convierten en una.
 La inversión vale lo que valga su entrada, y la respuesta medida de un altavoz no
 es un paso banda sintético. Mide en el eje de referencia y a una distancia
 declarada (1 m es el convenio de IEC 60268-5 que usa la
-[guía de altavoces](/phonometry/es/devices/electroacoustics/loudspeakers/)) con un
+[guía de altavoces](/es/devices/electroacoustics/loudspeakers/)) con un
 micrófono de medición, en cámara anecoica si la tienes. Si no la tienes, separa
 fuente y micrófono de todas las superficies tanto como permita la sala y
 **enventana en el tiempo la respuesta al impulso antes de la primera reflexión**.
@@ -412,7 +412,7 @@ ventana de 4,7 ms no resuelve nada por debajo de unos 210 Hz. El panel (a) es el
 equivalente eléctrico, donde un canal de bucle fija $t = 0$; la franja bajo los
 dos es el balance temporal de los armónicos del barrido que reproduce la
 guía de
-[distorsión con barrido sinusoidal](/phonometry/es/devices/electroacoustics/swept-sine-distortion/),
+[distorsión con barrido sinusoidal](/es/devices/electroacoustics/swept-sine-distortion/),
 y no interviene en la inversión.*
 
 Ecualizar con una respuesta medida significa invertirla, y un recíproco puro
@@ -583,7 +583,7 @@ sweep.plot(language="es")   # forma de onda y espectro contra el objetivo invert
 ## Relación con las demás herramientas
 
 El par de Golay se une a `sweep_signal` y `mls_signal` en la
-[familia de adquisición ISO 18233](/phonometry/es/buildings/rooms/room-acoustics/),
+[familia de adquisición ISO 18233](/es/buildings/rooms/room-acoustics/),
 y las tres se diferencian en cuatro ejes que deciden una medición real:
 
 | | Par de Golay | Barrido exponencial | MLS |
@@ -599,11 +599,11 @@ correlación de un *montaje estacionario* (bancos de HRTF, útiles de
 calibración), donde 3 dB de relación señal-ruido salen baratos y a lo que se ha
 venido es al último decimal de la respuesta al impulso. El análisis armónico de
 lo que los barridos *descartan* vive en
-[distorsión con barrido sinusoidal](/phonometry/es/devices/electroacoustics/swept-sine-distortion/).
+[distorsión con barrido sinusoidal](/es/devices/electroacoustics/swept-sine-distortion/).
 La maquinaria de Welch usada para verificar el barrido conformado es la
-página de [análisis espectral calibrado](/phonometry/es/signals/spectra/spectral-analysis/),
+página de [análisis espectral calibrado](/es/signals/spectra/spectral-analysis/),
 y las respuestas ecualizadas alimentan la misma cadena posterior que
-cualquier [respuesta al impulso](/phonometry/es/buildings/rooms/room-acoustics/).
+cualquier [respuesta al impulso](/es/buildings/rooms/room-acoustics/).
 
 ## Qué cubre esta guía
 
@@ -634,11 +634,11 @@ de su Ec. 17.
 
 ## Véase también
 
-- [Acústica de salas](/phonometry/es/buildings/rooms/room-acoustics/): las excitaciones de barrido y MLS de ISO 18233 junto a las que se sitúa el par de Golay.
-- [Distorsión con barrido sinusoidal](/phonometry/es/devices/electroacoustics/swept-sine-distortion/): leer los paquetes armónicos que un barrido separa.
-- [Altavoces](/phonometry/es/devices/electroacoustics/loudspeakers/): el eje de referencia, la distancia y las condiciones de campo libre que necesita la respuesta medida.
-- [Análisis espectral calibrado](/phonometry/es/signals/spectra/spectral-analysis/): la maquinaria de Welch que verifica el barrido conformado, y el suavizado que la inversión quiere antes.
-- [Correlación y retardo](/phonometry/es/signals/spectra/correlation-delay/): la medida de retorno que alinea los dos registros de Golay.
-- Referencia de la API: [`signals.inversion`](/phonometry/es/reference/api/signals/inversion/).
+- [Acústica de salas](/es/buildings/rooms/room-acoustics/): las excitaciones de barrido y MLS de ISO 18233 junto a las que se sitúa el par de Golay.
+- [Distorsión con barrido sinusoidal](/es/devices/electroacoustics/swept-sine-distortion/): leer los paquetes armónicos que un barrido separa.
+- [Altavoces](/es/devices/electroacoustics/loudspeakers/): el eje de referencia, la distancia y las condiciones de campo libre que necesita la respuesta medida.
+- [Análisis espectral calibrado](/es/signals/spectra/spectral-analysis/): la maquinaria de Welch que verifica el barrido conformado, y el suavizado que la inversión quiere antes.
+- [Correlación y retardo](/es/signals/spectra/correlation-delay/): la medida de retorno que alinea los dos registros de Golay.
+- Referencia de la API: [`signals.inversion`](/es/reference/api/signals/inversion/).
 
 </SeeAlso>

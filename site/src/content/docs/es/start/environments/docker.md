@@ -36,7 +36,7 @@ desde el código fuente, lo que ejecuta `make` y autoreconf, salvo que
 `PATH`. Una imagen de Alpine, hecha sobre musl, necesita más, porque allí
 python-soundfile no tiene ningún wheel que lleve libsndfile y numba no tiene
 ninguno; [Primeros
-pasos](/phonometry/es/start/getting-started/#desde-pypi-recomendada) dice qué
+pasos](/es/start/getting-started/#desde-pypi-recomendada) dice qué
 pide allí cada extra.
 
 Comprobado el 17 de noviembre de 2026 con phonometry 4.0.0 de PyPI, con Docker
@@ -165,11 +165,11 @@ ENV PATH=/opt/venv/bin:$PATH MPLCONFIGDIR=/tmp/matplotlib
 
 WebM y MP4 se codifican entonces en la CPU, igual como `nobody` que sobre una
 raíz de solo lectura con un `/tmp` escribible. [Escribir
-vídeos](/phonometry/es/io/videos/) trata los codificadores y un nodo con GPU.
+vídeos](/es/io/videos/) trata los codificadores y un nodo con GPU.
 
 ## Servidores e hilos
 
 Un servidor que atiende peticiones en un grupo de hilos puede importar desde
 esos hilos los dominios que necesita, varios a la vez. [Enviar una simulación
-a un nodo remoto](/phonometry/es/simulation/remote-node/) trata una simulación
+a un nodo remoto](/es/simulation/remote-node/) trata una simulación
 FDTD que el servidor no debe calcular por sí mismo.

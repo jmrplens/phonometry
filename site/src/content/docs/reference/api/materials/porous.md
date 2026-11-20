@@ -40,8 +40,8 @@ passive medium has $\operatorname{Im}(k) < 0$):
     Eqs. (11.53)-(11.55), printed pp. 251-253): a light frame is dragged along
     by the pore fluid, so its inertia has to be carried by the equivalent
     fluid. Only the effective density changes; the bulk modulus is the
-    rigid-frame one. See [`limp_frame`](/phonometry/reference/api/materials/porous/#limp_frame) and
-    [`decoupling_frequency`](/phonometry/reference/api/materials/porous/#decoupling_frequency).
+    rigid-frame one. See [`limp_frame`](/reference/api/materials/porous/#limp_frame) and
+    [`decoupling_frequency`](/reference/api/materials/porous/#decoupling_frequency).
 
 * **Resonant sheets**: the perforated-plate impedance
   uses the end-corrected air-plug mass and the visco-thermal surface
@@ -53,21 +53,21 @@ passive medium has $\operatorname{Im}(k) < 0$):
   Sect. G.3); the membrane is the limp surface
   mass $j \omega m$ (Cox & D'Antonio Eq. (7.14); Bies Eq. (D.96)).
   Each sheet is closed by the shallow-cavity resonance it is designed
-  around, [`helmholtz_resonance_frequency`](/phonometry/reference/api/materials/porous/#helmholtz_resonance_frequency) for a perforate and
-  [`membrane_resonance_frequency`](/phonometry/reference/api/materials/porous/#membrane_resonance_frequency) for a membrane.
+  around, [`helmholtz_resonance_frequency`](/reference/api/materials/porous/#helmholtz_resonance_frequency) for a perforate and
+  [`membrane_resonance_frequency`](/reference/api/materials/porous/#membrane_resonance_frequency) for a membrane.
 
-The air all of them propagate through is described by [`Fluid`](/phonometry/reference/api/fluids/fluids/#fluid),
+The air all of them propagate through is described by [`Fluid`](/reference/api/fluids/fluids/#fluid),
 which carries the six quantities a visco-thermal model can need (speed of
 sound, density, viscosity, Prandtl number, ratio of specific heats and static
-pressure), by default the fixed 20 degC values of [`ABSORBER_AIR`](/phonometry/reference/api/materials/porous/#absorber_air). The
+pressure), by default the fixed 20 degC values of [`ABSORBER_AIR`](/reference/api/materials/porous/#absorber_air). The
 narrow-channel
-models of [`slow_sound`](/phonometry/reference/api/materials/slow-sound/) and
-[`metadiffuser`](/phonometry/reference/api/materials/metadiffuser/) take it as a single
+models of [`slow_sound`](/reference/api/materials/slow-sound/) and
+[`metadiffuser`](/reference/api/materials/metadiffuser/) take it as a single
 argument.
 
 These are the elements a multilayer absorber is assembled from; declaring a
 stack of them and solving it with the transfer matrix is the subject of
-[`layered`](/phonometry/reference/api/materials/layered/).
+[`layered`](/reference/api/materials/layered/).
 
 > Auto-generated from the source docstrings by `scripts/generate_api_docs.py` (`make api-docs`). Do not edit by hand.
 
@@ -94,14 +94,14 @@ the fibre diameter in micrometres.
 The relation is a straight line through measured points on a log-log plot,
 not a law, so it belongs to the material the points came from. Passing a
 bulk density outside the range the fit was made over emits a
-[`PorousAbsorberWarning`](/phonometry/reference/api/materials/porous/#porousabsorberwarning) naming both.
+[`PorousAbsorberWarning`](/reference/api/materials/porous/#porousabsorberwarning) naming both.
 
 **Parameters**
 
 | Name | Description |
 | :--- | :--- |
 | `bulk_density_kg_m3` | Bulk density of the wool, in kg/m3 (> 0). |
-| `fit` | The published `k1`, `k2` pair to use, such as [`ROCK_WOOL_LONGITUDINAL_FIT`](/phonometry/reference/api/materials/porous/#rock_wool_longitudinal_fit). |
+| `fit` | The published `k1`, `k2` pair to use, such as [`ROCK_WOOL_LONGITUDINAL_FIT`](/reference/api/materials/porous/#rock_wool_longitudinal_fit). |
 
 **Returns:** The airflow resistivity `r`, in Pa s/m2.
 
@@ -138,10 +138,10 @@ above the limit.
 | Name | Description |
 | :--- | :--- |
 | `frame_bulk_modulus` | Bulk modulus of the frame in vacuum `K_c`, in Pa (>= 0; pass `abs(K_c)` for a complex modulus). |
-| `criterion` | Key into [`LIMP_FRAME_CRITERIA`](/phonometry/reference/api/materials/porous/#limp_frame_criteria), `"doutres"` (Default, 0.2) or `"beranek"` (0.05). |
+| `criterion` | Key into [`LIMP_FRAME_CRITERIA`](/reference/api/materials/porous/#limp_frame_criteria), `"doutres"` (Default, 0.2) or `"beranek"` (0.05). |
 | `fluid_bulk_modulus` | Bulk modulus of the pore fluid `K_f`, in Pa (Default: 101 325, the isothermal value for fluid). |
 
-**Returns:** The verdict, as a [`LimpFrameCheck`](/phonometry/reference/api/materials/porous/#limpframecheck); it passes when $\lvert K_c/K_\mathrm{f} \rvert$ is below the threshold (the book prints both criteria as strict inequalities).
+**Returns:** The verdict, as a [`LimpFrameCheck`](/reference/api/materials/porous/#limpframecheck); it passes when $\lvert K_c/K_\mathrm{f} \rvert$ is below the threshold (the book prints both criteria as strict inequalities).
 
 **Raises**
 
@@ -168,8 +168,8 @@ Sect. 11.3.4, printed p. 251; the same closed form as their Eq. (6.90),
 printed p. 126).
 Above `Fd` the visco-inertial coupling between the pore fluid and the
 frame is too weak for the acoustic wave to shake the frame, so the
-rigid-frame equivalent fluid of [`johnson_champoux_allard`](/phonometry/reference/api/materials/porous/#johnson_champoux_allard) applies;
-below it the frame moves and the limp correction of [`limp_frame`](/phonometry/reference/api/materials/porous/#limp_frame)
+rigid-frame equivalent fluid of [`johnson_champoux_allard`](/reference/api/materials/porous/#johnson_champoux_allard) applies;
+below it the frame moves and the limp correction of [`limp_frame`](/reference/api/materials/porous/#limp_frame)
 matters.
 
 **Parameters**
@@ -208,7 +208,7 @@ $k = (\omega/c)(1 + C_5 X^{-C_6} - j C_7 X^{-C_8})$ with
 $X = \rho f / \sigma$
 (Mechel 2e Sect. G.11 Eqs. (1)-(2); Bies 5e Eqs. (D.22)-(D.23) with the
 Table D.1 coefficients; Hopkins Eqs. (1.171)-(1.173)). A
-[`PorousAbsorberWarning`](/phonometry/reference/api/materials/porous/#porousabsorberwarning) is raised when any `X` leaves the stated
+[`PorousAbsorberWarning`](/reference/api/materials/porous/#porousabsorberwarning) is raised when any `X` leaves the stated
 $0.01 < X < 1.0$ validity range (Hopkins Eq. (1.174)); the values
 are still returned.
 
@@ -218,10 +218,10 @@ are still returned.
 | :--- | :--- |
 | `frequency` | Frequency `f`, in hertz (scalar or array). |
 | `flow_resistivity_pa_s_m2` | Airflow resistivity `sigma`, in Pa s/m2. |
-| `coefficients` | Preset name from [`DELANY_BAZLEY_COEFFICIENTS`](/phonometry/reference/api/materials/porous/#delany_bazley_coefficients) (`"delany_bazley"` rockwool/fibreglass default, `"garai_pompoli"` polyester, `"dunn_davern"` / `"wu"` foams) or the eight coefficients `(C1..C8)` as a sequence or an array of numbers. |
-| `fluid` | The medium, a [`Fluid`](/phonometry/reference/api/fluids/fluids/#fluid) (Default: [`ABSORBER_AIR`](/phonometry/reference/api/materials/porous/#absorber_air), dry air at 20 degC at textbook values). Pass a computed one, such as `fluids.air(temperature_c=30.0, relative_humidity_percent=70.0)`, to work in the air of the room. |
+| `coefficients` | Preset name from [`DELANY_BAZLEY_COEFFICIENTS`](/reference/api/materials/porous/#delany_bazley_coefficients) (`"delany_bazley"` rockwool/fibreglass default, `"garai_pompoli"` polyester, `"dunn_davern"` / `"wu"` foams) or the eight coefficients `(C1..C8)` as a sequence or an array of numbers. |
+| `fluid` | The medium, a [`Fluid`](/reference/api/fluids/fluids/#fluid) (Default: [`ABSORBER_AIR`](/reference/api/materials/porous/#absorber_air), dry air at 20 degC at textbook values). Pass a computed one, such as `fluids.air(temperature_c=30.0, relative_humidity_percent=70.0)`, to work in the air of the room. |
 
-**Returns:** A [`PorousMediumResult`](/phonometry/reference/api/materials/porous/#porousmediumresult).
+**Returns:** A [`PorousMediumResult`](/reference/api/materials/porous/#porousmediumresult).
 
 **Raises**
 
@@ -273,7 +273,7 @@ leaving $\Lambda = R \rho_\mathrm{fibre} / (2 \rho_\mathrm{bulk})$
 from three numbers a table does print. That substitution is arithmetic on
 the definition and not a second model.
 
-This is a different model from [`viscous_characteristic_length`](/phonometry/reference/api/materials/porous/#viscous_characteristic_length), not a
+This is a different model from [`viscous_characteristic_length`](/reference/api/materials/porous/#viscous_characteristic_length), not a
 second opinion on the same one, and on Hopkins' own rock wool the two drift
 apart with density: the cylinder model is the lower estimate throughout, by
 a factor of 1.4 at 38 kg/m3 and 1.9 at 155 kg/m3. Which to prefer is a
@@ -287,7 +287,7 @@ question about the material, and neither is a substitute for measuring it.
 | `bulk_density_kg_m3` | Bulk density of the layer, in kg/m3 (> 0), below the fibre density: the ratio of the two is the fibre volume fraction, and Eqs. (5.29) and (5.30) are stated for a porosity close to 1. |
 | `fiber_density_kg_m3` | Density of the fibre itself, in kg/m3 (> 0). |
 
-**Returns:** The viscous and thermal lengths, in metres, as a [`FiberCharacteristicLengths`](/phonometry/reference/api/materials/porous/#fibercharacteristiclengths).
+**Returns:** The viscous and thermal lengths, in metres, as a [`FiberCharacteristicLengths`](/reference/api/materials/porous/#fibercharacteristiclengths).
 
 **Raises**
 
@@ -304,7 +304,7 @@ FiberCharacteristicLengths(viscous_length_m: float, thermal_length_m: float)
 
 The two characteristic lengths of a fibrous layer, in metres.
 
-What [`fiber_characteristic_lengths`](/phonometry/reference/api/materials/porous/#fiber_characteristic_lengths) returns: the viscous length
+What [`fiber_characteristic_lengths`](/reference/api/materials/porous/#fiber_characteristic_lengths) returns: the viscous length
 $\Lambda$ and the thermal length $\Lambda'$, named, where a
 named tuple used to unpack them by position.
 
@@ -376,7 +376,7 @@ end-corrected plug length $t' = t + 2 \delta a$ (Cox & D'Antonio
 | `plate_thickness_m` | Plate thickness `t`, in metres. |
 | `hole_radius` | Hole radius `a`, in metres. |
 | `open_area` | Fractional open area `eps` (0..1). |
-| `end_correction` | End-correction factor `delta` per end; default [`perforation_end_correction`](/phonometry/reference/api/materials/porous/#perforation_end_correction) of `eps`. |
+| `end_correction` | End-correction factor `delta` per end; default [`perforation_end_correction`](/reference/api/materials/porous/#perforation_end_correction) of `eps`. |
 | `speed_of_sound` | Speed of sound `c` in fluid, in m/s. |
 
 **Returns:** Resonance frequency `f0`, in hertz.
@@ -435,9 +435,9 @@ $\omega \to \infty$ (Johnson et al. 1987), pinned in the tests.
 | `tortuosity` | High-frequency tortuosity $T = \alpha_\infty$ (>= 1). |
 | `viscous_length_m` | Viscous characteristic length `L`, in metres. |
 | `thermal_length_m` | Thermal characteristic length `L'`, in metres (physically $L' \ge L$). |
-| `fluid` | The medium, a [`Fluid`](/phonometry/reference/api/fluids/fluids/#fluid) (Default: [`ABSORBER_AIR`](/phonometry/reference/api/materials/porous/#absorber_air), dry air at 20 degC at textbook values). Pass a computed one, such as `fluids.air(temperature_c=30.0, relative_humidity_percent=70.0)`, to work in the air of the room. |
+| `fluid` | The medium, a [`Fluid`](/reference/api/fluids/fluids/#fluid) (Default: [`ABSORBER_AIR`](/reference/api/materials/porous/#absorber_air), dry air at 20 degC at textbook values). Pass a computed one, such as `fluids.air(temperature_c=30.0, relative_humidity_percent=70.0)`, to work in the air of the room. |
 
-**Returns:** A [`PorousMediumResult`](/phonometry/reference/api/materials/porous/#porousmediumresult).
+**Returns:** A [`PorousMediumResult`](/reference/api/materials/porous/#porousmediumresult).
 
 **Raises**
 
@@ -460,8 +460,8 @@ Limp-frame correction of a rigid-frame equivalent fluid (A&A 11.3.4).
 
 A light frame (aeronautic-grade fibreglass, felts, screens) is dragged
 along by the pore fluid instead of standing still, and the rigid-frame
-models of [`delany_bazley`](/phonometry/reference/api/materials/porous/#delany_bazley), [`miki`](/phonometry/reference/api/materials/porous/#miki) and
-[`johnson_champoux_allard`](/phonometry/reference/api/materials/porous/#johnson_champoux_allard) have no way to carry that inertia.
+models of [`delany_bazley`](/reference/api/materials/porous/#delany_bazley), [`miki`](/reference/api/materials/porous/#miki) and
+[`johnson_champoux_allard`](/reference/api/materials/porous/#johnson_champoux_allard) have no way to carry that inertia.
 Neglecting the stiffness of the frame altogether in the Biot mixed
 pressure-displacement formulation leaves an equivalent fluid with the same
 bulk modulus and a corrected effective density (Allard & Atalla 2e,
@@ -498,23 +498,23 @@ They corroborate the transcription rather than determine it:
   unconstrained sample in an impedance tube.
 
 The corrected medium is a drop-in
-[`PorousMediumResult`](/phonometry/reference/api/materials/porous/#porousmediumresult), so it can be handed to
-[`PorousLayer`](/phonometry/reference/api/materials/layered/#porouslayer) inside [`layered_absorber`](/phonometry/reference/api/materials/layered/#layered_absorber) exactly like the
+[`PorousMediumResult`](/reference/api/materials/porous/#porousmediumresult), so it can be handed to
+[`PorousLayer`](/reference/api/materials/layered/#porouslayer) inside [`layered_absorber`](/reference/api/materials/layered/#layered_absorber) exactly like the
 rigid-frame one.
 
-Use [`decoupling_frequency`](/phonometry/reference/api/materials/porous/#decoupling_frequency) to see where the frame stops following the
-fluid and [`check_limp_frame`](/phonometry/reference/api/materials/porous/#check_limp_frame) for the published bulk-modulus
+Use [`decoupling_frequency`](/reference/api/materials/porous/#decoupling_frequency) to see where the frame stops following the
+fluid and [`check_limp_frame`](/reference/api/materials/porous/#check_limp_frame) for the published bulk-modulus
 rule of thumb on when the frame may be treated as limp at all.
 
 **Parameters**
 
 | Name | Description |
 | :--- | :--- |
-| `medium` | A rigid-frame [`PorousMediumResult`](/phonometry/reference/api/materials/porous/#porousmediumresult) (its `effective_density` is `rho_eq` and its `bulk_modulus` is kept). |
+| `medium` | A rigid-frame [`PorousMediumResult`](/reference/api/materials/porous/#porousmediumresult) (its `effective_density` is `rho_eq` and its `bulk_modulus` is kept). |
 | `frame_density` | Bulk density of the frame `rho1`, in kg/m3 (> 0). |
 | `porosity` | Open porosity `phi` (0 \< phi \<= 1, Default: 1.0, the high-porosity assumption of the one-parameter models). |
 
-**Returns:** A [`PorousMediumResult`](/phonometry/reference/api/materials/porous/#porousmediumresult) with model `"limp_frame(<base model>)"`.
+**Returns:** A [`PorousMediumResult`](/reference/api/materials/porous/#porousmediumresult) with model `"limp_frame(<base model>)"`.
 
 **Raises**
 
@@ -558,7 +558,7 @@ not fields: a check cannot be built against another threshold.
 | Name | Description |
 | :--- | :--- |
 | `frame_bulk_modulus` | Bulk modulus of the frame in vacuum `K_c`, in Pa (>= 0; `abs(K_c)` for a complex modulus). |
-| `criterion` | Key into [`LIMP_FRAME_CRITERIA`](/phonometry/reference/api/materials/porous/#limp_frame_criteria), `"doutres"` (Default, 0.2) or `"beranek"` (0.05). |
+| `criterion` | Key into [`LIMP_FRAME_CRITERIA`](/reference/api/materials/porous/#limp_frame_criteria), `"doutres"` (Default, 0.2) or `"beranek"` (0.05). |
 | `fluid_bulk_modulus` | Bulk modulus of the pore fluid `K_f`, in Pa. |
 
 ### LimpFrameCheck.passes
@@ -657,7 +657,7 @@ the porous-filled cavity case below about 500 Hz.
 | `surface_density` | Membrane mass per unit area `m`, in kg/m2. |
 | `cavity_depth` | Cavity depth `d`, in metres. |
 | `isothermal` | Use the isothermal air-spring stiffness. |
-| `fluid` | The medium, a [`Fluid`](/phonometry/reference/api/fluids/fluids/#fluid) (Default: [`ABSORBER_AIR`](/phonometry/reference/api/materials/porous/#absorber_air), dry air at 20 degC at textbook values). Pass a computed one, such as `fluids.air(temperature_c=30.0, relative_humidity_percent=70.0)`, to work in the air of the room. |
+| `fluid` | The medium, a [`Fluid`](/reference/api/fluids/fluids/#fluid) (Default: [`ABSORBER_AIR`](/reference/api/materials/porous/#absorber_air), dry air at 20 degC at textbook values). Pass a computed one, such as `fluids.air(temperature_c=30.0, relative_humidity_percent=70.0)`, to work in the air of the room. |
 
 **Returns:** Resonance frequency `f0`, in hertz.
 
@@ -729,7 +729,7 @@ transfer impedance (Cox & D'Antonio Eq. (7.35)).
 | `hole_radius` | Hole radius `a`, in metres (submillimetre for a genuine microperforated design). |
 | `open_area` | Fractional open area `eps` (0..1). |
 | `end_correction` | End-correction factor `delta` per end (default 0.85, the isolated-orifice value used by Maa). |
-| `fluid` | The medium, a [`Fluid`](/phonometry/reference/api/fluids/fluids/#fluid) (Default: [`ABSORBER_AIR`](/phonometry/reference/api/materials/porous/#absorber_air), dry air at 20 degC at textbook values). Pass a computed one, such as `fluids.air(temperature_c=30.0, relative_humidity_percent=70.0)`, to work in the air of the room. |
+| `fluid` | The medium, a [`Fluid`](/reference/api/fluids/fluids/#fluid) (Default: [`ABSORBER_AIR`](/reference/api/materials/porous/#absorber_air), dry air at 20 degC at textbook values). Pass a computed one, such as `fluids.air(temperature_c=30.0, relative_humidity_percent=70.0)`, to work in the air of the room. |
 
 **Returns:** Complex transfer impedance `z`, in Pa s/m. A `complex` for a number, an array for a sequence or an array, a zero-dimensional one included.
 
@@ -759,7 +759,7 @@ $k = \beta - j \alpha$,
 $k = (\omega/c)(1 + 0.109 Y^{-0.618} - j 0.160 Y^{-0.618})$. The
 regression was constrained to be positive real, so the surface impedance
 of a hard-backed layer keeps a non-negative real part even below the
-Delany-Bazley range; a [`PorousAbsorberWarning`](/phonometry/reference/api/materials/porous/#porousabsorberwarning) still flags
+Delany-Bazley range; a [`PorousAbsorberWarning`](/reference/api/materials/porous/#porousabsorberwarning) still flags
 `Y` outside the fit range $0.01 < f/\sigma < 1.0$ (paper
 Sect. 4.1).
 
@@ -769,9 +769,9 @@ Sect. 4.1).
 | :--- | :--- |
 | `frequency` | Frequency `f`, in hertz (scalar or array). |
 | `flow_resistivity_pa_s_m2` | Airflow resistivity `sigma`, in Pa s/m2. |
-| `fluid` | The medium, a [`Fluid`](/phonometry/reference/api/fluids/fluids/#fluid) (Default: [`ABSORBER_AIR`](/phonometry/reference/api/materials/porous/#absorber_air), dry air at 20 degC at textbook values). Pass a computed one, such as `fluids.air(temperature_c=30.0, relative_humidity_percent=70.0)`, to work in the air of the room. |
+| `fluid` | The medium, a [`Fluid`](/reference/api/fluids/fluids/#fluid) (Default: [`ABSORBER_AIR`](/reference/api/materials/porous/#absorber_air), dry air at 20 degC at textbook values). Pass a computed one, such as `fluids.air(temperature_c=30.0, relative_humidity_percent=70.0)`, to work in the air of the room. |
 
-**Returns:** A [`PorousMediumResult`](/phonometry/reference/api/materials/porous/#porousmediumresult).
+**Returns:** A [`PorousMediumResult`](/reference/api/materials/porous/#porousmediumresult).
 
 **Raises**
 
@@ -838,7 +838,7 @@ $$
 
 giving $z = r + j \omega m$ (the series impedance added on top of
 the backing, Eq. (7.21)). Assumes hole radii well above the boundary-layer
-thickness; use [`microperforated_plate_impedance`](/phonometry/reference/api/materials/porous/#microperforated_plate_impedance) for submillimetre
+thickness; use [`microperforated_plate_impedance`](/reference/api/materials/porous/#microperforated_plate_impedance) for submillimetre
 holes.
 
 **Parameters**
@@ -849,8 +849,8 @@ holes.
 | `thickness_m` | Plate thickness `t`, in metres. |
 | `hole_radius` | Hole radius `a`, in metres. |
 | `open_area` | Fractional open area `eps` (0..1). |
-| `end_correction` | End-correction factor `delta` per end; default [`perforation_end_correction`](/phonometry/reference/api/materials/porous/#perforation_end_correction) of `eps`. |
-| `fluid` | The medium, a [`Fluid`](/phonometry/reference/api/fluids/fluids/#fluid) (Default: [`ABSORBER_AIR`](/phonometry/reference/api/materials/porous/#absorber_air), dry air at 20 degC at textbook values). Pass a computed one, such as `fluids.air(temperature_c=30.0, relative_humidity_percent=70.0)`, to work in the air of the room. |
+| `end_correction` | End-correction factor `delta` per end; default [`perforation_end_correction`](/reference/api/materials/porous/#perforation_end_correction) of `eps`. |
+| `fluid` | The medium, a [`Fluid`](/reference/api/fluids/fluids/#fluid) (Default: [`ABSORBER_AIR`](/reference/api/materials/porous/#absorber_air), dry air at 20 degC at textbook values). Pass a computed one, such as `fluids.air(temperature_c=30.0, relative_humidity_percent=70.0)`, to work in the air of the room. |
 
 **Returns:** Complex transfer impedance `z`, in Pa s/m. A `complex` for a number, an array for a sequence or an array, a zero-dimensional one included.
 
@@ -914,7 +914,7 @@ depth) is drawn as a thin sheet.
 
 | Name | Description |
 | :--- | :--- |
-| `layers` | The layer sequence of [`layered_absorber`](/phonometry/reference/api/materials/layered/#layered_absorber), front layer first, or a single layer. |
+| `layers` | The layer sequence of [`layered_absorber`](/reference/api/materials/layered/#layered_absorber), front layer first, or a single layer. |
 | `ax` | Existing axes, or `None` to create a figure. |
 | `language` | Label language, `"en"` (default) or `"es"`. |
 | `kwargs` | Forwarded to the front-layer rectangle. |

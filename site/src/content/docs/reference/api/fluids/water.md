@@ -21,7 +21,7 @@ temperature, salinity and depth or pressure, selectable through
 
 Unlike air, sea water has four competing fits to one quantity rather than one
 model of a substance, which is why this constructor takes a model and
-[`air`](/phonometry/reference/api/fluids/air/#air) does not: those four are answers to the same
+[`air`](/reference/api/fluids/air/#air) does not: those four are answers to the same
 question, while the air formulas scattered through the library are clauses of
 different measurement standards and must never be substitutable.
 
@@ -31,8 +31,8 @@ to Pierce (1989, p. 34). Its pressure argument is **absolute**, defined by
 Equation (4.4) as the atmosphere plus the water column above.
 
 Sea water has no ratio of specific heats or thermal diffusivity here: no source
-in this library prints them, so a [`Fluid`](/phonometry/reference/api/fluids/fluids/#fluid) built from
-this module raises [`FluidPropertyUnavailableError`](/phonometry/reference/api/fluids/fluids/#fluidpropertyunavailableerror) for
+in this library prints them, so a [`Fluid`](/reference/api/fluids/fluids/#fluid) built from
+this module raises [`FluidPropertyUnavailableError`](/reference/api/fluids/fluids/#fluidpropertyunavailableerror) for
 them rather than inventing a number.
 
 > Auto-generated from the source docstrings by `scripts/generate_api_docs.py` (`make api-docs`). Do not edit by hand.
@@ -54,8 +54,8 @@ Equation (4.4) defines the static pressure as the atmosphere plus the
 weight of the water above, so this returns one atmosphere at the surface
 rather than zero.
 
-That is the pressure [`sea_water`](/phonometry/reference/api/fluids/water/#sea_water)'s density wants. The sound speeds
-want the other one, from [`depth_to_gauge_pressure_mpa`](/phonometry/reference/api/fluids/water/#depth_to_gauge_pressure_mpa), and the two
+That is the pressure [`sea_water`](/reference/api/fluids/water/#sea_water)'s density wants. The sound speeds
+want the other one, from [`depth_to_gauge_pressure_mpa`](/reference/api/fluids/water/#depth_to_gauge_pressure_mpa), and the two
 names say which is which because the difference is a factor of a million
 and an offset of an atmosphere.
 
@@ -91,7 +91,7 @@ The standard-ocean formula, for an ideal medium of 0 degC and 35 ppt; no
 local corrections are applied. This is the pressure the UNESCO and Del
 Grosso sound speeds want, and it is **gauge**: zero at the surface.
 
-Its companion [`depth_to_absolute_pressure_pa`](/phonometry/reference/api/fluids/water/#depth_to_absolute_pressure_pa) answers the other
+Its companion [`depth_to_absolute_pressure_pa`](/reference/api/fluids/water/#depth_to_absolute_pressure_pa) answers the other
 question, in the other unit and from the other datum, which is why both
 names carry theirs. Handing one to what wants the other is a factor of a
 million and an offset of an atmosphere.
@@ -137,7 +137,7 @@ Sea water at one point of the ocean.
 | `latitude_deg` | Latitude, in degrees, for the depth-to-pressure conversions (default 45). |
 | `sound_speed_model` | Which of the four fits to use; see the module docstring. One of `"unesco"`, `"del_grosso"`, `"mackenzie"` or `"medwin"`. |
 
-**Returns:** The [`Fluid`](/phonometry/reference/api/fluids/fluids/#fluid) at that point.
+**Returns:** The [`Fluid`](/reference/api/fluids/fluids/#fluid) at that point.
 
 **Raises**
 
@@ -171,7 +171,7 @@ $$
 $$
 
 The pressure is **absolute**, in pascals, as Equations (4.4) and (4.7) to
-(4.10) define it. Use [`depth_to_absolute_pressure_pa`](/phonometry/reference/api/fluids/water/#depth_to_absolute_pressure_pa) to get one from
+(4.10) define it. Use [`depth_to_absolute_pressure_pa`](/reference/api/fluids/water/#depth_to_absolute_pressure_pa) to get one from
 a depth.
 
 **Parameters**

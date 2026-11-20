@@ -310,7 +310,7 @@ Level | Limit | Margin verdict row when a certification limit is supplied, a
 static reference-conditions strip (25 °C, 70 % RH, sea level, zero wind, ISA) and
 a footer with the fixed disclaimer. It uses the same `ReportMetadata` container
 and rendering engine as the [ISO 717 insulation
-fiche](/phonometry/buildings/insulation/insulation-ratings/#iso-717-report-report); a supplied
+fiche](/buildings/insulation/insulation-ratings/#iso-717-report-report); a supplied
 `requirement` is read as the certification EPNL limit in EPNdB (the EPNL passes
 at or below it), and `metadata=None` produces a lightweight prediction fiche with
 no verdict row. Rendering needs reportlab and, for the figure the fiche embeds,
@@ -462,7 +462,7 @@ invalidates the certification data, it is not a correction to apply. Band-filter
 conformance is a separate matter: Annex 16 §3.7.3 requires IEC 61260 class 1,
 with class 2 admissible only if the certificating authority allows it, and the
 library's own filter verification, `verify_filter_class` of
-[Filter class verification](/phonometry/signals/filters/filter-compliance/), is the
+[Filter class verification](/signals/filters/filter-compliance/), is the
 place that is checked.
 
 ```python
@@ -565,7 +565,7 @@ The certification chain ends here. Turning these aeroplanes into noise
 around an airport, the noise-power-distance tables, the per-segment
 corrections of a flight path and the ground contour of a single event, is
 the ECAC Doc 29 method of
-[Airport noise](/phonometry/aircraft/airport-noise/).
+[Airport noise](/aircraft/airport-noise/).
 
 ## What this guide covers
 
@@ -586,7 +586,7 @@ implemented, in either the simplified or the integrated form: the returned
 EPNL is the as-measured value, so adjust first and then report against a
 limit. `verify_aircraft_noise_system` checks the IEC 61265:1995 tolerances,
 not the superseding 2018 edition. The ECAC Doc 29 airport-noise chain has
-moved to [Airport noise](/phonometry/aircraft/airport-noise/).
+moved to [Airport noise](/aircraft/airport-noise/).
 </ScopeClaim>
 </Scope>
 
@@ -594,15 +594,15 @@ moved to [Airport noise](/phonometry/aircraft/airport-noise/).
 
 ## See also
 
-- [Airport noise (ECAC Doc 29)](/phonometry/aircraft/airport-noise/): the NPD
+- [Airport noise (ECAC Doc 29)](/aircraft/airport-noise/): the NPD
   engine and the single-event contour chain around an airport.
-- [Rotorcraft noise: the hemisphere method](/phonometry/aircraft/rotorcraft-noise/):
+- [Rotorcraft noise: the hemisphere method](/aircraft/rotorcraft-noise/):
   the ECAC Doc 32 method, whose single-event EPNL is this same Appendix 2 chain
   driven by a noise hemisphere instead of a certification flyover.
-- [The ANP fleet database](/phonometry/aircraft/anp-fleet/): the measured
+- [The ANP fleet database](/aircraft/anp-fleet/): the measured
   noise-power-distance tables for real types, which is where the certification
   data ends up for modelling work.
-- API reference: [`aircraft.certification`](/phonometry/reference/api/aeroacoustics/certification/) and [`aircraft.atmospheric_absorption`](/phonometry/reference/api/aeroacoustics/atmospheric-absorption/).
+- API reference: [`aircraft.certification`](/reference/api/aeroacoustics/certification/) and [`aircraft.atmospheric_absorption`](/reference/api/aeroacoustics/atmospheric-absorption/).
 
 </SeeAlso>
 

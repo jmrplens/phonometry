@@ -82,8 +82,8 @@ const ENTRIES = new Map();
  * @param {string} options.slug   Page slug without the locale prefix, e.g. `guides/levels`.
  * @param {string} options.title  Rendered page title, used for the last crumb.
  * @param {'en'|'es'} options.lang
- * @param {string} options.origin Absolute origin, e.g. `https://docs.jmrp.io`.
- * @param {string} options.base   Base path without a trailing slash, e.g. `/phonometry`.
+ * @param {string} options.origin Absolute origin, e.g. `https://phonometry.dev`.
+ * @param {string} options.base   Base path without a trailing slash, `''` at the root.
  * @returns {{name: string, item: string}[]} Crumbs, root first, every `item` a real route.
  */
 export function breadcrumbsFor({ slug, title, lang, origin, base }) {

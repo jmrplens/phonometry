@@ -24,16 +24,16 @@ the NPD, the unweighted reference spectrum at 1 000 ft, in three steps:
    levels is the increment $\Delta L(d_i)$ (Eq. D-4), added to the
    `Lmax` and `LE` NPD levels alike.
 
-* [`AIR1845_ATTENUATION_DB_PER_100M`](/phonometry/reference/api/aeroacoustics/npd-atmosphere/#air1845_attenuation_db_per_100m): Table D-1.
-* [`npd_atmosphere_increment`](/phonometry/reference/api/aeroacoustics/npd-atmosphere/#npd_atmosphere_increment): the increment at each NPD distance, as an
-  [`NPDAtmosphereIncrement`](/phonometry/reference/api/aeroacoustics/npd-atmosphere/#npdatmosphereincrement) with `.plot()` (the increment against
+* [`AIR1845_ATTENUATION_DB_PER_100M`](/reference/api/aeroacoustics/npd-atmosphere/#air1845_attenuation_db_per_100m): Table D-1.
+* [`npd_atmosphere_increment`](/reference/api/aeroacoustics/npd-atmosphere/#npd_atmosphere_increment): the increment at each NPD distance, as an
+  [`NPDAtmosphereIncrement`](/reference/api/aeroacoustics/npd-atmosphere/#npdatmosphereincrement) with `.plot()` (the increment against
   distance) and `.plot_attenuation()` (the attenuation of the two
   atmospheres against frequency).
-* [`revise_npd_curves`](/phonometry/reference/api/aeroacoustics/npd-atmosphere/#revise_npd_curves): an
-  [`ANPNPDCurves`](/phonometry/reference/api/aeroacoustics/anp-fleet/#anpnpdcurves) revised by that
-  increment, as a [`RevisedNPDCurves`](/phonometry/reference/api/aeroacoustics/npd-atmosphere/#revisednpdcurves) with `.plot()`; its `revised`
-  curves feed [`event_level`](/phonometry/reference/api/aeroacoustics/airport-noise/#event_level) and
-  [`noise_contour`](/phonometry/reference/api/aeroacoustics/airport-noise/#noise_contour) like any other NPD
+* [`revise_npd_curves`](/reference/api/aeroacoustics/npd-atmosphere/#revise_npd_curves): an
+  [`ANPNPDCurves`](/reference/api/aeroacoustics/anp-fleet/#anpnpdcurves) revised by that
+  increment, as a [`RevisedNPDCurves`](/reference/api/aeroacoustics/npd-atmosphere/#revisednpdcurves) with `.plot()`; its `revised`
+  curves feed [`event_level`](/reference/api/aeroacoustics/airport-noise/#event_level) and
+  [`noise_contour`](/reference/api/aeroacoustics/airport-noise/#noise_contour) like any other NPD
   table.
 
 The A-weighting of step 3 is the nominal one of IEC 61672-1, to 0.1 dB, in the
@@ -93,9 +93,9 @@ the unit the table prints (Doc 29 writes the equations with the rates in
 dB/m instead), and
 $\delta_n(d_i) \, d_i / (100\,\mathrm{m})$ the band attenuation of
 the specified atmosphere over $d_i$: the SAE Method of SAE ARP 5534
-([`band_attenuation_arp5534`](/phonometry/reference/api/aeroacoustics/atmospheric-absorption/#band_attenuation_arp5534)),
+([`band_attenuation_arp5534`](/reference/api/aeroacoustics/atmospheric-absorption/#band_attenuation_arp5534)),
 which depends on the path and the pressure, or SAE ARP 866A
-([`attenuation_arp866a`](/phonometry/reference/api/aeroacoustics/atmospheric-absorption/#attenuation_arp866a)),
+([`attenuation_arp866a`](/reference/api/aeroacoustics/atmospheric-absorption/#attenuation_arp866a)),
 which depends on neither, with `η(δ)` read linearly in Table 1 of ISO
 3891, as Tables D-3b and D-5 are computed. Doc 29 recommends ARP 5534 and
 keeps ARP 866A for transition. Nothing is rounded: Tables D-4 to D-6c are rounded for
@@ -109,14 +109,14 @@ shape; the spectral classes are normalised to 70 dB at 1 kHz (G4.3).
 
 | Name | Description |
 | :--- | :--- |
-| `spectrum` | The spectral class of the NPD, a [`SpectralClass`](/phonometry/reference/api/aeroacoustics/anp-fleet/#spectralclass) or its 24 one-third-octave-band levels from 50 Hz to 10 kHz at 1 000 ft, in dB. |
+| `spectrum` | The spectral class of the NPD, a [`SpectralClass`](/reference/api/aeroacoustics/anp-fleet/#spectralclass) or its 24 one-third-octave-band levels from 50 Hz to 10 kHz at 1 000 ft, in dB. |
 | `temperature_c` | Air temperature `T`, in degrees Celsius. |
 | `relative_humidity_percent` | Relative humidity, in percent. |
 | `static_pressure_kpa` | Air pressure `pa`, in kPa (default 101.325, sea level). Read by ARP 5534 only. |
 | `absorption` | `"arp5534"` (default) or `"arp866a"`. |
 | `distances_m` | The NPD slant distances, in metres. `None` takes the ten standard ones of footnote 40, 200 ft to 25 000 ft. |
 
-**Returns:** An [`NPDAtmosphereIncrement`](/phonometry/reference/api/aeroacoustics/npd-atmosphere/#npdatmosphereincrement).
+**Returns:** An [`NPDAtmosphereIncrement`](/reference/api/aeroacoustics/npd-atmosphere/#npdatmosphereincrement).
 
 **Raises**
 
@@ -254,7 +254,7 @@ revise_npd_curves(
 
 NPD curves recalculated for a specified atmosphere (Doc 29 Vol. 2 Appendix D).
 
-Adds [`npd_atmosphere_increment`](/phonometry/reference/api/aeroacoustics/npd-atmosphere/#npd_atmosphere_increment), taken at the curves' own distances,
+Adds [`npd_atmosphere_increment`](/reference/api/aeroacoustics/npd-atmosphere/#npd_atmosphere_increment), taken at the curves' own distances,
 to the level of every power setting. The same increment applies to the
 `Lmax` and the `LE` curves of an operation, which assumes the
 atmosphere changes the reference spectrum and not the shape of the level
@@ -264,20 +264,20 @@ time history (Appendix D, last paragraph of step 3).
 
 | Name | Description |
 | :--- | :--- |
-| `curves` | The NPD curves, an [`ANPNPDCurves`](/phonometry/reference/api/aeroacoustics/anp-fleet/#anpnpdcurves). |
-| `spectrum` | The spectral class of the same aircraft and operation (see [`spectral_class`](/phonometry/reference/api/aeroacoustics/anp-fleet/#anpaircraftspectral_class)). |
+| `curves` | The NPD curves, an [`ANPNPDCurves`](/reference/api/aeroacoustics/anp-fleet/#anpnpdcurves). |
+| `spectrum` | The spectral class of the same aircraft and operation (see [`spectral_class`](/reference/api/aeroacoustics/anp-fleet/#anpaircraftspectral_class)). |
 | `temperature_c` | Air temperature, in degrees Celsius. |
 | `relative_humidity_percent` | Relative humidity, in percent. |
 | `static_pressure_kpa` | Air pressure, in kPa (default 101.325). |
 | `absorption` | `"arp5534"` (default) or `"arp866a"`. |
 
-**Returns:** A [`RevisedNPDCurves`](/phonometry/reference/api/aeroacoustics/npd-atmosphere/#revisednpdcurves).
+**Returns:** A [`RevisedNPDCurves`](/reference/api/aeroacoustics/npd-atmosphere/#revisednpdcurves).
 
 **Raises**
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | as [`npd_atmosphere_increment`](/phonometry/reference/api/aeroacoustics/npd-atmosphere/#npd_atmosphere_increment) does. |
+| ValueError | as [`npd_atmosphere_increment`](/reference/api/aeroacoustics/npd-atmosphere/#npd_atmosphere_increment) does. |
 | TypeError | if `absorption` is not a text. |
 
 ## RevisedNPDCurves
@@ -297,7 +297,7 @@ NPD curves recalculated for a specified atmosphere (Doc 29 Vol. 2 Appendix D).
 | Name | Description |
 | :--- | :--- |
 | `original` | The curves as the ANP database gives them, in the AIR-1845 atmosphere. |
-| `revised` | The same curves with `increment` added at every power setting, an [`ANPNPDCurves`](/phonometry/reference/api/aeroacoustics/anp-fleet/#anpnpdcurves) that [`level`](/phonometry/reference/api/aeroacoustics/anp-fleet/#anpnpdcurveslevel) and the Doc 29 event chain read like any other. |
+| `revised` | The same curves with `increment` added at every power setting, an [`ANPNPDCurves`](/reference/api/aeroacoustics/anp-fleet/#anpnpdcurves) that [`level`](/reference/api/aeroacoustics/anp-fleet/#anpnpdcurveslevel) and the Doc 29 event chain read like any other. |
 | `increment` | The increment and everything it was computed from. |
 
 ### RevisedNPDCurves.plot()

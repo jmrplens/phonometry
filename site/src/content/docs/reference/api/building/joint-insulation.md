@@ -20,13 +20,13 @@ $$
 
 with $S_\mathrm{n} = 1$ m², $l_\mathrm{n} = 1$ m, the joint length
 $l$ and the equivalent absorption area $A$ of the receiving room
-([`joint_sound_reduction_index`](/phonometry/reference/api/building/joint-insulation/#joint_sound_reduction_index)).
+([`joint_sound_reduction_index`](/reference/api/building/joint-insulation/#joint_sound_reduction_index)).
 
 **Flanking through the test element.** The element the joint sits in is part
 of every measurement, so J.1 asks for the maximum the arrangement can show,
 $R_\mathrm{s,max}$, measured with the joint sealed on both sides. Unless
 it lies 10 dB or more above the measured $R_\mathrm{s}'$, the result is
-corrected by the rules of ISO 10140-2:2021 A.3 ([`laboratory_joint_insulation`](/phonometry/reference/api/building/joint-insulation/#laboratory_joint_insulation)):
+corrected by the rules of ISO 10140-2:2021 A.3 ([`laboratory_joint_insulation`](/reference/api/building/joint-insulation/#laboratory_joint_insulation)):
 
 * a difference of 6 dB up to 10 dB: Formula (J.2),
   $R_\mathrm{s} = -10 \lg(10^{-R_\mathrm{s}'/10} - 10^{-R_\mathrm{s,max}/10})$;
@@ -46,13 +46,13 @@ those indicative bands taken as infinitely high; a difference of more than
 
 **The arrangement.** J.2.1 asks for a joint longer than 1 m and no wider
 than 50 mm, J.2.2 for at least 5.0 m of a gap between the parts of a window or
-door ([`check_joint_test_element`](/phonometry/reference/api/building/joint-insulation/#check_joint_test_element)), whose width is read at four positions
-or more that may not differ by more than 0.3 mm ([`check_gap_width`](/phonometry/reference/api/building/joint-insulation/#check_gap_width)). A
+door ([`check_joint_test_element`](/reference/api/building/joint-insulation/#check_joint_test_element)), whose width is read at four positions
+or more that may not differ by more than 0.3 mm ([`check_gap_width`](/reference/api/building/joint-insulation/#check_gap_width)). A
 variable slit is measured at its nominal gap width $b_\mathrm{n}$ (5 mm
 when the manufacturer gives none), at the minimum width under a force of
 normally 100 N/m, and at $b_\mathrm{n} + 3$ mm (J.4,
-[`check_joint_gap_series`](/phonometry/reference/api/building/joint-insulation/#check_joint_gap_series)), and reported as single numbers against the
-gap width ([`joint_gap_series`](/phonometry/reference/api/building/joint-insulation/#joint_gap_series), Figures J.8 and J.9).
+[`check_joint_gap_series`](/reference/api/building/joint-insulation/#check_joint_gap_series)), and reported as single numbers against the
+gap width ([`joint_gap_series`](/reference/api/building/joint-insulation/#joint_gap_series), Figures J.8 and J.9).
 
 Citations are to ISO 10140-1:2021 (third edition) Annex J and, for the
 flanking rules it calls in, to ISO 10140-2:2021 A.3.
@@ -82,7 +82,7 @@ distributed is not judged, since only the widths are given.
 | :--- | :--- |
 | `readings_mm` | The gap widths read, in mm, in any order. |
 
-**Returns:** A [`GapWidthCheck`](/phonometry/reference/api/building/joint-insulation/#gapwidthcheck).
+**Returns:** A [`GapWidthCheck`](/reference/api/building/joint-insulation/#gapwidthcheck).
 
 **Raises**
 
@@ -110,15 +110,15 @@ width of a result is the average of readings that J.2.2 lets spread over
 0.3 mm, so a measured width within 0.3 mm of a required one counts as
 that width. A series that does not name $b_\mathrm{min}$ fails
 J.4 b), because nothing then shows which width it was; pass
-`min_gap_mm` to [`joint_gap_series`](/phonometry/reference/api/building/joint-insulation/#joint_gap_series).
+`min_gap_mm` to [`joint_gap_series`](/reference/api/building/joint-insulation/#joint_gap_series).
 
 **Parameters**
 
 | Name | Description |
 | :--- | :--- |
-| `series` | The [`JointGapSeries`](/phonometry/reference/api/building/joint-insulation/#jointgapseries) of the slit. |
+| `series` | The [`JointGapSeries`](/reference/api/building/joint-insulation/#jointgapseries) of the slit. |
 
-**Returns:** A [`JointGapSeriesCheck`](/phonometry/reference/api/building/joint-insulation/#jointgapseriescheck).
+**Returns:** A [`JointGapSeriesCheck`](/reference/api/building/joint-insulation/#jointgapseriescheck).
 
 ## check_joint_test_element
 
@@ -151,7 +151,7 @@ number and are not judged here.
 | `joint_width_mm` | Width of the joint, in mm (the gap width `b`). |
 | `window_or_door_gap` | `True` for a gap between the parts of a window or door (J.2.2). |
 
-**Returns:** A [`JointTestElementCheck`](/phonometry/reference/api/building/joint-insulation/#jointtestelementcheck).
+**Returns:** A [`JointTestElementCheck`](/reference/api/building/joint-insulation/#jointtestelementcheck).
 
 **Raises**
 
@@ -255,19 +255,19 @@ $R_\mathrm{s,w} + C_\mathrm{tr}$ as a function of the gap width with
 the nominal width marked (J.5.2 i)), and the results at
 $b_\mathrm{n}$ and $b_\mathrm{n} + 3$ are the ones products are
 compared by (J.5.2 h)). Any set of widths is collected;
-[`check_joint_gap_series`](/phonometry/reference/api/building/joint-insulation/#check_joint_gap_series) judges whether the three of J.4 are among
+[`check_joint_gap_series`](/reference/api/building/joint-insulation/#check_joint_gap_series) judges whether the three of J.4 are among
 them.
 
 **Parameters**
 
 | Name | Description |
 | :--- | :--- |
-| `gap_widths_mm` | The gap width `b` of each result, in mm (the average of [`check_gap_width`](/phonometry/reference/api/building/joint-insulation/#check_gap_width)). |
-| `results` | The [`LaboratoryJointInsulationResult`](/phonometry/reference/api/building/joint-insulation/#laboratoryjointinsulationresult) at each width, each with its ISO 717-1 rating. |
+| `gap_widths_mm` | The gap width `b` of each result, in mm (the average of [`check_gap_width`](/reference/api/building/joint-insulation/#check_gap_width)). |
+| `results` | The [`LaboratoryJointInsulationResult`](/reference/api/building/joint-insulation/#laboratoryjointinsulationresult) at each width, each with its ISO 717-1 rating. |
 | `nominal_gap_mm` | $b_\mathrm{n}$, in mm (default 5 mm). |
 | `min_gap_mm` | $b_\mathrm{min}$, in mm, marked on the plot when given. |
 
-**Returns:** A [`JointGapSeries`](/phonometry/reference/api/building/joint-insulation/#jointgapseries), sorted by gap width.
+**Returns:** A [`JointGapSeries`](/reference/api/building/joint-insulation/#jointgapseries), sorted by gap width.
 
 **Raises**
 
@@ -300,7 +300,7 @@ twice as long lets twice the power through, so the index of a metre is
 
 The same formula, with the joint sealed on both sides, gives the maximum
 of the test arrangement $R_\mathrm{s,max}$ that
-[`laboratory_joint_insulation`](/phonometry/reference/api/building/joint-insulation/#laboratory_joint_insulation) corrects against (J.1).
+[`laboratory_joint_insulation`](/reference/api/building/joint-insulation/#laboratory_joint_insulation) corrects against (J.1).
 
 **Parameters**
 
@@ -342,7 +342,7 @@ Single numbers of a variable slit against its gap width (J.4, J.5.2 h), i)).
 | Name | Description |
 | :--- | :--- |
 | `gap_widths_mm` | The gap widths measured, ascending, in mm. |
-| `results` | The [`LaboratoryJointInsulationResult`](/phonometry/reference/api/building/joint-insulation/#laboratoryjointinsulationresult) at each width. |
+| `results` | The [`LaboratoryJointInsulationResult`](/reference/api/building/joint-insulation/#laboratoryjointinsulationresult) at each width. |
 | `nominal_gap_mm` | The nominal gap width $b_\mathrm{n}$, in mm. |
 | `min_gap_mm` | The minimal gap width $b_\mathrm{min}$ at the maximal pressure, in mm, or `None` when not given. |
 | `r_s_w` | $R_\mathrm{s,w}$ at each width, in dB. |
@@ -681,7 +681,7 @@ laboratory_joint_insulation(
 Sound reduction index of a joint, corrected for the test arrangement (J.1).
 
 $R_\mathrm{s}'$ and $R_\mathrm{s,max}$ are both Formula (J.1)
-([`joint_sound_reduction_index`](/phonometry/reference/api/building/joint-insulation/#joint_sound_reduction_index)): the first with the joint as it is
+([`joint_sound_reduction_index`](/reference/api/building/joint-insulation/#joint_sound_reduction_index)): the first with the joint as it is
 tested, the second with it sealed on both sides, "e.g. with elastic
 sealant". Band by band, with the difference
 $d = R_\mathrm{s,max} - R_\mathrm{s}'$:
@@ -706,7 +706,7 @@ with the 18 bands to 5 000 Hz $C_{100\text{-}5000}$ and
 $C_\mathrm{tr,100\text{-}5000}$, the evaluation of Figure J.7. Bands
 with $d < 3$ dB are indicative: J.1 rates the curve again with them
 taken as infinitely high, and a change of more than 1 dB puts the single
-numbers in brackets ([`LaboratoryJointInsulationResult.bracketed`](/phonometry/reference/api/building/joint-insulation/#laboratoryjointinsulationresultbracketed)). The
+numbers in brackets ([`LaboratoryJointInsulationResult.bracketed`](/reference/api/building/joint-insulation/#laboratoryjointinsulationresultbracketed)). The
 indicative bands are read on $R_\mathrm{s}'$, the same condition as
 the bracketed lower limit, whichever rule corrected them.
 
@@ -720,7 +720,7 @@ the bracketed lower limit, whichever rule corrected them.
 | `joint_length_m` | Length of the joint under test, in m, kept for the form of Figure J.7; `None` leaves that row empty. |
 | `limit_at_max` | Set the bands within 3 dB of the maximum to $R_\mathrm{s,max}$ (default), or give them the 1.3 dB correction like the other bands below 6 dB. |
 
-**Returns:** A [`LaboratoryJointInsulationResult`](/phonometry/reference/api/building/joint-insulation/#laboratoryjointinsulationresult).
+**Returns:** A [`LaboratoryJointInsulationResult`](/reference/api/building/joint-insulation/#laboratoryjointinsulationresult).
 
 **Raises**
 
@@ -893,7 +893,7 @@ $R_\mathrm{s,max}$ in brackets.
 | Name | Description |
 | :--- | :--- |
 | `path` | Destination path of the PDF file. |
-| `metadata` | Optional [`ReportMetadata`](/phonometry/reference/api/building/insulation/#reportmetadata); its `separating_element` and `test_signal` fill the separation wall and test noise rows of the form. |
+| `metadata` | Optional [`ReportMetadata`](/reference/api/building/insulation/#reportmetadata); its `separating_element` and `test_signal` fill the separation wall and test noise rows of the form. |
 | `engine` | Rendering back end; only `"reportlab"` is supported. |
 | `verbose` | When `True`, the table also shows $R_\mathrm{s}'$ and $R_\mathrm{s,max}$. |
 | `language` | `"en"` (default) or `"es"`. |

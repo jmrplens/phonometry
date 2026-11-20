@@ -461,7 +461,7 @@ toda medida de intensidad.
 
 $\delta_{pI0}$ es el número sobre el que descansan todos los criterios de esta
 página y de la
-[página de barrido](/phonometry/es/devices/emission/sound-power-intensity/)
+[página de barrido](/es/devices/emission/sound-power-intensity/)
 entera, y la biblioteca no lo calcula: se mide, una vez por cadena
 sonda-espaciador-analizador, en el banco.
 
@@ -1116,8 +1116,8 @@ sonda-espaciador-analizador, no a los micrófonos por sí solos.
 | `limits` | lista, opcional | Hz | por defecto el rango de bandas de la biblioteca | Límites del análisis por bandas |
 | `bias_correct` | bool | — | defecto `False` | Aplica la corrección por bin $(k\Delta r)/\sin(k\Delta r)$ (IEC 61043 §7.3) antes de sumar, para que los totales de banda/banda ancha dejen de subestimar cuando $f \to$ `max_valid_frequency`; los bins pasado el primer nulo se dejan sin corregir. El factor `bias_correction` por banda se da en ambos casos |
 
-Consulta [Teoría](/phonometry/es/reference/theory/signal-analysis/) para las derivaciones y
-[Calibración](/phonometry/es/signals/metrology/calibration/) para el escalado absoluto de
+Consulta [Teoría](/es/reference/theory/signal-analysis/) para las derivaciones y
+[Calibración](/es/signals/metrology/calibration/) para el escalado absoluto de
 los dos canales.
 
 ## Qué cubre esta guía
@@ -1165,12 +1165,12 @@ sonda de ISO 9614-2 son igualmente procedimientos, no funciones.
 
 ## Véase también
 
-- [Potencia acústica por barrido de intensidad](/phonometry/es/devices/emission/sound-power-intensity/): las vías de ISO 9614-2/-3 que consumen $\delta_{pI}$, los indicadores de campo y la capacidad dinámica.
-- [Potencia acústica](/phonometry/es/devices/emission/sound-power/): la elección entre las vías de intensidad, de presión y de cámara reverberante.
-- [Potencia acústica a partir de la vibración](/phonometry/es/devices/emission/vibration-sound-power/): el factor de radiación de ISO/TS 7849-2 necesita una potencia medida por intensidad.
-- [Calibración](/phonometry/es/signals/metrology/calibration/): el escalado absoluto de los dos canales que el estimador da por supuesto.
-- [Teoría: análisis de señal](/phonometry/es/reference/theory/signal-analysis/): la derivación por espectro cruzado que hay detrás de $I(f) = -\mathrm{Im}\{G_{12}\}/(2\pi f \rho_0 \Delta r)$.
-- Referencia de la API: [`emission.intensity`](/phonometry/es/reference/api/power/intensity/).
-- Teoría: [Intensidad acústica (IEC 61043)](/phonometry/es/reference/theory/signal-analysis/#intensidad-acustica-iec-61043): la aproximación en diferencias finitas que hay detrás de una sonda p-p y los errores que comete.
+- [Potencia acústica por barrido de intensidad](/es/devices/emission/sound-power-intensity/): las vías de ISO 9614-2/-3 que consumen $\delta_{pI}$, los indicadores de campo y la capacidad dinámica.
+- [Potencia acústica](/es/devices/emission/sound-power/): la elección entre las vías de intensidad, de presión y de cámara reverberante.
+- [Potencia acústica a partir de la vibración](/es/devices/emission/vibration-sound-power/): el factor de radiación de ISO/TS 7849-2 necesita una potencia medida por intensidad.
+- [Calibración](/es/signals/metrology/calibration/): el escalado absoluto de los dos canales que el estimador da por supuesto.
+- [Teoría: análisis de señal](/es/reference/theory/signal-analysis/): la derivación por espectro cruzado que hay detrás de $I(f) = -\mathrm{Im}\{G_{12}\}/(2\pi f \rho_0 \Delta r)$.
+- Referencia de la API: [`emission.intensity`](/es/reference/api/power/intensity/).
+- Teoría: [Intensidad acústica (IEC 61043)](/es/reference/theory/signal-analysis/#intensidad-acustica-iec-61043): la aproximación en diferencias finitas que hay detrás de una sonda p-p y los errores que comete.
 
 </SeeAlso>

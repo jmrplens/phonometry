@@ -1,6 +1,6 @@
 <!-- Written by `make llms` from site/src/content/docs/vibration/human/seat-vibration.mdx: edit that page and its Spanish twin, then run `make llms`. -->
 
-← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/vibration/human/seat-vibration/
+← [Documentation index](../../README.md) · Published at https://phonometry.dev/vibration/human/seat-vibration/
 
 # What a seat does to the vibration
 

@@ -1,6 +1,6 @@
 <!-- Written by `make llms` from site/src/content/docs/vibration/index.mdx: edit that page and its Spanish twin, then run `make llms`. -->
 
-← [Documentation index](../README.md) · Published at https://docs.jmrp.io/phonometry/vibration/
+← [Documentation index](../README.md) · Published at https://phonometry.dev/vibration/
 
 # Vibration and structure-borne sound
 

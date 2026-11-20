@@ -1,6 +1,6 @@
 <!-- Written by `make llms` from site/src/content/docs/environment/assessment/soundscape.mdx: edit that page and its Spanish twin, then run `make llms`. -->
 
-← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/environment/assessment/soundscape/
+← [Documentation index](../../README.md) · Published at https://phonometry.dev/environment/assessment/soundscape/
 
 # Soundscape Analysis (ISO/TS 12913)
 
@@ -453,8 +453,8 @@ plt.show()
   part 2, the stray factor of Formula (A.3), the where-lists of (A.4) and
   (B.2), the exponent of the $N_\mathrm{rmc}$ NOTE, three scales for four,
   and the misspellings of the questionnaire.
-- API reference: [`environment.assessment.soundscape`](https://docs.jmrp.io/phonometry/reference/api/environment/soundscape/)
-  and [`environment.assessment.soundscape_binaural`](https://docs.jmrp.io/phonometry/reference/api/environment/soundscape-binaural/).
+- API reference: [`environment.assessment.soundscape`](https://phonometry.dev/reference/api/environment/soundscape/)
+  and [`environment.assessment.soundscape_binaural`](https://phonometry.dev/reference/api/environment/soundscape-binaural/).
 
 ## References
 

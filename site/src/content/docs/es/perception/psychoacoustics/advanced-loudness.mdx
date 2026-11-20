@@ -40,13 +40,13 @@ import ThemeImage from '../../../../../components/ThemeImage.astro';
 
 El método de Zwicker de ISO 532-1 es la vía de referencia hacia la sonoridad
 en sonios y está en
-[Sonoridad](/phonometry/es/perception/psychoacoustics/loudness/), junto con
+[Sonoridad](/es/perception/psychoacoustics/loudness/), junto con
 las líneas isofónicas de ISO 226. Esta página cubre las familias de modelos
 más nuevas que phonometry incluye a su lado: la sonoridad de
 **Moore-Glasberg** de ISO 532-2/532-3 y la sonoridad del **modelo de
 Sottek** de ECMA-418-2:2025, cuyo front-end auditivo compartido también
 impulsa la tonalidad y la aspereza de
-[Métricas de calidad sonora](/phonometry/es/perception/psychoacoustics/sound-quality/).
+[Métricas de calidad sonora](/es/perception/psychoacoustics/sound-quality/).
 
 La página empieza por la elección: qué modelo encaja con qué medición, y por
 qué los valores en sonios de los cuatro métodos coinciden en el ancla de
@@ -58,7 +58,7 @@ de parámetros.
 
 | Modelo | Norma | Estacionario / variable en el tiempo | Salida | Cuándo usarlo |
 | :--- | :--- | :--- | :--- | :--- |
-| [Zwicker](/phonometry/es/perception/psychoacoustics/loudness/) | ISO 532-1:2017 | ambos | sonios | Método de referencia; entrada en tercios de octava; rápido y muy citado |
+| [Zwicker](/es/perception/psychoacoustics/loudness/) | ISO 532-1:2017 | ambos | sonios | Método de referencia; entrada en tercios de octava; rápido y muy citado |
 | Moore-Glasberg | ISO 532-2:2017 | estacionario | sonios | Patrón de excitación roex; mejor para tonos y con suma binaural explícita |
 | Moore-Glasberg-Schlittenlacher | ISO 532-3:2023 | variable en el tiempo | sonios (STL/LTL) | Sonoridad variable en el tiempo con trazas de corto/largo plazo y el pico $N_\text{max}$ |
 | Sottek (modelo auditivo) | ECMA-418-2:2025 | variable en el tiempo | sone_HMS | Comparte un único front-end auditivo con las métricas de tonalidad y aspereza de ECMA |
@@ -481,7 +481,7 @@ mismo tamaño de bloque, 0,996; y con el recálculo completo entre grupos que
 exige la norma, 0,9845. La constante de calibración $c_\mathrm{N}$ se conserva en su
 valor tabulado literal en vez de reajustarse, que es la razón de que la
 desviación se vea siquiera; la
-[referencia de la API de `psychoacoustics.loudness.ecma`](/phonometry/es/reference/api/psychoacoustics/ecma/)
+[referencia de la API de `psychoacoustics.loudness.ecma`](/es/reference/api/psychoacoustics/ecma/)
 lleva la explicación completa.
 
 ```python
@@ -626,14 +626,14 @@ conformidad estricta apartado a apartado.
 
 ## Véase también
 
-- [Sonoridad](/phonometry/es/perception/psychoacoustics/loudness/): el método de referencia de
+- [Sonoridad](/es/perception/psychoacoustics/loudness/): el método de referencia de
   Zwicker (ISO 532-1), su ficha acreditada y las líneas isofónicas de ISO 226.
-- [Métricas de calidad sonora](/phonometry/es/perception/psychoacoustics/sound-quality/): la
+- [Métricas de calidad sonora](/es/perception/psychoacoustics/sound-quality/): la
   tonalidad, la aspereza y la intensidad de fluctuación construidas sobre el
   mismo front-end de ECMA-418-2.
-- [Teoría](/phonometry/es/reference/theory/perception/): las ecuaciones que sustentan los modelos de sonoridad.
-- Referencia de la API: [`psychoacoustics.loudness.moore_glasberg`](/phonometry/es/reference/api/psychoacoustics/moore-glasberg/), [`psychoacoustics.loudness.moore_glasberg_time`](/phonometry/es/reference/api/psychoacoustics/moore-glasberg-time/) y [`psychoacoustics.loudness.ecma`](/phonometry/es/reference/api/psychoacoustics/ecma/).
-- Teoría: [Modelos avanzados de sonoridad y calidad sonora](/phonometry/es/reference/theory/perception/#modelos-avanzados-de-sonoridad-y-calidad-sonora): qué cambian los modelos de Moore-Glasberg y de Sottek respecto al de Zwicker, y por qué los tres discrepan donde lo hacen.
+- [Teoría](/es/reference/theory/perception/): las ecuaciones que sustentan los modelos de sonoridad.
+- Referencia de la API: [`psychoacoustics.loudness.moore_glasberg`](/es/reference/api/psychoacoustics/moore-glasberg/), [`psychoacoustics.loudness.moore_glasberg_time`](/es/reference/api/psychoacoustics/moore-glasberg-time/) y [`psychoacoustics.loudness.ecma`](/es/reference/api/psychoacoustics/ecma/).
+- Teoría: [Modelos avanzados de sonoridad y calidad sonora](/es/reference/theory/perception/#modelos-avanzados-de-sonoridad-y-calidad-sonora): qué cambian los modelos de Moore-Glasberg y de Sottek respecto al de Zwicker, y por qué los tres discrepan donde lo hacen.
 
 </SeeAlso>
 

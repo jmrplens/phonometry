@@ -47,9 +47,9 @@ Esta página cubre esa cadena de principio a fin, de la interpolación NPD al
 contorno en malla de tierra, y está validada contra el workbook de referencia
 del Vol. 3 de la Doc 29 5.ª ed. La métrica de certificación de la que salen en
 última instancia esas tablas, el EPNL del Anexo 16 de la OACI, es
-[Ruido de aeronaves](/phonometry/es/aircraft/aircraft-noise/); los ingredientes
+[Ruido de aeronaves](/es/aircraft/aircraft-noise/); los ingredientes
 físicos de propagación (efecto suelo, absorción atmosférica, barreras) están
-en [Propagación exterior](/phonometry/es/environment/propagation/outdoor-propagation/).
+en [Propagación exterior](/es/environment/propagation/outdoor-propagation/).
 
 ## 1. El motor nivel-potencia-distancia
 
@@ -131,9 +131,9 @@ antes de que esta cadena las lea. Las funciones de esta página toman las
 matrices NPD tal como vienen y no tienen argumento de humedad:
 `impedance_adjustment` solo reescala los niveles por la impedancia acústica
 específica del aire. La conversión está en
-[Datos NPD para el aire del aeropuerto](/phonometry/es/aircraft/npd-atmosphere/),
+[Datos NPD para el aire del aeropuerto](/es/aircraft/npd-atmosphere/),
 cuya `revise_npd_curves` devuelve tablas recalculadas para pasarlas aquí, y el
-cableado ANP de [La base de datos ANP de flota](/phonometry/es/aircraft/anp-fleet/)
+cableado ANP de [La base de datos ANP de flota](/es/aircraft/anp-fleet/)
 la aplica por su cuenta cuando recibe `relative_humidity_percent=`.
 
 Las curvas se leen en consecuencia. Entre los marcadores el nivel cae casi
@@ -176,7 +176,7 @@ y no una preferencia de modelado, así que conviene pasar `"fuselage"` o
 `"propeller"` de forma explícita, porque una hélice no lleva corrección de
 instalación ninguna y dejar el valor por defecto le regala una directividad que
 no tiene. De dónde salen el montaje y las unidades de potencia de un tipo real
-es [La base de datos ANP de flota](/phonometry/es/aircraft/anp-fleet/).
+es [La base de datos ANP de flota](/es/aircraft/anp-fleet/).
 
 Cada segmento arranca de un nivel base leído en la tabla NPD a la potencia y a
 la distancia de ese segmento, y se corrige término a término:
@@ -544,10 +544,10 @@ no una predicción: la biblioteca interpola las tablas que se le aportan para
 un tipo de avión, no las sintetiza a partir de datos de motor. La base de
 datos ANP de EASA/EUROCONTROL de tablas medidas para tipos reales sí viene con
 phonometry y la lee [La base de datos ANP de
-flota](/phonometry/es/aircraft/anp-fleet/), que la enchufa directamente a las
+flota](/es/aircraft/anp-fleet/), que la enchufa directamente a las
 funciones de esta página, y el recálculo del Apéndice D de los datos NPD para
 un emplazamiento fuera de la envolvente del §2.5 está en
-[Datos NPD para el aire del aeropuerto](/phonometry/es/aircraft/npd-atmosphere/).
+[Datos NPD para el aire del aeropuerto](/es/aircraft/npd-atmosphere/).
 El suelo acústicamente duro que SAE AIR 5662 excluye no está implementado: la
 atenuación lateral, y con ella toda la cadena de evento único, supone suelo
 blando con hierba.
@@ -558,25 +558,25 @@ blando con hierba.
 
 ## Véase también
 
-- [Ruido de aeronaves: nivel efectivo de ruido percibido](/phonometry/es/aircraft/aircraft-noise/):
+- [Ruido de aeronaves: nivel efectivo de ruido percibido](/es/aircraft/aircraft-noise/):
   la métrica de certificación del Anexo 16 de la OACI detrás de los datos del
   avión.
-- [La base de datos ANP de flota](/phonometry/es/aircraft/anp-fleet/): las tablas
+- [La base de datos ANP de flota](/es/aircraft/anp-fleet/): las tablas
   NPD y las trayectorias por defecto que vienen incluidas para tipos de avión
   reales, y que ejecutan esta cadena sin una tabla escrita a mano.
-- [Ruido de helicópteros: el método del hemisferio](/phonometry/es/aircraft/rotorcraft-noise/):
+- [Ruido de helicópteros: el método del hemisferio](/es/aircraft/rotorcraft-noise/):
   el método de contornos de ECAC Doc 32, donde un hemisferio de ruido hace el
   papel que aquí hace la tabla NPD. Ojo con los símbolos al cruzar: la Doc 32 usa
   $\varphi$ para el acimut del hemisferio y escribe el ángulo de alabeo $\Phi$,
   mientras que la Doc 29 usa $\varphi$ para el ángulo de depresión y
   $\varepsilon$ para el alabeo. Cada una es la notación de su propia norma.
-- [Propagación exterior](/phonometry/es/environment/propagation/outdoor-propagation/): los
+- [Propagación exterior](/es/environment/propagation/outdoor-propagation/): los
   términos de atenuación de ISO 9613-2 y el efecto suelo que la atenuación
   lateral condensa en una sola curva.
-- [Niveles ambientales](/phonometry/es/environment/assessment/environmental-levels/): los
+- [Niveles ambientales](/es/environment/assessment/environmental-levels/): los
   índices de largo plazo tipo $L_\mathrm{den}$ que un estudio de aeropuerto completo
   acumula a partir de eventos únicos.
 - Referencia de la API:
-  [`aircraft.airport_noise`](/phonometry/es/reference/api/aeroacoustics/airport-noise/).
+  [`aircraft.airport_noise`](/es/reference/api/aeroacoustics/airport-noise/).
 
 </SeeAlso>

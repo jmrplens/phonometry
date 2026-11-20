@@ -29,7 +29,7 @@ no funciona ninguno, y un GIF en la CPU. `simulation.write_fdtd_animation` y
 `simulation.write_elastic_fdtd_animation` escriben una simulación FDTD
 acústica o elástica directamente en un vídeo a medida que se calcula, aquí o
 en un nodo, sin guardar sus instantáneas (secciones 4 y 5).
-[Dónde se ejecuta el trabajo pesado](/phonometry/es/simulation/where-it-runs/)
+[Dónde se ejecuta el trabajo pesado](/es/simulation/where-it-runs/)
 reúne en un sitio los dispositivos, los nodos y los codificadores.
 
 ffmpeg es un programa, no un paquete de Python, así que se instala aparte de
@@ -400,7 +400,7 @@ Las dos funciones toman el `compute=` de las funciones de simulación, así que
 una ejecución puede avanzar en una GPU; sin `compute=`, una función de
 escritura toma su ubicación del bloque `simulation.use()` más interior en el
 que se ejecuta; si no, de `PHONOMETRY_COMPUTE`, y si no, avanza con NumPy, como
-explica [Dónde se calcula una simulación](/phonometry/es/simulation/compute/).
+explica [Dónde se calcula una simulación](/es/simulation/compute/).
 En una GPU, solo llegan a esta máquina, para dibujarse, las celdas que
 conserva un fotograma, un fotograma cada vez. Con `fallback=True` y sin GPU,
 la ejecución avisa una sola vez y avanza con NumPy, las dos pasadas incluidas:
@@ -416,7 +416,7 @@ La procedencia del resultado, `provenance`, registra dónde avanzó la
 ejecución y con qué versiones: tras volver a NumPy, su `device` dice `"cpu"`
 y su `host`, `None`, de modo que una ejecución que volvió a NumPy no puede
 pasar por una en GPU ni en un nodo.
-[Dónde se calcula una simulación](/phonometry/es/simulation/compute/) lista
+[Dónde se calcula una simulación](/es/simulation/compute/) lista
 sus campos.
 
 ## 5. En un nodo
@@ -425,7 +425,7 @@ Con un `host` en su ubicación, venga de `compute=`, de un bloque
 `simulation.use()` o de `PHONOMETRY_COMPUTE` (`cupy@nas`), una función de
 escritura envía todo el trabajo a un nodo, una máquina nombrada en tu fichero
 de hosts como explica
-[Enviar una simulación a un nodo remoto](/phonometry/es/simulation/remote-node/);
+[Enviar una simulación a un nodo remoto](/es/simulation/remote-node/);
 `nas` es el nodo del fichero de hosts de esa guía:
 
 ```py
@@ -534,18 +534,18 @@ CRF se lee de otra manera de una versión mayor de SVT-AV1 a la siguiente.
 
 ## Véase también
 
-- [Dónde se calcula una simulación: NumPy, CuPy y torch](/phonometry/es/simulation/compute/):
+- [Dónde se calcula una simulación: NumPy, CuPy y torch](/es/simulation/compute/):
   los dispositivos en los que avanzan las simulaciones FDTD.
-- [Simulación de ondas FDTD 2D](/phonometry/es/simulation/fdtd-simulation/):
+- [Simulación de ondas FDTD 2D](/es/simulation/fdtd-simulation/):
   la simulación acústica y las instantáneas del campo que registra.
-- [Ondas elásticas y acoplamiento fluido-sólido](/phonometry/es/simulation/elastic-waves/):
+- [Ondas elásticas y acoplamiento fluido-sólido](/es/simulation/elastic-waves/):
   la simulación elástica y sus instantáneas.
-- [Enviar una simulación a un nodo remoto](/phonometry/es/simulation/remote-node/):
+- [Enviar una simulación a un nodo remoto](/es/simulation/remote-node/):
   el fichero de hosts que nombra un nodo, y cómo preparar uno.
-- [Leer y escribir audio de medición](/phonometry/es/io/audio-files/): los
+- [Leer y escribir audio de medición](/es/io/audio-files/): los
   archivos de audio que lee y escribe `phonometry.io`.
-- Referencia de la API: [`phonometry.io`](/phonometry/es/reference/api/io/io/),
-  [`simulation.video`](/phonometry/es/reference/api/simulation/video/).
+- Referencia de la API: [`phonometry.io`](/es/reference/api/io/io/),
+  [`simulation.video`](/es/reference/api/simulation/video/).
 
 </SeeAlso>
 

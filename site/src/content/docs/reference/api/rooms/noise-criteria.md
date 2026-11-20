@@ -50,7 +50,7 @@ Octave-band levels of a Noise Criteria curve (ANSI/ASA S12.2-2019 Table 1).
 | :--- | :--- |
 | `index` | The NC designation. Integer designations from 15 to 70 in steps of five return the tabulated curve; intermediate values are linearly interpolated band by band. |
 
-**Returns:** The 10-band curve levels, in dB, aligned with [`NC_OCTAVE_BANDS_HZ`](/phonometry/reference/api/rooms/noise-criteria/#nc_octave_bands_hz).
+**Returns:** The 10-band curve levels, in dB, aligned with [`NC_OCTAVE_BANDS_HZ`](/reference/api/rooms/noise-criteria/#nc_octave_bands_hz).
 
 **Raises**
 
@@ -163,7 +163,7 @@ fixed disclaimer.
 | Name | Description |
 | :--- | :--- |
 | `path` | Destination path of the PDF file. |
-| `metadata` | Optional [`ReportMetadata`](/phonometry/reference/api/building/insulation/#reportmetadata); `None` produces a bare assessment fiche (body, result and disclaimer only). A supplied `requirement` is read as the maximum acceptable NC rating (a lower rating is quieter, so the room passes at or below it). |
+| `metadata` | Optional [`ReportMetadata`](/reference/api/building/insulation/#reportmetadata); `None` produces a bare assessment fiche (body, result and disclaimer only). A supplied `requirement` is read as the maximum acceptable NC rating (a lower rating is quieter, so the room passes at or below it). |
 | `engine` | Rendering back end; only `"reportlab"` is supported. |
 | `verbose` | When `True`, the table adds the per-band NC contour value read by the tangency method. |
 | `language` | Fiche language: `"en"` (default, English) or `"es"` (Spanish, with a comma decimal separator). |
@@ -214,7 +214,7 @@ reads `">NC-70"` / `"<NC-15"`.
 | `levels` | Octave-band sound pressure levels, in dB. Without `frequencies` this must be the 10 bands from 16 Hz to 8000 Hz. |
 | `frequencies` | Optional band centre frequencies, in hertz, matching `levels`; a subset of the ANSI S12.2 octave bands may be supplied. |
 
-**Returns:** An [`NCResult`](/phonometry/reference/api/rooms/noise-criteria/#ncresult) with the designation and its `.plot()`.
+**Returns:** An [`NCResult`](/reference/api/rooms/noise-criteria/#ncresult) with the designation and its `.plot()`.
 
 **Raises**
 
@@ -227,7 +227,7 @@ reads `">NC-70"` / `"<NC-15"`.
 
 A room noise rating computed on fewer bands than its clause rates.
 
-Emitted by [`room_criterion`](/phonometry/reference/api/rooms/noise-criteria/#room_criterion) when the spectrum lacks one of the
+Emitted by [`room_criterion`](/reference/api/rooms/noise-criteria/#room_criterion) when the spectrum lacks one of the
 31.5 Hz to 4000 Hz octave bands ANSI/ASA S12.2-2019 clause D.4 rates,
 which the spectral-tag deviation tests then skip.
 
@@ -249,7 +249,7 @@ equals the 31.5 Hz level.
 | :--- | :--- |
 | `index` | The RC designation (value at 1000 Hz). |
 
-**Returns:** The 10-band curve levels, in dB, aligned with [`NC_OCTAVE_BANDS_HZ`](/phonometry/reference/api/rooms/noise-criteria/#nc_octave_bands_hz).
+**Returns:** The 10-band curve levels, in dB, aligned with [`NC_OCTAVE_BANDS_HZ`](/reference/api/rooms/noise-criteria/#nc_octave_bands_hz).
 
 **Raises**
 
@@ -355,7 +355,7 @@ fixed disclaimer.
 | Name | Description |
 | :--- | :--- |
 | `path` | Destination path of the PDF file. |
-| `metadata` | Optional [`ReportMetadata`](/phonometry/reference/api/building/insulation/#reportmetadata); `None` produces a bare assessment fiche (body, result and disclaimer only). A supplied `requirement` is read as the maximum acceptable RC rating (a lower rating is quieter, so the room passes at or below it). |
+| `metadata` | Optional [`ReportMetadata`](/reference/api/building/insulation/#reportmetadata); `None` produces a bare assessment fiche (body, result and disclaimer only). A supplied `requirement` is read as the maximum acceptable RC rating (a lower rating is quieter, so the room passes at or below it). |
 | `engine` | Rendering back end; only `"reportlab"` is supported. |
 | `verbose` | When `True`, the table adds the reference RC Mark II curve and the measured deviation from it. |
 | `language` | Fiche language: `"en"` (default, English) or `"es"` (Spanish, with a comma decimal separator). |
@@ -389,14 +389,14 @@ above 1000 Hz do not exceed it by more than 3 dB; rumble (`"R"`) when a
 low band exceeds by more than 5 dB; hiss (`"H"`) when a high band
 exceeds by more than 3 dB (clause D.3). When both deviations fire, the
 library tags the spectrum `"RH"`, a diagnostic extension beyond the
-clause D.3.5 letters (see [`RCResult`](/phonometry/reference/api/rooms/noise-criteria/#rcresult)).
+clause D.3.5 letters (see [`RCResult`](/reference/api/rooms/noise-criteria/#rcresult)).
 
 Clause D.4 evaluates a spectrum that includes at least the octave bands
 from 31.5 Hz through 4000 Hz; when any of those bands is missing a
-[`NoiseCriterionWarning`](/phonometry/reference/api/rooms/noise-criteria/#noisecriterionwarning) is emitted, since the absent bands are
+[`NoiseCriterionWarning`](/reference/api/rooms/noise-criteria/#noisecriterionwarning) is emitted, since the absent bands are
 skipped by the spectral-tag deviation tests. A rating outside the
 tabulated RC-25 to RC-50 family is flagged by
-[`RCResult.out_of_family`](/phonometry/reference/api/rooms/noise-criteria/#rcresultout_of_family).
+[`RCResult.out_of_family`](/reference/api/rooms/noise-criteria/#rcresultout_of_family).
 
 **Parameters**
 
@@ -405,7 +405,7 @@ tabulated RC-25 to RC-50 family is flagged by
 | `levels` | Octave-band sound pressure levels, in dB. Without `frequencies` this must be the 10 bands from 16 Hz to 8000 Hz. |
 | `frequencies` | Optional band centre frequencies, in hertz, matching `levels`. |
 
-**Returns:** An [`RCResult`](/phonometry/reference/api/rooms/noise-criteria/#rcresult) with the rating, tag and its `.plot()`.
+**Returns:** An [`RCResult`](/reference/api/rooms/noise-criteria/#rcresult) with the rating, tag and its `.plot()`.
 
 **Raises**
 

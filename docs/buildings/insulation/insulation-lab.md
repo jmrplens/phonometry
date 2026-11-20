@@ -1,6 +1,6 @@
 <!-- Written by `make llms` from site/src/content/docs/buildings/insulation/insulation-lab.mdx: edit that page and its Spanish twin, then run `make llms`. -->
 
-← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/buildings/insulation/insulation-lab/
+← [Documentation index](../../README.md) · Published at https://phonometry.dev/buildings/insulation/insulation-lab/
 
 # Laboratory Insulation Measurement
 
@@ -535,9 +535,9 @@ junction data the EN 12354 prediction consumes is measured per
   the reference-curve engine behind $R_\mathrm{w}$ and $L_\mathrm{n,w}$.
 - [Sound Power](../../devices/emission/sound-power.md): the $L_W$ methods that share
   the absorption-area machinery of the receiving room.
-- API reference: [`building.measurement.laboratory_insulation`](https://docs.jmrp.io/phonometry/reference/api/building/laboratory-insulation/).
+- API reference: [`building.measurement.laboratory_insulation`](https://phonometry.dev/reference/api/building/laboratory-insulation/).
 - Theory: [Sound insulation and absorption, measured](../../reference/theory/rooms-buildings.md#sound-insulation-and-absorption-measured-iso-16283-iso-10140-iso-717-iso-354): the derivation of R and R′ and the normalisations that separate laboratory from field.
-- [Published catalogues](https://docs.jmrp.io/phonometry/reference/catalogues/transmission-loss/): the
+- [Published catalogues](https://phonometry.dev/reference/catalogues/transmission-loss/): the
   band-by-band transmission loss and single-number ratings the books print for
   real constructions.
 

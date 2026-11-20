@@ -1,6 +1,6 @@
 <!-- Written by `make llms` from site/src/content/docs/devices/emission/workstation-emission.mdx: edit that page and its Spanish twin, then run `make llms`. -->
 
-← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/devices/emission/workstation-emission/
+← [Documentation index](../../README.md) · Published at https://phonometry.dev/devices/emission/workstation-emission/
 
 # Emission Sound Pressure at a Work Station
 

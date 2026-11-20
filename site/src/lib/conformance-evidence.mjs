@@ -296,7 +296,7 @@ function isWork(ref, work) {
  *   content entries of one language.
  * @param {string} options.bibliographyUrl Absolute URL of that language's bibliography.
  * @param {string} options.reportPath The report page's path in that language,
- *   "/phonometry/reference/conformance/".
+ *   "/reference/conformance/".
  * @param {readonly { document: string, works: readonly object[], reason: string }[]} [options.sameWorks]
  * @param {'en' | 'es'} [options.lang] The pages' language, which names an
  *   article's two authors with "&" or "y".

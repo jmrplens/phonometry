@@ -334,7 +334,7 @@ print(r.round(3))                 # [0.962 0.87  0.662 0.404 0.215 0.11 ]
 
 The library carries a second closed form for the same physics, Reynolds' as
 given by Long, in
-[`end_reflection_loss_closed_form`](/phonometry/devices/noise-control/noise-control/).
+[`end_reflection_loss_closed_form`](/devices/noise-control/noise-control/).
 It raises the same argument to 1.88 rather than to 2, and for a circular duct
 in free space the two read $10\lg[1 + (c/\pi f d)^2]$ against
 $10\lg[1 + (c/\pi f d)^{1.88}]$. They agree closely where the argument is
@@ -376,7 +376,7 @@ rectangular duct is a half wavelength across the larger dimension. The
 circular one, $0.59\,c/d$, is rounded. The exact coefficient is the first
 zero of $J_1'$ over $\pi$, which is 0.58607, so Equation (4) sits 0.67 %
 high: on the 0.4 m duct of the ISO 11691 sound source that is 505.9 Hz where
-[`circular_duct_cut_on`](/phonometry/devices/noise-control/duct-path/) gives
+[`circular_duct_cut_on`](/devices/noise-control/duct-path/) gives
 502.6 Hz. Three and a half hertz does not matter for choosing a modal filter,
 and it is worth knowing which of the two numbers is the physics.
 
@@ -630,7 +630,7 @@ standards hand their receiving side to is a separate page, and the background
 corrections, the discrete-tone check and the room qualification belong to it.
 ISO 11820, which measures a silencer in situ where the substitution trick is
 usually impossible, is not computed here either: it has
-[a page of its own](/phonometry/devices/noise-control/in-situ-noise-control/).
+[a page of its own](/devices/noise-control/in-situ-noise-control/).
 </ScopeClaim>
 </Scope>
 
@@ -638,20 +638,20 @@ usually impossible, is not computed here either: it has
 
 ## See also
 
-- [Silencers](/phonometry/devices/noise-control/silencers/): the reactive
+- [Silencers](/devices/noise-control/silencers/): the reactive
   four-pole models this measurement is the counterpart of, and the rig it is
   made on, described in full.
-- [Duct-Borne Noise: Fan to Room](/phonometry/devices/noise-control/duct-path/):
+- [Duct-Borne Noise: Fan to Room](/devices/noise-control/duct-path/):
   where a measured insertion loss goes once it has been bought.
-- [HVAC Noise the German Way (VDI 2081)](/phonometry/devices/noise-control/vdi2081-air-systems/):
+- [HVAC Noise the German Way (VDI 2081)](/devices/noise-control/vdi2081-air-systems/):
   the splitter-silencer insertion loss predicted from geometry, for comparison
   with what a laboratory would measure.
-- [Industrial noise control](/phonometry/devices/noise-control/noise-control/):
+- [Industrial noise control](/devices/noise-control/noise-control/):
   the rival closed form for the end reflection, and the air-terminal
   corrections a diffuser is selected with.
-- [Errata in published sources](/phonometry/reference/errata/): the gap Table 6
+- [Errata in published sources](/reference/errata/): the gap Table 6
   of ISO 7235 leaves at 160 Hz, and the two printed gas-law constants.
 - API reference:
-  [`noise_control.silencer_measurement`](/phonometry/reference/api/noise_control/silencer-measurement/).
+  [`noise_control.silencer_measurement`](/reference/api/noise_control/silencer-measurement/).
 
 </SeeAlso>

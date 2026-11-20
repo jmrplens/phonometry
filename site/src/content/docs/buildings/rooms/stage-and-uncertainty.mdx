@@ -128,7 +128,7 @@ and grows to 1.0 dB at $T = 8$ s: it separates cathedrals, not concert
 halls.
 
 The equations govern, and
-[the errata register](/phonometry/reference/errata/) records both.
+[the errata register](/reference/errata/) records both.
 
 ```python
 import numpy as np
@@ -239,7 +239,7 @@ one it may equal, so a room at or below 180 ms cannot have its 125 Hz
 reverberation time measured by forward analysis at all. ISO 3382-2:2008,
 7.3 NOTE relaxes the product to `B T > 4` when the filtering is
 time-reversed, which is what
-[`room_parameters`](/phonometry/buildings/rooms/room-acoustics/) does with
+[`room_parameters`](/buildings/rooms/room-acoustics/) does with
 `zero_phase=True`.
 
 ## What this guide covers
@@ -264,18 +264,18 @@ counts of Table A.2, and the reporting contract of Clause 9.2.
 
 ## See also
 
-- [Room Acoustic Parameters](/phonometry/buildings/rooms/room-acoustics/): the
+- [Room Acoustic Parameters](/buildings/rooms/room-acoustics/): the
   decay times this page puts an uncertainty on.
-- [Sound Strength G](/phonometry/buildings/rooms/sound-strength/): how loud the
+- [Sound Strength G](/buildings/rooms/sound-strength/): how loud the
   hall is, against the same source at 10 m in a free field.
-- [Spatial Impression](/phonometry/buildings/rooms/spatial-impression/): where
+- [Spatial Impression](/buildings/rooms/spatial-impression/): where
   the sound comes from, measured with a second microphone.
-- [Measuring the Room Impulse Response](/phonometry/buildings/rooms/room-impulse-response/):
+- [Measuring the Room Impulse Response](/buildings/rooms/room-impulse-response/):
   the ISO 18233 acquisition of the responses this page measures.
-- [Conformance report](/phonometry/reference/conformance/):
+- [Conformance report](/reference/conformance/):
   the closed-form window geometries and the printed coefficients the stage
   support and the Clause 7 uncertainty are validated against.
-- API reference: [`room.auditorium`](/phonometry/reference/api/rooms/auditorium/)
-  and [`room.acoustics`](/phonometry/reference/api/rooms/acoustics/).
+- API reference: [`room.auditorium`](/reference/api/rooms/auditorium/)
+  and [`room.acoustics`](/reference/api/rooms/acoustics/).
 
 </SeeAlso>

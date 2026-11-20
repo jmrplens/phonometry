@@ -1,24 +1,16 @@
 # phonometry documentation: robots.txt
 # All crawlers are welcome, including AI / generative-engine crawlers.
 #
-# NOTE: this is the subpath copy, served at /phonometry/robots.txt. Crawlers
-# only read the file at the domain root, so the authoritative one is
-# https://docs.jmrp.io/robots.txt; this copy exists so anything that does
-# fetch it is told the same thing.
-#
-# The two files are not identical, and no check here can make them so: the root
-# file lives in another repository, and the crawlers each one names can differ.
-# What they share is the policy for every path under /phonometry/, the only
-# paths this copy speaks for: both allow every crawler there, named or not, so
-# a crawler reading this copy is granted what the root file grants it here.
+# Served at https://phonometry.dev/robots.txt, the root of the host: it is the
+# file crawlers read, and it speaks for every path of the site.
 #
 # Structured context for LLMs:
-#   https://docs.jmrp.io/phonometry/llms.txt
-#   https://docs.jmrp.io/phonometry/llms-full.txt
+#   https://phonometry.dev/llms.txt
+#   https://phonometry.dev/llms-full.txt
 # and every page as Markdown, beside it at <page>/index.md, the two landing
 # pages included:
-#   https://docs.jmrp.io/phonometry/signals/levels/levels/index.md
-#   https://docs.jmrp.io/phonometry/index.md
+#   https://phonometry.dev/signals/levels/levels/index.md
+#   https://phonometry.dev/index.md
 
 User-agent: *
 Allow: /
@@ -26,7 +18,6 @@ Allow: /
 # `ai-input` and `ai-retrieval` name the same grounding/RAG use: the IETF draft
 # uses one token and contentsignals.org publishes the other, so both are
 # declared rather than betting on which vocabulary a given parser implements.
-# The root file declares the same four keys.
 Content-Signal: search=yes, ai-train=yes, ai-input=yes, ai-retrieval=yes
 
 # AI / generative-engine crawlers (explicitly welcomed for GEO).
@@ -72,4 +63,4 @@ Allow: /
 User-agent: Amazonbot
 Allow: /
 
-Sitemap: https://docs.jmrp.io/phonometry/sitemap-index.xml
+Sitemap: https://phonometry.dev/sitemap-index.xml

@@ -83,11 +83,11 @@ sound power method of this library uses.
 **The air absorption.** Table 3 prints $\alpha$ per octave band at
 15 °C and 70 %, "taken from ISO 3891", and asks for the values at the
 measured temperature and humidity when the weather differs markedly. With no
-weather given, [`plant_air_absorption_db_per_m`](/phonometry/reference/api/power/sound-power-plant/#plant_air_absorption_db_per_m-1) returns Table 3 as
+weather given, [`plant_air_absorption_db_per_m`](/reference/api/power/sound-power-plant/#plant_air_absorption_db_per_m-1) returns Table 3 as
 printed; with a temperature and a humidity it evaluates the attenuation
 coefficient of ISO 3891:1978 Annex A (SAE ARP 866A) at the one-third-octave
 band centred on each octave, through the transcription
-[`phonometry.aircraft.atmospheric_absorption.attenuation_arp866a`](/phonometry/reference/api/aeroacoustics/atmospheric-absorption/#attenuation_arp866a) that
+[`phonometry.aircraft.atmospheric_absorption.attenuation_arp866a`](/reference/api/aeroacoustics/atmospheric-absorption/#attenuation_arp866a) that
 the ECAC Doc 29 Appendix D implementation reads; there is no second copy of
 it here. ISO 3891 gives no evaluation frequency below 50 Hz, so the 31.5 Hz
 band keeps the 0 of Table 3 in any weather. At 15 °C and 70 % the formula
@@ -105,16 +105,16 @@ weather is therefore for the case 10.7 names, a weather that differs
 markedly from 15 °C and 70 %; at or near those conditions Table 3 is the
 reading the standard gives.
 
-**What is judged and what is computed.** [`plant_measurement_contour`](/phonometry/reference/api/power/sound-power-plant/#plant_measurement_contour)
+**What is judged and what is computed.** [`plant_measurement_contour`](/reference/api/power/sound-power-plant/#plant_measurement_contour)
 lays the positions on a contour given as a polygon round the plant polygon
-and measures everything 9.1 and 9.2 ask for; [`plant_sound_power`](/phonometry/reference/api/power/sound-power-plant/#plant_sound_power) runs
-clause 10 on the levels read there; [`check_plant_measurement`](/phonometry/reference/api/power/sound-power-plant/#check_plant_measurement) holds
+and measures everything 9.1 and 9.2 ask for; [`plant_sound_power`](/reference/api/power/sound-power-plant/#plant_sound_power) runs
+clause 10 on the levels read there; [`check_plant_measurement`](/reference/api/power/sound-power-plant/#check_plant_measurement) holds
 the arrangement and the readings against the requirements of clauses 1.2,
 6, 7.1, 9.1, 9.3, 9.5 and 10.2 and returns one verdict. Table 2 corrects the
 levels for background noise and Table 1 states the uncertainty of the
 method, which depends on $\bar{d}/\sqrt{S_\mathrm{p}}$ alone.
 Clause 0.2 b) uses the method to find the contribution of particular parts
-of a plant, and [`partial_plant_contributions`](/phonometry/reference/api/power/sound-power-plant/#partial_plant_contributions) combines the sound power
+of a plant, and [`partial_plant_contributions`](/reference/api/power/sound-power-plant/#partial_plant_contributions) combines the sound power
 of parts measured on their own contours into the whole and each part's share
 of it.
 
@@ -152,14 +152,14 @@ $L_{\mathrm{eq},T}$ that "does not fluctuate by more than
 ± 0,5 dB" at each position (9.5.3), a range of at most 1 dB.
 
 Four rows are advisory: the standard lets them go unmet provided the
-report says so, so they do not decide [`PlantMeasurementCheck.passes`](/phonometry/reference/api/power/sound-power-plant/#plantmeasurementcheckpasses).
+report says so, so they do not decide [`PlantMeasurementCheck.passes`](/reference/api/power/sound-power-plant/#plantmeasurementcheckpasses).
 The first is the height of 9.3 itself. 9.3 prescribes a height, not a
 lower bound, so the row holds when the microphones stand at
 $H + 0.025\sqrt{S_\mathrm{m}}$ (or 5 m) to within the ±5 % to
 which 9.2 reads $H$ and $S_\mathrm{m}$ off the plan, and a
 microphone lower (placed "as high as possible above the minimum height of
 5 m" where the height cannot be reached) or higher than that is listed in
-[`PlantMeasurementCheck.deviations`](/phonometry/reference/api/power/sound-power-plant/#plantmeasurementcheckdeviations). The others are the background
+[`PlantMeasurementCheck.deviations`](/reference/api/power/sound-power-plant/#plantmeasurementcheckdeviations). The others are the background
 "preferably more than 10 dB" below (6 b), a level more than 5 dB above
 the contour average, which 10.2 answers with a new contour or with steps
 2 and 3, and the upper end of 1.2, which the standard gives as
@@ -181,12 +181,12 @@ of clause 6 a) and c), which the standard states without a number.
 
 | Name | Description |
 | :--- | :--- |
-| `contour` | The contour, from [`plant_measurement_contour`](/phonometry/reference/api/power/sound-power-plant/#plant_measurement_contour). |
+| `contour` | The contour, from [`plant_measurement_contour`](/reference/api/power/sound-power-plant/#plant_measurement_contour). |
 | `sound_power` | The determination made on it, or `None` to judge the arrangement alone. Its geometry must be the contour's. |
 | `measurement_time_s` | The measurement time at each position, in seconds, one value or one per measured position; `None` to leave 9.5.1 unjudged. |
-| `leq_range_db` | With an integrating instrument, the range (highest less lowest) over which the $L_{\mathrm{eq},T}$ reading still moved when it was taken, in decibels: one value, or one per measured position (or per position and band); `None` to leave 9.5.3 unjudged. A sound level meter's reading is judged by [`plant_steady_reading`](/phonometry/reference/api/power/sound-power-plant/#plant_steady_reading) instead (9.5.2). |
+| `leq_range_db` | With an integrating instrument, the range (highest less lowest) over which the $L_{\mathrm{eq},T}$ reading still moved when it was taken, in decibels: one value, or one per measured position (or per position and band); `None` to leave 9.5.3 unjudged. A sound level meter's reading is judged by [`plant_steady_reading`](/reference/api/power/sound-power-plant/#plant_steady_reading) instead (9.5.2). |
 
-**Returns:** A [`PlantMeasurementCheck`](/phonometry/reference/api/power/sound-power-plant/#plantmeasurementcheck).
+**Returns:** A [`PlantMeasurementCheck`](/reference/api/power/sound-power-plant/#plantmeasurementcheck).
 
 **Raises**
 
@@ -226,7 +226,7 @@ plant (item m) of clause 12); they are not summed in here.
 | `parts` | The determinations of the parts, all over the same bands. |
 | `names` | A name per part, or `None` for "Part 1", "Part 2", ... |
 
-**Returns:** A [`PartialPlantContributions`](/phonometry/reference/api/power/sound-power-plant/#partialplantcontributions).
+**Returns:** A [`PartialPlantContributions`](/reference/api/power/sound-power-plant/#partialplantcontributions).
 
 **Raises**
 
@@ -348,7 +348,7 @@ temperature and relative humidity at the time of the measurement, which
 Table 3 asks for when they "differ markedly" from those, the coefficient
 of ISO 3891:1978 Annex A (SAE ARP 866A) that Table 3 was taken from,
 evaluated at the one-third-octave band centred on each octave by
-[`phonometry.aircraft.atmospheric_absorption.attenuation_arp866a`](/phonometry/reference/api/aeroacoustics/atmospheric-absorption/#attenuation_arp866a)
+[`phonometry.aircraft.atmospheric_absorption.attenuation_arp866a`](/reference/api/aeroacoustics/atmospheric-absorption/#attenuation_arp866a)
 (the parabolic reading of its Table 1 that reproduces ISO 3891 Table 10)
 and turned from dB/100 m into dB/m. ISO 3891 gives no evaluation frequency
 below 50 Hz, so the 31.5 Hz band keeps the 0 of Table 3.
@@ -518,7 +518,7 @@ river or a building in the way (9.1.2.4), as `omitted_positions`.
 
 The contour is not required to meet 9.1.1 here: a first contour drawn on
 the plan and found wanting is how the procedure starts (9.1.2.3, NOTE 6).
-[`check_plant_measurement`](/phonometry/reference/api/power/sound-power-plant/#check_plant_measurement) says whether it does.
+[`check_plant_measurement`](/reference/api/power/sound-power-plant/#check_plant_measurement) says whether it does.
 
 **Parameters**
 
@@ -526,11 +526,11 @@ the plan and found wanting is how the procedure starts (9.1.2.3, NOTE 6).
 | :--- | :--- |
 | `plant_outline_m` | Vertices of the plant area, in metres. |
 | `contour_m` | Vertices of the measurement contour round it, in metres. |
-| `characteristic_height_m` | $H$, in metres, from [`plant_characteristic_height_m`](/phonometry/reference/api/power/sound-power-plant/#plant_characteristic_height_m). |
+| `characteristic_height_m` | $H$, in metres, from [`plant_characteristic_height_m`](/reference/api/power/sound-power-plant/#plant_characteristic_height_m). |
 | `n_positions` | Positions in the layout, or `None` for the fewest 9.1.1 c) allows. |
 | `omitted_positions` | Indices into the layout of positions not measured; needs `n_positions`, since the indices refer to it. |
 
-**Returns:** A [`PlantMeasurementContour`](/phonometry/reference/api/power/sound-power-plant/#plantmeasurementcontour).
+**Returns:** A [`PlantMeasurementContour`](/reference/api/power/sound-power-plant/#plantmeasurementcontour).
 
 **Raises**
 
@@ -594,7 +594,7 @@ or 5 m, whichever is the greater.
 
 Where this height cannot be reached for practical reasons, 9.3 asks for
 the microphone as high as possible above 5 m and for the fact to be
-reported; [`check_plant_measurement`](/phonometry/reference/api/power/sound-power-plant/#check_plant_measurement) reports it.
+reported; [`check_plant_measurement`](/reference/api/power/sound-power-plant/#check_plant_measurement) reports it.
 
 **Parameters**
 
@@ -639,13 +639,13 @@ levels are energy-averaged per band (step 1); where one exceeds the
 average by more than 5 dB, 10.2 asks for a contour further from the
 plant, and where that is not practicable replaces each such level by the
 average plus 5 dB and averages again (steps 2 and 3), which is done here
-with a [`SoundPowerWarning`](/phonometry/reference/api/power/sound-power/#soundpowerwarning), the result recording which levels were
+with a [`SoundPowerWarning`](/reference/api/power/sound-power/#soundpowerwarning), the result recording which levels were
 replaced. Steps 4 to 7 add the area, proximity, microphone and air
 absorption terms, step 8 sums them into $L_W$ and step 9 into
 $L_{W\mathrm{A}}$; the module docstring writes them out.
 
 The geometry is the one 9.2 measures on the plot plan, to within ±5 %;
-[`PlantMeasurementContour.sound_power`](/phonometry/reference/api/power/sound-power-plant/#plantmeasurementcontoursound_power) supplies it from polygons.
+[`PlantMeasurementContour.sound_power`](/reference/api/power/sound-power-plant/#plantmeasurementcontoursound_power) supplies it from polygons.
 
 **Parameters**
 
@@ -660,10 +660,10 @@ The geometry is the one 9.2 measures on the plot plan, to within ±5 %;
 | `plant_area_m2` | $S_\mathrm{p}$, in square metres. |
 | `background_levels` | The background alone at each position and band, in decibels, or `None` where the plant could not be stopped. |
 | `directional_microphone_angle_deg` | $\theta$, the angle at which a directional microphone has lost 3 dB, in degrees, one value or one per band; `None` (default) for an omnidirectional microphone. |
-| `temperature_c` | Air temperature at the measurement, in °C, or `None` for Table 3 at 15 °C. Pass it, with the humidity, only when the weather differs markedly from 15 °C and 70 %: the formula does not return Table 3 at those conditions, and passing them gives $0.0074\sqrt{S_\mathrm{m}}$ dB more at 8 kHz than omitting them (see [`plant_air_absorption_db_per_m`](/phonometry/reference/api/power/sound-power-plant/#plant_air_absorption_db_per_m-1)). |
+| `temperature_c` | Air temperature at the measurement, in °C, or `None` for Table 3 at 15 °C. Pass it, with the humidity, only when the weather differs markedly from 15 °C and 70 %: the formula does not return Table 3 at those conditions, and passing them gives $0.0074\sqrt{S_\mathrm{m}}$ dB more at 8 kHz than omitting them (see [`plant_air_absorption_db_per_m`](/reference/api/power/sound-power-plant/#plant_air_absorption_db_per_m-1)). |
 | `relative_humidity_percent` | Relative humidity at the measurement, in percent, or `None` for Table 3 at 70 %. |
 
-**Returns:** A [`PlantSoundPowerResult`](/phonometry/reference/api/power/sound-power-plant/#plantsoundpowerresult).
+**Returns:** A [`PlantSoundPowerResult`](/reference/api/power/sound-power-plant/#plantsoundpowerresult).
 
 **Raises**
 
@@ -685,7 +685,7 @@ the noise as steady for the standard, and the level is the arithmetic
 mean of the maximum and the minimum over the observation. A wider swing
 makes the noise non-steady, and 9.5.2 then asks for an integrating
 instrument instead (9.5.3), whose steady $L_{\mathrm{eq},T}$ is
-the level used; `leq_range_db` of [`check_plant_measurement`](/phonometry/reference/api/power/sound-power-plant/#check_plant_measurement)
+the level used; `leq_range_db` of [`check_plant_measurement`](/reference/api/power/sound-power-plant/#check_plant_measurement)
 judges that one.
 
 **Parameters**
@@ -717,7 +717,7 @@ requirements of the standard.
 
 | Name | Description |
 | :--- | :--- |
-| `requirements` | One [`PlantRequirement`](/phonometry/reference/api/power/sound-power-plant/#plantrequirement) per requirement that could be evaluated, in the order of the clauses. |
+| `requirements` | One [`PlantRequirement`](/reference/api/power/sound-power-plant/#plantrequirement) per requirement that could be evaluated, in the order of the clauses. |
 
 ### PlantMeasurementCheck.deviations
 
@@ -776,7 +776,7 @@ The requirement with this key.
 
 | Name | Description |
 | :--- | :--- |
-| `key` | Its [`PlantRequirement.key`](/phonometry/reference/api/power/sound-power-plant/#plantrequirement). |
+| `key` | Its [`PlantRequirement.key`](/reference/api/power/sound-power-plant/#plantrequirement). |
 
 **Returns:** The requirement.
 
@@ -950,7 +950,7 @@ PlantMeasurementContour.sound_power(
 
 Run clause 10 on the levels read at the measured positions of this contour.
 
-[`plant_sound_power`](/phonometry/reference/api/power/sound-power-plant/#plant_sound_power) with the geometry of the contour; see there.
+[`plant_sound_power`](/reference/api/power/sound-power-plant/#plant_sound_power) with the geometry of the contour; see there.
 
 **Parameters**
 
@@ -964,13 +964,13 @@ Run clause 10 on the levels read at the measured positions of this contour.
 | `temperature_c` | Air temperature at the measurement, in °C, or `None` for Table 3. |
 | `relative_humidity_percent` | Relative humidity at the measurement, in percent, or `None` for Table 3. |
 
-**Returns:** A [`PlantSoundPowerResult`](/phonometry/reference/api/power/sound-power-plant/#plantsoundpowerresult).
+**Returns:** A [`PlantSoundPowerResult`](/reference/api/power/sound-power-plant/#plantsoundpowerresult).
 
 **Raises**
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | for a number of rows that is not the number of measured positions, or any error of [`plant_sound_power`](/phonometry/reference/api/power/sound-power-plant/#plant_sound_power). |
+| ValueError | for a number of rows that is not the number of measured positions, or any error of [`plant_sound_power`](/reference/api/power/sound-power-plant/#plant_sound_power). |
 | TypeError | if `levels` holds a text or a value that is not a real number. |
 
 ## PlantRequirement
@@ -1004,7 +1004,7 @@ One requirement of ISO 8297 held against the measurement.
 | `limit` | The limit, in `unit`. |
 | `unit` | The unit of the value and the limit, `""` for a count. |
 | `holds` | Whether the requirement is met. |
-| `advisory` | `True` where the standard allows the requirement to go unmet provided the report says so (the microphone height of 9.3, the preferred background margin of 6 b), the contour average of 10.2, the "approximately 320 m" of 1.2); such a requirement does not decide [`PlantMeasurementCheck.passes`](/phonometry/reference/api/power/sound-power-plant/#plantmeasurementcheckpasses). |
+| `advisory` | `True` where the standard allows the requirement to go unmet provided the report says so (the microphone height of 9.3, the preferred background margin of 6 b), the contour average of 10.2, the "approximately 320 m" of 1.2); such a requirement does not decide [`PlantMeasurementCheck.passes`](/reference/api/power/sound-power-plant/#plantmeasurementcheckpasses). |
 | `tolerance` | For `"="`, how far the value may stand from the limit, in `unit`; 0 for the other comparisons. |
 
 ### PlantRequirement.margin

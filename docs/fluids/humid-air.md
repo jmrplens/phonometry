@@ -1,6 +1,6 @@
 <!-- Written by `make llms` from site/src/content/docs/fluids/humid-air.mdx: edit that page and its Spanish twin, then run `make llms`. -->
 
-← [Documentation index](../README.md) · Published at https://docs.jmrp.io/phonometry/fluids/humid-air/
+← [Documentation index](../README.md) · Published at https://phonometry.dev/fluids/humid-air/
 
 # Humid air
 

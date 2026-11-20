@@ -9,8 +9,8 @@ Measurement uncertainty in building acoustics (ISO 12999-1:2020).
 
 This module supplies the **measurement uncertainty** of the sound-insulation
 quantities produced by the field/lab/prediction modules
-([`phonometry.building.measurement.insulation`](/phonometry/reference/api/building/insulation/), [`phonometry.building.measurement.laboratory_insulation`](/phonometry/reference/api/building/laboratory-insulation/),
-[`phonometry.building.prediction.simplified_model`](/phonometry/reference/api/building/simplified-model/)). ISO 12999-1 does not re-measure anything;
+([`phonometry.building.measurement.insulation`](/reference/api/building/insulation/), [`phonometry.building.measurement.laboratory_insulation`](/reference/api/building/laboratory-insulation/),
+[`phonometry.building.prediction.simplified_model`](/reference/api/building/simplified-model/)). ISO 12999-1 does not re-measure anything;
 it tabulates *standard uncertainties* `u` derived from inter-laboratory tests
 (ISO 5725) and prescribes how to expand and combine them.
 
@@ -65,7 +65,7 @@ assess_requirement_conformity(
 Does a measured value meet a requirement beyond its uncertainty? (Clause 8).
 
 The expanded uncertainty is worked with the one-sided coverage factor of
-Table 8 ([`insulation_coverage_factor`](/phonometry/reference/api/building/uncertainty/#insulation_coverage_factor) with `one_sided=True`) and
+Table 8 ([`insulation_coverage_factor`](/reference/api/building/uncertainty/#insulation_coverage_factor) with `one_sided=True`) and
 then taken off the best estimate for a minimum,
 $y - U > Y_\mathrm{required}$ (Formula (5)), or added to it for a
 maximum, $y + U < Y_\mathrm{required}$ (Formula (4)): an apparent
@@ -81,7 +81,7 @@ impact level `L'n,w` provably below its maximum.
 | `required_rating` | $Y_\mathrm{required}$, in dB. |
 | `bound` | `"minimum"` (Formula (5)) or `"maximum"` (Formula (4)). |
 
-**Returns:** The verdict, as a [`RequirementConformity`](/phonometry/reference/api/building/uncertainty/#requirementconformity).
+**Returns:** The verdict, as a [`RequirementConformity`](/reference/api/building/uncertainty/#requirementconformity).
 
 **Raises**
 
@@ -224,7 +224,7 @@ probability; a minimum of $k = 1$ is enforced (Clause 8).
 | Name | Description |
 | :--- | :--- |
 | `u` | Standard uncertainty `u`, in dB (must be non-negative). |
-| `coverage` | Coverage probability as a fraction (see [`insulation_coverage_factor`](/phonometry/reference/api/building/uncertainty/#insulation_coverage_factor)). |
+| `coverage` | Coverage probability as a fraction (see [`insulation_coverage_factor`](/reference/api/building/uncertainty/#insulation_coverage_factor)). |
 | `one_sided` | Use the one-sided coverage factor (conformity checks). |
 
 **Raises**
@@ -454,18 +454,18 @@ uncertain_value(
 
 Attach the ISO 12999-1 expanded uncertainty to a single-number rating.
 
-Convenience wrapper combining [`single_number_uncertainty`](/phonometry/reference/api/building/uncertainty/#single_number_uncertainty),
-[`insulation_coverage_factor`](/phonometry/reference/api/building/uncertainty/#insulation_coverage_factor) and [`insulation_expanded_uncertainty`](/phonometry/reference/api/building/uncertainty/#insulation_expanded_uncertainty) into an
-[`UncertainValue`](/phonometry/reference/api/building/uncertainty/#uncertainvalue) ($y \pm U$) without modifying the rating
+Convenience wrapper combining [`single_number_uncertainty`](/reference/api/building/uncertainty/#single_number_uncertainty),
+[`insulation_coverage_factor`](/reference/api/building/uncertainty/#insulation_coverage_factor) and [`insulation_expanded_uncertainty`](/reference/api/building/uncertainty/#insulation_expanded_uncertainty) into an
+[`UncertainValue`](/reference/api/building/uncertainty/#uncertainvalue) ($y \pm U$) without modifying the rating
 dataclasses. For conformity checks pass `one_sided=True` and read
-[`UncertainValue.lower`](/phonometry/reference/api/building/uncertainty/#uncertainvaluelower) / [`UncertainValue.upper`](/phonometry/reference/api/building/uncertainty/#uncertainvalueupper) (Formulae 4/5).
+[`UncertainValue.lower`](/reference/api/building/uncertainty/#uncertainvaluelower) / [`UncertainValue.upper`](/reference/api/building/uncertainty/#uncertainvalueupper) (Formulae 4/5).
 
 **Parameters**
 
 | Name | Description |
 | :--- | :--- |
 | `value` | Best estimate `y` (e.g. `Rw` in dB). |
-| `quantity` | Rating descriptor (see [`single_number_uncertainty`](/phonometry/reference/api/building/uncertainty/#single_number_uncertainty)). One of `"r_w"`, `"r_w+c_50_3150"`, `"r_w+c_50_5000"`, `"r_w+c_100_3150"`, `"r_w+c_100_5000"`, `"r_w+ctr_50_3150"`, `"r_w+ctr_50_5000"`, `"r_w+ctr_100_3150"`, `"r_w+ctr_100_5000"`, `"ln_w"`, `"ln_w+ci"`, `"delta_lw"`, `"rprime_w"`, `"r_prime_w"`, `"dn_w"`, `"dnw"`, `"dnt_w"`, `"dntw"`, `"lprime_n_w"`, `"lnprime_w"`, `"lnt_w"`, `"lprime_nt_w"` or `"delta_l_w"`. |
+| `quantity` | Rating descriptor (see [`single_number_uncertainty`](/reference/api/building/uncertainty/#single_number_uncertainty)). One of `"r_w"`, `"r_w+c_50_3150"`, `"r_w+c_50_5000"`, `"r_w+c_100_3150"`, `"r_w+c_100_5000"`, `"r_w+ctr_50_3150"`, `"r_w+ctr_50_5000"`, `"r_w+ctr_100_3150"`, `"r_w+ctr_100_5000"`, `"ln_w"`, `"ln_w+ci"`, `"delta_lw"`, `"rprime_w"`, `"r_prime_w"`, `"dn_w"`, `"dnw"`, `"dnt_w"`, `"dntw"`, `"lprime_n_w"`, `"lnprime_w"`, `"lnt_w"`, `"lprime_nt_w"` or `"delta_l_w"`. |
 | `situation` | Measurement situation `"A"`, `"B"` or `"C"` (Clause 5.2). |
 | `coverage` | Coverage probability as a fraction. |
 | `one_sided` | Use the one-sided coverage factor. |

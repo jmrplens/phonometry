@@ -1,6 +1,6 @@
 <!-- Written by `make llms` from site/src/content/docs/simulation/compute.mdx: edit that page and its Spanish twin, then run `make llms`. -->
 
-← [Documentation index](../README.md) · Published at https://docs.jmrp.io/phonometry/simulation/compute/
+← [Documentation index](../README.md) · Published at https://phonometry.dev/simulation/compute/
 
 # Where a simulation runs: NumPy, CuPy and torch
 
@@ -474,10 +474,10 @@ decimated.plot(kind="snapshot")
   the same run on another machine over SSH, with a `host` in the request.
 - [Writing animations and FDTD runs to video](../io/videos.md): the two
   writers that take the same `compute=` and write a run straight to a video.
-- API reference: [`simulation.compute`](https://docs.jmrp.io/phonometry/reference/api/simulation/compute/),
-  [`simulation.fdtd`](https://docs.jmrp.io/phonometry/reference/api/simulation/fdtd/),
-  [`simulation.elastic_fdtd`](https://docs.jmrp.io/phonometry/reference/api/simulation/elastic-fdtd/),
-  [`simulation.video`](https://docs.jmrp.io/phonometry/reference/api/simulation/video/).
+- API reference: [`simulation.compute`](https://phonometry.dev/reference/api/simulation/compute/),
+  [`simulation.fdtd`](https://phonometry.dev/reference/api/simulation/fdtd/),
+  [`simulation.elastic_fdtd`](https://phonometry.dev/reference/api/simulation/elastic-fdtd/),
+  [`simulation.video`](https://phonometry.dev/reference/api/simulation/video/).
 
 ## Quick answers
 

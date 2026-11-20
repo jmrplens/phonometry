@@ -55,11 +55,11 @@ Long prints the first constant as `6.33`; the closed form with the same
 $Q = 2$ and `-6 dB` that yield his second constant `3.16` gives
 `6.31`, which is also what his own conversion of the result ("6.3 or more
 square metres (68 sq ft)") implies (see `docs/ERRATA.md`). This module
-computes both constants from [`speech_to_noise_ratio`](/phonometry/reference/api/rooms/crowd-noise/#speech_to_noise_ratio), so they stay
+computes both constants from [`speech_to_noise_ratio`](/reference/api/rooms/crowd-noise/#speech_to_noise_ratio), so they stay
 mutually consistent.
 
 His prose also puts the direct field at an adjacent table 3 m away at
-"about 54 dB", where [`speech_direct_level`](/phonometry/reference/api/rooms/crowd-noise/#speech_direct_level) with the same
+"about 54 dB", where [`speech_direct_level`](/reference/api/rooms/crowd-noise/#speech_direct_level) with the same
 $Q = 2$
 and $L_W = 70$ dB gives 52.5 dB. That one is left as printed rather
 than
@@ -75,7 +75,7 @@ predictor of the final level.
 
 This is a *design* model for the self-generated noise of an occupied room. The
 measurement standard for the spatial decay of speech in an open-plan office is
-ISO 3382-3, implemented separately in [`phonometry.room.open_plan`](/phonometry/reference/api/rooms/open-plan/): that
+ISO 3382-3, implemented separately in [`phonometry.room.open_plan`](/reference/api/rooms/open-plan/): that
 one derives `D2,S`, the distraction distance and the privacy distance from
 measured levels along a line of workstations, and predicts nothing.
 
@@ -163,10 +163,10 @@ Equation (17.50) at the listener across the table.
 | `absorption_areas` | Total equivalent absorption areas `A` of the room to compare, m2 (scalar or 1-D). |
 | `talkers` | Occupancy axis `N`, the number of simultaneous talkers; default the integers `1..20`. |
 | `distance` | Talker-to-listener distance `r`, m (default 1.2 m, Long's cross-table distance). |
-| `sound_power_level` | Sound power level `Lw` of one talker, dB re 1 pW (default [`NORMAL_VOICE_POWER_LEVEL`](/phonometry/reference/api/rooms/crowd-noise/#normal_voice_power_level)). |
-| `directivity` | Talker directivity factor `Q` (default [`TALKER_DIRECTIVITY`](/phonometry/reference/api/rooms/crowd-noise/#talker_directivity)). |
+| `sound_power_level` | Sound power level `Lw` of one talker, dB re 1 pW (default [`NORMAL_VOICE_POWER_LEVEL`](/reference/api/rooms/crowd-noise/#normal_voice_power_level)). |
+| `directivity` | Talker directivity factor `Q` (default [`TALKER_DIRECTIVITY`](/reference/api/rooms/crowd-noise/#talker_directivity)). |
 
-**Returns:** A [`CrowdNoiseResult`](/phonometry/reference/api/rooms/crowd-noise/#crowdnoiseresult).
+**Returns:** A [`CrowdNoiseResult`](/reference/api/rooms/crowd-noise/#crowdnoiseresult).
 
 **Raises**
 
@@ -219,7 +219,7 @@ counted per occupied table).
 | :--- | :--- |
 | `talkers` | Number `N` of simultaneous talkers (scalar or array, at least 1). |
 | `absorption_area` | Total equivalent absorption area `A` of the room, metric sabins (m2) (scalar or array). |
-| `sound_power_level` | Sound power level `Lw` of one talker, dB re 1 pW (default [`NORMAL_VOICE_POWER_LEVEL`](/phonometry/reference/api/rooms/crowd-noise/#normal_voice_power_level)). |
+| `sound_power_level` | Sound power level `Lw` of one talker, dB re 1 pW (default [`NORMAL_VOICE_POWER_LEVEL`](/reference/api/rooms/crowd-noise/#normal_voice_power_level)). |
 
 **Returns:** The self-generated reverberant level, dB; a `float` when `talkers` and `absorption_area` are both numbers; an array of their broadcast shape when one is a sequence or an array, a zero-dimensional one included.
 
@@ -257,7 +257,7 @@ Self-generated noise of an occupied room versus occupancy and absorption.
 | `distance` | Talker-to-listener distance `r`, m. |
 | `sound_power_level` | Sound power level of one talker, dB re 1 pW. |
 | `directivity` | Talker directivity factor `Q`. |
-| `communication_level` | Noise level at which the speech-to-noise ratio falls to [`COMMUNICATION_SNR_DB`](/phonometry/reference/api/rooms/crowd-noise/#communication_snr_db), dB: above it, cross-table conversation stops working. |
+| `communication_level` | Noise level at which the speech-to-noise ratio falls to [`COMMUNICATION_SNR_DB`](/reference/api/rooms/crowd-noise/#communication_snr_db), dB: above it, cross-table conversation stops working. |
 
 ### CrowdNoiseResult.plot()
 
@@ -343,8 +343,8 @@ across the table receives.
 | Name | Description |
 | :--- | :--- |
 | `distance` | Talker-to-listener distance `r`, m (scalar or array). |
-| `sound_power_level` | Talker sound power level `Lw`, dB re 1 pW (default [`NORMAL_VOICE_POWER_LEVEL`](/phonometry/reference/api/rooms/crowd-noise/#normal_voice_power_level)). |
-| `directivity` | Talker directivity factor `Q` (default [`TALKER_DIRECTIVITY`](/phonometry/reference/api/rooms/crowd-noise/#talker_directivity)). |
+| `sound_power_level` | Talker sound power level `Lw`, dB re 1 pW (default [`NORMAL_VOICE_POWER_LEVEL`](/reference/api/rooms/crowd-noise/#normal_voice_power_level)). |
+| `directivity` | Talker directivity factor `Q` (default [`TALKER_DIRECTIVITY`](/reference/api/rooms/crowd-noise/#talker_directivity)). |
 
 **Returns:** The direct-field sound pressure level, dB; a `float` for a number; an array for a sequence or an array, a zero-dimensional one included.
 

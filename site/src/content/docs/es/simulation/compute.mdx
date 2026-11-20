@@ -31,9 +31,9 @@ uno, cómo elige su dispositivo un script entero o un proceso de trabajo, qué
 pasa cuando el dispositivo no está, cómo registra un resultado dónde se
 calculó y qué promete la biblioteca sobre los números en cada dispositivo. La
 física, las fuentes y los contornos son los mismos en todos; se explican en
-[Simulación de ondas FDTD 2D](/phonometry/es/simulation/fdtd-simulation/) y en
-[Ondas elásticas y acoplamiento fluido-sólido](/phonometry/es/simulation/elastic-waves/).
-[Dónde se ejecuta el trabajo pesado](/phonometry/es/simulation/where-it-runs/)
+[Simulación de ondas FDTD 2D](/es/simulation/fdtd-simulation/) y en
+[Ondas elásticas y acoplamiento fluido-sólido](/es/simulation/elastic-waves/).
+[Dónde se ejecuta el trabajo pesado](/es/simulation/where-it-runs/)
 reúne en un sitio los dispositivos, los nodos y los codificadores.
 
 ## 1. Pedir un dispositivo: `Compute`
@@ -47,7 +47,7 @@ ejecución puede volver a NumPy:
 | `device_index` | qué GPU, para `"cupy"` y `"torch:cuda"` | `0` |
 | `dtype` | `"float64"` o `"float32"` | `"float64"` |
 | `fallback` | calcular con NumPy aquí, con un aviso, cuando el dispositivo no está disponible o, con un `host`, cuando falla el nodo o la conexión, en lugar de lanzar un error | `False` |
-| `host` | el nodo al que va la ejecución, por su nombre en el fichero de hosts; véase [Enviar una simulación a un nodo remoto](/phonometry/es/simulation/remote-node/) | `None` (esta máquina) |
+| `host` | el nodo al que va la ejecución, por su nombre en el fichero de hosts; véase [Enviar una simulación a un nodo remoto](/es/simulation/remote-node/) | `None` (esta máquina) |
 | `timeout_s` | lo máximo que puede durar una ejecución en un nodo, en segundos; solo con un `host` | el del fichero de hosts o, si no, sin límite |
 
 El registro es una petición. Construirlo no importa ni sondea nada, así que un
@@ -193,7 +193,7 @@ registro que devuelve una ejecución aquí, y las que escriben un vídeo traen
 también el vídeo. `FDTD2D` y `ElasticFDTD2D`, construidos directamente,
 avanzan en este proceso y lanzan `ValueError` ante una ubicación que nombre
 un host, venga de donde venga.
-[Enviar una simulación a un nodo remoto](/phonometry/es/simulation/remote-node/)
+[Enviar una simulación a un nodo remoto](/es/simulation/remote-node/)
 explica cómo nombrar un nodo y prepararlo.
 
 **Hilos y procesos.** `use()` guarda su registro en una variable de contexto.
@@ -244,7 +244,7 @@ por qué:
 - `ComputeRemoteError`, una subclase de `RuntimeError`, para una ejecución
   enviada a un nodo con un `host`, cuando falla la conexión o el nodo,
   incluido el dispositivo de allí;
-  [Enviar una simulación a un nodo remoto](/phonometry/es/simulation/remote-node/)
+  [Enviar una simulación a un nodo remoto](/es/simulation/remote-node/)
   explica qué significa cada fallo.
 
 Con `fallback=True` no se lanza ninguno de ellos. La ejecución avisa con
@@ -437,7 +437,7 @@ paso a float32, unas siete cifras significativas.
 
 **Las sumas de la sonda de contorno.** Las sumas DFT acumuladas de una sonda
 de contorno
-([sección 4 de la guía acústica](/phonometry/es/simulation/fdtd-simulation/#4-del-campo-cercano-al-campo-lejano))
+([sección 4 de la guía acústica](/es/simulation/fdtd-simulation/#4-del-campo-cercano-al-campo-lejano))
 añaden un término por paso durante miles de pasos, y el redondeo de una suma
 crece con su número de términos. Se acumulan en float64 en todo dispositivo
 que tenga float64, también cuando los campos avanzan en float32; en MPS, que
@@ -512,20 +512,20 @@ escenarios. El resto de phonometry calcula solo con NumPy.
 
 ## Véase también
 
-- [Simulación de ondas FDTD 2D](/phonometry/es/simulation/fdtd-simulation/):
+- [Simulación de ondas FDTD 2D](/es/simulation/fdtd-simulation/):
   el motor acústico, sus fuentes, sondas y contornos, y cómo dimensionar una
   ejecución.
-- [Ondas elásticas y acoplamiento fluido-sólido](/phonometry/es/simulation/elastic-waves/):
+- [Ondas elásticas y acoplamiento fluido-sólido](/es/simulation/elastic-waves/):
   el motor elástico, que toma el mismo `compute=`.
-- [Enviar una simulación a un nodo remoto](/phonometry/es/simulation/remote-node/):
+- [Enviar una simulación a un nodo remoto](/es/simulation/remote-node/):
   la misma ejecución en otra máquina por SSH, con un `host` en la petición.
-- [Escribir animaciones y simulaciones FDTD en vídeo](/phonometry/es/io/videos/):
+- [Escribir animaciones y simulaciones FDTD en vídeo](/es/io/videos/):
   las dos funciones que toman el mismo `compute=` y escriben una ejecución
   directamente en un vídeo.
-- Referencia de la API: [`simulation.compute`](/phonometry/es/reference/api/simulation/compute/),
-  [`simulation.fdtd`](/phonometry/es/reference/api/simulation/fdtd/),
-  [`simulation.elastic_fdtd`](/phonometry/es/reference/api/simulation/elastic-fdtd/),
-  [`simulation.video`](/phonometry/es/reference/api/simulation/video/).
+- Referencia de la API: [`simulation.compute`](/es/reference/api/simulation/compute/),
+  [`simulation.fdtd`](/es/reference/api/simulation/fdtd/),
+  [`simulation.elastic_fdtd`](/es/reference/api/simulation/elastic-fdtd/),
+  [`simulation.video`](/es/reference/api/simulation/video/).
 
 </SeeAlso>
 

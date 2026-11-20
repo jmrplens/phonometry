@@ -1,6 +1,6 @@
 <!-- Written by `make llms` from site/src/content/docs/materials/resilient/dynamic-stiffness.mdx: edit that page and its Spanish twin, then run `make llms`. -->
 
-← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/materials/resilient/dynamic-stiffness/
+← [Documentation index](../../README.md) · Published at https://phonometry.dev/materials/resilient/dynamic-stiffness/
 
 # Dynamic stiffness of resilient materials
 
@@ -567,7 +567,7 @@ weighted single number, is
   reported there as $\sigma$ in Pa·s/m².
 - [Resilient layers overview](index.md): where this
   measurement sits among the materials guides.
-- API reference: [`materials.resilient.dynamic_stiffness`](https://docs.jmrp.io/phonometry/reference/api/materials/dynamic-stiffness/).
+- API reference: [`materials.resilient.dynamic_stiffness`](https://phonometry.dev/reference/api/materials/dynamic-stiffness/).
 - Theory: [Point mobilities and radiation efficiency](../../reference/theory/vibration.md#point-mobilities-and-radiation-efficiency-cremer-5-hopkins-29): the mass-spring resonance the EN 29052-1 rig measures, seen as a mobility.
 
 ## References

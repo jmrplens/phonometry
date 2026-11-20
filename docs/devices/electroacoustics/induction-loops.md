@@ -1,6 +1,6 @@
 <!-- Written by `make llms` from site/src/content/docs/devices/electroacoustics/induction-loops.mdx: edit that page and its Spanish twin, then run `make llms`. -->
 
-← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/devices/electroacoustics/induction-loops/
+← [Documentation index](../../README.md) · Published at https://phonometry.dev/devices/electroacoustics/induction-loops/
 
 # Audio-Frequency Induction Loops (IEC 60118-4)
 
@@ -682,8 +682,8 @@ plt.show()
 - [Frequency Weighting (A, C, Z)](../../signals/levels/weighting.md): the
   A-weighting of IEC 61672-1 that the noise measurements of clause 7 and 10.4
   use.
-- API reference: [`electroacoustics.induction_loop`](https://docs.jmrp.io/phonometry/reference/api/electroacoustics/induction-loop/)
-  and [`electroacoustics.induction_loop_components`](https://docs.jmrp.io/phonometry/reference/api/electroacoustics/induction-loop-components/).
+- API reference: [`electroacoustics.induction_loop`](https://phonometry.dev/reference/api/electroacoustics/induction-loop/)
+  and [`electroacoustics.induction_loop_components`](https://phonometry.dev/reference/api/electroacoustics/induction-loop-components/).
 
 ## References
 

@@ -1,4 +1,4 @@
-// The `_headers` file of the phonometry.dev preview.
+// The `_headers` file of phonometry.dev.
 //
 // On docs.jmrp.io the response headers come from zone Transform Rules and
 // from docs-edge. The preview has no script on any request, so every header
@@ -50,8 +50,8 @@ export const TEXT_TYPES = Object.freeze([
 /**
  * Refuses a base path or an origin that would write wrong patterns.
  *
- * @param {string} prefix `/phonometry`, or `` at the root.
- * @param {string} origin `https://docs.jmrp.io`, with no trailing slash.
+ * @param {string} prefix `` at the root, or a path such as `/docs`.
+ * @param {string} origin `https://phonometry.dev`, with no trailing slash.
  */
 export function checkPrefixAndOrigin(prefix, origin) {
 	if (prefix !== '' && (!prefix.startsWith('/') || prefix.endsWith('/'))) {

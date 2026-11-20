@@ -1,6 +1,6 @@
 <!-- Written by `make llms` from site/src/content/docs/devices/broadcast/index.mdx: edit that page and its Spanish twin, then run `make llms`. -->
 
-← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/devices/broadcast/
+← [Documentation index](../../README.md) · Published at https://phonometry.dev/devices/broadcast/
 
 # Broadcast
 

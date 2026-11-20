@@ -35,15 +35,15 @@ no ISO standard for PA; the formula is exact, verified against a
 hand-computed worked tuple, and matches the combination implemented by the
 open SQAT reference implementation.
 
-[`psychoacoustic_annoyance`](/phonometry/reference/api/psychoacoustics/annoyance/#psychoacoustic_annoyance) evaluates the model from the four quantities
-directly. [`psychoacoustic_annoyance_from_signal`](/phonometry/reference/api/psychoacoustics/annoyance/#psychoacoustic_annoyance_from_signal) is a convenience that
+[`psychoacoustic_annoyance`](/reference/api/psychoacoustics/annoyance/#psychoacoustic_annoyance) evaluates the model from the four quantities
+directly. [`psychoacoustic_annoyance_from_signal`](/reference/api/psychoacoustics/annoyance/#psychoacoustic_annoyance_from_signal) is a convenience that
 derives them from a calibrated pressure signal using the library's existing
 models: N5/S from ISO 532-1 Zwicker loudness and DIN 45692 sharpness, R from
 ECMA-418-2 roughness and F from
-[`fluctuation_strength`](/phonometry/reference/api/psychoacoustics/fluctuation-strength/#fluctuation_strength). That composite
+[`fluctuation_strength`](/reference/api/psychoacoustics/fluctuation-strength/#fluctuation_strength). That composite
 mixes model families (Zwicker N5/S, Sottek R, Osses F); the original PA model
 was calibrated with Zwicker-family sensations, so the signal convenience is an
-engineering estimate, while [`psychoacoustic_annoyance`](/phonometry/reference/api/psychoacoustics/annoyance/#psychoacoustic_annoyance) is the exact model.
+engineering estimate, while [`psychoacoustic_annoyance`](/reference/api/psychoacoustics/annoyance/#psychoacoustic_annoyance) is the exact model.
 
 > Auto-generated from the source docstrings by `scripts/generate_api_docs.py` (`make api-docs`). Do not edit by hand.
 
@@ -69,12 +69,12 @@ $S \le 1.75$ acum.
 
 | Name | Description |
 | :--- | :--- |
-| `n5` | Percentile loudness `N5`, in sone (the loudness exceeded 5 % of the time; [`n5`](/phonometry/reference/api/psychoacoustics/zwicker/#zwickerloudness)). |
+| `n5` | Percentile loudness `N5`, in sone (the loudness exceeded 5 % of the time; [`n5`](/reference/api/psychoacoustics/zwicker/#zwickerloudness)). |
 | `sharpness` | Sharpness `S`, in acum (DIN 45692). |
 | `fluctuation_strength` | Fluctuation strength `F`, in vacil. |
 | `roughness` | Roughness `R`, in asper (ECMA-418-2). |
 
-**Returns:** A [`PsychoacousticAnnoyanceResult`](/phonometry/reference/api/psychoacoustics/annoyance/#psychoacousticannoyanceresult).
+**Returns:** A [`PsychoacousticAnnoyanceResult`](/reference/api/psychoacoustics/annoyance/#psychoacousticannoyanceresult).
 
 **Raises**
 
@@ -98,34 +98,34 @@ psychoacoustic_annoyance_from_signal(
 Psychoacoustic annoyance from a calibrated pressure signal (convenience).
 
 Derives the four sensations from the library's models and combines them
-with [`psychoacoustic_annoyance`](/phonometry/reference/api/psychoacoustics/annoyance/#psychoacoustic_annoyance): `N5` from the ISO 532-1 Zwicker
+with [`psychoacoustic_annoyance`](/reference/api/psychoacoustics/annoyance/#psychoacoustic_annoyance): `N5` from the ISO 532-1 Zwicker
 time-varying loudness, `S` from DIN 45692 sharpness, `R` from
 ECMA-418-2 roughness and `F` from
-[`fluctuation_strength`](/phonometry/reference/api/psychoacoustics/fluctuation-strength/#fluctuation_strength).
+[`fluctuation_strength`](/reference/api/psychoacoustics/fluctuation-strength/#fluctuation_strength).
 
 :::note
 This composite mixes model families (Zwicker `N5`/`S`, Sottek
 `R`, Osses `F`); the PA model was calibrated with Zwicker-family
 sensations, so treat the signal convenience as an engineering estimate.
 For exact, reproducible results pass the four quantities to
-[`psychoacoustic_annoyance`](/phonometry/reference/api/psychoacoustics/annoyance/#psychoacoustic_annoyance) directly.
+[`psychoacoustic_annoyance`](/reference/api/psychoacoustics/annoyance/#psychoacoustic_annoyance) directly.
 
 `field` selects the sound field for the loudness, sharpness and
 roughness front-ends; the fluctuation strength `F` is always computed
 in the free field, because the Osses 2016 model has no diffuse-field
-variant (see [`fluctuation_strength`](/phonometry/reference/api/psychoacoustics/fluctuation-strength/#fluctuation_strength)).
+variant (see [`fluctuation_strength`](/reference/api/psychoacoustics/fluctuation-strength/#fluctuation_strength)).
 :::
 
 **Parameters**
 
 | Name | Description |
 | :--- | :--- |
-| `x` | Calibrated sound-pressure signal (1-D), in Pa after `calibration_factor`. Accepts a [`phonometry.io.Signal`](/phonometry/reference/api/io/io/#signal), which is where that calibration comes from without arithmetic: all four sensations are level-dependent models, so an uncalibrated record is read as if one digital unit were one pascal and every one of them comes out wrong by however far that is from true. |
-| `fs` | Sample rate, in Hz. Required for a bare array; a [`Signal`](/phonometry/reference/api/io/io/#signal) brings its own, and an explicit value that disagrees with it raises. |
+| `x` | Calibrated sound-pressure signal (1-D), in Pa after `calibration_factor`. Accepts a [`phonometry.io.Signal`](/reference/api/io/io/#signal), which is where that calibration comes from without arithmetic: all four sensations are level-dependent models, so an uncalibrated record is read as if one digital unit were one pascal and every one of them comes out wrong by however far that is from true. |
+| `fs` | Sample rate, in Hz. Required for a bare array; a [`Signal`](/reference/api/io/io/#signal) brings its own, and an explicit value that disagrees with it raises. |
 | `field` | `'free'` (default) or `'diffuse'` sound field for the loudness/sharpness/roughness front-ends (`F` is always free-field). |
 | `calibration_factor` | Digital-units-to-Pa factor applied to `x`. An explicit value wins over the one a Signal carries. |
 
-**Returns:** A [`PsychoacousticAnnoyanceResult`](/phonometry/reference/api/psychoacoustics/annoyance/#psychoacousticannoyanceresult).
+**Returns:** A [`PsychoacousticAnnoyanceResult`](/reference/api/psychoacoustics/annoyance/#psychoacousticannoyanceresult).
 
 **Raises**
 

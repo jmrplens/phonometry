@@ -41,12 +41,12 @@ fichas de predicción de ambos. Las partes tercera y cuarta de la misma
 familia, que cruzan el cerramiento del edificio en lugar de un tabique
 interior, están en
 [Aislamiento acústico de
-fachadas](/phonometry/es/buildings/insulation/facade-insulation/).
+fachadas](/es/buildings/insulation/facade-insulation/).
 Las magnitudes medidas con las que se contrasta el modelo viven en
-[Medición del aislamiento en campo (ISO 16283)](/phonometry/es/buildings/insulation/insulation-field/);
+[Medición del aislamiento en campo (ISO 16283)](/es/buildings/insulation/insulation-field/);
 los datos de entrada de laboratorio vienen de
 [Medición del aislamiento en
-laboratorio](/phonometry/es/buildings/insulation/insulation-lab/).
+laboratorio](/es/buildings/insulation/insulation-lab/).
 
 ## ¿Cómo predigo el aislamiento acústico con EN 12354 en Python?
 
@@ -338,7 +338,7 @@ además un campo de aplicación que el texto de 2000 dejaba implícito
 (apartado 4.3.1): el modelo simplificado se restringe a 100 Hz–3150 Hz y, para
 construcciones ligeras, a la vía del nivel de impactos normalizado por flancos
 medido $L_{\mathrm{nf},ij}$ de la Fórmula (17). La vía por bandas de frecuencia de
-[Predicción detallada por bandas](/phonometry/es/buildings/design/detailed-prediction/)
+[Predicción detallada por bandas](/es/buildings/design/detailed-prediction/)
 está anclada en las ediciones de 2017 de principio a fin.
 
 **Qué son las dos masas de entrada y dónde se acaba la forma cerrada.** El
@@ -433,10 +433,10 @@ $D_{\mathrm{n}T} = R' + 10\log_{10}(0{,}32\,V/S_\mathrm{s})$, expuesta como
 impresa con $V/(3S)$ 53,8 dB, y ambas redondean a $D_{\mathrm{n}T,\mathrm{w}} = 54$ dB).
 
 Las tres guías de aislamiento cierran un bucle: el
-[laboratorio](/phonometry/es/buildings/insulation/insulation-lab/) mide $R$ y $K_{ij}$
+[laboratorio](/es/buildings/insulation/insulation-lab/) mide $R$ y $K_{ij}$
 elemento a elemento y unión a unión, este modelo los ensambla en un $R'_\mathrm{w}$
 predicho, y la
-[medición en campo](/phonometry/es/buildings/insulation/insulation-field/) comprueba el
+[medición en campo](/es/buildings/insulation/insulation-field/) comprueba el
 resultado construido. Cuando el valor medido queda muy por debajo de la
 predicción, busca un defecto de ejecución en la trayectoria dominante de la que informa
 el modelo: un puente rígido a través de una unión resiliente, un trasdosado
@@ -496,7 +496,7 @@ aritmética.
   transmisión entre recintos que comparten el elemento separador, y las
   trayectorias secundarias que cruzan más de una unión se desprecian. Cuando la
   fuente está a varias uniones de distancia, la
-  [vía de EN 12354-5](/phonometry/es/buildings/design/installed-structure-borne/)
+  [vía de EN 12354-5](/es/buildings/design/installed-structure-borne/)
   encadena en su lugar los índices de unión.
 
 Y la desviación típica de unos 2 dB no es una tolerancia sobre tu respuesta. El
@@ -523,7 +523,7 @@ sustituir por un $K_{ij}$ sin ese paso. Y la independencia con la frecuencia val
 de la frecuencia puede ser mayor. La salida son los datos medidos: ISO 10848-4
 para uniones pesadas (que el propio Anexo E.3.1 recomienda recopilar a escala
 nacional) y el
-[laboratorio de flancos](/phonometry/es/buildings/insulation/flanking-lab/)
+[laboratorio de flancos](/es/buildings/insulation/flanking-lab/)
 cuando la unión es ligera, no homogénea o simplemente no está en el catálogo.
 
 ### Informe de predicción EN 12354 (`.report()`)
@@ -612,7 +612,7 @@ potencia acústica que una fuente interior radia al exterior. Ambas se
 construyen sobre la misma suma de factores de transmisión ponderada por
 superficie usada arriba, y ambas están cubiertas, junto a la medición de
 ISO 16283-3 con la que se contrastan, en
-[Aislamiento acústico de fachadas](/phonometry/es/buildings/insulation/facade-insulation/).
+[Aislamiento acústico de fachadas](/es/buildings/insulation/facade-insulation/).
 
 ## Qué cubre esta guía
 
@@ -637,7 +637,7 @@ Ambos resultados escriben una ficha de predicción con `.report()`.
 <ScopeClaim status="not-covered" label="No cubierto">
 Los modelos *detallados* por banda de ambas partes son el asunto de
 [Predicción detallada por bandas (ISO
-12354)](/phonometry/es/buildings/design/detailed-prediction/): la misma norma
+12354)](/es/buildings/design/detailed-prediction/): la misma norma
 ejecutada banda a banda, con los datos de laboratorio de elemento y de unión
 convertidos a sus valores in situ antes de formar las trayectorias. Usa el
 modelo simplificado de aquí cuando solo conozcas las magnitudes globales
@@ -647,14 +647,14 @@ trayectoria fija qué banda. Los propios datos de los elementos ($R_\mathrm{w}$,
 $\Delta R_\mathrm{w}$, $\Delta L_\mathrm{w}$, masa por unidad de superficie) se toman como
 dados, de datos de laboratorio o de las estimaciones de ley de masas de
 [Predicción del aislamiento de
-paneles](/phonometry/es/buildings/design/panel-sound-insulation/). El resto de
+paneles](/es/buildings/design/panel-sound-insulation/). El resto de
 la familia está cubierto por sus propias guías: la EN 12354-3 y la EN 12354-4
 a través del cerramiento del edificio en [Aislamiento acústico de
-fachadas](/phonometry/es/buildings/insulation/facade-insulation/), los
+fachadas](/es/buildings/insulation/facade-insulation/), los
 equipamientos de la EN 12354-5 en [Ruido estructural
-instalado](/phonometry/es/buildings/design/installed-structure-borne/) y el
+instalado](/es/buildings/design/installed-structure-borne/) y el
 modelo de absorción de la EN 12354-6 en [Absorción acústica en
-recintos](/phonometry/es/buildings/rooms/enclosed-space-absorption/).
+recintos](/es/buildings/rooms/enclosed-space-absorption/).
 </ScopeClaim>
 </Scope>
 
@@ -662,33 +662,33 @@ recintos](/phonometry/es/buildings/rooms/enclosed-space-absorption/).
 
 ## Véase también
 
-- [Aislamiento acústico de fachadas](/phonometry/es/buildings/insulation/facade-insulation/):
+- [Aislamiento acústico de fachadas](/es/buildings/insulation/facade-insulation/):
   las predicciones de EN 12354-3 y EN 12354-4 a través del cerramiento del
   edificio, con la medición de ISO 16283-3 con la que se contrastan.
-- [Predicción detallada por bandas (ISO 12354)](/phonometry/es/buildings/design/detailed-prediction/):
+- [Predicción detallada por bandas (ISO 12354)](/es/buildings/design/detailed-prediction/):
   las mismas dos partes ejecutadas banda a banda, con la conversión in situ de
   los datos de elemento y de unión que el modelo de número único de aquí toma
   como dados.
-- [Transmisión de onda de flexión en uniones de placas](/phonometry/es/vibration/structural/junction-transmission/):
+- [Transmisión de onda de flexión en uniones de placas](/es/vibration/structural/junction-transmission/):
   el enfoque ondulatorio que hay detrás de $K_{ij}$, con el índice representado
   frente a la relación de espesores de placa para las uniones en X, T y L del
   catálogo de más arriba.
-- [Medición del aislamiento en campo (ISO 16283)](/phonometry/es/buildings/insulation/insulation-field/):
+- [Medición del aislamiento en campo (ISO 16283)](/es/buildings/insulation/insulation-field/):
   las magnitudes in situ medidas con las que se contrasta la predicción.
-- [Índices globales de aislamiento (ISO 717)](/phonometry/es/buildings/insulation/insulation-ratings/):
+- [Índices globales de aislamiento (ISO 717)](/es/buildings/insulation/insulation-ratings/):
   el motor de curva de referencia tras los $R'_\mathrm{w}$ y $L'_\mathrm{n,w}$ previstos.
-- [Medición del aislamiento en laboratorio](/phonometry/es/buildings/insulation/insulation-lab/):
+- [Medición del aislamiento en laboratorio](/es/buildings/insulation/insulation-lab/):
   los índices de ISO 10140 que consume el modelo.
-- [Transmisión por flancos en laboratorio (ISO 10848)](/phonometry/es/buildings/insulation/flanking-lab/):
+- [Transmisión por flancos en laboratorio (ISO 10848)](/es/buildings/insulation/flanking-lab/):
   el índice de reducción vibratoria de unión $K_{ij}$ medido que consume
   el modelo.
-- [Absorción acústica en recintos (EN 12354-6)](/phonometry/es/buildings/rooms/enclosed-space-absorption/):
+- [Absorción acústica en recintos (EN 12354-6)](/es/buildings/rooms/enclosed-space-absorption/):
   el miembro de absorción de la misma familia EN 12354.
-- [Rigidez dinámica de materiales resilientes (EN 29052-1)](/phonometry/es/materials/resilient/dynamic-stiffness/):
+- [Rigidez dinámica de materiales resilientes (EN 29052-1)](/es/materials/resilient/dynamic-stiffness/):
   la $s'$ que alimenta el término de suelo flotante de EN 12354-2.
-- Referencia de la API: [`building.prediction.simplified_model`](/phonometry/es/reference/api/building/simplified-model/) y [`building.prediction.facade`](/phonometry/es/reference/api/building/facade/).
-- Teoría: [Aislamiento acústico y absorción, predichos](/phonometry/es/reference/theory/rooms-buildings/#aislamiento-acustico-y-absorcion-predichos-en-12354-1-2-6-bies-cremer-hopkins): el modelo de trayectos de EN 12354 y las magnitudes de transmisión que suma.
-- [Catálogos publicados](/phonometry/es/reference/catalogues/transmission-loss/): la
+- Referencia de la API: [`building.prediction.simplified_model`](/es/reference/api/building/simplified-model/) y [`building.prediction.facade`](/es/reference/api/building/facade/).
+- Teoría: [Aislamiento acústico y absorción, predichos](/es/reference/theory/rooms-buildings/#aislamiento-acustico-y-absorcion-predichos-en-12354-1-2-6-bies-cremer-hopkins): el modelo de trayectos de EN 12354 y las magnitudes de transmisión que suma.
+- [Catálogos publicados](/es/reference/catalogues/transmission-loss/): la
   pérdida por transmisión banda a banda y los índices globales que imprimen
   los libros para construcciones reales.
 

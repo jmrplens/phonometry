@@ -36,9 +36,9 @@ Dos sonidos igual de sonoros pueden diferir aún en cuán *afilados*, cuán
 métricas de calidad sonora que complementan a la sonoridad: la agudeza (*sharpness*,
 DIN 45692) y la tonalidad, la aspereza y la intensidad de fluctuación de
 ECMA-418-2 del modelo de Sottek. La sonoridad está en
-[Sonoridad](/phonometry/es/perception/psychoacoustics/loudness/); la de ECMA-418-2, que
+[Sonoridad](/es/perception/psychoacoustics/loudness/); la de ECMA-418-2, que
 comparte el mismo front-end auditivo, está en
-[Sonoridad avanzada](/phonometry/es/perception/psychoacoustics/advanced-loudness/).
+[Sonoridad avanzada](/es/perception/psychoacoustics/advanced-loudness/).
 
 Las cuatro métricas forman una familia: una única señal calibrada se reparte
 entre dos etapas auditivas, y cada rama se ancla a un sonido de referencia
@@ -61,7 +61,7 @@ sentado o 1,50 m de pie, o al menos cuatro posiciones de observador a 1,00 m de
 distancia y 1,50 m de altura), con el ruido de fondo medido con el equipo
 apagado y un calibrador aplicado antes y después. Las posiciones son las mismas
 de las que parte la
-[guía de tonos prominentes](/phonometry/es/perception/psychoacoustics/tone-prominence/),
+[guía de tonos prominentes](/es/perception/psychoacoustics/tone-prominence/),
 que las enuncia enteras:
 
 <ThemeImage
@@ -361,7 +361,7 @@ estacionario, la señal contiene tonalidades prominentes cuando el valor único
 $T$ de la fórmula (63) supera 0,4 tu_HMS. El ensayo de un tono discreto frente
 al ruido que lo rodea es la relación tono-ruido y la relación de prominencia de
 ECMA-418-1 de
-[Tonos discretos prominentes](/phonometry/es/perception/psychoacoustics/tone-prominence/).
+[Tonos discretos prominentes](/es/perception/psychoacoustics/tone-prominence/).
 
 **¿Es audible el sonido?** El cuarto criterio de ECMA-418-2, los 0,01 sone_HMS
 del apartado 5.1.9 que guarda `psychoacoustics.AUDIBILITY_THRESHOLD_SONE_HMS`,
@@ -376,7 +376,7 @@ con los bloques fijos del apartado 5.1.5.2 y el relleno inicial del apartado
 apartado 5.1.9 no nombra ninguna segmentación, así que leer el criterio sobre
 aquella en la que se apoya la sonoridad del apartado 8 es una elección de la
 biblioteca.
-[Sonoridad avanzada](/phonometry/es/perception/psychoacoustics/advanced-loudness/)
+[Sonoridad avanzada](/es/perception/psychoacoustics/advanced-loudness/)
 muestra cómo se forma el total y por qué la comparación se detiene en
 `last_evaluated_block`. Ninguna función aplica el criterio. El apartado 6.1.1
 añade que el método de tonalidad no necesita una criba de audibilidad previa,
@@ -657,14 +657,14 @@ el percentil 90 de $F(l_{50})$), `specific_fluctuation_strength`
 Los modelos de intensidad de fluctuación de Fastl y Zwicker (forma cerrada
 para ruido de banda ancha AM y el modelo de señal de Osses 2016) están en
 [Molestia
-psicoacústica](/phonometry/es/perception/psychoacoustics/psychoacoustic-annoyance/);
+psicoacústica](/es/perception/psychoacoustics/psychoacoustic-annoyance/);
 esta métrica del apartado 9 es la contraparte normativa del modelo de
 Sottek.
 
-Consulta [Tonos discretos prominentes](/phonometry/es/perception/psychoacoustics/tone-prominence/)
+Consulta [Tonos discretos prominentes](/es/perception/psychoacoustics/tone-prominence/)
 para los veredictos TNR/PR de ECMA-418-1, el
-[índice de transmisión del habla](/phonometry/es/perception/speech/speech-transmission/)
-para el STI/STIPA, y [Teoría](/phonometry/es/reference/theory/perception/) para la
+[índice de transmisión del habla](/es/perception/speech/speech-transmission/)
+para el STI/STIPA, y [Teoría](/es/reference/theory/perception/) para la
 matemática subyacente.
 
 ## Qué cubre esta guía
@@ -690,9 +690,9 @@ canal por separado. La ponderación de entropía opcional del apartado 7.1.6
 necesita una señal externa de velocidad de giro y queda fuera, igual que el
 ajuste de ±0,25 % de $c_\mathrm{F}$ que permite la nota al pie 47. La sonoridad de
 ECMA-418-2 que comparte este front-end está en [Sonoridad
-avanzada](/phonometry/es/perception/psychoacoustics/advanced-loudness/), y los
+avanzada](/es/perception/psychoacoustics/advanced-loudness/), y los
 modelos de intensidad de fluctuación de Fastl y Zwicker, en [Molestia
-psicoacústica](/phonometry/es/perception/psychoacoustics/psychoacoustic-annoyance/).
+psicoacústica](/es/perception/psychoacoustics/psychoacoustic-annoyance/).
 </ScopeClaim>
 </Scope>
 
@@ -700,8 +700,8 @@ psicoacústica](/phonometry/es/perception/psychoacoustics/psychoacoustic-annoyan
 
 ## Véase también
 
-- Referencia de la API: [`psychoacoustics.quality.sharpness`](/phonometry/es/reference/api/psychoacoustics/sharpness/), [`psychoacoustics`: tonality (Sottek model)](/phonometry/es/reference/api/psychoacoustics/tonality-ecma/), [`psychoacoustics`: roughness (Sottek model)](/phonometry/es/reference/api/psychoacoustics/roughness-ecma/) y [`psychoacoustics`: fluctuation strength (Sottek model)](/phonometry/es/reference/api/psychoacoustics/fluctuation-strength-ecma/).
-- Teoría: [Modelos avanzados de sonoridad y calidad sonora](/phonometry/es/reference/theory/perception/#modelos-avanzados-de-sonoridad-y-calidad-sonora): el patrón de sonoridad específica sobre el que se construyen la agudeza, la aspereza y la intensidad de fluctuación.
+- Referencia de la API: [`psychoacoustics.quality.sharpness`](/es/reference/api/psychoacoustics/sharpness/), [`psychoacoustics`: tonality (Sottek model)](/es/reference/api/psychoacoustics/tonality-ecma/), [`psychoacoustics`: roughness (Sottek model)](/es/reference/api/psychoacoustics/roughness-ecma/) y [`psychoacoustics`: fluctuation strength (Sottek model)](/es/reference/api/psychoacoustics/fluctuation-strength-ecma/).
+- Teoría: [Modelos avanzados de sonoridad y calidad sonora](/es/reference/theory/perception/#modelos-avanzados-de-sonoridad-y-calidad-sonora): el patrón de sonoridad específica sobre el que se construyen la agudeza, la aspereza y la intensidad de fluctuación.
 
 </SeeAlso>
 

@@ -80,7 +80,7 @@ room shape has to go and gather a level-4 description of it.
 | `fitting_detail` | The level of Table 2 the fittings are described at. |
 | `source_detail` | The level of Table 3 the sources are described at. |
 
-**Returns:** The verdict, as a [`PredictionDetailCheck`](/phonometry/reference/api/rooms/workroom-prediction/#predictiondetailcheck).
+**Returns:** The verdict, as a [`PredictionDetailCheck`](/reference/api/rooms/workroom-prediction/#predictiondetailcheck).
 
 **Raises**
 
@@ -146,7 +146,7 @@ One category of Table 4, with the detail levels of Table E.1.
 | :--- | :--- |
 | `category` | `"1"`, `"2a"`, `"2b"` or `"2c"`. |
 
-**Returns:** The row, as a [`PredictionMethod`](/phonometry/reference/api/rooms/workroom-prediction/#predictionmethod).
+**Returns:** The row, as a [`PredictionMethod`](/reference/api/rooms/workroom-prediction/#predictionmethod).
 
 **Raises**
 
@@ -278,7 +278,7 @@ The contributions are added on an energy basis, with whatever was already
 there added the same way. Annex B reads each contribution off the spatial
 sound distribution curve of the room at the distance between the machine
 and the workstation, except at a machine's own workstation, where
-[`workstation_level`](/phonometry/reference/api/rooms/workroom-prediction/#workstation_level) gives it from the declared emission values.
+[`workstation_level`](/reference/api/rooms/workroom-prediction/#workstation_level) gives it from the declared emission values.
 
 **Parameters**
 
@@ -395,7 +395,7 @@ declared with plus what the room adds to it.
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | As [`workstation_level_increase`](/phonometry/reference/api/rooms/workroom-prediction/#workstation_level_increase). |
+| ValueError | As [`workstation_level_increase`](/reference/api/rooms/workroom-prediction/#workstation_level_increase). |
 
 ## workstation_level_increase
 

@@ -7,13 +7,13 @@ sidebar:
 
 Where an FDTD simulation runs: the device, its dtype and what to do if absent.
 
-A [`Compute`](/phonometry/reference/api/simulation/compute/#compute) record is a request. Building one imports and probes
+A [`Compute`](/reference/api/simulation/compute/#compute) record is a request. Building one imports and probes
 nothing, so a record naming a GPU can be written on a machine without one;
 the engine checks the request when it is built. The request comes from the
-`compute=` argument, else from the innermost [`use`](/phonometry/reference/api/simulation/compute/#use) block, else from
+`compute=` argument, else from the innermost [`use`](/reference/api/simulation/compute/#use) block, else from
 the `PHONOMETRY_COMPUTE` environment variable, else it is NumPy in float64.
 
-[`use`](/phonometry/reference/api/simulation/compute/#use) holds its record in a context variable. Whether a new thread or
+[`use`](/reference/api/simulation/compute/#use) holds its record in a context variable. Whether a new thread or
 process sees it depends on how it is started; give a worker its placement
 through `compute=` or `PHONOMETRY_COMPUTE`.
 
@@ -22,10 +22,10 @@ never at import. Its grammar is `device[:index][@host][,option...]` with the
 options `float32`, `float64` and `fallback`: `cupy`, `cupy:1`,
 `torch:cuda:1,fallback`, `torch:mps,float32`, `cupy@nas`. A host is a
 name in the hosts file (see the guide on remote nodes); only the two
-simulation functions, [`fdtd_simulation`](/phonometry/reference/api/simulation/fdtd/#fdtd_simulation) and
-[`elastic_fdtd_simulation`](/phonometry/reference/api/simulation/elastic-fdtd/#elastic_fdtd_simulation), and the two video
-writers, [`write_fdtd_animation`](/phonometry/reference/api/simulation/video/#write_fdtd_animation) and
-[`write_elastic_fdtd_animation`](/phonometry/reference/api/simulation/video/#write_elastic_fdtd_animation), run on one.
+simulation functions, [`fdtd_simulation`](/reference/api/simulation/fdtd/#fdtd_simulation) and
+[`elastic_fdtd_simulation`](/reference/api/simulation/elastic-fdtd/#elastic_fdtd_simulation), and the two video
+writers, [`write_fdtd_animation`](/reference/api/simulation/video/#write_fdtd_animation) and
+[`write_elastic_fdtd_animation`](/reference/api/simulation/video/#write_elastic_fdtd_animation), run on one.
 
 > Auto-generated from the source docstrings by `scripts/generate_api_docs.py` (`make api-docs`). Do not edit by hand.
 
@@ -52,8 +52,8 @@ Where an FDTD simulation steps, in which dtype, and whether it may fall back.
 | `device` | The array library and device: `"cpu"` (NumPy, the default), `"cupy"` (an NVIDIA GPU through CuPy), `"torch:cpu"`, `"torch:cuda"` or `"torch:mps"` (Apple silicon, float32 only). |
 | `device_index` | Which GPU, for `"cupy"` and `"torch:cuda"`. |
 | `dtype` | `"float64"` (default) or `"float32"`. |
-| `fallback` | Run on NumPy here, with a [`ComputeFallbackWarning`](/phonometry/reference/api/simulation/compute/#computefallbackwarning), when the device is not available or, for a run with a `host`, when the node or the connection fails, instead of raising. |
-| `host` | The node the run goes to, by its name in the hosts file, or `None` (default) to run on this machine. Only [`fdtd_simulation`](/phonometry/reference/api/simulation/fdtd/#fdtd_simulation), [`elastic_fdtd_simulation`](/phonometry/reference/api/simulation/elastic-fdtd/#elastic_fdtd_simulation) and the two video writers, [`write_fdtd_animation`](/phonometry/reference/api/simulation/video/#write_fdtd_animation) and [`write_elastic_fdtd_animation`](/phonometry/reference/api/simulation/video/#write_elastic_fdtd_animation), run on a node; an engine built here refuses a host. |
+| `fallback` | Run on NumPy here, with a [`ComputeFallbackWarning`](/reference/api/simulation/compute/#computefallbackwarning), when the device is not available or, for a run with a `host`, when the node or the connection fails, instead of raising. |
+| `host` | The node the run goes to, by its name in the hosts file, or `None` (default) to run on this machine. Only [`fdtd_simulation`](/reference/api/simulation/fdtd/#fdtd_simulation), [`elastic_fdtd_simulation`](/reference/api/simulation/elastic-fdtd/#elastic_fdtd_simulation) and the two video writers, [`write_fdtd_animation`](/reference/api/simulation/video/#write_fdtd_animation) and [`write_elastic_fdtd_animation`](/reference/api/simulation/video/#write_elastic_fdtd_animation), run on a node; an engine built here refuses a host. |
 | `timeout_s` | The longest a remote run may take, from connecting to the result [s], or `None` for the hosts file's value (no limit when the file names none). Only with a `host`. |
 
 **Raises**
@@ -160,4 +160,4 @@ sees it depends on how it is started; give a worker its placement through
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | for anything but a [`Compute`](/phonometry/reference/api/simulation/compute/#compute). |
+| TypeError | for anything but a [`Compute`](/reference/api/simulation/compute/#compute). |

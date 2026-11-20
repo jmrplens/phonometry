@@ -1,6 +1,6 @@
 <!-- Written by `make llms` from site/src/content/docs/simulation/fdtd-simulation.mdx: edit that page and its Spanish twin, then run `make llms`. -->
 
-← [Documentation index](../README.md) · Published at https://docs.jmrp.io/phonometry/simulation/fdtd-simulation/
+← [Documentation index](../README.md) · Published at https://phonometry.dev/simulation/fdtd-simulation/
 
 # 2D FDTD wave simulation
 
@@ -680,7 +680,7 @@ The far-field chain is what finally closes the metadiffuser loop end to
 end: the Table-1 panel of the paper (every slit, neck and cavity meshed
 at 0.5 mm) is driven to steady state by a plane wave, captured on a contour,
 and transformed against the
-[`metadiffuser_polar_response`](https://docs.jmrp.io/phonometry/reference/api/materials/metadiffuser/)
+[`metadiffuser_polar_response`](https://phonometry.dev/reference/api/materials/metadiffuser/)
 model (TMM + Fraunhofer) of the materials module. That is the library-side
 counterpart of the TMM-vs-FEM comparison the metadiffuser paper itself
 reports, small discrepancies included: the transfer-matrix model
@@ -1151,10 +1151,10 @@ res = simulation.write_fdtd_animation(
 - [Conformance report](../CONFORMANCE.md): the box mode and
   the free-field arrival of section 6, and the ripple and level of the
   near-to-far-field monopole of section 4, run there.
-- API reference: [`simulation.fdtd`](https://docs.jmrp.io/phonometry/reference/api/simulation/fdtd/),
-  [`simulation.ntff`](https://docs.jmrp.io/phonometry/reference/api/simulation/ntff/),
-  [`simulation.compute`](https://docs.jmrp.io/phonometry/reference/api/simulation/compute/),
-  [`simulation.video`](https://docs.jmrp.io/phonometry/reference/api/simulation/video/).
+- API reference: [`simulation.fdtd`](https://phonometry.dev/reference/api/simulation/fdtd/),
+  [`simulation.ntff`](https://phonometry.dev/reference/api/simulation/ntff/),
+  [`simulation.compute`](https://phonometry.dev/reference/api/simulation/compute/),
+  [`simulation.video`](https://phonometry.dev/reference/api/simulation/video/).
 
 ## Quick answers
 

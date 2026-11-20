@@ -65,8 +65,8 @@ $$
 
   where `Q` is the standardized normal exceedance (Eq. (5.250)).
 
-[`stationarity_test`](/phonometry/reference/api/metrology/data-qualification/#stationarity_test) and [`trend_test`](/phonometry/reference/api/metrology/data-qualification/#trend_test) implement the first block,
-[`level_crossing_rate`](/phonometry/reference/api/metrology/data-qualification/#level_crossing_rate) and [`peak_statistics`](/phonometry/reference/api/metrology/data-qualification/#peak_statistics) the second, each
+[`stationarity_test`](/reference/api/metrology/data-qualification/#stationarity_test) and [`trend_test`](/reference/api/metrology/data-qualification/#trend_test) implement the first block,
+[`level_crossing_rate`](/reference/api/metrology/data-qualification/#level_crossing_rate) and [`peak_statistics`](/reference/api/metrology/data-qualification/#peak_statistics) the second, each
 comparing the counts measured on the record with the closed-form
 expectations.
 
@@ -108,12 +108,12 @@ miss crossings between samples.
 
 | Name | Description |
 | :--- | :--- |
-| `x` | Signal, 1-D. Accepts a [`phonometry.io.Signal`](/phonometry/reference/api/io/io/#signal), whose calibration is applied to the samples, which means `levels` has to be given in the same units, so pascals rather than digital ones, and `sigma` comes out in Pa. The crossing rates themselves are scale-free. |
-| `fs` | Sample rate, in Hz. Required for a bare array; a [`Signal`](/phonometry/reference/api/io/io/#signal) brings its own, and an explicit value that disagrees with it raises instead of silently winning. |
+| `x` | Signal, 1-D. Accepts a [`phonometry.io.Signal`](/reference/api/io/io/#signal), whose calibration is applied to the samples, which means `levels` has to be given in the same units, so pascals rather than digital ones, and `sigma` comes out in Pa. The crossing rates themselves are scale-free. |
+| `fs` | Sample rate, in Hz. Required for a bare array; a [`Signal`](/reference/api/io/io/#signal) brings its own, and an explicit value that disagrees with it raises instead of silently winning. |
 | `levels` | Crossing levels in signal units about the mean (default: 13 levels evenly spaced over +-3 RMS). |
-| `nperseg` | Welch segment length for the spectral moments (default: the [`power_spectral_density`](/phonometry/reference/api/signals/spectra/#power_spectral_density) default). |
+| `nperseg` | Welch segment length for the spectral moments (default: the [`power_spectral_density`](/reference/api/signals/spectra/#power_spectral_density) default). |
 
-**Returns:** A [`LevelCrossingResult`](/phonometry/reference/api/metrology/data-qualification/#levelcrossingresult).
+**Returns:** A [`LevelCrossingResult`](/reference/api/metrology/data-qualification/#levelcrossingresult).
 
 **Raises**
 
@@ -200,7 +200,7 @@ Secs. 5.5.2 to 5.5.4): expected maxima rate $M = \sqrt{m_4/m_2}$
 and the standardized peak-height distribution that interpolates
 between Rayleigh (narrow bandwidth, $r = 1$) and Gaussian
 (wide bandwidth, $r \to 0$) via
-[`PeakStatisticsResult.peak_exceedance`](/phonometry/reference/api/metrology/data-qualification/#peakstatisticsresultpeak_exceedance). The
+[`PeakStatisticsResult.peak_exceedance`](/reference/api/metrology/data-qualification/#peakstatisticsresultpeak_exceedance). The
 irregularity factor is the bridge to fatigue and vibro-acoustic
 damage models, where it selects the cycle-counting correction.
 
@@ -213,11 +213,11 @@ record to the physically meaningful band first.
 
 | Name | Description |
 | :--- | :--- |
-| `x` | Signal, 1-D. Accepts a [`phonometry.io.Signal`](/phonometry/reference/api/io/io/#signal), whose calibration is applied to the samples, so `sigma` comes out in Pa. The peak heights are standardized by it, so they and the rates do not move. |
-| `fs` | Sample rate, in Hz. Required for a bare array; a [`Signal`](/phonometry/reference/api/io/io/#signal) brings its own, and an explicit value that disagrees with it raises instead of silently winning. |
-| `nperseg` | Welch segment length for the spectral moments (default: the [`power_spectral_density`](/phonometry/reference/api/signals/spectra/#power_spectral_density) default). |
+| `x` | Signal, 1-D. Accepts a [`phonometry.io.Signal`](/reference/api/io/io/#signal), whose calibration is applied to the samples, so `sigma` comes out in Pa. The peak heights are standardized by it, so they and the rates do not move. |
+| `fs` | Sample rate, in Hz. Required for a bare array; a [`Signal`](/reference/api/io/io/#signal) brings its own, and an explicit value that disagrees with it raises instead of silently winning. |
+| `nperseg` | Welch segment length for the spectral moments (default: the [`power_spectral_density`](/reference/api/signals/spectra/#power_spectral_density) default). |
 
-**Returns:** A [`PeakStatisticsResult`](/phonometry/reference/api/metrology/data-qualification/#peakstatisticsresult).
+**Returns:** A [`PeakStatisticsResult`](/reference/api/metrology/data-qualification/#peakstatisticsresult).
 
 **Raises**
 
@@ -390,14 +390,14 @@ segment must remain long against the record's lowest frequencies.
 
 | Name | Description |
 | :--- | :--- |
-| `x` | Signal, 1-D. Accepts a [`phonometry.io.Signal`](/phonometry/reference/api/io/io/#signal), whose calibration is applied to the samples, so the per-segment values come out in Pa² for the squared statistics (`'mean_square'`, the default, and `'variance'`) and in Pa for `'rms'` and `'mean'`. The verdict, the bounds and the p-value are scale-free. |
-| `fs` | Sample rate, in Hz. Required for a bare array; a [`Signal`](/phonometry/reference/api/io/io/#signal) brings its own, and an explicit value that disagrees with it raises instead of silently winning. |
+| `x` | Signal, 1-D. Accepts a [`phonometry.io.Signal`](/reference/api/io/io/#signal), whose calibration is applied to the samples, so the per-segment values come out in Pa² for the squared statistics (`'mean_square'`, the default, and `'variance'`) and in Pa for `'rms'` and `'mean'`. The verdict, the bounds and the p-value are scale-free. |
+| `fs` | Sample rate, in Hz. Required for a bare array; a [`Signal`](/reference/api/io/io/#signal) brings its own, and an explicit value that disagrees with it raises instead of silently winning. |
 | `n_segments` | Number of equal intervals (default 20, as in B&P Example 10.3); at least 10, at most the record length in samples. |
 | `statistic` | Per-segment statistic: `"mean_square"` (default, the book's choice), `"rms"`, `"mean"` or `"variance"`. |
 | `method` | Trend test: `"reverse_arrangements"` (default) or `"runs"`. |
 | `alpha` | Two-sided significance level (default 0.05). |
 
-**Returns:** A [`StationarityTestResult`](/phonometry/reference/api/metrology/data-qualification/#stationaritytestresult).
+**Returns:** A [`StationarityTestResult`](/reference/api/metrology/data-qualification/#stationaritytestresult).
 
 **Raises**
 
@@ -430,7 +430,7 @@ A stationarity test on segment statistics of a single record.
 
 The record was divided into `n_segments` equal intervals, the
 per-segment `statistic` sequence was computed, and the sequence
-was tested for trends with [`trend_test`](/phonometry/reference/api/metrology/data-qualification/#trend_test) (the B&P Sec. 10.3.1.1
+was tested for trends with [`trend_test`](/reference/api/metrology/data-qualification/#trend_test) (the B&P Sec. 10.3.1.1
 procedure). The hypothesis of stationarity is accepted when
 `bounds[0] < trend_statistic <= bounds[1]`.
 
@@ -457,7 +457,7 @@ procedure). The hypothesis of stationarity is accepted when
 
 Acceptance region `(lower, upper)` at `alpha`, read from the segment values.
 
-The same region [`trend_test`](/phonometry/reference/api/metrology/data-qualification/#trend_test) reads on `segment_values`:
+The same region [`trend_test`](/reference/api/metrology/data-qualification/#trend_test) reads on `segment_values`:
 B&P Table A.6's convention for reverse arrangements, the exact
 percentage points about the segment values' own median for runs.
 
@@ -527,7 +527,7 @@ non-monotonic clustering.
 | `method` | `"reverse_arrangements"` (default) or `"runs"`. |
 | `alpha` | Two-sided significance level (default 0.05, the level tabulated by B&P). |
 
-**Returns:** A [`TrendTestResult`](/phonometry/reference/api/metrology/data-qualification/#trendtestresult).
+**Returns:** A [`TrendTestResult`](/reference/api/metrology/data-qualification/#trendtestresult).
 
 **Raises**
 

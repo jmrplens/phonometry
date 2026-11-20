@@ -1,6 +1,6 @@
 <!-- Written by `make llms` from site/src/content/docs/buildings/design/resilient-layers.mdx: edit that page and its Spanish twin, then run `make llms`. -->
 
-← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/buildings/design/resilient-layers/
+← [Documentation index](../../README.md) · Published at https://phonometry.dev/buildings/design/resilient-layers/
 
 # Predicting Resilient-Layer Performance
 
@@ -514,7 +514,7 @@ example.
 - [Predicting Panel Sound Insulation](panel-sound-insulation.md):
   the mass-spring-mass resonance of a double leaf, the airborne counterpart of
   the lining resonance.
-- API reference: [`building.prediction.resilient_layers`](https://docs.jmrp.io/phonometry/reference/api/building/resilient-layers/).
+- API reference: [`building.prediction.resilient_layers`](https://phonometry.dev/reference/api/building/resilient-layers/).
 - Theory: [Point mobilities and radiation efficiency](../../reference/theory/vibration.md#point-mobilities-and-radiation-efficiency-cremer-5-hopkins-29): the mass-spring picture behind an improvement index, and why a resilient layer is a mobility mismatch.
 
 ## References

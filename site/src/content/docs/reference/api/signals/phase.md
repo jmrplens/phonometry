@@ -30,7 +30,7 @@ phase.
 Sampling precautions (documented, and the reason for the `oversample`
 padding): the estimate operates on a *uniformly sampled* one-sided response
 (DC to Nyquist inclusive, the layout of `numpy.fft.rfft` and of
-[`phonometry.room.impulse_response`](/phonometry/reference/api/rooms/impulse-response/#impulse_response) spectra). The real cepstrum of the
+[`phonometry.room.impulse_response`](/reference/api/rooms/impulse-response/#impulse_response) spectra). The real cepstrum of the
 sampled log-magnitude is time-aliased when the grid is coarse relative to
 how sharp the response is, so the magnitude is resampled onto an
 `oversample` times denser grid by exact trigonometric (zero-padded
@@ -133,7 +133,7 @@ phase assigns to $\lvert H(f) \rvert$ (Bendat & Piersol
 Sec. 13.1.4) via the real cepstrum: the inverse transform of
 $\ln \lvert H \rvert$ is folded onto positive
 quefrencies (doubling them, keeping the ends; the folding core is
-shared with [`phonometry.signals.cepstrum`](/phonometry/reference/api/signals/cepstrum/#cepstrum)) and transformed
+shared with [`phonometry.signals.cepstrum`](/reference/api/signals/cepstrum/#cepstrum)) and transformed
 back, so `exp` of the result is the unique stable, causal, causally
 invertible response with that magnitude. The input phase, if any, is
 ignored: passing a plain magnitude array works.
@@ -173,8 +173,8 @@ phase_decomposition(
 
 Decompose a response into its minimum-phase and all-pass parts.
 
-Bundles [`min_phase`](/phonometry/reference/api/signals/phase/#min_phase), [`excess_phase`](/phonometry/reference/api/signals/phase/#excess_phase) and
-[`group_delay`](/phonometry/reference/api/signals/phase/#group_delay) on one frequency axis: the minimum phase carries
+Bundles [`min_phase`](/reference/api/signals/phase/#min_phase), [`excess_phase`](/reference/api/signals/phase/#excess_phase) and
+[`group_delay`](/reference/api/signals/phase/#group_delay) on one frequency axis: the minimum phase carries
 everything an equalizer can invert, the excess phase is the residual
 all-pass (latency plus non-minimum-phase zeros), and the two group
 delays quantify both in seconds.
@@ -187,7 +187,7 @@ delays quantify both in seconds.
 | `fs` | Sample rate of the underlying record, in Hz. |
 | `oversample` | Cepstral anti-aliasing factor (default 8). |
 
-**Returns:** A [`PhaseDecompositionResult`](/phonometry/reference/api/signals/phase/#phasedecompositionresult).
+**Returns:** A [`PhaseDecompositionResult`](/reference/api/signals/phase/#phasedecompositionresult).
 
 **Raises**
 

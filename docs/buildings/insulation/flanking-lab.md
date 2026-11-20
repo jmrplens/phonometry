@@ -1,6 +1,6 @@
 <!-- Written by `make llms` from site/src/content/docs/buildings/insulation/flanking-lab.mdx: edit that page and its Spanish twin, then run `make llms`. -->
 
-← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/buildings/insulation/flanking-lab/
+← [Documentation index](../../README.md) · Published at https://phonometry.dev/buildings/insulation/flanking-lab/
 
 # Laboratory Flanking Transmission (ISO 10848)
 
@@ -631,8 +631,8 @@ Flanking impact level fiche (FlankingImpactLevelResult.report), Ln,f,w (CI).
   formulae in the EN 12354 derivation.
 - [Room-to-room and open-plan acoustics](../rooms/open-plan-acoustics.md): the open-plan context
   the ceiling flanking path usually appears in.
-- API reference: [`building.measurement.flanking_transmission`](https://docs.jmrp.io/phonometry/reference/api/building/flanking-transmission/)
-  and [`building.prediction.ceiling_plenum`](https://docs.jmrp.io/phonometry/reference/api/building/ceiling-plenum/).
+- API reference: [`building.measurement.flanking_transmission`](https://phonometry.dev/reference/api/building/flanking-transmission/)
+  and [`building.prediction.ceiling_plenum`](https://phonometry.dev/reference/api/building/ceiling-plenum/).
 - Theory: [Point mobilities and radiation efficiency](../../reference/theory/vibration.md#point-mobilities-and-radiation-efficiency-cremer-5-hopkins-29): the mobility and radiation-efficiency theory behind a flanking path.
 
 ## References

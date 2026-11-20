@@ -333,7 +333,7 @@ harmonic phases carry no residual sub-sample skew.
 
 Recordings made with the plain **exponential sine sweep (ESS)** of
 `phonometry.sweep_signal` (the ISO 18233 excitation used by
-[`impulse_response`](/phonometry/buildings/rooms/room-acoustics/)) are analysed with
+[`impulse_response`](/buildings/rooms/room-acoustics/)) are analysed with
 `method="farina"`: the same windowing over the time-reversed,
 amplitude-compensated inverse filter of Farina (2000). The harmonic
 **magnitudes** and the THD are correct (the Chebyshev oracle passes
@@ -516,11 +516,11 @@ grids.
 
 ## Relation to other tools
 
-- [`impulse_response`](/phonometry/buildings/rooms/room-acoustics/) recovers the
+- [`impulse_response`](/buildings/rooms/room-acoustics/) recovers the
   *linear* IR from the same sweep recording and simply discards the
   negative-time distortion products; `swept_sine_distortion` is the tool
   that reads them.
-- [`thd` / `harmonic_analysis`](/phonometry/devices/electroacoustics/electroacoustics/)
+- [`thd` / `harmonic_analysis`](/devices/electroacoustics/electroacoustics/)
   measure distortion from a steady tone at one frequency; the sweep
   separator returns the same ratios as a continuous function of frequency,
   from one measurement. Speed is the least of the reasons to prefer it.
@@ -536,7 +536,7 @@ grids.
   rules of section 4 exist to prevent.
 - The phase utilities operate on any one-sided *complex* response: an
   `rfft` of a measured IR, or the `response` of a
-  [`transfer_function`](/phonometry/devices/electroacoustics/electroacoustics/) estimate on a
+  [`transfer_function`](/devices/electroacoustics/electroacoustics/) estimate on a
   uniform grid. `min_phase` alone also accepts a plain magnitude
   array, e.g. a design target for equalization.
 
@@ -560,7 +560,7 @@ Piersol Section 13.1.4 through the real cepstrum.
 <ScopeClaim status="not-covered" label="Not covered">
 Intermodulation and dynamic intermodulation distortion (IEC 60268-3, clauses
 14.12.7-10) are measured from steady tones on the
-[electroacoustics](/phonometry/devices/electroacoustics/electroacoustics/)
+[electroacoustics](/devices/electroacoustics/electroacoustics/)
 page, not from a sweep; this page separates harmonic orders only. Müller &
 Massarani's sweep monograph is cited for background practice (fades,
 inverse-filter technique), not for a specific implemented formula. With
@@ -577,15 +577,15 @@ the tail are the operator's to keep and to report.
 
 ## See also
 
-- [Electroacoustics](/phonometry/devices/electroacoustics/electroacoustics/): the
+- [Electroacoustics](/devices/electroacoustics/electroacoustics/): the
   steady-tone $\mathrm{THD}$, THD+N and intermodulation set of IEC 60268-3
   that this sweep complements, and the operating point they are all defined at.
-- [Loudspeaker Characterisation (IEC 60268-5)](/phonometry/devices/electroacoustics/loudspeakers/):
+- [Loudspeaker Characterisation (IEC 60268-5)](/devices/electroacoustics/loudspeakers/):
   the THD(f) curve produced here is the distortion panel of that
   rated-characteristics report.
-- [Room acoustics](/phonometry/buildings/rooms/room-acoustics/): `impulse_response`,
+- [Room acoustics](/buildings/rooms/room-acoustics/): `impulse_response`,
   which is the linear half of the same recording.
-- API reference: [`electroacoustics.swept_sine`](/phonometry/reference/api/electroacoustics/swept-sine/)
-  and [`signals.phase`](/phonometry/reference/api/signals/phase/).
+- API reference: [`electroacoustics.swept_sine`](/reference/api/electroacoustics/swept-sine/)
+  and [`signals.phase`](/reference/api/signals/phase/).
 
 </SeeAlso>

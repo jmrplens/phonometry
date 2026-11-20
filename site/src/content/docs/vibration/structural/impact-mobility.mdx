@@ -42,7 +42,7 @@ to attach, no drive rod to align, and the excitation point moves from one
 location to the next in seconds. **ISO 7626-5:2019** is the part of the ISO 7626
 series that makes that measurement accurate. It measures the same
 frequency-response functions as
-[ISO 7626-2](/phonometry/vibration/structural/mechanical-mobility/), but the
+[ISO 7626-2](/vibration/structural/mechanical-mobility/), but the
 record it works on has a peculiar shape: a force pulse a few milliseconds long,
 followed by the free decay it leaves behind. Almost every clause of the part is
 about a consequence of that shape. The pulse fills a tiny fraction of the
@@ -238,7 +238,7 @@ pulse the spectrum is noise over almost no force, and nothing built on the
 result, its plot, its fiche or a fit, should see that part.
 
 Records read from a measurement file arrive as a
-[`Signal`](/phonometry/io/audio-files/): pass it in place of the array
+[`Signal`](/io/audio-files/): pass it in place of the array
 and leave out `fs`, which it brings with it (one impact per channel). A force
 and an acceleration are not pressures, so a calibration factor the `Signal`
 carries is not applied to them. The checks of section 5 that read a record
@@ -625,7 +625,7 @@ one check here that judges the instrument rather than the record, hence
 
 **Calibration (7.2).** The rigid-block check of ISO 7626-2 7.5.2,
 `verify_rigid_mass_calibration`, described on the [mobility
-page](/phonometry/vibration/structural/mechanical-mobility/). The block's mass
+page](/vibration/structural/mechanical-mobility/). The block's mass
 shall be chosen so its mobility is representative of the mobilities to be
 measured, and the hammer and the analyser shall be set up exactly as in the
 measurement.
@@ -693,13 +693,13 @@ comparisons of 9.2 to 9.5 are left to the operator.
 
 ## See also
 
-- [Mechanical mobility and the FRF family (ISO 7626-1)](/phonometry/vibration/structural/mechanical-mobility/):
+- [Mechanical mobility and the FRF family (ISO 7626-1)](/vibration/structural/mechanical-mobility/):
   the FRF vocabulary this page estimates in, the attached-exciter measurement
   of ISO 7626-2 and the rigid-mass calibration.
-- [Frequency response and coherence](/phonometry/devices/electroacoustics/electroacoustics/):
+- [Frequency response and coherence](/devices/electroacoustics/electroacoustics/):
   the `transfer_function` estimator for the channel-match test of 8.1.
-- [Transfer stiffness of resilient elements (ISO 10846)](/phonometry/vibration/structural/transfer-stiffness/):
+- [Transfer stiffness of resilient elements (ISO 10846)](/vibration/structural/transfer-stiffness/):
   a force-per-motion FRF measured on a laboratory rig.
-- API reference: [`vibration`: impact mobility](/phonometry/reference/api/vibration/impact-mobility/).
+- API reference: [`vibration`: impact mobility](/reference/api/vibration/impact-mobility/).
 
 </SeeAlso>

@@ -1,6 +1,6 @@
 <!-- Written by `make llms` from site/src/content/docs/perception/psychoacoustics/loudness.mdx: edit that page and its Spanish twin, then run `make llms`. -->
 
-← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/perception/psychoacoustics/loudness/
+← [Documentation index](../../README.md) · Published at https://phonometry.dev/perception/psychoacoustics/loudness/
 
 # Loudness
 
@@ -483,7 +483,7 @@ model-choice table that says when to prefer each, are
 - [Psychoacoustic annoyance and fluctuation strength](psychoacoustic-annoyance.md):
   the Zwicker and Fastl model that consumes the percentile loudness $N_5$.
 - [Theory](../../reference/theory/perception.md): the equations behind the loudness models.
-- API reference: [`psychoacoustics.loudness.zwicker`](https://docs.jmrp.io/phonometry/reference/api/psychoacoustics/zwicker/) and [`psychoacoustics.loudness.contours`](https://docs.jmrp.io/phonometry/reference/api/psychoacoustics/contours/).
+- API reference: [`psychoacoustics.loudness.zwicker`](https://phonometry.dev/reference/api/psychoacoustics/zwicker/) and [`psychoacoustics.loudness.contours`](https://phonometry.dev/reference/api/psychoacoustics/contours/).
 - Theory: [Zwicker loudness (ISO 532-1)](../../reference/theory/perception.md#zwicker-loudness-iso-532-1): the specific-loudness integral of ISO 532-1 and the excitation pattern it runs over.
 
 ## Quick answers

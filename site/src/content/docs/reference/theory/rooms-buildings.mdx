@@ -239,7 +239,7 @@ sidebar:
 import ThemeImage from '../../../../components/ThemeImage.astro';
 import Video from '../../../../components/Video.astro';
 
-This page collects the theory behind rooms and buildings: impulse-response measurement and the room-acoustic parameters, the image-source and steady-state models of the sound field in a room, background-noise criteria, airborne and impact insulation with their single-number ratings and uncertainty, and flanking and absorption prediction. It is part of the [theory reference](/phonometry/reference/theory/); surface scattering and acoustic material characterisation live on [Materials and Surfaces](/phonometry/reference/theory/materials-surfaces/).
+This page collects the theory behind rooms and buildings: impulse-response measurement and the room-acoustic parameters, the image-source and steady-state models of the sound field in a room, background-noise criteria, airborne and impact insulation with their single-number ratings and uncertainty, and flanking and absorption prediction. It is part of the [theory reference](/reference/theory/); surface scattering and acoustic material characterisation live on [Materials and Surfaces](/reference/theory/materials-surfaces/).
 
 Each section keeps its own standard's notation, and five letters carry more than
 one meaning across them:
@@ -287,7 +287,7 @@ different remedies. And a rating computed from a spectrum whose lowest bands wer
 never actually measured is not comparable with one where they were, because those
 bands set both the tag and, often, the tangency point.
 
-See the [Room Noise guide](/phonometry/buildings/rooms/room-noise/) for usage.
+See the [Room Noise guide](/buildings/rooms/room-noise/) for usage.
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/room_noise_criteria.svg" alt="Two panels for the same ventilation-dominated room spectrum. Left: the measured octave-band levels over the NC curve family, with a red diamond marking the tangent point at 250 Hz that sets the NC-42.5 rating. Right: the same spectrum over the reference RC-35 curve, with the low-frequency bands rising through the shaded rumble tolerance (plus 5 dB below 500 Hz) so the noise is classified RC-35(R), and the hiss tolerance (plus 3 dB at and above 1000 Hz) shaded for comparison" width="96%" />
 
@@ -506,7 +506,7 @@ print(round(rho_c, 1), round(corrected - plain, 2))  # 412.5 0.13
 
 The **critical distance** $r_\mathrm{c} = \sqrt{Q R / 16\pi}$ is where the two fields cross; Kuttruff's reverberation distance (Eq. 5.44, $r_\mathrm{c} = \sqrt{A/16\pi}$ for $Q=1$) uses the Sabine area $A = S\bar\alpha$ instead of $R = A/(1-\bar\alpha)$, the two coinciding for small $\bar\alpha$. The **Schroeder frequency** $f_\mathrm{s} = 2000\sqrt{T/V}$ (Kuttruff Eq. 3.44) roughly marks the modal-to-diffuse transition, a heuristic crossover rather than a sharp cutoff: well below it discrete room modes dominate and these diffuse-field relations grow unreliable, well above it the modes overlap and the relations hold. Borderline rooms still warrant a band-by-band check.
 
-See the [Image Sources and the Steady-State Room Field guide](/phonometry/buildings/rooms/room-image-sources/) for usage.
+See the [Image Sources and the Steady-State Room Field guide](/buildings/rooms/room-image-sources/) for usage.
 
 ## Sound insulation and absorption, measured (ISO 16283, ISO 10140, ISO 717, ISO 354)
 
@@ -798,7 +798,7 @@ arithmetic on a smaller room: $A$ from 2.26 to 5.03 m² and $T$ from 2.1 to
 0.9 s at 1 kHz, and the figure shows why the two move in opposite directions
 and not proportionally.*
 
-See the [Enclosed-Space Absorption guide](/phonometry/buildings/rooms/enclosed-space-absorption/) for usage.
+See the [Enclosed-Space Absorption guide](/buildings/rooms/enclosed-space-absorption/) for usage.
 
 ### Predicted panel sound insulation (Bies 7.2, Hopkins 2.9/4.3.10, Cremer 5)
 
@@ -837,7 +837,7 @@ sum $R = -10\log_{10}[(1/\sum S_n)\sum S_n 10^{-R_n/10}]$ (Eq. 4.92), so a bare 
 of relative area $S_\mathrm{a}/S$ limits the composite to $10\log_{10}(S/S_\mathrm{a})$. The resonant
 transmission path and the double-wall radiation draw on the plate radiation
 efficiency and point mobilities of the
-[vibration theory](/phonometry/reference/theory/vibration/).
+[vibration theory](/reference/theory/vibration/).
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/panel_insulation_concept.svg" alt="Four panels: the single-panel mass law with its coincidence dip, the double wall with the mass-spring-mass resonance and cavity gain, the plate radiation efficiency rising to unity above the critical frequency, and a composite wall whose 1 % open slit caps R at the open-area limit" width="92%" />
 
@@ -876,7 +876,7 @@ field shows.*
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/aperture_slit_geometry.svg" alt="To-scale cross-section of a 2 mm slit through a 100 mm wall: the hatched wall drawn in section with the narrow horizontal air gap at mid-height, an incident-sound arrow pointing at the gap from the left, the 100 mm wall depth and 2 mm slit width dimensioned, and circular transmitted wavefronts sketched spreading from the slit exit on the right" width="80%" />
 
-See the [Predicting Panel Sound Insulation](/phonometry/buildings/design/panel-sound-insulation/)
+See the [Predicting Panel Sound Insulation](/buildings/design/panel-sound-insulation/)
 guide for usage.
 
 ## Measurement uncertainty (ISO 12999-1)
@@ -902,5 +902,5 @@ Uncorrelated components combine in quadrature $u_\mathrm{c} = \sqrt{\sum u_i^2}$
 (Formula A.7), and the uncorrelated single-number uncertainty is the
 energy-weighted quadrature sum of the band uncertainties (Formula B.2).
 
-See the [Room Acoustics](/phonometry/buildings/rooms/room-acoustics/) and
-[Field Insulation Measurement (ISO 16283)](/phonometry/buildings/insulation/insulation-field/) guides for usage.
+See the [Room Acoustics](/buildings/rooms/room-acoustics/) and
+[Field Insulation Measurement (ISO 16283)](/buildings/insulation/insulation-field/) guides for usage.

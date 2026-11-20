@@ -26,14 +26,14 @@ catalogue insertion loss are not the same quantity. Neither is wrong; they
 answer different questions, and a design that mixes them without saying so is
 not defensible.
 
-[Duct-Borne Noise: Fan to Room](/phonometry/devices/noise-control/duct-path/)
+[Duct-Borne Noise: Fan to Room](/devices/noise-control/duct-path/)
 follows an airborne path from the fan through the duct run into the room:
 attenuation in straight duct, at bends and takeoffs, end reflection at the
 terminal, regenerated flow noise added back, the room effect at the receiver,
 and the result laid against the room criterion. It also states the limit every
 element model in this section shares: the frequency above which higher-order
 modes cut on and the plane-wave assumption stops holding.
-[Room to Room: Partition, Receiving Room, Criterion](/phonometry/devices/noise-control/room-to-room/)
+[Room to Room: Partition, Receiving Room, Criterion](/devices/noise-control/room-to-room/)
 follows the airborne room-to-room path instead: a source-room level built from a
 sound power and the room constant, a partition with its transmission loss, a
 receiving room with its absorption, the received spectrum and its verdict, and
@@ -41,58 +41,58 @@ the inverse problem: the transmission loss a partition or a lined enclosure must
 have for the receiving room to meet its criterion, solved backwards.
 
 The two element pages supply what those chains call.
-[Silencers](/phonometry/devices/noise-control/silencers/) covers the reactive
+[Silencers](/devices/noise-control/silencers/) covers the reactive
 four-pole elements (expansion chambers, Helmholtz, quarter-wave and
 extended-tube resonators) with their transmission and insertion loss, and the
 choice between reflection and dissipation, while
-[Industrial Noise Control](/phonometry/devices/noise-control/noise-control/)
+[Industrial Noise Control](/devices/noise-control/noise-control/)
 keeps the HVAC duct attenuation and flow noise of an installation and the
 insertion loss of a machine enclosure.
 
 If the noise travels in a duct, start at
-[Duct-Borne Noise](/phonometry/devices/noise-control/duct-path/); if it travels
+[Duct-Borne Noise](/devices/noise-control/duct-path/); if it travels
 through a wall, start at
-[Room to Room](/phonometry/devices/noise-control/room-to-room/); open the
+[Room to Room](/devices/noise-control/room-to-room/); open the
 element pages when a chain asks for a number you do not have.
 
 Both ends of the problem are settled outside this section, and a path
 calculation with either end missing has no verdict. At the **source** end, what
 a quieting measure is judged against is the emission of the machine itself,
-determined by the [Sound power and intensity](/phonometry/devices/emission/)
+determined by the [Sound power and intensity](/devices/emission/)
 pages. Reducing it there is almost always cheaper than treating a path. At
 the **receiver** end sit the criteria: the NC and RC Mark II families of
-[Room noise criteria](/phonometry/buildings/rooms/room-noise/), plus whatever
+[Room noise criteria](/buildings/rooms/room-noise/), plus whatever
 occupational limit applies, in [Occupational exposure
-(ISO 9612)](/phonometry/perception/hearing/occupational-exposure/).
+(ISO 9612)](/perception/hearing/occupational-exposure/).
 
 ## Pages in this section
 
-- [Silencers](/phonometry/devices/noise-control/silencers/): reactive silencers by the
+- [Silencers](/devices/noise-control/silencers/): reactive silencers by the
   four-pole method and the reactive-versus-dissipative choice.
-- [Measuring a Silencer (ISO 7235 and ISO 11691)](/phonometry/devices/noise-control/silencer-measurement/):
+- [Measuring a Silencer (ISO 7235 and ISO 11691)](/devices/noise-control/silencer-measurement/):
   where a catalogue insertion loss comes from, and how repeatable it is.
-- [Enclosures and Cabins Measured (ISO 11546, ISO 11957)](/phonometry/devices/noise-control/enclosure-cabin-insulation/):
+- [Enclosures and Cabins Measured (ISO 11546, ISO 11957)](/devices/noise-control/enclosure-cabin-insulation/):
   what a built enclosure is worth rather than what it was designed to be worth,
   and the cabin that is the same problem inverted.
-- [Silencers, Screens and Barriers In Situ](/phonometry/devices/noise-control/in-situ-noise-control/):
+- [Silencers, Screens and Barriers In Situ](/devices/noise-control/in-situ-noise-control/):
   the silencer in the duct it was fitted to, the screen that can be wheeled
   away, and the barrier that was built years ago.
-- [Duct-Borne Noise: Fan to Room](/phonometry/devices/noise-control/duct-path/): the
+- [Duct-Borne Noise: Fan to Room](/devices/noise-control/duct-path/): the
   end-to-end fan-to-room calculation against a room criterion, and the
   higher-order-mode cut-on that limits every plane-wave method.
-- [HVAC Noise the German Way (VDI 2081)](/phonometry/devices/noise-control/vdi2081-air-systems/):
+- [HVAC Noise the German Way (VDI 2081)](/devices/noise-control/vdi2081-air-systems/):
   the same chain by the German guideline, against the worked sheet of its own
   Part 2.
-- [Control Valve Noise (IEC 60534-8-3)](/phonometry/devices/noise-control/control-valve-noise/):
+- [Control Valve Noise (IEC 60534-8-3)](/devices/noise-control/control-valve-noise/):
   the five flow regimes of a throttling valve and the pipe wall that radiates
   what they make.
-- [Hydrodynamic Valve Noise (IEC 60534-8-4)](/phonometry/devices/noise-control/valve-cavitation/):
+- [Hydrodynamic Valve Noise (IEC 60534-8-4)](/devices/noise-control/valve-cavitation/):
   the same valve on a liquid line, where the jet's turbulence is one source
   and cavitation, past its threshold, is the other.
-- [Room to Room: Partition, Receiving Room, Criterion](/phonometry/devices/noise-control/room-to-room/):
+- [Room to Room: Partition, Receiving Room, Criterion](/devices/noise-control/room-to-room/):
   the composed source-room to receiving-room chain and the transmission loss a
   partition or an enclosure needs to meet a noise criterion.
-- [Industrial Noise Control: HVAC and Enclosures](/phonometry/devices/noise-control/noise-control/):
+- [Industrial Noise Control: HVAC and Enclosures](/devices/noise-control/noise-control/):
   duct attenuation, flow noise and machine-enclosure insertion loss.
 
 ## What this section does not cover
@@ -113,7 +113,7 @@ perforates do not appear, so a silencer carrying significant flow is predicted
 as though it were not. And `enclosure_insertion_loss` **never predicts the
 panel's transmission loss**: you supply R measured or from another model, and
 the module combines it with the interior correction; predicting R itself is
-[Insulation design](/phonometry/buildings/design/). Above the
+[Insulation design](/buildings/design/). Above the
 higher-order-mode cut-on frequency the plane-wave assumption every duct model
 rests on stops holding, which the duct-path page states and which no method
 here works around.

@@ -42,24 +42,24 @@ limit. phonometry implements ten standardised routes to it, split across
 seven guides: an enveloping *pressure* surface in the field
 (ISO 3744/3746) and the precision grade in an *anechoic room* (ISO 3745),
 covered in
-[Sound Power by Pressure Methods](/phonometry/devices/emission/sound-power-pressure/);
+[Sound Power by Pressure Methods](/devices/emission/sound-power-pressure/);
 the diffuse field of a *reverberation room* (ISO 3741), covered in
-[Sound Power in the Reverberation Room](/phonometry/devices/emission/sound-power-reverberation/);
+[Sound Power in the Reverberation Room](/devices/emission/sound-power-reverberation/);
 a *small test room* for a small movable source, hard-walled with a
 reference sound source (ISO 3743-1) or specially reverberant (ISO 3743-2),
 covered in
-[Sound Power in Small Test Rooms](/phonometry/devices/emission/sound-power-test-rooms/);
+[Sound Power in Small Test Rooms](/devices/emission/sound-power-test-rooms/);
 the same comparison against a reference sound source taken to the room the
 machine works in (ISO 3747), covered in
-[Sound Power in Situ by Comparison](/phonometry/devices/emission/sound-power-in-situ/);
+[Sound Power in Situ by Comparison](/devices/emission/sound-power-in-situ/);
 *intensity* read at discrete points over a surface (ISO 9614-1), covered in
-[Sound Intensity](/phonometry/devices/emission/intensity/); the same intensity
+[Sound Intensity](/devices/emission/intensity/); the same intensity
 *scanned* over that surface (ISO 9614-2), with its precision
 counterpart (ISO 9614-3), covered in
-[Sound Power by Intensity Scanning](/phonometry/devices/emission/sound-power-intensity/);
+[Sound Power by Intensity Scanning](/devices/emission/sound-power-intensity/);
 and the *surface velocity* of the machine's own casing (ISO/TS 7849-1 and -2),
 the one route that needs no acoustic measurement at all, covered in
-[Sound power from surface vibration](/phonometry/devices/emission/vibration-sound-power/).
+[Sound power from surface vibration](/devices/emission/vibration-sound-power/).
 This page is the front door: how to choose among them, what the accuracy
 grades actually promise, and how a measured $L_W$ becomes the ISO 4871
 noise-emission declaration a datasheet prints.
@@ -103,13 +103,13 @@ a radiation factor. Each method guide walks its routes in turn.
 
 **The two parts of ISO 3743** reach engineering grade on *small movable*
 sources and share a guide,
-[Sound Power in Small Test Rooms](/phonometry/devices/emission/sound-power-test-rooms/):
+[Sound Power in Small Test Rooms](/devices/emission/sound-power-test-rooms/):
 Part 1 compares the source with a reference sound source in an ordinary
 hard-walled room, and Part 2 reads the power off a room built so that its
 reverberation time follows a prescribed curve. Their in situ relative,
-ISO 3747, has its own guide, [Sound Power in Situ by Comparison](/phonometry/devices/emission/sound-power-in-situ/):
+ISO 3747, has its own guide, [Sound Power in Situ by Comparison](/devices/emission/sound-power-in-situ/):
 the comparison formula of the
-[ISO 3741 page](/phonometry/devices/emission/sound-power-reverberation/#2-the-comparison-method-eq-21)
+[ISO 3741 page](/devices/emission/sound-power-reverberation/#2-the-comparison-method-eq-21)
 applied to the room the machine works in instead of a qualified one, with the
 background corrected at every microphone position and the grade read from the
 excess of sound pressure level. The plate below draws seven of the ten: the
@@ -209,9 +209,9 @@ path.
    tolerates survey grade (grade 3). Grade 1 exists only in a qualified
    laboratory room (ISO 3741, ISO 3745) or via the precision intensity
    methods, both of which are here: ISO 9614-1 at discrete points in
-   [Sound Intensity](/phonometry/devices/emission/intensity/), ISO 9614-3 by
+   [Sound Intensity](/devices/emission/intensity/), ISO 9614-3 by
    scanning in [Sound Power by Intensity
-   Scanning](/phonometry/devices/emission/sound-power-intensity/).
+   Scanning](/devices/emission/sound-power-intensity/).
 2. **Can the source travel to a laboratory?** ISO 3741 wants the source
    small next to the room (volume no more than about 2 % of the room volume)
    and its noise steady; ISO 3745 wants it inside a qualified anechoic or
@@ -231,7 +231,7 @@ path.
    engineering grade where the excess of sound pressure level $\Delta L_f$
    is at least 7 dB at every position and the source is not strongly
    directional, and at survey grade otherwise, as [Sound Power in Situ by
-   Comparison](/phonometry/devices/emission/sound-power-in-situ/) sets out.
+   Comparison](/devices/emission/sound-power-in-situ/) sets out.
 4. **Is the background the problem?** When neighbouring machines cannot be
    switched off, or the margin is outright negative, the pressure methods
    are out. Intensity (ISO 9614-1 at discrete points, ISO 9614-2 by scanning,
@@ -302,14 +302,14 @@ press stroke, one door slam), the descriptor is not $L_W$ at all but the **sound
 energy level $L_J$**, the same surface integral taken over the event rather than
 per second, defined in the same clauses of ISO 3741, ISO 3744 and ISO 3746 and
 determined by `sound_energy_pressure` over the [enveloping
-surface](/phonometry/devices/emission/sound-power-pressure/#4-sound-energy-level-of-a-burst-clause-83),
+surface](/devices/emission/sound-power-pressure/#4-sound-energy-level-of-a-burst-clause-83),
 by `sound_energy_reverberation`, or `sound_energy_comparison` against a
 reference source, in the [reverberation
-room](/phonometry/devices/emission/sound-power-reverberation/#4-sound-energy-level-of-a-single-event-clause-92),
+room](/devices/emission/sound-power-reverberation/#4-sound-energy-level-of-a-single-event-clause-92),
 by `sound_energy_hard_walled` in the hard-walled room of ISO 3743-1, in [Sound
-Power in Small Test Rooms](/phonometry/devices/emission/sound-power-test-rooms/#bursts-the-sound-energy-level-eq-15-to-20),
+Power in Small Test Rooms](/devices/emission/sound-power-test-rooms/#bursts-the-sound-energy-level-eq-15-to-20),
 and by `sound_energy_in_situ` where the machine works, in [Sound Power in Situ
-by Comparison](/phonometry/devices/emission/sound-power-in-situ/#2-impulsive-sources-the-sound-energy-level-eq-13-to-20).
+by Comparison](/devices/emission/sound-power-in-situ/#2-impulsive-sources-the-sound-energy-level-eq-13-to-20).
 The practical test: if the A-weighted level
 at a fixed microphone moves by more than a few decibels over the averaging time,
 the source is not steady for these methods.
@@ -375,7 +375,7 @@ $K_{W\mathrm{A}}$ combines the measurement (reproducibility) and, for a batch, t
 production spread; for a single machine $K = 1.645\,\sigma_\mathrm{R}$ (Annex A.2.2),
 where 1.645 is the 95 % one-sided quantile of the normal distribution: the
 declared value is an upper limit, so only one tail is being covered. A
-[`NoiseEmissionDeclaration`](/phonometry/reference/api/power/sound-power/)
+[`NoiseEmissionDeclaration`](/reference/api/power/sound-power/)
 holds one or more per-operating-mode declarations and renders the ISO 4871
 fiche through `.report()`. The quickest route is to `declare()` straight from a
 measured sound power:
@@ -490,20 +490,20 @@ and the clause 6.2 verification with both rounding rules (`verified`,
 <ScopeClaim status="not-covered" label="Not covered">
 The ten determinations themselves live in their method guides: the enveloping
 surface and the anechoic array in [Sound Power by Pressure
-Methods](/phonometry/devices/emission/sound-power-pressure/), the
+Methods](/devices/emission/sound-power-pressure/), the
 diffuse-field method in [Sound Power in the Reverberation
-Room](/phonometry/devices/emission/sound-power-reverberation/), both scanning
+Room](/devices/emission/sound-power-reverberation/), both scanning
 methods in [Sound Power by Intensity
-Scanning](/phonometry/devices/emission/sound-power-intensity/), the
+Scanning](/devices/emission/sound-power-intensity/), the
 discrete-point summation of ISO 9614-1 in [Sound
-Intensity](/phonometry/devices/emission/intensity/), beside the Annex A field
+Intensity](/devices/emission/intensity/), beside the Annex A field
 indicators it lends the scanning parts, and the surface-velocity route in
 [Sound power from surface
-vibration](/phonometry/devices/emission/vibration-sound-power/), the small
+vibration](/devices/emission/vibration-sound-power/), the small
 test rooms of ISO 3743-1 and ISO 3743-2 in [Sound Power in Small Test
-Rooms](/phonometry/devices/emission/sound-power-test-rooms/), and the in
+Rooms](/devices/emission/sound-power-test-rooms/), and the in
 situ comparison of ISO 3747 in [Sound Power in Situ by
-Comparison](/phonometry/devices/emission/sound-power-in-situ/).
+Comparison](/devices/emission/sound-power-in-situ/).
 The sound *energy* level $L_J$ of a single event is covered for ISO 3744,
 ISO 3746, ISO 3741, ISO 3743-1 and ISO 3747, each on its own page; ISO 3745
 and ISO 3743-2 define none.
@@ -520,35 +520,35 @@ $K = 1.645\,\sigma_\mathrm{R}$ case (Annex A.2.2) are stated, not derived.
 
 ## See also
 
-- [Sound Power by Pressure Methods (ISO 3744 / ISO 3746 / ISO 3745)](/phonometry/devices/emission/sound-power-pressure/):
+- [Sound Power by Pressure Methods (ISO 3744 / ISO 3746 / ISO 3745)](/devices/emission/sound-power-pressure/):
   the enveloping surface with its $K_1$/$K_2$ corrections, and the precision
   anechoic array.
-- [Sound Power in the Reverberation Room (ISO 3741)](/phonometry/devices/emission/sound-power-reverberation/):
+- [Sound Power in the Reverberation Room (ISO 3741)](/devices/emission/sound-power-reverberation/):
   the precision diffuse-field method with the Waterhouse and meteorological
   corrections.
-- [Sound Power in Small Test Rooms (ISO 3743)](/phonometry/devices/emission/sound-power-test-rooms/):
+- [Sound Power in Small Test Rooms (ISO 3743)](/devices/emission/sound-power-test-rooms/):
   a small movable source in a hard-walled room against a reference sound
   source, or in a special reverberation room read directly or against one.
-- [Sound Power in Situ by Comparison (ISO 3747)](/phonometry/devices/emission/sound-power-in-situ/):
+- [Sound Power in Situ by Comparison (ISO 3747)](/devices/emission/sound-power-in-situ/):
   the reference-source comparison where the machine works, with the sound
   energy level of an impulsive source.
-- [Sound Power by Intensity Scanning (ISO 9614-2 / ISO 9614-3)](/phonometry/devices/emission/sound-power-intensity/):
+- [Sound Power by Intensity Scanning (ISO 9614-2 / ISO 9614-3)](/devices/emission/sound-power-intensity/):
   the routes that tolerate steady background noise, qualified by their field
   indicators.
-- [Sound power from surface vibration (ISO/TS 7849)](/phonometry/devices/emission/vibration-sound-power/):
+- [Sound power from surface vibration (ISO/TS 7849)](/devices/emission/vibration-sound-power/):
   the surface-velocity route, for a machine no microphone can approach.
-- [Sound Intensity (p-p)](/phonometry/devices/emission/intensity/): the two-microphone
+- [Sound Intensity (p-p)](/devices/emission/intensity/): the two-microphone
   probe behind every intensity route, and the ISO 9614-1 determination at
   discrete points.
-- [Room Acoustics](/phonometry/buildings/rooms/room-acoustics/): the reverberation
+- [Room Acoustics](/buildings/rooms/room-acoustics/): the reverberation
   time and equivalent absorption area that feed the room corrections.
-- [Predicting Sound Insulation (EN 12354)](/phonometry/buildings/design/insulation-prediction/): the
+- [Predicting Sound Insulation (EN 12354)](/buildings/design/insulation-prediction/): the
   airborne and impact insulation ratings and the EN 12354 emission predictions
   that consume a source $L_W$.
-- [Levels](/phonometry/signals/levels/levels/): energy averaging and the A-weighting behind $L_{W\mathrm{A}}$.
-- [Theory](/phonometry/reference/theory/environment-transport/): the Waterhouse, $K_1$/$K_2$ and $C_1$/$C_2$ derivations.
-- API reference: [`emission.sound_power`](/phonometry/reference/api/power/sound-power/), [`emission`: sound power in a reverberation room](/phonometry/reference/api/power/sound-power-reverberation/) and [`emission`: sound power by intensity scanning](/phonometry/reference/api/power/sound-power-intensity/).
-- Theory: [Sound power determination](/phonometry/reference/theory/environment-transport/#sound-power-determination-iso-374437453746-iso-3741-iso-9614-123): the enveloping-surface, reverberation-room and intensity derivations behind the six acoustic routes.
+- [Levels](/signals/levels/levels/): energy averaging and the A-weighting behind $L_{W\mathrm{A}}$.
+- [Theory](/reference/theory/environment-transport/): the Waterhouse, $K_1$/$K_2$ and $C_1$/$C_2$ derivations.
+- API reference: [`emission.sound_power`](/reference/api/power/sound-power/), [`emission`: sound power in a reverberation room](/reference/api/power/sound-power-reverberation/) and [`emission`: sound power by intensity scanning](/reference/api/power/sound-power-intensity/).
+- Theory: [Sound power determination](/reference/theory/environment-transport/#sound-power-determination-iso-374437453746-iso-3741-iso-9614-123): the enveloping-surface, reverberation-room and intensity derivations behind the six acoustic routes.
 
 </SeeAlso>
 

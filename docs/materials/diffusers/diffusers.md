@@ -1,6 +1,6 @@
 <!-- Written by `make llms` from site/src/content/docs/materials/diffusers/diffusers.mdx: edit that page and its Spanish twin, then run `make llms`. -->
 
-← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/materials/diffusers/diffusers/
+← [Documentation index](../../README.md) · Published at https://phonometry.dev/materials/diffusers/diffusers/
 
 # Diffusers and Their Coefficients
 
@@ -1158,9 +1158,9 @@ print(row.why_missing("scattering_coefficient_5000"))
 
 All three tables are published whole, filterable and with the source of
 every row, each in its own catalogue: the
-[scattering coefficients](https://docs.jmrp.io/phonometry/reference/catalogues/scattering-coefficients/), the
-[diffusion coefficients](https://docs.jmrp.io/phonometry/reference/catalogues/diffusion-coefficients/) and the
-[predicted scattering coefficients](https://docs.jmrp.io/phonometry/reference/catalogues/predicted-scattering-coefficients/).
+[scattering coefficients](https://phonometry.dev/reference/catalogues/scattering-coefficients/), the
+[diffusion coefficients](https://phonometry.dev/reference/catalogues/diffusion-coefficients/) and the
+[predicted scattering coefficients](https://phonometry.dev/reference/catalogues/predicted-scattering-coefficients/).
 
 ## Scattering or diffusion? Two coefficients, two jobs
 
@@ -1250,7 +1250,7 @@ no longer small against the wavelength; a frequency-blind single number
 - [Outdoor Sound Propagation](../../environment/propagation/outdoor-propagation.md): the
   full ISO 9613-1 atmospheric-absorption model whose pure-tone coefficient the
   ISO 17497-1 air-attenuation relations consume.
-- API reference: [`materials.diffusers.scattering_diffusion`](https://docs.jmrp.io/phonometry/reference/api/materials/scattering-diffusion/) and [`materials.diffusers.design`](https://docs.jmrp.io/phonometry/reference/api/materials/design/).
+- API reference: [`materials.diffusers.scattering_diffusion`](https://phonometry.dev/reference/api/materials/scattering-diffusion/) and [`materials.diffusers.design`](https://phonometry.dev/reference/api/materials/design/).
 - Theory: [Surface scattering and diffusion](../../reference/theory/materials-surfaces.md#surface-scattering-and-diffusion-iso-17497-1-iso-17497-2): the derivation of the scattering and diffusion coefficients and why the two are different quantities.
 
 ## References

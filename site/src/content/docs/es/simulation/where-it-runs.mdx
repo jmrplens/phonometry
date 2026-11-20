@@ -59,7 +59,7 @@ En Linux, la fila de la CPU toma primero torch del índice de CPU de PyTorch,
 porque el torch que sirve PyPI allí trae gigabytes de bibliotecas de CUDA que
 una CPU nunca usa.
 
-[Dónde se calcula una simulación](/phonometry/es/simulation/compute/) explica
+[Dónde se calcula una simulación](/es/simulation/compute/) explica
 cada dispositivo, el bloque `use()` y la variable `PHONOMETRY_COMPUTE`, la
 vuelta a NumPy, qué registra `provenance` además del dispositivo y el host
 (el dtype, las versiones con las que se ejecutó, la GPU y el paquete que
@@ -84,7 +84,7 @@ nunca código tuyo; el nodo ejecuta el phonometry que tienes aquí, enviado una
 vez por versión, y su respuesta se comprueba antes de fiarse de ella. Un motor
 construido directamente (`FDTD2D`, `ElasticFDTD2D`) avanza en este proceso:
 lo mueve tu propio código, paso a paso, y eso no puede viajar.
-[Enviar una simulación a un nodo remoto](/phonometry/es/simulation/remote-node/)
+[Enviar una simulación a un nodo remoto](/es/simulation/remote-node/)
 explica el fichero de hosts, la imagen del nodo y de qué se fía cada lado.
 
 ## Dónde se codifica un vídeo
@@ -140,7 +140,7 @@ que se pasa como `frame=`. Un GIF se escribe siempre en la CPU.
 Una animación que dibujas tú se codifica solo aquí: lo que viaja a un nodo es
 lo que la biblioteca puede volver a dibujar allí, las dos funciones que
 escriben simulaciones.
-[Escribir animaciones y simulaciones FDTD en vídeo](/phonometry/es/io/videos/)
+[Escribir animaciones y simulaciones FDTD en vídeo](/es/io/videos/)
 explica los contenedores, los códecs, los codificadores y los preajustes de
 calidad.
 
@@ -180,16 +180,16 @@ VAAPI y VideoToolbox se prueban y se usan, y no se comprueban en CI.
 
 ## Véase también
 
-- [Dónde se calcula una simulación: NumPy, CuPy y torch](/phonometry/es/simulation/compute/):
+- [Dónde se calcula una simulación: NumPy, CuPy y torch](/es/simulation/compute/):
   cada dispositivo, el bloque `use()`, `PHONOMETRY_COMPUTE`, `provenance` y
   lo que se promete en cada uno.
-- [Enviar una simulación a un nodo remoto](/phonometry/es/simulation/remote-node/):
+- [Enviar una simulación a un nodo remoto](/es/simulation/remote-node/):
   el fichero de hosts, la imagen del nodo y de qué se fía cada lado.
-- [Escribir animaciones y simulaciones FDTD en vídeo](/phonometry/es/io/videos/):
+- [Escribir animaciones y simulaciones FDTD en vídeo](/es/io/videos/):
   los contenedores, los códecs, los codificadores y los preajustes de
   calidad.
-- [Simulación de ondas FDTD 2D](/phonometry/es/simulation/fdtd-simulation/) y
-  [Ondas elásticas y acoplamiento fluido-sólido](/phonometry/es/simulation/elastic-waves/):
+- [Simulación de ondas FDTD 2D](/es/simulation/fdtd-simulation/) y
+  [Ondas elásticas y acoplamiento fluido-sólido](/es/simulation/elastic-waves/):
   los dos motores.
 
 </SeeAlso>

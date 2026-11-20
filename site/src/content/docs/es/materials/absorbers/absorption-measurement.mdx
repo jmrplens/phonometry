@@ -54,7 +54,7 @@ su clase por letra de la A a la E, el número único que citan las hojas de
 datos de los absorbentes. Y como un coeficiente sin su incertidumbre es solo
 medio resultado, ISO 12999-2 aporta la **incertidumbre de medida** de ambos.
 La contraparte a incidencia normal medida sobre muestras pequeñas vive en la
-guía del [tubo de impedancia](/phonometry/es/materials/absorbers/impedance-tube/); la
+guía del [tubo de impedancia](/es/materials/absorbers/impedance-tube/); la
 sección final, después de la incertidumbre, explica cuándo cada uno de los dos
 es la herramienta adecuada y por qué los dos números no coinciden.
 
@@ -177,7 +177,7 @@ plt.show()
 
 Los dos tiempos de reverberación son medidas de decaimiento corrientes (la
 maquinaria es la que se describe en
-[acústica de salas](/phonometry/es/buildings/rooms/room-acoustics/)), pero la
+[acústica de salas](/es/buildings/rooms/room-acoustics/)), pero la
 ISO 354 restringe la geometría y el promediado mucho más de lo que lo hace un
 ensayo general de sala, porque todo el resultado es la *diferencia* de dos
 números que a baja frecuencia son casi iguales.
@@ -255,13 +255,13 @@ catálogo de montajes que cita una hoja de características:
 El sufijo es una profundidad de cámara, y la profundidad de cámara mueve la
 respuesta más que la mayoría de las elecciones de material. Predecir la misma
 manta de 50 mm ($\sigma = 20$ kPa·s/m²) con los
-[modelos multicapa](/phonometry/es/materials/absorbers/porous-absorbers/) da
+[modelos multicapa](/es/materials/absorbers/porous-absorbers/) da
 $\alpha_\mathrm{w} = 0{,}70(\text{H})$, clase C, tendida como tipo A, y
 $\alpha_\mathrm{w} = 0{,}90$, clase A, sobre un montaje tipo E-400: dos clases para un
 mismo producto, porque los 350 mm de aire que quedan detrás llevan la capa al
 máximo de velocidad de partícula a 250 Hz (donde el coeficiente predicho pasa
 de 0,37 a 0,86); la guía de absorbentes porosos
-[reproduce esa jugada](/phonometry/es/materials/absorbers/porous-absorbers/#separar-la-capa-de-la-pared)
+[reproduce esa jugada](/es/materials/absorbers/porous-absorbers/#separar-la-capa-de-la-pared)
 en incidencia normal, con la capa alejándose de la pared y la velocidad que se
 encuentra. Un $\alpha_\mathrm{s}$ o un $\alpha_\mathrm{w}$ citados sin su montaje no son,
 por tanto, una propiedad del material, sino un resultado de instalación, y por
@@ -410,7 +410,7 @@ print(np.round(alpha, 3))                      # [0.398 0.448 0.498]
 ```
 
 $T_1$ y $T_2$ son exactamente los tiempos de reverberación que devuelve
-[`room_parameters`](/phonometry/es/buildings/rooms/room-acoustics/), así que una medición de decaimiento ISO 3382-2 de la sala
+[`room_parameters`](/es/buildings/rooms/room-acoustics/), así que una medición de decaimiento ISO 3382-2 de la sala
 vacía y tratada fluye directamente a `absorption_coefficient`.
 
 El objeto de resultado de la sección 1 conserva todos los intermedios de esa
@@ -560,7 +560,7 @@ completo. Y «a menudo no es adecuada para aplicarla a elementos individuales,
 como sillas, bafles, etc.» (cuya absorción es un área equivalente por objeto y
 no un coeficiente) «ni es aplicable a barreras de carretera ni a pavimentos de
 carretera», que tienen [EN 1793-1](#incertidumbre-de-medida-de-la-absorcion) e
-[ISO 13472](/phonometry/es/materials/surfaces/road-absorption/) propias. Por eso
+[ISO 13472](/es/materials/surfaces/road-absorption/) propias. Por eso
 la ficha imprime siempre el espectro completo junto al número único.
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/absorption_rating.svg" alt="Valoración ponderada de absorción acústica de ISO 11654: el espectro de absorción práctica trazado frente a la curva de referencia desplazada de 250 Hz a 4000 Hz, con la desviación desfavorable a 250 Hz sombreada y el coeficiente ponderado alpha_w leído a 500 Hz" width="80%" />
@@ -631,7 +631,7 @@ de onda, así que cada vez que se quiere bajar una octava la frecuencia útil ha
 que doblar el espesor o la profundidad de cámara, y la escalera es corta.
 Predecir un material de la clase de la lana mineral ($\sigma = 20$ kPa·s/m²)
 pegado contra una pared con los
-[modelos multicapa](/phonometry/es/materials/absorbers/porous-absorbers/) da un
+[modelos multicapa](/es/materials/absorbers/porous-absorbers/) da un
 coeficiente de incidencia aleatoria a 500 Hz de unos 0,32 para una manta de
 25 mm, 0,68 para 50 mm y 0,89 para 100 mm; a 250 Hz esos mismos tres dan 0,14,
 0,37 y 0,74. Separar la capa de 50 mm de la pared sobre una cámara de 100 mm
@@ -660,7 +660,7 @@ y un pie con el descargo fijo. Cuando la valoración se construyó con
 tabla completa de $\alpha_\mathrm{s}$ de tercio de octava de ISO 354 con el $\alpha_\mathrm{p}$ de
 octava en las filas correspondientes, tal como la imprimen los certificados
 acreditados. Usa el mismo contenedor `ReportMetadata` y el
-mismo motor de renderizado que la [ficha de aislamiento de ISO 717](/phonometry/es/buildings/insulation/insulation-ratings/#informe-de-iso-717-report);
+mismo motor de renderizado que la [ficha de aislamiento de ISO 717](/es/buildings/insulation/insulation-ratings/#informe-de-iso-717-report);
 pasar `metadata=None` produce una ficha ligera de predicción, y un `requirement`
 aportado se lee como el $\alpha_\mathrm{w}$ mínimo para el veredicto CUMPLE/NO CUMPLE.
 Con `verbose=True` la tabla cambia a las columnas de evaluación de ISO 11654
@@ -713,7 +713,7 @@ ISO 12999-2:2020 da la incertidumbre típica $u$ de las magnitudes que produce u
 medida en cámara reverberante (ISO 354) y sus valoraciones (ISO 11654, EN 1793-1),
 estimada a partir de ensayos interlaboratorio según ISO 5725. Es la compañera,
 en absorción acústica, de la incertidumbre de aislamiento de la ISO 12999-1
-([Medición del aislamiento en campo (ISO 16283)](/phonometry/es/buildings/insulation/insulation-field/)).
+([Medición del aislamiento en campo (ISO 16283)](/es/buildings/insulation/insulation-field/)).
 
 **Bandas de tercio de octava (apartado 5).** Para el coeficiente de absorción, la
 desviación típica de reproducibilidad es $\sigma_\mathrm{R} = m_\mathrm{R}\,\alpha_\mathrm{s} + n_\mathrm{R}$
@@ -833,7 +833,7 @@ de absorción», y los dos se confunden de forma rutinaria. Son magnitudes
 físicas distintas, medidas bajo campos sonoros distintos, y no coinciden, a
 veces ni de lejos.
 
-El [tubo](/phonometry/es/materials/absorbers/impedance-tube/) mide un coeficiente a **incidencia normal**: una onda plana, un
+El [tubo](/es/materials/absorbers/impedance-tube/) mide un coeficiente a **incidencia normal**: una onda plana, un
 ángulo, una probeta de unos centímetros y un factor de reflexión complejo que
 conserva módulo y fase. ISO 354 mide el coeficiente de **incidencia
 aleatoria** $\alpha_\mathrm{s}$: un campo difuso que golpea una muestra de 10 a 12 m²
@@ -856,7 +856,7 @@ deduce solo de la impedancia superficial normalizada, así que la integral tiene
 forma cerrada y un resultado de tubo se convierte en una línea:
 `materials.statistical_absorption(result.normalized_impedance)`, documentada
 con los
-[modelos multicapa](/phonometry/es/materials/absorbers/porous-absorbers/#4-incidencia-oblicua-y-aleatoria).
+[modelos multicapa](/es/materials/absorbers/porous-absorbers/#4-incidencia-oblicua-y-aleatoria).
 Lo que eso no puede hacer es cubrir una capa de **reacción volumétrica**, donde
 el comportamiento oblicuo depende de la refracción dentro del material y la
 integral hay que evaluarla ángulo a ángulo a partir de un modelo:
@@ -912,20 +912,20 @@ ambos. La valoración de ISO 11654 simplemente trunca: los coeficientes
 prácticos por encima de $1{,}00$ se fijan en $1{,}00$ (sección 3). Las
 entradas de predicción no reciben ese recorte silencioso en esta biblioteca:
 cada
-[estimador del tiempo de reverberación](/phonometry/es/buildings/rooms/reverberation-prediction/)
+[estimador del tiempo de reverberación](/es/buildings/rooms/reverberation-prediction/)
 aplica su propio dominio matemático, de modo que Sabine y Eyring aceptan los
 valores de ISO 354 iguales o superiores a uno tal cual (Eyring siempre que la
 absorción media quede por debajo de uno), mientras que Millington-Sette los
 rechaza (su logaritmo por superficie diverge en uno) y cualquier ajuste por
 debajo de uno queda en manos de quien llama. El balance de área de
 absorción equivalente de
-[EN 12354-6](/phonometry/es/buildings/rooms/enclosed-space-absorption/) también acepta
+[EN 12354-6](/es/buildings/rooms/enclosed-space-absorption/) también acepta
 los coeficientes tal cual se suministran.
 
 **Cuál usar.** Responden a preguntas distintas. El valor de cámara
 reverberante es el que alimenta la predicción en campo difuso: las
 estimaciones de reverberación de Sabine, las áreas de absorción equivalentes
-de [EN 12354-6](/phonometry/es/buildings/rooms/enclosed-space-absorption/) y la
+de [EN 12354-6](/es/buildings/rooms/enclosed-space-absorption/) y la
 valoración $\alpha_\mathrm{w}$ con su clase, todas las cuales esperan incidencia
 aleatoria sobre una muestra finita y montada (los tipos de montaje del Anexo B
 de ISO 354 existen porque el montaje es parte del resultado). El valor de tubo
@@ -933,7 +933,7 @@ es la herramienta de laboratorio y desarrollo: necesita solo unos centímetros
 cuadrados de material, resuelve módulo *y* fase, y su impedancia superficial
 fija los parámetros de los modelos de material poroso de la tradición de
 Allard y Atalla, con la
-[resistividad al flujo](/phonometry/es/materials/absorbers/airflow-resistance/) como
+[resistividad al flujo](/es/materials/absorbers/airflow-resistance/) como
 primera entrada; el modelo ajustado predice después la capa a cualquier ángulo,
 espesor o respaldo. Lo que el número del tubo *no* es, es un sustituto directo
 de $\alpha_\mathrm{s}$: alimentar coeficientes a incidencia normal en un balance de
@@ -978,7 +978,7 @@ volumen de la sala o el área de la probeta salen de los límites del apartado 6
 Tampoco entra en el alcance la propia medida del decaimiento: los métodos de
 ruido interrumpido y de respuesta al impulso integrada del apartado 7
 pertenecen a la [acústica de
-salas](/phonometry/es/buildings/rooms/room-acoustics/). La fórmula de
+salas](/es/buildings/rooms/room-acoustics/). La fórmula de
 incertidumbre de ISO 12999-2 para la valoración de número único de EN 1793-1
 $DL_{\alpha,\text{NRD}}$ está implementada, pero el propio método de medida in
 situ de EN 1793-1 (dispositivos reductores de ruido de tráfico rodado) no lo
@@ -990,27 +990,27 @@ está.
 
 ## Véase también
 
-- [Tubo de impedancia](/phonometry/es/materials/absorbers/impedance-tube/): la absorción,
+- [Tubo de impedancia](/es/materials/absorbers/impedance-tube/): la absorción,
   la impedancia superficial y la pérdida por transmisión a incidencia normal
   de muestras pequeñas, y por qué su coeficiente difiere de $\alpha_\mathrm{s}$.
-- [Resistencia al flujo de aire](/phonometry/es/materials/absorbers/airflow-resistance/):
+- [Resistencia al flujo de aire](/es/materials/absorbers/airflow-resistance/):
   la resistividad al flujo de ISO 9053 que ancla los modelos de material
   poroso detrás de la mayoría de los absorbentes.
-- [Absorbentes porosos y multicapa](/phonometry/es/materials/absorbers/porous-absorbers/):
+- [Absorbentes porosos y multicapa](/es/materials/absorbers/porous-absorbers/):
   predecir la absorción de una construcción antes de construirla.
-- [Acústica de salas](/phonometry/es/buildings/rooms/room-acoustics/): las medidas de
+- [Acústica de salas](/es/buildings/rooms/room-acoustics/): las medidas de
   decaimiento ISO 3382 que aportan los tiempos de reverberación $T_1$ y
   $T_2$.
-- [Predicción del tiempo de reverberación](/phonometry/es/buildings/rooms/reverberation-prediction/):
+- [Predicción del tiempo de reverberación](/es/buildings/rooms/reverberation-prediction/):
   los estimadores de Sabine, Eyring y Millington-Sette que consumen
   $\alpha_\mathrm{s}$.
-- [Área de absorción equivalente de recintos amueblados](/phonometry/es/buildings/rooms/enclosed-space-absorption/):
+- [Área de absorción equivalente de recintos amueblados](/es/buildings/rooms/enclosed-space-absorption/):
   el balance de absorción EN 12354-6 que alimentan estos coeficientes.
-- [Medición del aislamiento en campo (ISO 16283)](/phonometry/es/buildings/insulation/insulation-field/):
+- [Medición del aislamiento en campo (ISO 16283)](/es/buildings/insulation/insulation-field/):
   la norma de incertidumbre hermana del aislamiento acústico, ISO 12999-1.
-- Referencia de la API: [`materials.absorbers.sound_absorption`](/phonometry/es/reference/api/materials/sound-absorption/), [`materials.absorbers.rating`](/phonometry/es/reference/api/materials/rating/) y [`materials.absorbers.uncertainty`](/phonometry/es/reference/api/materials/uncertainty/).
-- Teoría: [Caracterización de materiales acústicos](/phonometry/es/reference/theory/materials-surfaces/#caracterizacion-de-materiales-acusticos-iso-11654-iso-9053-12-iso-10534-12-astm-e2611): la diferencia de decaimiento de ISO 354, la valoración ISO 11654 y de dónde salen los coeficientes prácticos.
-- [Catálogos publicados](/phonometry/es/reference/catalogues/absorption-coefficients/): los
+- Referencia de la API: [`materials.absorbers.sound_absorption`](/es/reference/api/materials/sound-absorption/), [`materials.absorbers.rating`](/es/reference/api/materials/rating/) y [`materials.absorbers.uncertainty`](/es/reference/api/materials/uncertainty/).
+- Teoría: [Caracterización de materiales acústicos](/es/reference/theory/materials-surfaces/#caracterizacion-de-materiales-acusticos-iso-11654-iso-9053-12-iso-10534-12-astm-e2611): la diferencia de decaimiento de ISO 354, la valoración ISO 11654 y de dónde salen los coeficientes prácticos.
+- [Catálogos publicados](/es/reference/catalogues/absorption-coefficients/): los
   coeficientes de absorción banda a banda que imprimen los libros, con el
   montaje sobre el que se midió cada uno.
 

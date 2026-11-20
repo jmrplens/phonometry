@@ -1,6 +1,6 @@
 <!-- Written by `make llms` from site/src/content/docs/vibration/structural/transfer-stiffness.mdx: edit that page and its Spanish twin, then run `make llms`. -->
 
-← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/vibration/structural/transfer-stiffness/
+← [Documentation index](../../README.md) · Published at https://phonometry.dev/vibration/structural/transfer-stiffness/
 
 # Transfer stiffness of resilient elements (ISO 10846)
 
@@ -765,7 +765,7 @@ Dynamic-transfer-stiffness fiche (TransferStiffnessResult.report): the FRF chara
 - [Installed structure-borne sound (EN 12354-5)](../../buildings/design/installed-structure-borne.md):
   the prediction that consumes $k_{2,1}$ together with both mobilities and
   turns it into a level in a receiving room.
-- API reference: [`vibration.structural.transfer_stiffness`](https://docs.jmrp.io/phonometry/reference/api/vibration/transfer-stiffness/) and [`vibration.structural.mechanical_mobility`](https://docs.jmrp.io/phonometry/reference/api/vibration/mechanical-mobility/).
+- API reference: [`vibration.structural.transfer_stiffness`](https://phonometry.dev/reference/api/vibration/transfer-stiffness/) and [`vibration.structural.mechanical_mobility`](https://phonometry.dev/reference/api/vibration/mechanical-mobility/).
 - Theory: [Point mobilities and radiation efficiency](../../reference/theory/vibration.md#point-mobilities-and-radiation-efficiency-cremer-5-hopkins-29): the mobility and impedance definitions the transfer stiffness is the reciprocal of.
 
 ## References

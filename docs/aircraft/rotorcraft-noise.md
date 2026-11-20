@@ -1,6 +1,6 @@
 <!-- Written by `make llms` from site/src/content/docs/aircraft/rotorcraft-noise.mdx: edit that page and its Spanish twin, then run `make llms`. -->
 
-← [Documentation index](../README.md) · Published at https://docs.jmrp.io/phonometry/aircraft/rotorcraft-noise/
+← [Documentation index](../README.md) · Published at https://phonometry.dev/aircraft/rotorcraft-noise/
 
 # Rotorcraft noise: the hemisphere method
 
@@ -1012,7 +1012,7 @@ itself rests on the closed-form anchors and its CNOSSOS-EU lineage.
 - [Outdoor sound propagation](../environment/propagation/outdoor-propagation.md):
   the ISO 9613-2 ground effect and the CNOSSOS ground classes this two-ray
   adjustment shares.
-- API reference: [`aircraft.rotorcraft_noise`](https://docs.jmrp.io/phonometry/reference/api/aeroacoustics/rotorcraft-noise/).
+- API reference: [`aircraft.rotorcraft_noise`](https://phonometry.dev/reference/api/aeroacoustics/rotorcraft-noise/).
 
 ## References
 

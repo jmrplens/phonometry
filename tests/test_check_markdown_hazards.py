@@ -488,16 +488,16 @@ def test_a_same_page_link_to_an_accented_heading_is_refused() -> None:
 
 def test_a_link_to_an_accented_heading_on_another_page_is_refused() -> None:
     """The audit of the published site found 150 of these, all cross-page."""
-    text = "See [it](/phonometry/es/reference/theory/vibration/#la-medición).\n"
+    text = "See [it](/es/reference/theory/vibration/#la-medición).\n"
     problems = cmh.check_text(text, "p.md")
     assert len(problems) == 1
-    assert "'/phonometry/es/reference/theory/vibration/#la-medición'" in problems[0]
+    assert "'/es/reference/theory/vibration/#la-medición'" in problems[0]
 
 
 @pytest.mark.parametrize(
     "text",
     [
-        "See [it](/phonometry/es/reference/theory/vibration/#la-medicion).\n",
+        "See [it](/es/reference/theory/vibration/#la-medicion).\n",
         "See [it](https://es.wikipedia.org/wiki/Ac%C3%BAstica#Historia).\n",
         "See [it](https://es.wikipedia.org/wiki/Acústica#Física).\n",
     ],

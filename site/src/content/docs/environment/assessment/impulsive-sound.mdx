@@ -132,7 +132,7 @@ print(round(environment.rating_level([72.0, 66.0], [7.6, 0.0], [30.0, 30.0], 60.
 The `ImpulseProminenceResult` carries the `per_impulse` prominences, the governing
 `prominence` and its `adjustment`, and its `.plot()` draws the $K_\mathrm{I}(P)$ curve
 with the impulses marked. The method is a supplement to the environmental-noise
-measurement of [ISO 1996-2](/phonometry/environment/assessment/environmental-levels/).
+measurement of [ISO 1996-2](/environment/assessment/environmental-levels/).
 
 <ThemeImage
   src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/impulse_prominence.svg"
@@ -360,7 +360,7 @@ verdict row and a prominence-category note, and a footer with the fixed
 disclaimer.
 
 It uses the same `ReportMetadata` container and rendering engine as the
-[ISO 532-1 loudness fiche](/phonometry/perception/psychoacoustics/loudness/#iso-532-1-report-report);
+[ISO 532-1 loudness fiche](/perception/psychoacoustics/loudness/#iso-532-1-report-report);
 a supplied `requirement` is read as the maximum acceptable governing prominence
 $P$ (a less prominent impulse passes). Rendering needs reportlab and, for the
 figure the fiche embeds, matplotlib (`pip install "phonometry[report,plot]"`);
@@ -424,7 +424,7 @@ function of their own.
 
 ## See also
 
-- API reference: [`environment.assessment.impulsive_sound`](/phonometry/reference/api/environment/impulsive-sound/).
-- Theory: [Impulsive-sound prominence (NT ACOU 112)](/phonometry/reference/theory/environment-transport/#impulsive-sound-prominence-nt-acou-112): the NT ACOU 112 prominence derivation and the onset criterion it rests on.
+- API reference: [`environment.assessment.impulsive_sound`](/reference/api/environment/impulsive-sound/).
+- Theory: [Impulsive-sound prominence (NT ACOU 112)](/reference/theory/environment-transport/#impulsive-sound-prominence-nt-acou-112): the NT ACOU 112 prominence derivation and the onset criterion it rests on.
 
 </SeeAlso>

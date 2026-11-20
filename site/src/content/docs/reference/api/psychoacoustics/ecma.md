@@ -98,7 +98,7 @@ with `bark` the critical-band-rate scale z (0.5..26.5 Bark_HMS) and
 `basis_loudness_vs_time` is the total basis loudness N_basis(l) in
 sone_HMS (Formula 26) at the same `times`, the quantity Clause 5.1.9
 compares with its audibility criterion,
-[`AUDIBILITY_THRESHOLD_SONE_HMS`](/phonometry/reference/api/psychoacoustics/ecma/#audibility_threshold_sone_hms) (0.01 sone_HMS). It is the
+[`AUDIBILITY_THRESHOLD_SONE_HMS`](/reference/api/psychoacoustics/ecma/#audibility_threshold_sone_hms) (0.01 sone_HMS). It is the
 specific basis loudness N'_basis(l, z) of Formula (25), the front-end's
 output before the tonal and noise split, summed over the 53 bands with
 dz = 0.5. Each band computes it at its own block size, the segmentation
@@ -176,11 +176,11 @@ Psychoacoustic loudness per ECMA-418-2:2025 (Sottek Hearing Model).
 
 | Name | Description |
 | :--- | :--- |
-| `x` | Calibrated sound pressure signal in pascals. Accepts a [`phonometry.io.Signal`](/phonometry/reference/api/io/io/#signal), which is where "calibrated" comes from without arithmetic: this model reads absolute levels, so an uncalibrated record is taken as if one digital unit were one pascal and the answer is wrong by however far that is from true. |
-| `fs` | Sampling rate in Hz. Signals not at 48 kHz are resampled (Clause 5.1.1). Required for a bare array; a [`Signal`](/phonometry/reference/api/io/io/#signal) brings its own, and an explicit value that disagrees with it raises instead of silently winning. |
+| `x` | Calibrated sound pressure signal in pascals. Accepts a [`phonometry.io.Signal`](/reference/api/io/io/#signal), which is where "calibrated" comes from without arithmetic: this model reads absolute levels, so an uncalibrated record is taken as if one digital unit were one pascal and the answer is wrong by however far that is from true. |
+| `fs` | Sampling rate in Hz. Signals not at 48 kHz are resampled (Clause 5.1.1). Required for a bare array; a [`Signal`](/reference/api/io/io/#signal) brings its own, and an explicit value that disagrees with it raises instead of silently winning. |
 | `field` | `"free"` (default) or `"diffuse"` sound field, selecting the outer/middle-ear filter of Clause 5.1.3. |
 
-**Returns:** An [`EcmaLoudness`](/phonometry/reference/api/psychoacoustics/ecma/#ecmaloudness) with the single loudness value N (Formula 117), the average specific loudness N'(z) (Formula 115), the time-dependent loudness N(l) (Formula 116), the total basis loudness N_basis(l) (Formula 26) the audibility criterion of Clause 5.1.9 is compared with, and the last evaluated block l_end (Formula 40).
+**Returns:** An [`EcmaLoudness`](/reference/api/psychoacoustics/ecma/#ecmaloudness) with the single loudness value N (Formula 117), the average specific loudness N'(z) (Formula 115), the time-dependent loudness N(l) (Formula 116), the total basis loudness N_basis(l) (Formula 26) the audibility criterion of Clause 5.1.9 is compared with, and the last evaluated block l_end (Formula 40).
 
 **Raises**
 

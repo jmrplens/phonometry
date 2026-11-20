@@ -1,6 +1,6 @@
 <!-- Written by `make llms` from site/src/content/docs/signals/filters/filter-banks.mdx: edit that page and its Spanish twin, then run `make llms`. -->
 
-← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/signals/filters/filter-banks/
+← [Documentation index](../../README.md) · Published at https://phonometry.dev/signals/filters/filter-banks/
 
 # Octave and Fractional-Octave Filter Banks
 
@@ -687,7 +687,7 @@ to 3.3 changed after PyOctaveBand 2.0.0.
 - [Filter Class Verification (IEC 61260-1)](filter-compliance.md):
   the Table 1 acceptance mask, class 0 and the compliance fiche of the banks
   designed here.
-- API reference: [`phonometry`](https://docs.jmrp.io/phonometry/reference/api/filters/phonometry/), [`filters.core`](https://docs.jmrp.io/phonometry/reference/api/filters/core/) and [`filters.weighting`](https://docs.jmrp.io/phonometry/reference/api/filters/weighting/).
+- API reference: [`phonometry`](https://phonometry.dev/reference/api/filters/phonometry/), [`filters.core`](https://phonometry.dev/reference/api/filters/core/) and [`filters.weighting`](https://phonometry.dev/reference/api/filters/weighting/).
 - Theory: [Octave Band Frequencies](../../reference/theory/signal-analysis.md#octave-band-frequencies-ansi-s111--iec-61260): where the base-10 midband grid and the band edges come from, and why the bank is designed on them rather than on nominal labels.
 
 ## Quick answers

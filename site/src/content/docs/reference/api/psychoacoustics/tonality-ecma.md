@@ -13,8 +13,8 @@ Clean-room implementation of the tonality signal chain of ECMA-418-2:2025
 (Clause 6.2). The shared auditory front-end (Clause 5) and the ACF-based
 tonal/noise decomposition with the full Clause 6.2.3 band averaging
 (Clause 6.2.2-6.2.7,
-[`phonometry.psychoacoustics.loudness.ecma._tonal_noise_split`](/phonometry/reference/api/psychoacoustics/ecma/)) are
-reused from [`phonometry.psychoacoustics.loudness.ecma`](/phonometry/reference/api/psychoacoustics/ecma/), so loudness and
+[`phonometry.psychoacoustics.loudness.ecma._tonal_noise_split`](/reference/api/psychoacoustics/ecma/)) are
+reused from [`phonometry.psychoacoustics.loudness.ecma`](/reference/api/psychoacoustics/ecma/), so loudness and
 tonality therefore report the same underlying `N'_tonal(l, z)` for the same
 signal; this module adds
 
@@ -118,13 +118,13 @@ Psychoacoustic tonality per ECMA-418-2:2025 (Sottek Hearing Model).
 
 | Name | Description |
 | :--- | :--- |
-| `x` | Calibrated sound pressure signal in pascals. Accepts a [`phonometry.io.Signal`](/phonometry/reference/api/io/io/#signal), which is where "calibrated" comes from without arithmetic: this model reads absolute levels, so an uncalibrated record is taken as if one digital unit were one pascal and the answer is wrong by however far that is from true. |
-| `fs` | Sampling rate in Hz. Signals not at 48 kHz are resampled (Clause 5.1.1). Required for a bare array; a [`Signal`](/phonometry/reference/api/io/io/#signal) brings its own, and an explicit value that disagrees with it raises instead of silently winning. |
+| `x` | Calibrated sound pressure signal in pascals. Accepts a [`phonometry.io.Signal`](/reference/api/io/io/#signal), which is where "calibrated" comes from without arithmetic: this model reads absolute levels, so an uncalibrated record is taken as if one digital unit were one pascal and the answer is wrong by however far that is from true. |
+| `fs` | Sampling rate in Hz. Signals not at 48 kHz are resampled (Clause 5.1.1). Required for a bare array; a [`Signal`](/reference/api/io/io/#signal) brings its own, and an explicit value that disagrees with it raises instead of silently winning. |
 | `field` | `"free"` (default) or `"diffuse"` sound field, selecting the outer/middle-ear filter of Clause 5.1.3. |
 | `f_low` | Optional lower edge (Hz) of a user frequency band for the time-dependent tonality maximum search (Formulae 56-60). `None` uses the full range. |
 | `f_high` | Optional upper edge (Hz) of the user frequency band. |
 
-**Returns:** An [`EcmaTonality`](/phonometry/reference/api/psychoacoustics/tonality-ecma/#ecmatonality) with the single value T (Formula 63), the average specific tonality T'(z) (Formula 53), the tonal frequencies f_ton,z(z) (Formula 55) and the time-dependent tonality T(l) (Formula 61) with its frequency (Formula 62).
+**Returns:** An [`EcmaTonality`](/reference/api/psychoacoustics/tonality-ecma/#ecmatonality) with the single value T (Formula 63), the average specific tonality T'(z) (Formula 53), the tonal frequencies f_ton,z(z) (Formula 55) and the time-dependent tonality T(l) (Formula 61) with its frequency (Formula 62).
 
 **Raises**
 

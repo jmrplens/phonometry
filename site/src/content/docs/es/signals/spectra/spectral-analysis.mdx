@@ -91,7 +91,7 @@ media o filtra el registro en paso alto explícitamente antes de la llamada (eso
 es un cambio en la *señal*, no un ajuste del estimador), y ten en cuenta que ese
 mismo desplazamiento es invisible en una representación en fracciones de octava,
 porque ninguna banda llega a continua. La misma condición reaparece en
-[Cualificación de datos](/phonometry/es/signals/metrology/data-qualification/),
+[Cualificación de datos](/es/signals/metrology/data-qualification/),
 cuyos estadísticos de cruce de nivel y de picos están escritos para un proceso de
 media nula.
 
@@ -204,7 +204,7 @@ Alargar los segmentos sin alargar el registro cambia un error por el otro y no
 compra nada. Y 150 s de registro son 150 s durante los cuales el proceso tiene
 que mantenerse estacionario, lo cual es una afirmación y no una suposición, y es
 la que decide
-[Cualificación de datos](/phonometry/es/signals/metrology/data-qualification/).
+[Cualificación de datos](/es/signals/metrology/data-qualification/).
 Cuando el registro sencillamente no puede ser tan largo, la salida es el
 estimador multitaper del §7.
 
@@ -227,7 +227,7 @@ contiene un informe acústico, integra la densidad en la banda (suma los bins y
 multiplica por la separación entre bins) y divide por $p_0^2$;
 `fractional_octave_smoothing` del §4 es un suavizador de representación y no un
 sustituto de esa integración, como detalla ese mismo apartado. El factor sale de
-[Calibración y dBFS](/phonometry/es/signals/metrology/calibration/).
+[Calibración y dBFS](/es/signals/metrology/calibration/).
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/psd_confidence_smoothing.svg" alt="Densidad espectral de potencia de Welch de ruido rosa en dB por Hz entre 20 Hz y 20 kHz, con la banda de confianza chi-cuadrado del 95 por ciento sombreada alrededor de la estimación, la curva suavizada en 1/3 de octava encima y la ley de potencias exacta de -3,01 dB por octava como línea discontinua de referencia" width="82%" loading="eager" />
 
@@ -475,10 +475,10 @@ distintos:
 | Lo que ves | La causa | El arreglo |
 | :--- | :--- | :--- |
 | Coherencia plana en toda la banda, coherente con $\gamma^2 = \mathrm{SNR}/(1+\mathrm{SNR})$ | ruido no correlacionado en alguno de los sensores, el caso modelado del §3 | promedia más, sube el nivel, acércate |
-| Coherencia que cae progresivamente con la frecuencia, peor cuanto más corto se segmenta el registro | un retardo global de propagación comparable con la longitud del segmento | alinea antes los registros, o sube `nperseg` muy por encima del retardo; ver [Correlación y retardo](/phonometry/es/signals/spectra/correlation-delay/) |
+| Coherencia que cae progresivamente con la frecuencia, peor cuanto más corto se segmenta el registro | un retardo global de propagación comparable con la longitud del segmento | alinea antes los registros, o sube `nperseg` muy por encima del retardo; ver [Correlación y retardo](/es/signals/spectra/correlation-delay/) |
 | Hundimientos abruptos justo en las resonancias | sesgo de resolución: el ancho de banda de análisis emborrona el pico de forma distinta en cada canal | alarga el segmento; la fórmula de $\varepsilon_\mathrm{b}$ del §1 dice cuánto |
 | Baja en los armónicos de un tono fuerte mientras la coherencia de banda ancha sigue alta | no linealidad, un traqueteo o un canal recortado | arregla el camino, o trabaja por debajo del nivel al que aparece |
-| Baja en toda una banda sin estructura evidente | una segunda fuente no correlacionada está excitando también la salida | la [página de MISO](/phonometry/es/signals/spectra/miso-coherence/): una entrada no puede explicar dos fuentes |
+| Baja en toda una banda sin estructura evidente | una segunda fuente no correlacionada está excitando también la salida | la [página de MISO](/es/signals/spectra/miso-coherence/): una entrada no puede explicar dos fuentes |
 
 Dos advertencias de cierre. La estimación de coherencia está sesgada **al alza**
 en $(1-\gamma^2)^2/n_\mathrm{d}$, así que una coherencia baja leída con un puñado de
@@ -557,7 +557,7 @@ Qué representación va dónde: la **densidad suavizada** para comparar respuest
 en magnitud de altavoces y salas, donde el ojo quiere una curva a resolución
 relativa constante; el **nivel de banda** para todo lo que se enfrente a un
 criterio, o que tenga que cuadrar con `octave_filter` y `OctaveFilterBank`; ver
-[Niveles](/phonometry/es/signals/levels/levels/).
+[Niveles](/es/signals/levels/levels/).
 
 ## 5. Generadores de ruido de colores
 
@@ -606,7 +606,7 @@ ruido blanco que sube no es ningún defecto. El ruido rojo cae 3 dB por octava e
 una representación por bandas y el azul sube 6. Los mismos +3 dB por octava valen
 para cualquier comparación de densidad frente a banda en esta biblioteca; el §4
 de arriba da la conversión exacta, y en
-[Niveles](/phonometry/es/signals/levels/levels/) vive el lado de las bandas.
+[Niveles](/es/signals/levels/levels/) vive el lado de las bandas.
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/noise_colors.svg" alt="Densidades espectrales de Welch de los cinco colores de ruido entre 20 hercios y 20 kilohercios, cada una normalizada a su propio nivel en 1 kilohercio de modo que las cinco rectas se abren en abanico desde un único punto: el violeta subiendo a 6 dB por octava, el azul a 3, el blanco plano, el rosa cayendo a 3 y el rojo a 6, cada uno con su ley de potencias exacta discontinua debajo y la pendiente de regresión medida en la leyenda" width="88%" />
 
@@ -841,11 +841,11 @@ completa y ambos estimadores coinciden.
 ## Congruencia con los estimadores de respuesta en frecuencia y de intensidad
 
 Los [estimadores de respuesta en
-frecuencia](/phonometry/es/devices/electroacoustics/electroacoustics/) forman los
+frecuencia](/es/devices/electroacoustics/electroacoustics/) forman los
 mismos espectros cruzados en una función de transferencia ($H_1 = G_{xy}/G_{xx}$,
 insesgado cuando el ruido está en la salida, y $H_2 = G_{yy}/G_{yx}$, insesgado
 cuando está en la entrada), y la sonda de
-[intensidad acústica](/phonometry/es/devices/emission/intensity/) de dos micrófonos
+[intensidad acústica](/es/devices/emission/intensity/) de dos micrófonos
 forma la parte imaginaria de $G_{xy}$. Esos estimadores,
 `transfer_function` y `coherence`, la sonda de intensidad y
 estos estimadores comparten un único núcleo de Welch (misma ventana, misma
@@ -853,7 +853,7 @@ política de solape y calibración sin eliminación de tendencia), así que una
 PSD, una coherencia y una $H_1$ calculadas con la misma longitud de segmento
 son mutuamente congruentes bin a bin. La misma matriz de espectros cruzados
 sustenta la [coherencia múltiple y
-parcial](/phonometry/es/signals/spectra/miso-coherence/),
+parcial](/es/signals/spectra/miso-coherence/),
 que extiende la coherencia ordinaria a varias entradas correlacionadas y una
 salida.
 
@@ -876,10 +876,10 @@ caja de herramientas.
 Los estimadores de respuesta en frecuencia `transfer_function` y `coherence`,
 y la sonda de intensidad acústica, comparten el núcleo de Welch de esta página
 pero se documentan en las páginas de
-[electroacústica](/phonometry/es/devices/electroacoustics/electroacoustics/) y
-[intensidad acústica](/phonometry/es/devices/emission/intensity/), no aquí. Lo
+[electroacústica](/es/devices/electroacoustics/electroacoustics/) y
+[intensidad acústica](/es/devices/emission/intensity/), no aquí. Lo
 mismo ocurre con la coherencia múltiple y parcial, en la página de [coherencia
-MISO](/phonometry/es/signals/spectra/miso-coherence/). Esta página implementa
+MISO](/es/signals/spectra/miso-coherence/). Esta página implementa
 los estimadores del libro de Bendat y Piersol, no una norma de certificación,
 así que no lleva números de apartado ni límites de cumplimiento que comprobar.
 </ScopeClaim>
@@ -889,12 +889,12 @@ así que no lleva números de apartado ni límites de cumplimiento que comprobar
 
 ## Véase también
 
-- [Cualificación de datos](/phonometry/es/signals/metrology/data-qualification/): la estacionariedad que da por supuesta todo intervalo chi-cuadrado de esta página.
-- [Calibración y dBFS](/phonometry/es/signals/metrology/calibration/): de dónde sale el factor que convierte las densidades de esta página en Pa²/Hz.
-- [Coherencia MISO](/phonometry/es/signals/spectra/miso-coherence/): la misma matriz de espectros cruzados con varias entradas correlacionadas.
-- [Análisis tiempo-frecuencia](/phonometry/es/signals/spectra/time-frequency/): la misma segmentación de Welch representada en lugar de promediada.
-- [Niveles](/phonometry/es/signals/levels/levels/): el lado de los niveles de banda de la conversión densidad/banda del §4.
-- Referencia de la API: [`signals.spectra`](/phonometry/es/reference/api/signals/spectra/), [`signals.windows`](/phonometry/es/reference/api/signals/windows/) y [`signals.multitaper`](/phonometry/es/reference/api/signals/multitaper/).
-- Teoría: [Resolución frecuencial vs separación de bins FFT](/phonometry/es/reference/theory/signal-analysis/#resolucion-frecuencial-vs-separacion-de-bins-fft): por qué la separación de bins de una FFT no es la resolución de la estimación, y qué le hace la ventana a ambas.
+- [Cualificación de datos](/es/signals/metrology/data-qualification/): la estacionariedad que da por supuesta todo intervalo chi-cuadrado de esta página.
+- [Calibración y dBFS](/es/signals/metrology/calibration/): de dónde sale el factor que convierte las densidades de esta página en Pa²/Hz.
+- [Coherencia MISO](/es/signals/spectra/miso-coherence/): la misma matriz de espectros cruzados con varias entradas correlacionadas.
+- [Análisis tiempo-frecuencia](/es/signals/spectra/time-frequency/): la misma segmentación de Welch representada en lugar de promediada.
+- [Niveles](/es/signals/levels/levels/): el lado de los niveles de banda de la conversión densidad/banda del §4.
+- Referencia de la API: [`signals.spectra`](/es/reference/api/signals/spectra/), [`signals.windows`](/es/reference/api/signals/windows/) y [`signals.multitaper`](/es/reference/api/signals/multitaper/).
+- Teoría: [Resolución frecuencial vs separación de bins FFT](/es/reference/theory/signal-analysis/#resolucion-frecuencial-vs-separacion-de-bins-fft): por qué la separación de bins de una FFT no es la resolución de la estimación, y qué le hace la ventana a ambas.
 
 </SeeAlso>

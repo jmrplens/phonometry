@@ -62,10 +62,10 @@ amplitude and `A_P` the piston cross-sectional area.
 The **effective** ratio of specific heats `kappa'` accounts for heat conduction
 between the oscillating air and the cavity walls, which makes the compression not
 fully adiabatic. ISO 9053-2:2020 Annex A (normative) gives its evaluation from the
-cavity geometry and air properties ([`effective_kappa`](/phonometry/reference/api/materials/airflow-resistance/#effective_kappa), Formula (A.7)); the
+cavity geometry and air properties ([`effective_kappa`](/reference/api/materials/airflow-resistance/#effective_kappa), Formula (A.7)); the
 Annex A.3 worked example yields $\kappa' = 1.370$ (about 2 % below the
 adiabatic $\kappa = 1.4008$). When no cavity/air data are supplied,
-[`alternating_airflow_resistance`](/phonometry/reference/api/materials/airflow-resistance/#alternating_airflow_resistance) falls back to the **uncorrected adiabatic**
+[`alternating_airflow_resistance`](/reference/api/materials/airflow-resistance/#alternating_airflow_resistance) falls back to the **uncorrected adiabatic**
 value $\kappa = 1.4$ (Formula (A.1)); for a conforming result compute
 `kappa'` per Annex A and pass it explicitly.
 
@@ -154,15 +154,15 @@ Pa\*s/m3.
 `kappa_prime` defaults to the **uncorrected adiabatic**
 $\kappa = 1.4$ (Formula (A.1)). For a result conforming to the
 normative Annex A, compute the heat-conduction-corrected `kappa'` with
-[`effective_kappa`](/phonometry/reference/api/materials/airflow-resistance/#effective_kappa) from the cavity geometry and pass it here (the
+[`effective_kappa`](/reference/api/materials/airflow-resistance/#effective_kappa) from the cavity geometry and pass it here (the
 Annex A.3 example gives $\kappa' = 1.370$).
 
-Emits [`AirflowResistanceWarning`](/phonometry/reference/api/materials/airflow-resistance/#airflowresistancewarning) when the piston frequency is outside
+Emits [`AirflowResistanceWarning`](/reference/api/materials/airflow-resistance/#airflowresistancewarning) when the piston frequency is outside
 1-4 Hz or when the Formula (3)/(4) validity criteria are not met. Clause 6.2
 recommends a specimen flow velocity between 0.5 mm/s and 4 mm/s as well,
 and that recommendation is not checked here: the velocity follows from the
 piston area and the specimen area, and this function is handed neither. Compute it
-with [`piston_volume_flow_rate`](/phonometry/reference/api/materials/airflow-resistance/#piston_volume_flow_rate) and [`linear_airflow_velocity`](/phonometry/reference/api/materials/airflow-resistance/#linear_airflow_velocity) if
+with [`piston_volume_flow_rate`](/reference/api/materials/airflow-resistance/#piston_volume_flow_rate) and [`linear_airflow_velocity`](/reference/api/materials/airflow-resistance/#linear_airflow_velocity) if
 the rig is near either end of the range.
 
 **Raises**
@@ -197,16 +197,16 @@ $$
 $$
 
 with `b` the thermal boundary-layer thickness (Formulae (A.4)/(A.5),
-[`thermal_boundary_layer_thickness`](/phonometry/reference/api/materials/airflow-resistance/#thermal_boundary_layer_thickness)), `S` the total internal surface area
+[`thermal_boundary_layer_thickness`](/reference/api/materials/airflow-resistance/#thermal_boundary_layer_thickness)), `S` the total internal surface area
 of the air cavity (m2) and `V` its volume (m3).
 
 `cavity_surface` is `S` (m2), `cavity_volume` `V` (m3) and `frequency`
 the piston frequency `f` (Hz). The adiabatic `kappa` and every other air
-property come from `fluid`, which defaults to [`ANNEX_A_AIR`](/phonometry/reference/api/materials/airflow-resistance/#annex_a_air), the
+property come from `fluid`, which defaults to [`ANNEX_A_AIR`](/reference/api/materials/airflow-resistance/#annex_a_air), the
 Annex A.3 reference state computed from IEC 61094-2:2009 Annex F (see
-[`thermal_boundary_layer_thickness`](/phonometry/reference/api/materials/airflow-resistance/#thermal_boundary_layer_thickness) on why those differ from the pair
+[`thermal_boundary_layer_thickness`](/reference/api/materials/airflow-resistance/#thermal_boundary_layer_thickness) on why those differ from the pair
 Annex A.3 prints). Returns the dimensionless `kappa'` for use in
-[`alternating_airflow_resistance`](/phonometry/reference/api/materials/airflow-resistance/#alternating_airflow_resistance); the Annex A.3 worked example
+[`alternating_airflow_resistance`](/reference/api/materials/airflow-resistance/#alternating_airflow_resistance); the Annex A.3 worked example
 ($S = 0.0471$ m2, $V = 7.854\times 10^{-4}$ m3,
 $f = 2$ Hz) yields $\kappa' = 1.370$.
 
@@ -314,7 +314,7 @@ and `thickness_m` the specimen thickness `d` (m, optional, enabling
 Because $R_\mathrm{s} = \Delta p / u = a + b u$, the returned
 `linear_coefficient` `a` is the zero-velocity specific airflow
 resistance. A velocity above the clause 7.5 upper limit (15 mm/s) raises
-[`AirflowResistanceWarning`](/phonometry/reference/api/materials/airflow-resistance/#airflowresistancewarning).
+[`AirflowResistanceWarning`](/reference/api/materials/airflow-resistance/#airflowresistancewarning).
 
 **Raises**
 
@@ -411,7 +411,7 @@ place (mm/s).
 | Name | Description |
 | :--- | :--- |
 | `path` | Destination path of the PDF file. |
-| `metadata` | Optional [`ReportMetadata`](/phonometry/reference/api/building/insulation/#reportmetadata); `None` produces a body-and-disclaimer fiche. The applicable descriptive fields are `client`, `manufacturer`, `specimen`, `thickness_m` (the specimen thickness `d`, in metres, shown in millimetres), `test_room`, `test_date`, `temperature_c`, `relative_humidity_percent`, `measurement_standard`, `laboratory`, `operator`, `report_id` and `notes`. The `requirement` field is ignored (ISO 9053-1 has no verdict). |
+| `metadata` | Optional [`ReportMetadata`](/reference/api/building/insulation/#reportmetadata); `None` produces a body-and-disclaimer fiche. The applicable descriptive fields are `client`, `manufacturer`, `specimen`, `thickness_m` (the specimen thickness `d`, in metres, shown in millimetres), `test_room`, `test_date`, `temperature_c`, `relative_humidity_percent`, `measurement_standard`, `laboratory`, `operator`, `report_id` and `notes`. The `requirement` field is ignored (ISO 9053-1 has no verdict). |
 | `engine` | Rendering back end; only `"reportlab"` is supported. |
 | `verbose` | Accepted for a uniform `.report()` signature; the airflow-resistance fiche has a single body layout, so it has no effect. |
 | `language` | Fiche language: `"en"` (default, English, decimal point) or `"es"` (Spanish, decimal comma). |
@@ -447,7 +447,7 @@ $$
 
 `frequency` is the piston frequency `f` (Hz). The air properties `c0`,
 `rho0`, `C_P` and `k_a` come from `fluid`, which defaults to
-[`ANNEX_A_AIR`](/phonometry/reference/api/materials/airflow-resistance/#annex_a_air): air at 23 degC, 101 325 Pa and 50 % relative humidity
+[`ANNEX_A_AIR`](/reference/api/materials/airflow-resistance/#annex_a_air): air at 23 degC, 101 325 Pa and 50 % relative humidity
 computed from IEC 61094-2:2009 Annex F. Note that `c0` cancels: `b` is
 $\sqrt{2 k_\mathrm{a} / (\rho_0 C_\mathrm{P} \omega)}$, so only the pair
 `k_a`/`C_P` and the density move it.

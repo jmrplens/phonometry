@@ -18,9 +18,9 @@ prediction has something published to sit beside.
 
 Three quantities, and never two on one row
 ------------------------------------------
-Tables 32.1 to 32.7 print [`ImpactInsulation.impact_insulation_class`](/phonometry/reference/api/building/impact-catalogue/#impactinsulation),
+Tables 32.1 to 32.7 print [`ImpactInsulation.impact_insulation_class`](/reference/api/building/impact-catalogue/#impactinsulation),
 the IIC of a whole floor-ceiling assembly. Table 32.8 prints
-[`ImpactInsulation.impact_insulation_class_improvement`](/phonometry/reference/api/building/impact-catalogue/#impactinsulation), the delta-IIC a
+[`ImpactInsulation.impact_insulation_class_improvement`](/reference/api/building/impact-catalogue/#impactinsulation), the delta-IIC a
 surface treatment adds to a hard massive floor. They are different quantities
 and no row of this catalogue carries both: one is a rating, the other is a
 difference between two ratings, and a caller who added the second to the first
@@ -28,7 +28,7 @@ would be adding a difference to an absolute with nothing in the arithmetic to
 say so. Both are dimensionless.
 
 The first edition of the handbook, in its Spanish translation of 1977, prints
-a third: [`ImpactInsulation.impact_sound_improvement`](/phonometry/reference/api/building/impact-catalogue/#impactinsulation), the average
+a third: [`ImpactInsulation.impact_sound_improvement`](/reference/api/building/impact-catalogue/#impactinsulation), the average
 improvement in impact sound insulation a finish, a floating screed or a timber
 floor gives over a bare concrete slab, in decibels. It predates the IIC and is
 not one: it is a level difference averaged over frequency, and nothing on the
@@ -53,20 +53,20 @@ printed number is the key of the row: `"harris-1995-tables-32-1-to-32-8/34A"`
 is the row the page calls 34A. It has to be, because about a dozen descriptions
 are printed in full and refer to another row rather than repeating the
 structural floor: "Igual que 1 salvo que...", "Mismo suelo estructural que el
-18". The printed text is kept whole in [`name`](/phonometry/reference/api/io/io/#cataloguerow), the row it
-points at is in [`ImpactInsulation.refers_to_row`](/phonometry/reference/api/building/impact-catalogue/#impactinsulation), and resolving it is one
+18". The printed text is kept whole in [`name`](/reference/api/io/io/#cataloguerow), the row it
+points at is in [`ImpactInsulation.refers_to_row`](/reference/api/building/impact-catalogue/#impactinsulation), and resolving it is one
 lookup: `PUBLISHED_IMPACT_INSULATION[f"{row.table}/{row.refers_to_row}"]`.
 Table 32.8 numbers nothing, so its six rows are keyed by a slug of the printed
 treatment. A lettered pair is two rows and not one row in two conditions, which
 is why no row of Chapter 32 fills
-[`variant`](/phonometry/reference/api/io/io/#cataloguerow): 34A and 34B are
+[`variant`](/reference/api/io/io/#cataloguerow): 34A and 34B are
 each printed with a description and a rating of their own.
 
 The 1977 tables number nothing either, and are keyed by a slug of the printed
 description in the same way. Table 19.4 prints one timber floor twice,
 unloaded and loaded, with nothing but the load to tell the two apart, so its
 rows carry the load in the key and in
-[`variant`](/phonometry/reference/api/io/io/#cataloguerow): that pair is one
+[`variant`](/reference/api/io/io/#cataloguerow): that pair is one
 floor in two conditions, and Table 19.4 is the only table here whose rows fill
 it.
 
@@ -86,9 +86,9 @@ row 31 gives 2 in as 10.1 cm, row 38 gives 44 oz/yd2 as 1.99 kg/m2 where 28 and
 30 give it as 1.5. They are registered as one entry in `docs/ERRATA.md` and
 nothing here quietly repairs them: the printed description is kept whole and
 the seventeen rows that carry one mark the cell in
-[`misprinted`](/phonometry/reference/api/io/io/#cataloguerow). One of the
+[`misprinted`](/reference/api/io/io/#cataloguerow). One of the
 nineteen reaches a quantity rather than prose, which is why
-[`ImpactInsulation.layer_density_kg_m3`](/phonometry/reference/api/building/impact-catalogue/#impactinsulation) is empty on row 35A.
+[`ImpactInsulation.layer_density_kg_m3`](/reference/api/building/impact-catalogue/#impactinsulation) is empty on row 35A.
 
 What it is not
 --------------
@@ -97,7 +97,7 @@ tables hold "datos de mediciones" collected from a 1967 report prepared for the
 Federal Housing Administration by the National Bureau of Standards, and Table
 32.8 credits a 1963 paper by Zeller; each row of Chapter 32 carries the one
 that covers its table in
-[`attributed_to`](/phonometry/reference/api/io/io/#cataloguerow), because a
+[`attributed_to`](/reference/api/io/io/#cataloguerow), because a
 row read on its own would otherwise answer the same source for both. The 1977
 tables credit no source and their rows carry none. No laboratory, no test
 standard and no uncertainty is named for any row. Table
@@ -124,7 +124,7 @@ Every row whose printed description contains *name*.
 | Name | Description |
 | :--- | :--- |
 | `name` | A fragment of the printed description, matched without case. The descriptions are in the language the page is set in, and they are the only thing matched: there is no short name for a construction the page describes in a paragraph. |
-| `catalogue` | The rows to search in place of [`PUBLISHED_IMPACT_INSULATION`](/phonometry/reference/api/building/impact-catalogue/#published_impact_insulation): a catalogue of your own that [`phonometry.io.read_catalogue`](/phonometry/reference/api/io/io/#read_catalogue) returns, `PUBLISHED_IMPACT_INSULATION \| mine` to search both at once, or any mapping of key to row (Default: `None`, which searches [`PUBLISHED_IMPACT_INSULATION`](/phonometry/reference/api/building/impact-catalogue/#published_impact_insulation)). |
+| `catalogue` | The rows to search in place of [`PUBLISHED_IMPACT_INSULATION`](/reference/api/building/impact-catalogue/#published_impact_insulation): a catalogue of your own that [`phonometry.io.read_catalogue`](/reference/api/io/io/#read_catalogue) returns, `PUBLISHED_IMPACT_INSULATION \| mine` to search both at once, or any mapping of key to row (Default: `None`, which searches [`PUBLISHED_IMPACT_INSULATION`](/reference/api/building/impact-catalogue/#published_impact_insulation)). |
 
 **Returns:** The matching rows, in catalogue order. Empty when none match. A tuple and not one row, because a description is not a name and several constructions share most of their words.
 
@@ -132,7 +132,7 @@ Every row whose printed description contains *name*.
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | for a *catalogue* that is not a mapping, or that holds a row that is not an [`ImpactInsulation`](/phonometry/reference/api/building/impact-catalogue/#impactinsulation), naming its key. |
+| TypeError | for a *catalogue* that is not a mapping, or that holds a row that is not an [`ImpactInsulation`](/reference/api/building/impact-catalogue/#impactinsulation), naming its key. |
 
 ## ImpactInsulation
 
@@ -185,18 +185,18 @@ improvement it qualifies.
 
 | Name | Description |
 | :--- | :--- |
-| `impact_insulation_class` | The IIC of the whole floor-ceiling assembly this row describes, dimensionless. Filled by Tables 32.1 to 32.7, and never on a row that gives an improvement. Two rows print no class at all and leave it empty, which [`why_missing`](/phonometry/reference/api/io/io/#cataloguerowwhy_missing) says. |
+| `impact_insulation_class` | The IIC of the whole floor-ceiling assembly this row describes, dimensionless. Filled by Tables 32.1 to 32.7, and never on a row that gives an improvement. Two rows print no class at all and leave it empty, which [`why_missing`](/reference/api/io/io/#cataloguerowwhy_missing) says. |
 | `impact_sound_improvement` | The average improvement in impact sound insulation a floor treatment gives over a bare concrete floor, in decibels, as Harris (1977) Tables 19.2 to 19.4 print it. It is a level difference averaged over frequency and not a rating, so it is not comparable with `impact_insulation_class` or with `impact_insulation_class_improvement`, which are dimensionless. |
 | `added_load_pa` | The load a floor of Harris (1977) Table 19.4 was measured under, in pascals. The page prints it in kg/cm2, the technical atmosphere of 98 066.5 Pa, and prints 0 for an unloaded floor, which is held as zero: it is a condition of the measurement and was printed. Empty on every row of every other table, which prints no load. |
 | `impact_insulation_class_improvement` | The delta-IIC an elastic surface treatment adds over a hard massive structural floor, dimensionless. Filled by Table 32.8 alone. It is a difference between two ratings and not a rating, so it is not comparable with `impact_insulation_class` and is not to be added to one from another row: the page gives the improvement over the floor it was measured on, and its own footnote says that over wood joists it may be substantially smaller. |
-| `refers_to_row` | The row this row's printed description refers to instead of repeating the structural floor, named by the number the table prints in its own column. Empty when the description stands on its own. The description itself is printed in full and is kept whole in [`name`](/phonometry/reference/api/io/io/#cataloguerow); this is only the thing it inherits. |
+| `refers_to_row` | The row this row's printed description refers to instead of repeating the structural floor, named by the number the table prints in its own column. Empty when the description stands on its own. The description itself is printed in full and is kept whole in [`name`](/reference/api/io/io/#cataloguerow); this is only the thing it inherits. |
 | `has_section_drawing` | Whether the "Esquema" cell of this row holds a drawing of the section. That cell prints no text of any kind, so there is nothing to transcribe and nothing else is recorded about it. The four rows whose description is nothing but a reference to another row carry no drawing, and neither do the six rows of Table 32.8, which has no such cell; every other row has one. |
-| `layer_density_kg_m3` | A mass density the running description buries, in kilograms per cubic metre, lifted out so it can be read without parsing prose. Three rows print one and it is the density of one layer, which is why the field says layer and not slab: on row 5 it is a semi-rigid polyurethane foam, on row 35A a compressed paper-pulp board and only on row 37A the structural concrete. Which layer is named by the row's [`note`](/phonometry/reference/api/io/io/#cataloguerow), and it is never a density of the assembly. Row 35A serves none, because the page prints that one cell twice and the two printings disagree; [`why_missing`](/phonometry/reference/api/io/io/#cataloguerowwhy_missing) hands back both. |
+| `layer_density_kg_m3` | A mass density the running description buries, in kilograms per cubic metre, lifted out so it can be read without parsing prose. Three rows print one and it is the density of one layer, which is why the field says layer and not slab: on row 5 it is a semi-rigid polyurethane foam, on row 35A a compressed paper-pulp board and only on row 37A the structural concrete. Which layer is named by the row's [`note`](/reference/api/io/io/#cataloguerow), and it is never a density of the assembly. Row 35A serves none, because the page prints that one cell twice and the two printings disagree; [`why_missing`](/reference/api/io/io/#cataloguerowwhy_missing) hands back both. |
 | `name` | The material as the table names it, attribution stripped. |
 | `variant` | Which specimen or condition this row is, when the page prints several under one name: `"chemically pure"`, `"direction x"`, `"0.68 mm diameter"`. Empty when the page prints one. |
 | `source` | Document, table, PDF page and printed folio. |
 | `table` | The data file this row was read from, without the extension, which is also the first half of its key in the catalogue that holds it. |
-| `basis` | What the source says a value is: a field name, or `"row"` for the whole row, to one of [`CATALOGUE_BASES`](/phonometry/reference/api/io/io/#catalogue_bases). Hopkins marks most of his Poisson ratios "Estimate", and those cells hold `"estimated"`; a datasheet that declares a class under a product standard would hold `"declared"`. A field with no entry takes the row's, and a row with neither is one whose source does not say, which is a different answer from any of the five. `basis_of` reads it. Independent of `derived`: this is what the source claims for a cell, that is what this library computed. |
+| `basis` | What the source says a value is: a field name, or `"row"` for the whole row, to one of [`CATALOGUE_BASES`](/reference/api/io/io/#catalogue_bases). Hopkins marks most of his Poisson ratios "Estimate", and those cells hold `"estimated"`; a datasheet that declares a class under a product standard would hold `"declared"`. A field with no entry takes the row's, and a row with neither is one whose source does not say, which is a different answer from any of the five. `basis_of` reads it. Independent of `derived`: this is what the source claims for a cell, that is what this library computed. |
 | `approximate` | Fields the page prints with a `~`. Not an estimate and not an interval: a number the author rounded on purpose. |
 | `derived` | Field to how it was computed, for the ones this library worked out from the cells the page did print. A derived value is never stored as if it had been read, and on every row the library builds it follows again from the row's own cells: `from_printed` writes it, and nothing else in the library does. One a caller passes to the literal constructor is the caller's word, which the row keeps and `printed_fields` leaves out with its value, as it leaves out every derived one. When the printed cells a value rests on do not all have one `basis`, the text names the basis of each, so a modulus worked out from a plate speed and a Poisson ratio Hopkins marks as an estimate says it rests on that estimate. A value converted from the unit the page prints is not derived (`converted` holds it), and neither is one the page gives by reference to another of its rows (`carried` does). |
 | `converted` | Field to `(figure, unit)`, the page's figure and the unit it is in, for a value this row holds in a unit the page does not use. Ver and Beranek print their damping materials in degrees Fahrenheit and pounds per square inch, and the row holds degrees Celsius and pascals, so `("3e5", "psi")` sits beside a modulus in pascals. The figure is kept as the page writes it, so the cell can always be read back in the page's own terms. The unit is the one the page prints with the figure or over its column. Long prints the figures of his musician bare, and the sabins recorded for them are a reading of the table, which is set in inches and pounds and names sabins on the next row; that row's note says so. A figure written in another unit of the same kind as the field's (`thickness_m` for `thickness_mm`, `flow_resistivity_kpa_s_m2` for `flow_resistivity_pa_s_m2`) is converted by `from_printed` and recorded here, whether it is a value, the end of a range or one of several readings; for a range the figure is the printed end of a bound, or both ends as `"5 to 10"`, and for readings the list as the page gives it. A packaged table transcribed in the base unit with only its SI prefix changed, such as the megapascals of Rossing Table 15.5, holds no entry here, and the table's `about` says so. |
@@ -220,7 +220,7 @@ improvement it qualifies.
 ImpactInsulation.basis_of(field_name: str) -> str
 ```
 
-What the source says this field is, one of [`CATALOGUE_BASES`](/phonometry/reference/api/io/io/#catalogue_bases).
+What the source says this field is, one of [`CATALOGUE_BASES`](/reference/api/io/io/#catalogue_bases).
 
 The five are `measured`, `declared`, `calculated`, `estimated`
 and `extended`.
@@ -250,7 +250,7 @@ unit of the same kind as its field (`thickness_m` for
 `thickness_mm`, `flow_resistivity_kpa_s_m2` for
 `flow_resistivity_pa_s_m2`), or in a unit the class takes as an
 alias of its own (an
-[`AbsorptionAreaSpectrum`](/phonometry/reference/api/materials/measured/#absorptionareaspectrum) takes
+[`AbsorptionAreaSpectrum`](/reference/api/materials/measured/#absorptionareaspectrum) takes
 `absorption_area_125_ft2` for `absorption_area_125_m2`), is
 converted on its digits with an exact factor and rounded once,
 whether it is a value or stands as the key of a hedge (the ends of a

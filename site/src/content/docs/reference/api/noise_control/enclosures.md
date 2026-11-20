@@ -21,7 +21,7 @@ where `R` is the field-incidence transmission loss of the enclosure panels,
 the machine) and `alpha_i` the mean absorption of the enclosure interior. The
 reverberant term is exactly `S_E` over the interior **room constant**
 $R_\mathrm{i} = S_\mathrm{i} \alpha_\mathrm{i} / (1 - \alpha_\mathrm{i})$
-([`phonometry.room.room_constant`](/phonometry/reference/api/rooms/steady-field/#room_constant)), so
+([`phonometry.room.room_constant`](/reference/api/rooms/steady-field/#room_constant)), so
 
 $$
 C = 10 \log_{10}(0.3 + S_\mathrm{E} / R_\mathrm{i}).
@@ -52,16 +52,16 @@ the model its author used.
 
 Turned around, the same equation answers the question a designer actually asks:
 *given the noise reduction I need, what transmission loss must the panels have?*
-That is [`enclosure_required_transmission_loss`](/phonometry/reference/api/noise_control/enclosures/#enclosure_required_transmission_loss), which returns the required
-`R` per band in the same [`EnclosureInsertionLossResult`](/phonometry/reference/api/noise_control/enclosures/#enclosureinsertionlossresult).
+That is [`enclosure_required_transmission_loss`](/reference/api/noise_control/enclosures/#enclosure_required_transmission_loss), which returns the required
+`R` per band in the same [`EnclosureInsertionLossResult`](/reference/api/noise_control/enclosures/#enclosureinsertionlossresult).
 
 **The panel transmission loss `R` is supplied by the caller** (measured, or
 predicted by a panel model) as a per-band array, a callable of frequency, or
-a panel prediction result (a [`phonometry.building.SoundReductionResult`](/phonometry/reference/api/building/panel-transmission/#soundreductionresult)
-or [`phonometry.building.ApertureTransmissionResult`](/phonometry/reference/api/building/aperture-transmission/#aperturetransmissionresult), matched structurally
+a panel prediction result (a [`phonometry.building.SoundReductionResult`](/reference/api/building/panel-transmission/#soundreductionresult)
+or [`phonometry.building.ApertureTransmissionResult`](/reference/api/building/aperture-transmission/#aperturetransmissionresult), matched structurally
 so no dependency on `building` is introduced). This module never predicts
 `R` itself; it combines a given `R` with the interior absorption. The
-interior room constant reuses [`phonometry.room.room_constant`](/phonometry/reference/api/rooms/steady-field/#room_constant).
+interior room constant reuses [`phonometry.room.room_constant`](/reference/api/rooms/steady-field/#room_constant).
 
 > Auto-generated from the source docstrings by `scripts/generate_api_docs.py` (`make api-docs`). Do not edit by hand.
 
@@ -89,14 +89,14 @@ constant $R_\mathrm{i} = S_\mathrm{i} \alpha_\mathrm{i} / (1 - \alpha_\mathrm{i}
 
 | Name | Description |
 | :--- | :--- |
-| `panel_transmission_loss` | Panel transmission loss `R` per band, dB. One of: a per-band array (measured); a callable mapping a frequency array to per-band `R` (then `frequencies` is required); or a panel prediction result carrying `transmission_loss` and `frequencies`, such as the [`SoundReductionResult`](/phonometry/reference/api/building/panel-transmission/#soundreductionresult) of [`phonometry.building.single_panel_transmission_loss`](/phonometry/reference/api/building/panel-transmission/#single_panel_transmission_loss) / [`phonometry.building.double_wall_transmission_loss`](/phonometry/reference/api/building/panel-transmission/#double_wall_transmission_loss) or the [`ApertureTransmissionResult`](/phonometry/reference/api/building/aperture-transmission/#aperturetransmissionresult) of [`phonometry.building.composite_transmission_loss`](/phonometry/reference/api/building/aperture-transmission/#composite_transmission_loss) (its `frequencies` are then used unless *frequencies* is given). This function does not predict `R` itself. |
+| `panel_transmission_loss` | Panel transmission loss `R` per band, dB. One of: a per-band array (measured); a callable mapping a frequency array to per-band `R` (then `frequencies` is required); or a panel prediction result carrying `transmission_loss` and `frequencies`, such as the [`SoundReductionResult`](/reference/api/building/panel-transmission/#soundreductionresult) of [`phonometry.building.single_panel_transmission_loss`](/reference/api/building/panel-transmission/#single_panel_transmission_loss) / [`phonometry.building.double_wall_transmission_loss`](/reference/api/building/panel-transmission/#double_wall_transmission_loss) or the [`ApertureTransmissionResult`](/reference/api/building/aperture-transmission/#aperturetransmissionresult) of [`phonometry.building.composite_transmission_loss`](/reference/api/building/aperture-transmission/#composite_transmission_loss) (its `frequencies` are then used unless *frequencies* is given). This function does not predict `R` itself. |
 | `external_area` | External enclosure surface area `S_E`, m2. |
 | `internal_area` | Internal surface area `S_i` (including the machine), m2. |
 | `internal_absorption` | Mean interior absorption `alpha_i` in `(0, 1)` (scalar or per-band). |
 | `frequencies` | Band centre frequencies, Hz; required when `panel_transmission_loss` is a callable, optional otherwise (used to label the result and the plot). |
-| `model` | Interior build-up model, one of [`ENCLOSURE_MODELS`](/phonometry/reference/api/noise_control/enclosures/#enclosure_models): `"bies"` (default) carries the `0.3` floor of Bies Equation (7.111), `"norton"` the bare $C = 10 \log_{10}(S_\mathrm{E} / R_\mathrm{i})$ of Norton & Karczub Equation (4.115). |
+| `model` | Interior build-up model, one of [`ENCLOSURE_MODELS`](/reference/api/noise_control/enclosures/#enclosure_models): `"bies"` (default) carries the `0.3` floor of Bies Equation (7.111), `"norton"` the bare $C = 10 \log_{10}(S_\mathrm{E} / R_\mathrm{i})$ of Norton & Karczub Equation (4.115). |
 
-**Returns:** An [`EnclosureInsertionLossResult`](/phonometry/reference/api/noise_control/enclosures/#enclosureinsertionlossresult).
+**Returns:** An [`EnclosureInsertionLossResult`](/reference/api/noise_control/enclosures/#enclosureinsertionlossresult).
 
 **Raises**
 
@@ -129,7 +129,7 @@ enclosure_required_transmission_loss(
 
 Panel `R` an enclosure needs to deliver a given insertion loss.
 
-The design equation of [`enclosure_insertion_loss`](/phonometry/reference/api/noise_control/enclosures/#enclosure_insertion_loss) solved the other
+The design equation of [`enclosure_insertion_loss`](/reference/api/noise_control/enclosures/#enclosure_insertion_loss) solved the other
 way, $R = \mathrm{IL} + C$: the enclosure geometry and its interior
 lining fix the
 build-up correction `C`, and the panels have to make up the rest. This is
@@ -144,11 +144,11 @@ produces in the room and a noise-criterion curve.
 | `insertion_loss` | Required insertion loss `IL` per band, dB (a per-band array, or a callable of the frequency array, in which case `frequencies` is required). |
 | `external_area` | External enclosure surface area `S_E`, m2. |
 | `internal_area` | Internal surface area `S_i`, m2, including the surface of the enclosed machine. |
-| `internal_absorption` | Mean interior absorption `alpha_i` in `(0, 1)` (scalar or per-band); e.g. from [`phonometry.room.mean_absorption`](/phonometry/reference/api/rooms/reverberation-prediction/#mean_absorption) over the lined enclosure walls and the machine surface. |
+| `internal_absorption` | Mean interior absorption `alpha_i` in `(0, 1)` (scalar or per-band); e.g. from [`phonometry.room.mean_absorption`](/reference/api/rooms/reverberation-prediction/#mean_absorption) over the lined enclosure walls and the machine surface. |
 | `frequencies` | Band centre frequencies, Hz; required for a callable `insertion_loss`, optional otherwise. |
-| `model` | Interior build-up model, one of [`ENCLOSURE_MODELS`](/phonometry/reference/api/noise_control/enclosures/#enclosure_models) (see [`enclosure_insertion_loss`](/phonometry/reference/api/noise_control/enclosures/#enclosure_insertion_loss)). One of `"bies"` or `"norton"`. |
+| `model` | Interior build-up model, one of [`ENCLOSURE_MODELS`](/reference/api/noise_control/enclosures/#enclosure_models) (see [`enclosure_insertion_loss`](/reference/api/noise_control/enclosures/#enclosure_insertion_loss)). One of `"bies"` or `"norton"`. |
 
-**Returns:** An [`EnclosureInsertionLossResult`](/phonometry/reference/api/noise_control/enclosures/#enclosureinsertionlossresult) whose `panel_transmission_loss` is the **required** `R` and whose `insertion_loss` is the requested target, so it plots and reports like a forward calculation.
+**Returns:** An [`EnclosureInsertionLossResult`](/reference/api/noise_control/enclosures/#enclosureinsertionlossresult) whose `panel_transmission_loss` is the **required** `R` and whose `insertion_loss` is the requested target, so it plots and reports like a forward calculation.
 
 **Raises**
 
@@ -239,7 +239,7 @@ $C = 10 \log_{10}(0.3 + S_\mathrm{E} / R_\mathrm{i})$.
 | Name | Description |
 | :--- | :--- |
 | `path` | Destination path of the PDF file. |
-| `metadata` | Optional [`ReportMetadata`](/phonometry/reference/api/building/insulation/#reportmetadata) supplying the header (`client`, `specimen` the enclosed machine, `test_room` the test environment, `instrumentation`, `temperature_c`, `relative_humidity_percent`, `pressure`, `test_date`), the footer identity (`laboratory`, `operator`, `report_id`, `notes`) and, via `requirement`, a declared minimum mean insertion loss (more insertion loss is better). The surface areas come from the result itself. |
+| `metadata` | Optional [`ReportMetadata`](/reference/api/building/insulation/#reportmetadata) supplying the header (`client`, `specimen` the enclosed machine, `test_room` the test environment, `instrumentation`, `temperature_c`, `relative_humidity_percent`, `pressure`, `test_date`), the footer identity (`laboratory`, `operator`, `report_id`, `notes`) and, via `requirement`, a declared minimum mean insertion loss (more insertion loss is better). The surface areas come from the result itself. |
 | `engine` | Rendering back end; only `"reportlab"` is supported. |
 | `verbose` | When `True` the per-band table adds the interior room constant `R_i` column. |
 | `language` | Fiche language: `"en"` (default) or `"es"`. |

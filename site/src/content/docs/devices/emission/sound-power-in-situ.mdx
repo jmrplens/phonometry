@@ -39,7 +39,7 @@ covers the per-position background correction with its 6 dB and 15 dB rules,
 the one- and several-location forms, the single-event path, the Table 2
 grade, the clause 9 uncertainty and the Annex C reference conditions. Which
 route fits which job is weighed in
-[Sound Power](/phonometry/devices/emission/sound-power/).
+[Sound Power](/devices/emission/sound-power/).
 
 ## 1. The comparison in situ (ISO 3747)
 
@@ -303,7 +303,7 @@ grade, $U$, its coverage factor and probability.
 | :--- | :--- | :--- | :--- | :--- |
 | `levels` | 2D array | dB | `(n, bands)` | Measured $L'_{pi(\mathrm{ST})}$, one row per microphone position, three or four positions (7.4.1) |
 | `reference_levels` | 2D or 3D array | dB | `(n, bands)` or `(m, n, bands)` | The reference source at the same positions, one grid per location, corrected per its manufacturer for speed, temperature and pressure but not for background |
-| `reference_sound_power_levels` | 1D or 2D array, or `ReferenceSourceCalibration` | dB | `(bands,)` or `(m, bands)` | Calibrated $L_{W(\mathrm{RSS})}$, per location when each was calibrated in its own similar position (Eq. 12); a [`ReferenceSourceCalibration`](/phonometry/devices/emission/free-field-qualification/) is summed from its one-third octave bands into the octaves at `frequencies` |
+| `reference_sound_power_levels` | 1D or 2D array, or `ReferenceSourceCalibration` | dB | `(bands,)` or `(m, bands)` | Calibrated $L_{W(\mathrm{RSS})}$, per location when each was calibrated in its own similar position (Eq. 12); a [`ReferenceSourceCalibration`](/devices/emission/free-field-qualification/) is summed from its one-third octave bands into the octaves at `frequencies` |
 | `frequencies` | 1D array | Hz | 63 Hz to 8 kHz octaves | Nominal octave mid-band frequencies of Table D.1; required. Clause 3.11 puts the general-purpose range at 125 Hz to 8 kHz; the 63 Hz row of Table D.1 carries footnote a, which allows it only where the test environment, the reference sound source and the instrumentation are satisfactory at that frequency |
 | `background_levels` | 1D or 2D array | dB | `(bands,)` or `(n, bands)` | $L_{pi(\mathrm{B})}$; one spectrum serves every position. `None` warns and leaves `background_requirement_met` `False` in every band, since 7.5 measures it at each position and 8.1 needs the margin |
 | `reference_background_levels` | 1D or 2D array | dB | same shapes | Background for the reference-source reading; `None` reuses `background_levels` (7.5) |
@@ -517,8 +517,8 @@ decisions, made before the levels exist; the library takes the levels and the
 two indicators the grade needs. The reference source's own corrections for
 speed, temperature and static pressure are its manufacturer's, applied before
 the levels arrive. The other in situ routes are their own guides:
-[Sound Power by Pressure Methods](/phonometry/devices/emission/sound-power-pressure/)
-for the enveloping surface, [Sound Power by Intensity Scanning](/phonometry/devices/emission/sound-power-intensity/)
+[Sound Power by Pressure Methods](/devices/emission/sound-power-pressure/)
+for the enveloping surface, [Sound Power by Intensity Scanning](/devices/emission/sound-power-intensity/)
 for the probe.
 </ScopeClaim>
 </Scope>
@@ -527,18 +527,18 @@ for the probe.
 
 ## See also
 
-- [Sound Power](/phonometry/devices/emission/sound-power/): choosing among the
+- [Sound Power](/devices/emission/sound-power/): choosing among the
   determination routes, the accuracy grades and the ISO 4871 noise-emission
   declaration.
-- [Sound Power in the Reverberation Room](/phonometry/devices/emission/sound-power-reverberation/):
+- [Sound Power in the Reverberation Room](/devices/emission/sound-power-reverberation/):
   the precision comparison of ISO 3741 in a qualified room, whose $C_2$ this
   guide shares.
-- [Sound Power by Pressure Methods (ISO 3744 / ISO 3746 / ISO 3745)](/phonometry/devices/emission/sound-power-pressure/):
+- [Sound Power by Pressure Methods (ISO 3744 / ISO 3746 / ISO 3745)](/devices/emission/sound-power-pressure/):
   the enveloping surface for a source that can be measured in its direct field.
-- [Sound Power by Intensity Scanning (ISO 9614)](/phonometry/devices/emission/sound-power-intensity/):
+- [Sound Power by Intensity Scanning (ISO 9614)](/devices/emission/sound-power-intensity/):
   the routes that tolerate steady background noise without a reference source.
-- [Levels](/phonometry/signals/levels/levels/): energy averaging, the single
+- [Levels](/signals/levels/levels/): energy averaging, the single
   event level and the A-weighting behind $L_{W\mathrm{A}}$.
-- API reference: [`emission`: sound power in situ](/phonometry/reference/api/power/sound-power-in-situ/).
+- API reference: [`emission`: sound power in situ](/reference/api/power/sound-power-in-situ/).
 
 </SeeAlso>

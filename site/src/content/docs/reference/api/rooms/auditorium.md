@@ -72,11 +72,11 @@ and this function refuses to invent one.
 
 | Name | Description |
 | :--- | :--- |
-| `symbol` | The quantity, as [`TABLE_A1`](/phonometry/reference/api/rooms/auditorium/#table_a1) keys it. `"J_LFC"` is taken too: Table A.1 prints the early lateral energy fraction as one row, "J_LF or J_LFC", so both weightings of [`early_lateral_energy_fraction`](/phonometry/reference/api/rooms/auditorium/#early_lateral_energy_fraction) share its four bands, its just-noticeable difference and its typical range. One of `"G"`, `"EDT"`, `"C80"`, `"D50"`, `"Ts"`, `"J_LF"`, `"J_LFC"` or `"L_J"`. |
+| `symbol` | The quantity, as [`TABLE_A1`](/reference/api/rooms/auditorium/#table_a1) keys it. `"J_LFC"` is taken too: Table A.1 prints the early lateral energy fraction as one row, "J_LF or J_LFC", so both weightings of [`early_lateral_energy_fraction`](/reference/api/rooms/auditorium/#early_lateral_energy_fraction) share its four bands, its just-noticeable difference and its typical range. One of `"G"`, `"EDT"`, `"C80"`, `"D50"`, `"Ts"`, `"J_LF"`, `"J_LFC"` or `"L_J"`. |
 | `first` | One value, in the quantity's unit. |
 | `second` | The other, of the same shape. |
 
-**Returns:** The answer, as a [`PerceptibleDifference`](/phonometry/reference/api/rooms/auditorium/#perceptibledifference); its [`different`](/phonometry/reference/api/rooms/auditorium/#perceptibledifferencedifferent) is true when the two differ by at least the just-noticeable difference.
+**Returns:** The answer, as a [`PerceptibleDifference`](/reference/api/rooms/auditorium/#perceptibledifference); its [`different`](/reference/api/rooms/auditorium/#perceptibledifferencedifferent) is true when the two differ by at least the just-noticeable difference.
 
 **Raises**
 
@@ -181,7 +181,7 @@ apart. The 5 degree survey of 4.2.1, which the same standard uses for
 the source directivity of Table 1, does divide 360 exactly, into 72.
 
 The mean itself is the one
-[`phonometry.building.energy_average_level`](/phonometry/reference/api/building/insulation/#energy_average_level) computes; this
+[`phonometry.building.energy_average_level`](/reference/api/building/insulation/#energy_average_level) computes; this
 function adds the bearing count the note constrains, and averages one
 band per row when it is handed a two-dimensional survey.
 
@@ -276,18 +276,18 @@ of `ir`, band by band.
 | :--- | :--- |
 | `ir` | Impulse response measured with the omnidirectional microphone at the measurement point (1D). |
 | `lateral_ir` | Impulse response measured at the same point with a figure-of-eight microphone whose null points at the source (1D). |
-| `fs` | Sample rate in Hz. Required for bare arrays; a [`Signal`](/phonometry/reference/api/io/io/#signal) brings its own. |
+| `fs` | Sample rate in Hz. Required for bare arrays; a [`Signal`](/reference/api/io/io/#signal) brings its own. |
 | `weighting` | `"squared"` for $J_\mathrm{LF}$, Equation (A.14), whose contributions vary as the square of the cosine of the angle of incidence; `"cosine"` for $J_\mathrm{LFC}$, Equation (A.15), whose contributions vary as the cosine itself. |
 | `limits` | `(f_min, f_max)` band-centre limits in Hz; default the octave bands 125 Hz to 4 kHz. Table A.1 averages this quantity over 125 Hz to 1 kHz. `None` measures the broadband responses. |
 | `fraction` | Bandwidth fraction (1 = octave, 3 = one-third octave). |
 
-**Returns:** A [`LateralEnergyResult`](/phonometry/reference/api/rooms/auditorium/#lateralenergyresult) with one entry per band.
+**Returns:** A [`LateralEnergyResult`](/reference/api/rooms/auditorium/#lateralenergyresult) with one entry per band.
 
 **Raises**
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | If `weighting` is not one of [`LATERAL_WEIGHTINGS`](/phonometry/reference/api/rooms/auditorium/#lateral_weightings), if a response is not one-dimensional or is silent, if the two responses do not split into the same number of bands or are of different lengths, or if they are too short for the 80 ms window. |
+| ValueError | If `weighting` is not one of [`LATERAL_WEIGHTINGS`](/reference/api/rooms/auditorium/#lateral_weightings), if a response is not one-dimensional or is silent, if the two responses do not split into the same number of bands or are of different lengths, or if they are too short for the 80 ms window. |
 | TypeError | if `weighting` is not a text. |
 
 ## EARLY_LATERAL_WINDOW_S
@@ -337,12 +337,12 @@ $$
 
 Both are printed for a point "d (>= 3 m) from the source", far enough
 for the free field to have taken over; a shorter distance raises
-[`AuditoriumWarning`](/phonometry/reference/api/rooms/auditorium/#auditoriumwarning).
+[`AuditoriumWarning`](/reference/api/rooms/auditorium/#auditoriumwarning).
 
 The note under (A.4) adds that the measurement is to be repeated around
 the source and energy-averaged, "at every 12,5 degrees", to average out
 the source's own directivity. Feed this function the averaged level,
-not one bearing; [`directivity_energy_average`](/phonometry/reference/api/rooms/auditorium/#directivity_energy_average) is that mean, and
+not one bearing; [`directivity_energy_average`](/reference/api/rooms/auditorium/#directivity_energy_average) is that mean, and
 its docstring says what the printed step does and does not determine.
 
 **Parameters**
@@ -470,8 +470,8 @@ only in sign.
 
 B.4 puts three windows to it. The general form runs from the direct
 sound to a time of the order of the reverberation time, which is the
-default here; [`IACC_EARLY_WINDOW_S`](/phonometry/reference/api/rooms/auditorium/#iacc_early_window_s) is the early coefficient and
-[`IACC_LATE_START_S`](/phonometry/reference/api/rooms/auditorium/#iacc_late_start_s) starts the reverberant one. Time zero is the
+default here; [`IACC_EARLY_WINDOW_S`](/reference/api/rooms/auditorium/#iacc_early_window_s) is the early coefficient and
+[`IACC_LATE_START_S`](/reference/api/rooms/auditorium/#iacc_late_start_s) starts the reverberant one. Time zero is the
 direct sound, located on the two channels together so that a listener
 turned away from the source does not move it.
 
@@ -481,12 +481,12 @@ turned away from the source does not move it.
 | :--- | :--- |
 | `left` | Impulse response at the entrance to the left ear canal (1D). |
 | `right` | Impulse response at the entrance to the right ear canal (1D), of the same length. |
-| `fs` | Sample rate in Hz. Required for bare arrays; a [`Signal`](/phonometry/reference/api/io/io/#signal) brings its own. |
+| `fs` | Sample rate in Hz. Required for bare arrays; a [`Signal`](/reference/api/io/io/#signal) brings its own. |
 | `window` | `(t_1, t_2)` in seconds from the direct sound, with `t_2` `None` for the end of the response. |
 | `limits` | `(f_min, f_max)` band-centre limits in Hz; default the octave bands 125 Hz to 4 kHz, which is the range B.4 names. `None` correlates the broadband responses. |
 | `fraction` | Bandwidth fraction (1 = octave, 3 = one-third octave). |
 
-**Returns:** An [`InterauralCorrelationResult`](/phonometry/reference/api/rooms/auditorium/#interauralcorrelationresult) with one entry per band.
+**Returns:** An [`InterauralCorrelationResult`](/reference/api/rooms/auditorium/#interauralcorrelationresult) with one entry per band.
 
 **Raises**
 
@@ -567,7 +567,7 @@ octaves, in that order.
 
 | Name | Description |
 | :--- | :--- |
-| `levels` | The four octave-band values of $L_J$, in dB, in the order of [`LATE_LATERAL_AVERAGE_BANDS_HZ`](/phonometry/reference/api/rooms/auditorium/#late_lateral_average_bands_hz). |
+| `levels` | The four octave-band values of $L_J$, in dB, in the order of [`LATE_LATERAL_AVERAGE_BANDS_HZ`](/reference/api/rooms/auditorium/#late_lateral_average_bands_hz). |
 
 **Returns:** $L_{J,\mathrm{avg}}$ in dB.
 
@@ -615,11 +615,11 @@ Where $J_\mathrm{LF}$ is a fraction and cancels its own
 calibration, $L_J$ is a level and does not: it needs the
 calibrated omnidirectional source of A.2.1 and a free-field reference,
 which reaches this function the same two ways it reaches
-[`sound_strength`](/phonometry/reference/api/rooms/auditorium/#sound_strength). It also needs the relative sensitivity of the
+[`sound_strength`](/reference/api/rooms/auditorium/#sound_strength). It also needs the relative sensitivity of the
 two microphones to have been calibrated in a free field (A.3.2).
 
 **Time zero comes from the omnidirectional response**, for the reason
-given under [`early_lateral_energy_fraction`](/phonometry/reference/api/rooms/auditorium/#early_lateral_energy_fraction): a figure-of-eight
+given under [`early_lateral_energy_fraction`](/reference/api/rooms/auditorium/#early_lateral_energy_fraction): a figure-of-eight
 microphone aimed as A.2.5 asks has no direct sound to trigger on, and an
 80 ms boundary placed on its first reflection is not the printed one.
 `ir` supplies that time zero and nothing else.
@@ -631,12 +631,12 @@ microphone aimed as A.2.5 asks has no direct sound to trigger on, and an
 | `ir` | Impulse response measured with the omnidirectional microphone at the measurement point (1D), for its direct sound. |
 | `lateral_ir` | Impulse response measured at the same point with a figure-of-eight microphone whose null points at the source (1D). |
 | `reference_ir` | Impulse response of the same source at 10 m in a free field (1D). Mutually exclusive with `reference_level`. |
-| `fs` | Sample rate in Hz. Required for bare arrays; a [`Signal`](/phonometry/reference/api/io/io/#signal) brings its own. |
+| `fs` | Sample rate in Hz. Required for bare arrays; a [`Signal`](/reference/api/io/io/#signal) brings its own. |
 | `reference_level` | The free-field reference exposure level $L_{pE,10}$ in dB, as a scalar or one value per band. Mutually exclusive with `reference_ir`. |
 | `limits` | `(f_min, f_max)` band-centre limits in Hz; default the octave bands 125 Hz to 4 kHz. Equation (A.17) averages this quantity over 125 Hz to 1 kHz. `None` measures the broadband responses. |
 | `fraction` | Bandwidth fraction (1 = octave, 3 = one-third octave). |
 
-**Returns:** A [`LateLateralResult`](/phonometry/reference/api/rooms/auditorium/#latelateralresult) with one entry per band.
+**Returns:** A [`LateLateralResult`](/reference/api/rooms/auditorium/#latelateralresult) with one entry per band.
 
 **Raises**
 
@@ -868,7 +868,7 @@ a mid-frequency one, and 2 kHz and 4 kHz into a high-frequency one, all
 arithmetically.
 
 This is a different product from the single number of
-[`single_number_average`](/phonometry/reference/api/rooms/auditorium/#single_number_average), and the two must not be confused. They
+[`single_number_average`](/reference/api/rooms/auditorium/#single_number_average), and the two must not be confused. They
 coincide for the five quantities Table A.1 averages over 500 Hz and
 1 kHz, and they do not for the lateral ones, whose single number spans
 four bands. A.5 also warns that lateral energy fractions in the 4 kHz
@@ -921,7 +921,7 @@ built against another JND.
 
 | Name | Description |
 | :--- | :--- |
-| `symbol` | The quantity, as [`TABLE_A1`](/phonometry/reference/api/rooms/auditorium/#table_a1) keys it, or `"J_LFC"`. One of `"G"`, `"EDT"`, `"C80"`, `"D50"`, `"Ts"`, `"J_LF"`, `"J_LFC"` or `"L_J"`. |
+| `symbol` | The quantity, as [`TABLE_A1`](/reference/api/rooms/auditorium/#table_a1) keys it, or `"J_LFC"`. One of `"G"`, `"EDT"`, `"C80"`, `"D50"`, `"Ts"`, `"J_LF"`, `"J_LFC"` or `"L_J"`. |
 | `first` | One value, in the quantity's unit. |
 | `second` | The other, of the same shape. |
 
@@ -995,7 +995,7 @@ in the diffuse field instead, and the absorption area converts that
 reading into the free-field one. `A` follows from the room's
 reverberation time through Sabine's formula, Equation (A.6), which the
 library publishes as
-[`phonometry.room.sabine_absorption_area`](/phonometry/reference/api/rooms/steady-field/#sabine_absorption_area). Watch the constant when
+[`phonometry.room.sabine_absorption_area`](/reference/api/rooms/steady-field/#sabine_absorption_area). Watch the constant when
 reproducing a hand calculation: (A.6) prints $A = 0.16\,V/T$,
 which is $24 \ln 10 / c_0$ at $c_0 = 345.4$ m/s, while
 that function defaults to 343 m/s and so to 0.1611. The difference moves
@@ -1044,7 +1044,7 @@ The Table A.1 single number of one auditorium quantity.
 Footnote a of ISO 3382-1:2009, Table A.1 makes this the arithmetical
 average over the octave bands the table names for that quantity, with
 one exception: the late lateral sound level, which
-[`late_lateral_average`](/phonometry/reference/api/rooms/auditorium/#late_lateral_average) energy-averages through Equation (A.17).
+[`late_lateral_average`](/reference/api/rooms/auditorium/#late_lateral_average) energy-averages through Equation (A.17).
 A.5 asks for the index "m" to be applied to the symbol of the result.
 
 The band set is per quantity and is not always the mid pair. The sound
@@ -1059,7 +1059,7 @@ table.
 
 | Name | Description |
 | :--- | :--- |
-| `symbol` | The quantity, as [`TABLE_A1`](/phonometry/reference/api/rooms/auditorium/#table_a1) keys it. `"J_LFC"` is taken too: Table A.1 prints the early lateral energy fraction as one row, "J_LF or J_LFC", so both weightings of [`early_lateral_energy_fraction`](/phonometry/reference/api/rooms/auditorium/#early_lateral_energy_fraction) share its four bands, its just-noticeable difference and its typical range. One of `"G"`, `"EDT"`, `"C80"`, `"D50"`, `"Ts"`, `"J_LF"`, `"J_LFC"` or `"L_J"`. |
+| `symbol` | The quantity, as [`TABLE_A1`](/reference/api/rooms/auditorium/#table_a1) keys it. `"J_LFC"` is taken too: Table A.1 prints the early lateral energy fraction as one row, "J_LF or J_LFC", so both weightings of [`early_lateral_energy_fraction`](/reference/api/rooms/auditorium/#early_lateral_energy_fraction) share its four bands, its just-noticeable difference and its typical range. One of `"G"`, `"EDT"`, `"C80"`, `"D50"`, `"Ts"`, `"J_LF"`, `"J_LFC"` or `"L_J"`. |
 | `values` | Its per-band values, one per entry of `frequencies`. |
 | `frequencies` | The band centre frequencies in Hz, as a result carries them. |
 
@@ -1107,8 +1107,8 @@ the integral runs to the end of the response supplied.
 A.2.1 asks that end to lie at or beyond the point where the decay curve
 has fallen 30 dB. Whether a room response reaches it is visible in the
 `dynamic_range` of
-[`phonometry.room.room_parameters`](/phonometry/reference/api/rooms/acoustics/#room_parameters), and
-[`sound_strength`](/phonometry/reference/api/rooms/auditorium/#sound_strength) raises [`AuditoriumWarning`](/phonometry/reference/api/rooms/auditorium/#auditoriumwarning) when it does
+[`phonometry.room.room_parameters`](/reference/api/rooms/acoustics/#room_parameters), and
+[`sound_strength`](/reference/api/rooms/auditorium/#sound_strength) raises [`AuditoriumWarning`](/reference/api/rooms/auditorium/#auditoriumwarning) when it does
 not; this function evaluates whatever it is given, because the same
 equation is (A.3) applied to a free-field response, which has no
 reverberant decay to reach 30 dB of.
@@ -1121,8 +1121,8 @@ $L_{pE,10}$.
 
 | Name | Description |
 | :--- | :--- |
-| `ir` | Measured impulse response (1D). A [`phonometry.io.Signal`](/phonometry/reference/api/io/io/#signal) brings its calibration, which is applied; a bare array is read as pascals, so its exposure level is only referenced to 20 uPa if the samples already are. |
-| `fs` | Sample rate in Hz. Required for a bare array; a [`Signal`](/phonometry/reference/api/io/io/#signal) brings its own, and an explicit value that disagrees with it raises instead of silently winning. |
+| `ir` | Measured impulse response (1D). A [`phonometry.io.Signal`](/reference/api/io/io/#signal) brings its calibration, which is applied; a bare array is read as pascals, so its exposure level is only referenced to 20 uPa if the samples already are. |
+| `fs` | Sample rate in Hz. Required for a bare array; a [`Signal`](/reference/api/io/io/#signal) brings its own, and an explicit value that disagrees with it raises instead of silently winning. |
 | `limits` | `(f_min, f_max)` band-centre limits in Hz; default the octave bands 125 Hz to 4 kHz (ISO 3382-1:2009, 5.1). `None` integrates the broadband response as a single band. |
 | `fraction` | Bandwidth fraction (1 = octave, 3 = one-third octave). |
 
@@ -1162,9 +1162,9 @@ rather than exposure levels, which is why this function accepts the
 reference either as a second impulse response or as a level already in
 hand: exactly one of `reference_ir` and `reference_level` is
 required. A level obtained from
-[`free_field_reference_level`](/phonometry/reference/api/rooms/auditorium/#free_field_reference_level),
-[`reverberation_room_reference_level`](/phonometry/reference/api/rooms/auditorium/#reverberation_room_reference_level) or, through
-[`sound_strength_from_power`](/phonometry/reference/api/rooms/auditorium/#sound_strength_from_power), from the source's power level, goes
+[`free_field_reference_level`](/reference/api/rooms/auditorium/#free_field_reference_level),
+[`reverberation_room_reference_level`](/reference/api/rooms/auditorium/#reverberation_room_reference_level) or, through
+[`sound_strength_from_power`](/reference/api/rooms/auditorium/#sound_strength_from_power), from the source's power level, goes
 in the second slot.
 
 Both responses are split into the same bands and each is integrated
@@ -1179,12 +1179,12 @@ a calibrated source where every other measure in Table A.1 does not.
 | :--- | :--- |
 | `ir` | Impulse response measured in the room under test (1D). |
 | `reference_ir` | Impulse response of the same source at 10 m in a free field (1D). Mutually exclusive with `reference_level`. |
-| `fs` | Sample rate in Hz. Required for bare arrays; a [`Signal`](/phonometry/reference/api/io/io/#signal) brings its own. |
+| `fs` | Sample rate in Hz. Required for bare arrays; a [`Signal`](/reference/api/io/io/#signal) brings its own. |
 | `reference_level` | The free-field reference exposure level $L_{pE,10}$ in dB, as a scalar or one value per band. Mutually exclusive with `reference_ir`. |
 | `limits` | `(f_min, f_max)` band-centre limits in Hz; default the octave bands 125 Hz to 4 kHz (ISO 3382-1:2009, 5.1). `None` measures the broadband response as a single band. |
 | `fraction` | Bandwidth fraction (1 = octave, 3 = one-third octave). |
 
-**Returns:** A [`SoundStrengthResult`](/phonometry/reference/api/rooms/auditorium/#soundstrengthresult) with one entry per band.
+**Returns:** A [`SoundStrengthResult`](/reference/api/rooms/auditorium/#soundstrengthresult) with one entry per band.
 
 **Raises**
 
@@ -1230,7 +1230,7 @@ measurement at all: the 31 dB is the spread of a point source over the
 sphere of radius 10 m, $10\lg(4\pi \cdot 100) = 30.9921$ dB,
 rounded. A.2.1 asks for the source's power level to be measured to
 ISO 3741, which the library implements in
-[`phonometry.emission.sound_power`](/phonometry/reference/api/power/sound-power/).
+[`phonometry.emission.sound_power`](/reference/api/power/sound-power/).
 
 **Parameters**
 
@@ -1380,11 +1380,11 @@ than that. The equations govern, and `docs/ERRATA.md` records the rest.
 | Name | Description |
 | :--- | :--- |
 | `ir` | Impulse response measured on the platform (1D), 1.0 m from the acoustic centre of an omnidirectional source. |
-| `fs` | Sample rate in Hz. Required for a bare array; a [`Signal`](/phonometry/reference/api/io/io/#signal) brings its own. |
+| `fs` | Sample rate in Hz. Required for a bare array; a [`Signal`](/reference/api/io/io/#signal) brings its own. |
 | `limits` | `(f_min, f_max)` band-centre limits in Hz; default the 250 Hz to 2 kHz octave bands C.2.4 averages over. `None` measures the broadband response. |
 | `fraction` | Bandwidth fraction (1 = octave, 3 = one-third octave). C.2.4 asks for octave bands. |
 
-**Returns:** A [`StageSupportResult`](/phonometry/reference/api/rooms/auditorium/#stagesupportresult) with one entry per band.
+**Returns:** A [`StageSupportResult`](/reference/api/rooms/auditorium/#stagesupportresult) with one entry per band.
 
 **Raises**
 

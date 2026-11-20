@@ -1,6 +1,6 @@
 <!-- Written by `make llms` from site/src/content/docs/vibration/immission/railway-vibration.mdx: edit that page and its Spanish twin, then run `make llms`. -->
 
-← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/vibration/immission/railway-vibration/
+← [Documentation index](../../README.md) · Published at https://phonometry.dev/vibration/immission/railway-vibration/
 
 # Vibration next to a railway (DIN 45672)
 
@@ -484,8 +484,8 @@ DIN 4150-3.
 - [Spectral analysis](../../signals/spectra/spectral-analysis.md): the
   Welch estimate behind the narrow-band density and the confidence it carries.
 - API reference:
-  [`vibration.immission.railway`](https://docs.jmrp.io/phonometry/reference/api/vibration/railway/)
-  and [`vibration.immission.ground`](https://docs.jmrp.io/phonometry/reference/api/vibration/ground/).
+  [`vibration.immission.railway`](https://phonometry.dev/reference/api/vibration/railway/)
+  and [`vibration.immission.ground`](https://phonometry.dev/reference/api/vibration/ground/).
 
 ## References
 

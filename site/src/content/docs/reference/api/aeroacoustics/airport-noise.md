@@ -14,21 +14,21 @@ infinite path, tabulated over a grid of engine power settings and slant
 distances at reference conditions. Placing an aircraft's noise at a receiver
 starts by reading a level from this table for an arbitrary power and distance.
 
-* [`npd_level`](/phonometry/reference/api/aeroacoustics/airport-noise/#npd_level): the interpolated event level `L(P, d)`, linear in power
+* [`npd_level`](/reference/api/aeroacoustics/airport-noise/#npd_level): the interpolated event level `L(P, d)`, linear in power
   and log-linear in distance (Eqs. 4-3/4-4), with extrapolation beyond the
   tabulated envelope.
-* [`npd_curve`](/phonometry/reference/api/aeroacoustics/airport-noise/#npd_curve): the level over a distance sweep at one power, returned as
-  an [`NPDLevelResult`](/phonometry/reference/api/aeroacoustics/airport-noise/#npdlevelresult) with a `.plot()`.
+* [`npd_curve`](/reference/api/aeroacoustics/airport-noise/#npd_curve): the level over a distance sweep at one power, returned as
+  an [`NPDLevelResult`](/reference/api/aeroacoustics/airport-noise/#npdlevelresult) with a `.plot()`.
 
 The single-event stage segments a flight path and adjusts the NPD baseline per
-segment (§4.3-4.5): [`impedance_adjustment`](/phonometry/reference/api/aeroacoustics/airport-noise/#impedance_adjustment) (Eq. 4-6/4-7),
-[`lateral_attenuation`](/phonometry/reference/api/aeroacoustics/airport-noise/#lateral_attenuation) (β, ℓ), [`engine_installation_correction`](/phonometry/reference/api/aeroacoustics/airport-noise/#engine_installation_correction)
-(φ, mounting), [`duration_correction`](/phonometry/reference/api/aeroacoustics/airport-noise/#duration_correction), the finite-segment
-[`noise_fraction`](/phonometry/reference/api/aeroacoustics/airport-noise/#noise_fraction) and, behind takeoff ground-roll segments, the
-[`start_of_roll_directivity`](/phonometry/reference/api/aeroacoustics/airport-noise/#start_of_roll_directivity) `ΔSOR` (§4.5.7). [`event_level`](/phonometry/reference/api/aeroacoustics/airport-noise/#event_level)
+segment (§4.3-4.5): [`impedance_adjustment`](/reference/api/aeroacoustics/airport-noise/#impedance_adjustment) (Eq. 4-6/4-7),
+[`lateral_attenuation`](/reference/api/aeroacoustics/airport-noise/#lateral_attenuation) (β, ℓ), [`engine_installation_correction`](/reference/api/aeroacoustics/airport-noise/#engine_installation_correction)
+(φ, mounting), [`duration_correction`](/reference/api/aeroacoustics/airport-noise/#duration_correction), the finite-segment
+[`noise_fraction`](/reference/api/aeroacoustics/airport-noise/#noise_fraction) and, behind takeoff ground-roll segments, the
+[`start_of_roll_directivity`](/reference/api/aeroacoustics/airport-noise/#start_of_roll_directivity) `ΔSOR` (§4.5.7). [`event_level`](/reference/api/aeroacoustics/airport-noise/#event_level)
 assembles and sums them into the `SEL`/`LAmax` of a movement (mark takeoff
 ground-roll segments with the `ground_roll` mask of its
-[`FlightSegmentState`](/phonometry/reference/api/aeroacoustics/airport-noise/#flightsegmentstate)), and [`noise_contour`](/phonometry/reference/api/aeroacoustics/airport-noise/#noise_contour)
+[`FlightSegmentState`](/reference/api/aeroacoustics/airport-noise/#flightsegmentstate)), and [`noise_contour`](/reference/api/aeroacoustics/airport-noise/#noise_contour)
 evaluates it over a ground grid.
 
 Source (clean-room, implemented from the standard text): ECAC Doc 29, 4th ed.,
@@ -49,12 +49,12 @@ AerodromeAtmosphere(
 
 The aerodrome air the NPD levels are corrected to (Eq. 4-6/4-7).
 
-The two quantities [`impedance_adjustment`](/phonometry/reference/api/aeroacoustics/airport-noise/#impedance_adjustment) needs, at the standard
+The two quantities [`impedance_adjustment`](/reference/api/aeroacoustics/airport-noise/#impedance_adjustment) needs, at the standard
 atmosphere by default, so an event at reference conditions needs no
 atmosphere at all.
 
 The Doc 32 rotorcraft chain keeps its own
-[`RotorcraftAtmosphere`](/phonometry/reference/api/aeroacoustics/rotorcraft-noise/#rotorcraftatmosphere)
+[`RotorcraftAtmosphere`](/reference/api/aeroacoustics/rotorcraft-noise/#rotorcraftatmosphere)
 instead of sharing this one: it propagates band by band, so it also needs
 the humidity and the absorption method, and its reference conditions are
 the ICAO 25 °C/70 % of the hemisphere database, not the 15 °C of Eq. 4-7.
@@ -83,7 +83,7 @@ $\Delta V = 10 \cdot \log_{10}(V_{\mathrm{ref}}/V_{\mathrm{seg}})$.
 
 | Name | Description |
 | :--- | :--- |
-| `reference_speed_m_s` | NPD reference speed `Vref`, in m/s, the unit [`event_level`](/phonometry/reference/api/aeroacoustics/airport-noise/#event_level) passes; only the ratio enters, so two speeds in any one unit give the same correction. |
+| `reference_speed_m_s` | NPD reference speed `Vref`, in m/s, the unit [`event_level`](/reference/api/aeroacoustics/airport-noise/#event_level) passes; only the ratio enters, so two speeds in any one unit give the same correction. |
 | `segment_speed_m_s` | Segment speed `Vseg`, in the unit of `reference_speed_m_s`. |
 
 **Returns:** The duration correction `ΔV`, in dB.
@@ -162,10 +162,10 @@ ground-roll segments, and combines them into the exposure level `SEL`
 | `reference_speed_m_s` | NPD reference speed, in m/s (default 160 kt). |
 | `mounting` | Engine mounting (`"wing"`/`"fuselage"`/`"propeller"`). |
 | `metric` | `"exposure"` (SEL) or `"maximum"` (LAmax). |
-| `atmosphere` | Aerodrome air temperature and pressure, an [`AerodromeAtmosphere`](/phonometry/reference/api/aeroacoustics/airport-noise/#aerodromeatmosphere) (default: the standard atmosphere); they set the impedance adjustment. |
-| `segments` | What each segment is doing, a [`FlightSegmentState`](/phonometry/reference/api/aeroacoustics/airport-noise/#flightsegmentstate) (default: airborne and unbanked): the takeoff ground-roll and landing-rollout masks and the per-segment bank angle. |
+| `atmosphere` | Aerodrome air temperature and pressure, an [`AerodromeAtmosphere`](/reference/api/aeroacoustics/airport-noise/#aerodromeatmosphere) (default: the standard atmosphere); they set the impedance adjustment. |
+| `segments` | What each segment is doing, a [`FlightSegmentState`](/reference/api/aeroacoustics/airport-noise/#flightsegmentstate) (default: airborne and unbanked): the takeoff ground-roll and landing-rollout masks and the per-segment bank angle. |
 
-**Returns:** A [`FlyoverResult`](/phonometry/reference/api/aeroacoustics/airport-noise/#flyoverresult). If every segment is degenerate (zero length) the level is `-inf`.
+**Returns:** A [`FlyoverResult`](/reference/api/aeroacoustics/airport-noise/#flyoverresult). If every segment is degenerate (zero length) the level is `-inf`.
 
 **Raises**
 
@@ -321,13 +321,13 @@ noise_contour(
 
 Single-event noise level over a ground grid (ECAC Doc 29 contour).
 
-Evaluates [`event_level`](/phonometry/reference/api/aeroacoustics/airport-noise/#event_level) at every grid point `(xi, yj, 0)`.
+Evaluates [`event_level`](/reference/api/aeroacoustics/airport-noise/#event_level) at every grid point `(xi, yj, 0)`.
 
 **Parameters**
 
 | Name | Description |
 | :--- | :--- |
-| `path` | Flight-path points, shape `(N, 5)` (see [`event_level`](/phonometry/reference/api/aeroacoustics/airport-noise/#event_level)). |
+| `path` | Flight-path points, shape `(N, 5)` (see [`event_level`](/reference/api/aeroacoustics/airport-noise/#event_level)). |
 | `powers` | NPD tabulated power settings. |
 | `distances_m` | NPD tabulated slant distances, in metres. |
 | `exposure_levels` | NPD exposure (SEL) levels, shape `(P, D)`. |
@@ -337,10 +337,10 @@ Evaluates [`event_level`](/phonometry/reference/api/aeroacoustics/airport-noise/
 | `reference_speed_m_s` | NPD reference speed, in m/s. |
 | `mounting` | Engine mounting. One of `"wing"`, `"fuselage"` or `"propeller"`. |
 | `metric` | `"exposure"` (SEL) or `"maximum"` (LAmax). |
-| `atmosphere` | Aerodrome air temperature and pressure, an [`AerodromeAtmosphere`](/phonometry/reference/api/aeroacoustics/airport-noise/#aerodromeatmosphere) (impedance adjustment). |
-| `segments` | What each segment is doing, a [`FlightSegmentState`](/phonometry/reference/api/aeroacoustics/airport-noise/#flightsegmentstate) (see [`event_level`](/phonometry/reference/api/aeroacoustics/airport-noise/#event_level)). |
+| `atmosphere` | Aerodrome air temperature and pressure, an [`AerodromeAtmosphere`](/reference/api/aeroacoustics/airport-noise/#aerodromeatmosphere) (impedance adjustment). |
+| `segments` | What each segment is doing, a [`FlightSegmentState`](/reference/api/aeroacoustics/airport-noise/#flightsegmentstate) (see [`event_level`](/reference/api/aeroacoustics/airport-noise/#event_level)). |
 
-**Returns:** A [`NoiseContourResult`](/phonometry/reference/api/aeroacoustics/airport-noise/#noisecontourresult).
+**Returns:** A [`NoiseContourResult`](/reference/api/aeroacoustics/airport-noise/#noisecontourresult).
 
 **Raises**
 
@@ -444,7 +444,7 @@ NPD event level over a distance sweep at one power setting.
 | `power` | Query engine power setting. |
 | `query_distances_m` | Distances to evaluate, in metres; defaults to a log sweep across the tabulated envelope. |
 
-**Returns:** An [`NPDLevelResult`](/phonometry/reference/api/aeroacoustics/airport-noise/#npdlevelresult).
+**Returns:** An [`NPDLevelResult`](/reference/api/aeroacoustics/airport-noise/#npdlevelresult).
 
 **Raises**
 

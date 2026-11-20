@@ -52,8 +52,8 @@ Usa esta página cuando tus canales sean grabaciones paralelas con el mismo
 reloj y quieras espectros o niveles por canal. Cuando la pregunta sea *entre*
 canales (cuál es el retardo de A a B, cuánta parte de B se explica por A),
 eso es análisis cruzado: consulta
-[Correlación y retardo](/phonometry/es/signals/spectra/correlation-delay/) y
-[Coherencia múltiple y parcial](/phonometry/es/signals/spectra/miso-coherence/), las
+[Correlación y retardo](/es/signals/spectra/correlation-delay/) y
+[Coherencia múltiple y parcial](/es/signals/spectra/miso-coherence/), las
 implementaciones de la correlación cruzada y de los modelos de múltiples
 entradas de Bendat y Piersol.
 
@@ -111,7 +111,7 @@ con estructuras temporales completamente distintas (un ruido estacionario y un
 barrido que en un instante está en 50 Hz y cinco segundos después en 10 kHz)
 dan el mismo espectro, y por eso los niveles de banda de esta página responden a
 «cuánta energía hay por banda» y nunca a «cuándo». El espectrograma de octava de
-[Niveles integrados y estadísticos](/phonometry/es/signals/levels/levels/) es la
+[Niveles integrados y estadísticos](/es/signals/levels/levels/) es la
 herramienta que devuelve el eje del tiempo.
 
 La convención es uniforme en toda la biblioteca: el tiempo siempre es el
@@ -162,7 +162,7 @@ explicitar:
   promediados por posición de las normas de acústica de salas), combina
   energías tú mismo: `10 * np.log10(np.mean(10 ** (spl / 10), axis=0))`,
   nunca la media aritmética de los valores en dB (ver
-  [Niveles](/phonometry/es/signals/levels/levels/) para el porqué).
+  [Niveles](/es/signals/levels/levels/) para el porqué).
 - **Un factor de calibración significa una sensibilidad.** El factor escalar
   (`calibration=LevelCalibration(factor=...)` en un banco de filtros,
   `calibration_factor=` en `leq`, `laeq`, `ln_levels`, `lc_peak` y `sel`)
@@ -173,7 +173,7 @@ explicitar:
 - **Las clases con estado guardan un estado por canal.** En el procesado por
   bloques el array de estado se ajusta al número de canales y un cambio del
   número de canales lo reinicia; ver
-  [Procesado por bloques](/phonometry/es/signals/filters/block-processing/).
+  [Procesado por bloques](/es/signals/filters/block-processing/).
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/survey_channel_average.svg" alt="Panel superior: cinco curvas finas grises de tercios de octava correspondientes a cinco posiciones de una misma sala, junto con un promedio energético azul grueso y un promedio aritmético de los valores en decibelios en rojo discontinuo. Por encima de unos 400 Hz las cinco posiciones coinciden dentro de un decibelio y los dos promedios se superponen; por debajo, en la región modal, las posiciones se dispersan hasta quince decibelios y el promedio rojo discontinuo queda por debajo del azul. Panel inferior: la diferencia entre ambos banda a banda, nula por encima de 400 Hz y creciente hasta una subestimación máxima de 3,8 dB a 40 Hz" width="88%" />
 
@@ -309,7 +309,7 @@ Notas adicionales de rendimiento:
   explícito sobre el ciclo de vida del diseño.
 - **Diezmado multitasa**: las bandas graves se filtran a una frecuencia diezmada,
   lo que es a la vez más rápido y numéricamente más estable (consulta
-  [Teoría](/phonometry/es/reference/theory/signal-analysis/)).
+  [Teoría](/es/reference/theory/signal-analysis/)).
 - **numba opcional**: el kernel del modo `impulse` de la ponderación temporal se
   compila JIT cuando numba está instalado (`pip install "phonometry[perf]"`).
 
@@ -331,8 +331,8 @@ Las preguntas entre canales, como el retardo entre dos canales o cuánto de uno
 explica el otro, quedan deliberadamente fuera: `octave_filter`,
 `weighting_filter` y `time_weighting` nunca mezclan ni combinan filas.
 Consulta [Correlación y
-retardo](/phonometry/es/signals/spectra/correlation-delay/) y [Coherencia
-múltiple y parcial](/phonometry/es/signals/spectra/miso-coherence/) para las
+retardo](/es/signals/spectra/correlation-delay/) y [Coherencia
+múltiple y parcial](/es/signals/spectra/miso-coherence/) para las
 herramientas entre canales construidas sobre la correlación cruzada y los
 modelos de entrada múltiple de Bendat y Piersol.
 </ScopeClaim>
@@ -342,10 +342,10 @@ modelos de entrada múltiple de Bendat y Piersol.
 
 ## Véase también
 
-- [Correlación y retardo](/phonometry/es/signals/spectra/correlation-delay/): las preguntas cruzadas en el dominio del tiempo (retardo, alineación) que la ruta por canal deja deliberadamente en tus manos.
-- [Coherencia múltiple y parcial](/phonometry/es/signals/spectra/miso-coherence/): cuál de varios canales correlacionados excita realmente una respuesta (Bendat y Piersol, cap. 7).
-- [Procesado por bloques](/phonometry/es/signals/filters/block-processing/): la contrapartida en streaming, con un estado de filtro por canal.
-- [Niveles](/phonometry/es/signals/levels/levels/): las métricas de nivel por canal, y por qué los dB se combinan energéticamente.
-- Referencia de la API: [`phonometry`](/phonometry/es/reference/api/filters/phonometry/) y [`filters.core`](/phonometry/es/reference/api/filters/core/).
+- [Correlación y retardo](/es/signals/spectra/correlation-delay/): las preguntas cruzadas en el dominio del tiempo (retardo, alineación) que la ruta por canal deja deliberadamente en tus manos.
+- [Coherencia múltiple y parcial](/es/signals/spectra/miso-coherence/): cuál de varios canales correlacionados excita realmente una respuesta (Bendat y Piersol, cap. 7).
+- [Procesado por bloques](/es/signals/filters/block-processing/): la contrapartida en streaming, con un estado de filtro por canal.
+- [Niveles](/es/signals/levels/levels/): las métricas de nivel por canal, y por qué los dB se combinan energéticamente.
+- Referencia de la API: [`phonometry`](/es/reference/api/filters/phonometry/) y [`filters.core`](/es/reference/api/filters/core/).
 
 </SeeAlso>

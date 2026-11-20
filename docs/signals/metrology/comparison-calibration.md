@@ -1,6 +1,6 @@
 <!-- Written by `make llms` from site/src/content/docs/signals/metrology/comparison-calibration.mdx: edit that page and its Spanish twin, then run `make llms`. -->
 
-← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/signals/metrology/comparison-calibration/
+← [Documentation index](../../README.md) · Published at https://phonometry.dev/signals/metrology/comparison-calibration/
 
 # Microphone Calibration by Comparison (IEC 61094-5/-8)
 
@@ -1158,7 +1158,7 @@ plt.show()
 - [Calibration and dBFS](calibration.md): the
   calibrator tone that turns a recording into pascals once a microphone's
   sensitivity is known.
-- API reference: [`metrology.comparison_calibration`](https://docs.jmrp.io/phonometry/reference/api/metrology/comparison-calibration/).
+- API reference: [`metrology.comparison_calibration`](https://phonometry.dev/reference/api/metrology/comparison-calibration/).
 
 ## References
 

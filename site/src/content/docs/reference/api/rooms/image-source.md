@@ -14,7 +14,7 @@ the sum of the direct sound and one delayed, attenuated pulse per image
 (Kuttruff, *Room Acoustics* 6th ed., 4.1-4.2, Equations (4.4)-(4.5); Vorlander,
 *Auralization* 2nd ed., 11.4, the Allen-Berkley/Borish construction). This is
 the deterministic complement of the statistical reverberation-time formulae of
-[`phonometry.room.reverberation_prediction`](/phonometry/reference/api/rooms/reverberation-prediction/): where those give a single
+[`phonometry.room.reverberation_prediction`](/reference/api/rooms/reverberation-prediction/): where those give a single
 decay rate, the image-source model gives the whole early reflection pattern and
 the decay it implies.
 
@@ -61,7 +61,7 @@ single
 absorption set or one curve per octave band from per-band coefficients.
 
 The Schroeder backward integral of the synthetic RIR (see
-[`phonometry.room.decay_curve`](/phonometry/reference/api/rooms/acoustics/#decay_curve)) reproduces the Eyring reverberation time
+[`phonometry.room.decay_curve`](/reference/api/rooms/acoustics/#decay_curve)) reproduces the Eyring reverberation time
 $T = -24 V \ln 10 / (c S \ln(1 - \bar{\alpha}))$ (Kuttruff Equation
 (5.23)) of the
 same room to within a few percent, closing the loop between this deterministic
@@ -85,7 +85,7 @@ Kuttruff *Room Acoustics* 6th ed., Equation (9.23):
 $(2/3)(2 i_0^3 + 3 i_0^2 + 4 i_0)$. Every image of a rectangular
 room is
 audible (no visibility test needed), so this is exactly the number of
-impulses [`image_source_rir`](/phonometry/reference/api/rooms/image-source/#image_source_rir) sums at that order.
+impulses [`image_source_rir`](/reference/api/rooms/image-source/#image_source_rir) sums at that order.
 
 **Parameters**
 
@@ -136,8 +136,8 @@ With scalar or per-wall `absorption` (and no `frequencies`) the result
 is a broadband RIR; a per-band `absorption` (or a given `frequencies`)
 produces one RIR per band. The Schroeder decay of the synthetic RIR
 reproduces the Eyring reverberation time of the room (Kuttruff Equation
-(5.23)); feed `ir` straight to [`phonometry.room.decay_curve`](/phonometry/reference/api/rooms/acoustics/#decay_curve) or
-[`phonometry.room.room_parameters`](/phonometry/reference/api/rooms/acoustics/#room_parameters).
+(5.23)); feed `ir` straight to [`phonometry.room.decay_curve`](/reference/api/rooms/acoustics/#decay_curve) or
+[`phonometry.room.room_parameters`](/reference/api/rooms/acoustics/#room_parameters).
 
 **Parameters**
 
@@ -150,11 +150,11 @@ reproduces the Eyring reverberation time of the room (Kuttruff Equation
 | `fs` | Sample rate, Hz. |
 | `max_order` | Reflection-order cut-off (total wall reflections). The shoebox has $(2/3)(2 i_0^3 + 3 i_0^2 + 4 i_0)$ audible images up to order `i0` (Kuttruff Equation (9.23)). Default 20. |
 | `speed_of_sound` | Speed of sound `c`, m/s (default 343 m/s, dry air at 20 °C). |
-| `air_attenuation_per_m` | Air *intensity* attenuation coefficient `m`, in reciprocal metres (the power attenuation coefficient of ISO 354 8.1.2.1, $m = \alpha / (10 \lg \mathrm{e})$), scalar or per-band; the pressure amplitude of each path is scaled by $\mathrm{e}^{-m r / 2}$ (Kuttruff 4.1). Default 0 (air absorption neglected). Obtain a physical `m` from [`air_power_attenuation_per_m`](/phonometry/reference/api/environment/air-absorption/#air_power_attenuation_per_m). |
+| `air_attenuation_per_m` | Air *intensity* attenuation coefficient `m`, in reciprocal metres (the power attenuation coefficient of ISO 354 8.1.2.1, $m = \alpha / (10 \lg \mathrm{e})$), scalar or per-band; the pressure amplitude of each path is scaled by $\mathrm{e}^{-m r / 2}$ (Kuttruff 4.1). Default 0 (air absorption neglected). Obtain a physical `m` from [`air_power_attenuation_per_m`](/reference/api/environment/air-absorption/#air_power_attenuation_per_m). |
 | `duration_s` | RIR length, s; default the latest image arrival rounded up to the next sample. |
 | `frequencies` | Optional band centre frequencies, Hz, labelling a per-band result. When given, its length must match the band count of `absorption` (or broadcast against it). |
 
-**Returns:** An [`ImageSourceResult`](/phonometry/reference/api/rooms/image-source/#imagesourceresult).
+**Returns:** An [`ImageSourceResult`](/reference/api/rooms/image-source/#imagesourceresult).
 
 **Raises**
 
@@ -304,7 +304,7 @@ Kuttruff *Room Acoustics* 6th ed., Equation (4.6): the number of image
 sources per unit time whose spheres of radius $c t$ sweep the
 receiver.
 Independent of room shape. Useful to judge the reflection-order cut-off of
-[`image_source_rir`](/phonometry/reference/api/rooms/image-source/#image_source_rir) (the model is complete only while its images keep
+[`image_source_rir`](/reference/api/rooms/image-source/#image_source_rir) (the model is complete only while its images keep
 up with this density).
 
 **Parameters**

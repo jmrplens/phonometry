@@ -49,7 +49,7 @@ $$
 so a bare opening ($R = 0$, $\tau = 1$) of relative area
 $S_\mathrm{a}/S$ caps the composite at $10 \log_{10}(S / S_\mathrm{a})$. This is the same
 energetic combination used by the EN 12354-3/-4 facade model of
-[`phonometry.building.prediction.facade`](/phonometry/reference/api/building/facade/).
+[`phonometry.building.prediction.facade`](/reference/api/building/facade/).
 
 > Auto-generated from the source docstrings by `scripts/generate_api_docs.py` (`make api-docs`). Do not edit by hand.
 
@@ -154,7 +154,7 @@ Transmission coefficient of a circular aperture (Hopkins Eq. 4.102).
 | `depth` | Aperture depth `d` (wall thickness), in m (> 0). |
 | `speed_of_sound` | Speed of sound in air `c0` (Default: 343 m/s). |
 
-**Returns:** An [`ApertureTransmissionResult`](/phonometry/reference/api/building/aperture-transmission/#aperturetransmissionresult) (kind `"circular"`).
+**Returns:** An [`ApertureTransmissionResult`](/reference/api/building/aperture-transmission/#aperturetransmissionresult) (kind `"circular"`).
 
 **Raises**
 
@@ -228,8 +228,8 @@ Wall of thickness `depth` with a slit of the given `width_m` (or the
 diametral section of a circular hole of the given `radius`), incident
 sound on the left and the transmitted wavefronts sketched on the right.
 Give exactly one of `width_m`/`radius`, matching
-[`slit_transmission_coefficient`](/phonometry/reference/api/building/aperture-transmission/#slit_transmission_coefficient) /
-[`circular_aperture_transmission_coefficient`](/phonometry/reference/api/building/aperture-transmission/#circular_aperture_transmission_coefficient).
+[`slit_transmission_coefficient`](/reference/api/building/aperture-transmission/#slit_transmission_coefficient) /
+[`circular_aperture_transmission_coefficient`](/reference/api/building/aperture-transmission/#circular_aperture_transmission_coefficient).
 
 **Parameters**
 
@@ -315,7 +315,7 @@ Transmission coefficient of a straight-edged slit (Hopkins Eq. 4.99).
 | `position` | `"mid"` ($n = 1$) or `"edge"` ($n = 0.5$). |
 | `speed_of_sound` | Speed of sound in air `c0` (Default: 343 m/s). |
 
-**Returns:** An [`ApertureTransmissionResult`](/phonometry/reference/api/building/aperture-transmission/#aperturetransmissionresult) (kind `"slit"`).
+**Returns:** An [`ApertureTransmissionResult`](/reference/api/building/aperture-transmission/#aperturetransmissionresult) (kind `"slit"`).
 
 **Raises**
 

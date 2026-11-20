@@ -156,7 +156,7 @@ sidebar:
 import ThemeImage from '../../../../components/ThemeImage.astro';
 import Video from '../../../../components/Video.astro';
 
-This page collects the theory behind hearing and psychoacoustics: the equal-loudness contours, the Zwicker, Moore-Glasberg and Sottek loudness models, the sound-quality metrics tonality, roughness and sharpness, tone prominence, the speech metrics STI and SII, and the statistics of hearing thresholds and hearing loss. It is part of the [theory reference](/phonometry/reference/theory/).
+This page collects the theory behind hearing and psychoacoustics: the equal-loudness contours, the Zwicker, Moore-Glasberg and Sottek loudness models, the sound-quality metrics tonality, roughness and sharpness, tone prominence, the speech metrics STI and SII, and the statistics of hearing thresholds and hearing loss. It is part of the [theory reference](/reference/theory/).
 
 Each section keeps the notation of the standard it describes, and five letters
 are reused between them. Where two collide the section says which is meant, but
@@ -197,7 +197,7 @@ The three parameters come from Table 1 (p. 4), tabulated at the 29 preferred thi
 
 The standard specifies **no interpolation** between the tabulated frequencies. Formula (1) is specified for **20 phon to 90 phon** between 20 Hz and 4 kHz, and only up to **80 phon between 5 kHz and 12.5 kHz**; above 80 phon the contour therefore stops at 4 kHz. Values outside these limits from Formula (2) are extrapolations the standard labels as informative only.
 
-See the [Loudness guide](/phonometry/perception/psychoacoustics/loudness/) for usage.
+See the [Loudness guide](/perception/psychoacoustics/loudness/) for usage.
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/equal_loudness_contours.svg" alt="ISO 226:2023 normal equal-loudness-level contours from 20 to 90 phon with the hearing threshold curve" width="80%" />
 
@@ -234,13 +234,13 @@ $$
 
 below 1 sone the reference program uses $L_\mathrm{N} = 40 (N + 0.0005)^{0.35}$, floored at 3 phon.
 
-See the [Loudness guide](/phonometry/perception/psychoacoustics/loudness/) for usage.
+See the [Loudness guide](/perception/psychoacoustics/loudness/) for usage.
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/loudness_pattern.svg" alt="Specific loudness patterns over the Bark scale for a 1 kHz narrowband sound and a broadband sound of equal band level" width="80%" />
 
 *Specific loudness N′(z) over the Bark axis: energy spread over many critical bands sums to more sones than the same band level in a single band.*
 
-That figure is drawn at one level, and stage 5 is the one that depends on level. The clip from the [Loudness guide](/phonometry/perception/psychoacoustics/loudness/) raises the band level of the same 1 kHz narrowband sound from 45 to 85 dB:
+That figure is drawn at one level, and stage 5 is the one that depends on level. The clip from the [Loudness guide](/perception/psychoacoustics/loudness/) raises the band level of the same 1 kHz narrowband sound from 45 to 85 dB:
 
 <Video
   name="anim_specific_loudness"
@@ -302,7 +302,7 @@ $$
 
 using a fast time constant on the attack and a slower one on the release. This yields the **short-term loudness** $S'(t)$ (attack/release near 20–30 ms) and the **long-term loudness** $S''(t)$ (near 0.1–0.75 s); the peak long-term loudness $N_{\max} = \max_t S''(t)$ predicts the loudness of sounds up to about 5 s.
 
-See the [Advanced Loudness guide](/phonometry/perception/psychoacoustics/advanced-loudness/)
+See the [Advanced Loudness guide](/perception/psychoacoustics/advanced-loudness/)
 for usage and the model-choice table.
 
 ### Sottek Hearing Model (ECMA-418-2:2025)
@@ -390,7 +390,7 @@ about 2 acum read as shrill. Differences of the order of 10 % in any of the thre
 are around the smallest a listener reliably notices, so quoting more precision
 than that invites over-interpretation.
 
-See the [Sound Quality Metrics guide](/phonometry/perception/psychoacoustics/sound-quality/) for usage.
+See the [Sound Quality Metrics guide](/perception/psychoacoustics/sound-quality/) for usage.
 
 ## Tone prominence: TNR and PR (ECMA-418-1)
 
@@ -456,7 +456,7 @@ tone-to-noise ratio is judged against a different threshold at every frequency:
 the example tone clears its 13.0 dB threshold at 250 Hz by 2.1 dB, while a
 10 dB tone would be prominent anywhere above 1 kHz and not prominent here.*
 
-See the [Prominent Discrete Tones guide](/phonometry/perception/psychoacoustics/tone-prominence/) for usage.
+See the [Prominent Discrete Tones guide](/perception/psychoacoustics/tone-prominence/) for usage.
 
 ## Modulation transfer and STI (IEC 60268-16)
 
@@ -486,7 +486,7 @@ $$
 
 truncated to 1.0.
 
-The clip from the [Speech Transmission guide](/phonometry/perception/speech/speech-transmission/) puts the two degradations on one envelope: a fully modulated 4 Hz probe, received through the 1 kHz octave band and drawn at a constant received mean. First the reverberation time sweeps from 0.30 to 2.50 s without noise: it acts on $m$ itself, through the integral above, and the depth at 4 Hz falls from 0.90 to 0.26 and the STI from 0.84 to 0.40. Then, at a fixed 1.00 s, the speech-to-noise ratio falls from 25 to 0 dB: it acts through the factor $1/(1 + 10^{-\mathrm{SNR}/10})$, which is one half at 0 dB, and the depth ends at 0.28 and the STI at 0.36.
+The clip from the [Speech Transmission guide](/perception/speech/speech-transmission/) puts the two degradations on one envelope: a fully modulated 4 Hz probe, received through the 1 kHz octave band and drawn at a constant received mean. First the reverberation time sweeps from 0.30 to 2.50 s without noise: it acts on $m$ itself, through the integral above, and the depth at 4 Hz falls from 0.90 to 0.26 and the STI from 0.84 to 0.40. Then, at a fixed 1.00 s, the speech-to-noise ratio falls from 25 to 0 dB: it acts through the factor $1/(1 + 10^{-\mathrm{SNR}/10})$, which is one half at 0 dB, and the depth ends at 0.28 and the STI at 0.36.
 
 <Video
   name="anim_modulation_transfer"
@@ -537,7 +537,7 @@ half-width of a band), so a value within about 0.02 of an edge may legitimately
 be graded either side, and the STI is quoted beside the letter and averaged over
 several positions rather than trusted at one.
 
-See the [Speech Transmission Index guide](/phonometry/perception/speech/speech-transmission/) for usage,
+See the [Speech Transmission Index guide](/perception/speech/speech-transmission/) for usage,
 the Annex G table of typical uses and the position-averaging rule.
 
 ## Speech Intelligibility Index (ANSI S3.5)
@@ -611,7 +611,7 @@ vocal effort as input; the **STI** answers questions about a *room or a system*,
 because it takes an impulse response and a background spectrum and says nothing
 about who is listening.
 
-See the [Speech Intelligibility guide](/phonometry/perception/speech/speech-intelligibility/) for usage.
+See the [Speech Intelligibility guide](/perception/speech/speech-intelligibility/) for usage.
 
 ## Hearing thresholds and presbycusis (ISO 389-7, ISO 7029)
 
@@ -640,7 +640,7 @@ $$
 
 and any fractile follows a two-sided Gaussian model (clause 4.4), $\Delta H_Q = \Delta H_\mathrm{md} + z(Q)\ s$, using the upper spread $s_\mathrm{u}$ for $z \ge 0$ (worse than median) and the lower spread $s_\mathrm{l}$ otherwise, each a degree-5 polynomial in $Y - 18$ per sex and frequency (clause 4.3, Tables 2–5). At age 18 every deviation is zero by construction. The formulae are established to 80 years at and below 2 kHz and to 70 years above; beyond that the evaluation is an extrapolation. Reference values: at 60 years the medians evaluate to 7.85 dB (male, 1 kHz), 20.21 dB (male, 4 kHz) and 15.32 dB (female, 4 kHz), matching the Table 1 formula to $10^{-3}$.
 
-See the [Hearing Threshold guide](/phonometry/perception/hearing/hearing-threshold/) for usage.
+See the [Hearing Threshold guide](/perception/hearing/hearing-threshold/) for usage.
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/hearing_threshold.svg" alt="Two panels. Left: the ISO 7029 median hearing-threshold deviation for men at ages 20, 40, 60 and 80 on an inverted audiogram axis, with the 10 to 90 percent fractile band around the 70-year curve; the loss deepens toward high frequencies and with age. Right: the ISO 389-7 free-field and diffuse-field reference threshold, coinciding below 1 kHz and diverging above, dipping to a minimum near 3 to 4 kHz" width="96%" />
 
@@ -672,4 +672,4 @@ direction the paragraph above states: the edge of the shaded band showing the
 , which ISO 1999 and its Annex D column headings label $Q = 10\ \%$. At 4 kHz
 this case runs 19.5 / 26.0 / 36.0 dB at `fractile` 0.10 / 0.50 / 0.90.*
 
-See the [Noise-Induced Hearing Loss guide](/phonometry/perception/hearing/noise-induced-hearing-loss/) for usage.
+See the [Noise-Induced Hearing Loss guide](/perception/hearing/noise-induced-hearing-loss/) for usage.

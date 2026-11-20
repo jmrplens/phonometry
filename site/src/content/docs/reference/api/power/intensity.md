@@ -59,7 +59,7 @@ the instrument is adequate for a measurement when $L_\mathrm{d} > F_2$
 (criterion 1, Annex B equation (B.1)). The residual index
 $\delta_{pI0}$ that feeds it is classified against
 IEC 61043:1993 Table 2 by
-[`phonometry.emission.intensity_compliance.verify_intensity_class`](/phonometry/reference/api/power/intensity-compliance/#verify_intensity_class).
+[`phonometry.emission.intensity_compliance.verify_intensity_class`](/reference/api/power/intensity-compliance/#verify_intensity_class).
 
 > Auto-generated from the source docstrings by `scripts/generate_api_docs.py` (`make api-docs`). Do not edit by hand.
 
@@ -129,7 +129,7 @@ typical position from M short-time-averaged intensity samples
 (clause 8.2), and again immediately before and after the measurement
 on any one measurement surface (Annex B, B.1.4). Passing those samples
 as `temporal_intensity` fills `f1` on the result; see
-[`temporal_variability_indicator`](/phonometry/reference/api/power/intensity/#temporal_variability_indicator).
+[`temporal_variability_indicator`](/reference/api/power/intensity/#temporal_variability_indicator).
 
 The inputs are either 1D per-position arrays (one frequency band,
 scalar indicators) or 2D `(positions, bands)` arrays (the
@@ -147,7 +147,7 @@ in that band (clause A.2.3) and a `ValueError` is raised.
 | `frequencies` | Band centre frequencies in Hz, one per column of the 2D input (optional for 1D input, where it is ignored beyond a length check). |
 | `temporal_intensity` | Optional M short-time-averaged normal intensity samples `Ink` at one fixed position, in W/m^2; 1D `(samples,)` for a single band or 2D `(samples, bands)` with one column per band of the surface input. Supplying it fills `f1` on the returned result. |
 
-**Returns:** [`FieldIndicators`](/phonometry/reference/api/power/intensity/#fieldindicators).
+**Returns:** [`FieldIndicators`](/reference/api/power/intensity/#fieldindicators).
 
 **Raises**
 
@@ -179,15 +179,15 @@ positions N must satisfy $N > C F_4^2$ (criterion 2, equation
 (B.2)).
 
 `f1` is the temporal variability indicator (equation (A.1)), present
-only when [`field_indicators`](/phonometry/reference/api/power/intensity/#field_indicators) was given the `temporal_intensity`
+only when [`field_indicators`](/reference/api/power/intensity/#field_indicators) was given the `temporal_intensity`
 samples it is computed from; it is `None` otherwise. Unlike the other
 three it describes the *field* rather than the surface: it is evaluated
 at one typical position from M short-time-averaged samples of the
 normal intensity (clause 8.2, the initial test), and Table B.3
-requires action when it exceeds [`TEMPORAL_VARIABILITY_LIMIT`](/phonometry/reference/api/power/intensity/#temporal_variability_limit).
+requires action when it exceeds [`TEMPORAL_VARIABILITY_LIMIT`](/reference/api/power/intensity/#temporal_variability_limit).
 
 With per-position *and* per-band input (2D arrays passed to
-[`field_indicators`](/phonometry/reference/api/power/intensity/#field_indicators)) the indicators are per-band arrays and
+[`field_indicators`](/reference/api/power/intensity/#field_indicators)) the indicators are per-band arrays and
 `frequencies` carries the band centres; with 1D per-position input they
 are scalars and `frequencies` is `None`.
 
@@ -205,13 +205,13 @@ of the extraneous intensity, measuring during quieter periods or
 lengthening the averaging time at each position. A field at exactly
 the limit is not flagged.
 
-**Returns:** The verdict, as a [`FieldStationarityCheck`](/phonometry/reference/api/power/intensity/#fieldstationaritycheck): `passes` over every band, and band by band its `stationary`.
+**Returns:** The verdict, as a [`FieldStationarityCheck`](/reference/api/power/intensity/#fieldstationaritycheck): `passes` over every band, and band by band its `stationary`.
 
 **Raises**
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | If the result carries no `f1` (call [`field_indicators`](/phonometry/reference/api/power/intensity/#field_indicators) with `temporal_intensity`, or use [`temporal_variability_indicator`](/phonometry/reference/api/power/intensity/#temporal_variability_indicator) directly). |
+| ValueError | If the result carries no `f1` (call [`field_indicators`](/reference/api/power/intensity/#field_indicators) with `temporal_intensity`, or use [`temporal_variability_indicator`](/reference/api/power/intensity/#temporal_variability_indicator) directly). |
 
 ### FieldIndicators.plot()
 
@@ -229,9 +229,9 @@ Plot the per-band indicators F2/F3, the Ld line and F4.
 
 F1 and its Table B.3 limit of 0.6 are drawn beside F4 when the
 result carries them, that is when `temporal_intensity` was
-supplied to [`field_indicators`](/phonometry/reference/api/power/intensity/#field_indicators).
+supplied to [`field_indicators`](/reference/api/power/intensity/#field_indicators).
 
-Requires per-band data (call [`field_indicators`](/phonometry/reference/api/power/intensity/#field_indicators) with 2D
+Requires per-band data (call [`field_indicators`](/reference/api/power/intensity/#field_indicators) with 2D
 `(positions, bands)` arrays and `frequencies`) and matplotlib
 (the `[plot]` extra); returns the
 `Axes`.
@@ -241,7 +241,7 @@ Requires per-band data (call [`field_indicators`](/phonometry/reference/api/powe
 | Name | Description |
 | :--- | :--- |
 | `ax` | Existing axes, or `None` to create a figure. |
-| `dynamic_capability` | Optional instrument dynamic capability index `Ld` in dB (scalar or per band), drawn as the criterion-1 reference line ($L_\mathrm{d} > F_2$, equation (B.1)); see [`dynamic_capability_index`](/phonometry/reference/api/power/intensity/#dynamic_capability_index). |
+| `dynamic_capability` | Optional instrument dynamic capability index `Ld` in dB (scalar or per band), drawn as the criterion-1 reference line ($L_\mathrm{d} > F_2$, equation (B.1)); see [`dynamic_capability_index`](/reference/api/power/intensity/#dynamic_capability_index). |
 | `language` | Label language, `"en"` (default) or `"es"`. |
 | `kwargs` | Forwarded to the F2 curve `plot` call. |
 
@@ -264,7 +264,7 @@ Table B.3 lists $F_1 > 0.6$ as the condition that calls for action
 code (e): reducing the temporal variability of the extraneous intensity,
 measuring during quieter periods or lengthening the averaging time at
 each position. A field at exactly the limit is not flagged, so it passes.
-The limit is the table's, [`TEMPORAL_VARIABILITY_LIMIT`](/phonometry/reference/api/power/intensity/#temporal_variability_limit), and the
+The limit is the table's, [`TEMPORAL_VARIABILITY_LIMIT`](/reference/api/power/intensity/#temporal_variability_limit), and the
 answers are read from $F_1$ and it, so they are not fields: a check
 cannot be built against another limit.
 
@@ -278,7 +278,7 @@ cannot be built against another limit.
 
 *property*
 
-The Table B.3 limit on $F_1$, [`TEMPORAL_VARIABILITY_LIMIT`](/phonometry/reference/api/power/intensity/#temporal_variability_limit).
+The Table B.3 limit on $F_1$, [`TEMPORAL_VARIABILITY_LIMIT`](/reference/api/power/intensity/#temporal_variability_limit).
 
 ### FieldStationarityCheck.passes
 
@@ -455,7 +455,7 @@ The mean-square pressure is taken from the mean signal
 $(p_1 + p_2)/2$ at the probe reference point. When `fraction` is
 given, both quantities are integrated into octave (1) or one-third
 octave (3) bands using the ANSI S1.11/IEC 61260-1 band edges of
-[`phonometry.filters.nominal_frequencies`](/phonometry/reference/api/filters/frequencies/#nominal_frequencies); bands without any spectral
+[`phonometry.filters.nominal_frequencies`](/reference/api/filters/frequencies/#nominal_frequencies); bands without any spectral
 bin are dropped. Broadband totals are always computed (over
 `limits` when provided, otherwise over all positive frequencies).
 
@@ -475,17 +475,17 @@ by the factor $\sin(k \Delta r)/(k \Delta r)$ (IEC 61043:1993,
 
 | Name | Description |
 | :--- | :--- |
-| `p1` | Pressure signal of microphone 1, in pascals (1D). Accepts a [`phonometry.io.Signal`](/phonometry/reference/api/io/io/#signal), whose calibration is applied to the samples, which is what puts them in pascals; the intensity goes as the product of the two pressures, so a factor on both scales it by the square of that factor. |
+| `p1` | Pressure signal of microphone 1, in pascals (1D). Accepts a [`phonometry.io.Signal`](/reference/api/io/io/#signal), whose calibration is applied to the samples, which is what puts them in pascals; the intensity goes as the product of the two pressures, so a factor on both scales it by the square of that factor. |
 | `p2` | Pressure signal of microphone 2, in pascals (1D). Same treatment as `p1`. |
-| `fs` | Sample rate in Hz. Required when both records are bare arrays; either may be a [`Signal`](/phonometry/reference/api/io/io/#signal) and supply it, and two Signals recorded at different rates are refused rather than arbitrated. |
+| `fs` | Sample rate in Hz. Required when both records are bare arrays; either may be a [`Signal`](/reference/api/io/io/#signal) and supply it, and two Signals recorded at different rates are refused rather than arbitrated. |
 | `spacing_m` | Microphone separation $\Delta r$, in metres. |
 | `density` | Air density, in kg/m^3. Default 1.204 (20 degC). |
 | `speed_of_sound` | Speed of sound, in m/s. Default 343.0. |
 | `fraction` | `None` (broadband only), 1 (octave bands) or 3 (one-third octave bands). One of `1` or `3`. |
-| `limits` | [f_min, f_max] band limits in Hz, a sequence or an array of the two (default [12, 20000], as in [`phonometry.filters.nominal_frequencies`](/phonometry/reference/api/filters/frequencies/#nominal_frequencies), trimmed to the bands `fs` holds). |
+| `limits` | [f_min, f_max] band limits in Hz, a sequence or an array of the two (default [12, 20000], as in [`phonometry.filters.nominal_frequencies`](/reference/api/filters/frequencies/#nominal_frequencies), trimmed to the bands `fs` holds). |
 | `bias_correct` | If True, apply the per-bin finite-difference correction $(k \Delta r)/\sin(k \Delta r)$ (IEC 61043:1993, 7.3) to the intensity spectral density before summing the band and broadband totals, so the totals no longer under-read as the frequency approaches `max_valid_frequency`. The reciprocal diverges as $k \Delta r \to \pi$ (the first spatial-aliasing null at $c/(2 \Delta r)$, inside the default band range for close spacings), so it is applied only over the probe's usable range (up to $k \Delta r = \pi/2$) and held constant beyond, keeping the totals bounded instead of letting a few near-null bins dominate them. Default False keeps the exact legacy totals; the per-band `bias_correction` factor (same clamped definition) is reported either way. |
 
-**Returns:** [`IntensityResult`](/phonometry/reference/api/power/intensity/#intensityresult).
+**Returns:** [`IntensityResult`](/reference/api/power/intensity/#intensityresult).
 
 **Raises**
 
@@ -526,7 +526,7 @@ qualifies the *stationarity of the field*, not the uniformity of the
 surface (that is F4). Note 9 of Annex A recommends M = 10 samples, with
 a short averaging time of 8 s to 12 s (or a whole number of cycles) for
 periodic signals. Table B.3 requires corrective action when
-$F_1 > 0.6$ ([`TEMPORAL_VARIABILITY_LIMIT`](/phonometry/reference/api/power/intensity/#temporal_variability_limit)).
+$F_1 > 0.6$ ([`TEMPORAL_VARIABILITY_LIMIT`](/reference/api/power/intensity/#temporal_variability_limit)).
 
 **Parameters**
 

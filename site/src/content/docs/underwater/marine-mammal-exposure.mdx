@@ -83,7 +83,7 @@ the end-to-end assessment of a piling campaign.
 Levels are in dB re 1 µPa (sound pressure), dB re 1 µPa²·s (sound exposure) or,
 for the two in-air carnivore groups, dB re 20 µPa and dB re (20 µPa)²·s. The
 underwater reference conventions themselves are in
-[Underwater acoustics](/phonometry/underwater/underwater-acoustics/).
+[Underwater acoustics](/underwater/underwater-acoustics/).
 
 ## Hearing groups (and why the names collide)
 
@@ -211,7 +211,7 @@ twice, so with a source level $SL = 198.2$ dB re 1 µPa²m², a salmon target
 strength $TS = -29.0$ dB re m² and its own hearing threshold in place of a
 detection threshold, the hearing-limited figure of merit is
 $(SL + TS - HT)/2 = 59.0$ dB re m²: the maximum *one-way* loss it can afford.
-The [sonar equation](/phonometry/underwater/underwater-propagation/#sonar-equation)
+The [sonar equation](/underwater/underwater-propagation/#sonar-equation)
 those terms come from, and `detection_range`, turn that figure into a range.
 
 ## Auditory weighting and exposure functions
@@ -310,7 +310,7 @@ same table's footnote that the value should be 1.36 dB. The library implements
 digit as `c_db_as_printed`. Southall's Table 7 carries four peak-SPL misprints
 corrected by the journal's own errata, and the corrected values are the ones
 implemented. Both are recorded in
-[Errata found in published sources](/phonometry/reference/errata/).
+[Errata found in published sources](/reference/errata/).
 :::
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/marine_mammal_exposure_functions.svg" alt="Top left, the exposure function E(f) of the five in-water hearing groups against frequency, each with its minimum marked as that group's weighted TTS onset; top right, the low-frequency cetacean weighting function under the 2024 and 2018 guidance showing the steeper high-frequency skirt that b equal to five produces; bottom, the impulsive onset criteria of all five groups as grouped bars, weighted sound exposure and unweighted peak side by side" width="92%" />
@@ -422,7 +422,7 @@ the recorded strike to the verdict:
 1. `strike_sel_spectrum` splits the single-strike sound exposure of the record
    into fractional-octave bands (the band energies sum back to the broadband
    `single_strike_sel` of
-   [Underwater acoustics](/phonometry/underwater/underwater-acoustics/#3-pile-driving-sound-iso-18406), by
+   [Underwater acoustics](/underwater/underwater-acoustics/#3-pile-driving-sound-iso-18406), by
    Parseval);
 2. `weighted_exposure` applies $W(f)$ band by band, sums the weighted energy,
    accumulates it over the number of strikes (the ISO 18406 $+10\log_{10} N$) and
@@ -634,7 +634,7 @@ stationary-receiver worst case. It also does not check that the supplied
 spectrum spans the group's passband: a record that stops short of $f_2$ is
 weighted as given and under-reports the exposure. Propagation from source to
 receiver belongs to [Underwater sound
-propagation](/phonometry/underwater/underwater-propagation/).
+propagation](/underwater/underwater-propagation/).
 </ScopeClaim>
 </Scope>
 
@@ -642,12 +642,12 @@ propagation](/phonometry/underwater/underwater-propagation/).
 
 ## See also
 
-- [Underwater acoustics: radiated noise and pile driving](/phonometry/underwater/underwater-acoustics/):
+- [Underwater acoustics: radiated noise and pile driving](/underwater/underwater-acoustics/):
   the ISO 18405 reference levels and the ISO 18406 pile-driving exposure that
   feed this page.
-- [Underwater sound propagation](/phonometry/underwater/underwater-propagation/):
+- [Underwater sound propagation](/underwater/underwater-propagation/):
   the propagation loss and figure-of-merit machinery that turns a criterion
   into a range.
-- API reference: [`underwater.bioacoustics.weighting`](/phonometry/reference/api/underwater/weighting/) and [`underwater.bioacoustics.audiograms`](/phonometry/reference/api/underwater/audiograms/).
+- API reference: [`underwater.bioacoustics.weighting`](/reference/api/underwater/weighting/) and [`underwater.bioacoustics.audiograms`](/reference/api/underwater/audiograms/).
 
 </SeeAlso>

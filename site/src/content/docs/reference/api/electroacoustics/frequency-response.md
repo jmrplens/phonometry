@@ -52,13 +52,13 @@ Averaging over several segments is required for a meaningful estimate
 
 | Name | Description |
 | :--- | :--- |
-| `x` | First signal, 1-D. Accepts a [`phonometry.io.Signal`](/phonometry/reference/api/io/io/#signal), whose calibration is applied to the samples. The coherence is a normalised ratio, so it is unchanged whichever of the two is calibrated and by how much. |
+| `x` | First signal, 1-D. Accepts a [`phonometry.io.Signal`](/reference/api/io/io/#signal), whose calibration is applied to the samples. The coherence is a normalised ratio, so it is unchanged whichever of the two is calibrated and by how much. |
 | `y` | Second signal, 1-D, same length as `x`. Same treatment as `x`. |
-| `fs` | Sample rate, in Hz. Required when both records are bare arrays; either may be a [`Signal`](/phonometry/reference/api/io/io/#signal) and supply it, and two Signals recorded at different rates are refused rather than arbitrated. |
+| `fs` | Sample rate, in Hz. Required when both records are bare arrays; either may be a [`Signal`](/reference/api/io/io/#signal) and supply it, and two Signals recorded at different rates are refused rather than arbitrated. |
 | `nperseg` | Welch segment length; `None` picks a default. |
 | `overlap` | Segment overlap fraction (default 0.5). |
 
-**Returns:** The bins and the coherence at each, as a [`CoherenceResult`](/phonometry/reference/api/electroacoustics/frequency-response/#coherenceresult).
+**Returns:** The bins and the coherence at each, as a [`CoherenceResult`](/reference/api/electroacoustics/frequency-response/#coherenceresult).
 
 **Raises**
 
@@ -78,7 +78,7 @@ CoherenceResult(
 
 The ordinary coherence of two records, frequency by frequency.
 
-What [`coherence`](/phonometry/reference/api/electroacoustics/frequency-response/#coherence) returns: the frequency axis and the coherence,
+What [`coherence`](/reference/api/electroacoustics/frequency-response/#coherence) returns: the frequency axis and the coherence,
 named, where a `(frequencies, gamma_squared)` tuple used to be unpacked
 by position.
 
@@ -191,14 +191,14 @@ returned alongside as a data-quality indicator.
 
 | Name | Description |
 | :--- | :--- |
-| `x` | Input (reference) signal, 1-D. Accepts a [`phonometry.io.Signal`](/phonometry/reference/api/io/io/#signal), whose calibration is applied to the samples. The response is a ratio of the two records, so with factors `c_x` on `x` and `c_y` on `y` it comes out as `(c_y / c_x) H`: a factor the two share cancels, calibrating only `y` multiplies the response by `c_y` and calibrating only `x` divides it by `c_x`. That is the right answer for a pair that is genuinely in two different units. |
+| `x` | Input (reference) signal, 1-D. Accepts a [`phonometry.io.Signal`](/reference/api/io/io/#signal), whose calibration is applied to the samples. The response is a ratio of the two records, so with factors `c_x` on `x` and `c_y` on `y` it comes out as `(c_y / c_x) H`: a factor the two share cancels, calibrating only `y` multiplies the response by `c_y` and calibrating only `x` divides it by `c_x`. That is the right answer for a pair that is genuinely in two different units. |
 | `y` | Output (response) signal, 1-D, same length as `x`. Same treatment as `x`. |
-| `fs` | Sample rate, in Hz. Required when both records are bare arrays; either may be a [`Signal`](/phonometry/reference/api/io/io/#signal) and supply it, and two Signals recorded at different rates are refused rather than arbitrated. |
+| `fs` | Sample rate, in Hz. Required when both records are bare arrays; either may be a [`Signal`](/reference/api/io/io/#signal) and supply it, and two Signals recorded at different rates are refused rather than arbitrated. |
 | `estimator` | `'H1'` (default) or `'H2'`. |
-| `nperseg` | Welch segment length; `None` picks a length targeting about 4 Hz resolution (as in [`intensity`](/phonometry/reference/api/power/intensity/)). |
+| `nperseg` | Welch segment length; `None` picks a length targeting about 4 Hz resolution (as in [`intensity`](/reference/api/power/intensity/)). |
 | `overlap` | Segment overlap fraction (default 0.5). |
 
-**Returns:** A [`FrequencyResponseResult`](/phonometry/reference/api/electroacoustics/frequency-response/#frequencyresponseresult).
+**Returns:** A [`FrequencyResponseResult`](/reference/api/electroacoustics/frequency-response/#frequencyresponseresult).
 
 **Raises**
 

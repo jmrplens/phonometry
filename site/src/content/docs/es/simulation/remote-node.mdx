@@ -26,10 +26,10 @@ nombrarlo, cómo preparar un nodo Docker o un nodo Python, qué puede fallar y
 qué dice cada error, cómo seguir una ejecución, de qué se fía cada lado del
 otro y cuándo una ejecución allí da los números que da una ejecución aquí. El
 dispositivo en sí, NumPy, CuPy o torch, se elige como explica
-[Dónde se calcula una simulación](/phonometry/es/simulation/compute/), y eso
+[Dónde se calcula una simulación](/es/simulation/compute/), y eso
 vale también en un nodo que tenga esa biblioteca: la sección 3 dice qué lleva
 la imagen, y la sección 4, qué necesita un nodo Python.
-[Dónde se ejecuta el trabajo pesado](/phonometry/es/simulation/where-it-runs/)
+[Dónde se ejecuta el trabajo pesado](/es/simulation/where-it-runs/)
 reúne en un sitio los dispositivos, los nodos y los codificadores.
 
 ## 1. Qué pasa cuando una ejecución va a un nodo
@@ -37,7 +37,7 @@ reúne en un sitio los dispositivos, los nodos y los codificadores.
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_compute_map.svg" alt="Mapa en dos carriles. Carril superior, dónde avanza una simulación: un registro de ejecución, FDTDRun o ElasticRun, y un registro Compute con device, dtype y host entran en una de cuatro funciones, fdtd_simulation, elastic_fdtd_simulation, write_fdtd_animation o write_elastic_fdtd_animation. Con host None la ejecución avanza aquí en el dispositivo pedido, uno de cpu (NumPy, el valor por defecto), cupy (una GPU de NVIDIA con CuPy), torch:cpu, torch:cuda o torch:mps (la GPU de Apple, solo en float32). Con un host va a un nodo del fichero de hosts en pasos numerados: el fichero de hosts dice dónde está el nodo y cómo ejecuta un trabajo; un solo proceso ssh lleva la ejecución, como datos y nunca como código; phonometry se envía una vez por versión y se guarda bajo un digest; el nodo reconstruye la ejecución y la avanza en el dispositivo pedido; y vuelven las sondas y las instantáneas, o los bytes de un vídeo. Las dos ramas terminan en result.provenance, cuyos device, dtype y gpu dicen dónde avanzó la ejecución y cuyos host y package_sha256 nombran el nodo y el paquete que ejecutó. Una flecha discontinua de la rama del nodo a la rama que se ejecuta aquí lleva el rótulo fallback=True: un dispositivo que no se puede usar, o un nodo o una conexión que falla, avisa con ComputeFallbackWarning y la ejecución avanza con NumPy aquí. Carril inferior, dónde se codifica un vídeo: el codificador auto, el valor por defecto, prueba NVENC, Quick Sync, VAAPI, VideoToolbox y después la CPU, cada uno con una codificación real de un fotograma, y escribe el vídeo el primero que la supera; en la CPU es SVT-AV1 o, sin él, VP9 en un WebM y x265 o x264 en un MP4; un GIF se escribe siempre en la CPU, y una animación que dibujas tú se codifica solo aquí." width="92%" />
 
 *El mapa de
-[Dónde se ejecuta el trabajo pesado](/phonometry/es/simulation/where-it-runs/).
+[Dónde se ejecuta el trabajo pesado](/es/simulation/where-it-runs/).
 Esta sección recorre su rama derecha, los pasos numerados y la
 procedencia en que terminan; la flecha discontinua es la vuelta a NumPy de la
 sección 5.*
@@ -60,7 +60,7 @@ biblioteca, así que allí se comprueba otra vez. Las funciones que escriben
 vídeo también viajan, llamadas como
 `write_fdtd_animation(path, run, compute=...)`, con su ejecución, su fotograma
 y sus opciones de vídeo como registros: véase la sección 5 de
-[Escribir animaciones y simulaciones FDTD en vídeo](/phonometry/es/io/videos/).
+[Escribir animaciones y simulaciones FDTD en vídeo](/es/io/videos/).
 
 El nodo ejecuta tu propio phonometry, el que tienes instalado aquí, sea cual
 sea el que haya instalado allí. El cliente envía sus ficheros, los que
@@ -80,7 +80,7 @@ dimensionados a partir de tu petición y reservados antes de que se abra la
 conexión. En una malla grande, las instantáneas son la mayor parte de lo que
 cruza el enlace y de la memoria que necesita esta máquina: las reducen
 `snapshot_decimation`, sección 7 de
-[Dónde se calcula una simulación](/phonometry/es/simulation/compute/), y
+[Dónde se calcula una simulación](/es/simulation/compute/), y
 `dtype="float32"`, mientras que las historias de las sondas siguen en float64.
 Una función que escribe vídeo envía los bytes de su vídeo en lugar de las
 instantáneas.
@@ -91,7 +91,7 @@ instantáneas.
 trabajo: desde su caché el nodo no puede nombrar el paquete que ejecuta.
 `device_index` es el que pediste, y el resto de la procedencia es la del nodo:
 su NumPy, su biblioteca de arrays, su CUDA, su GPU. La sección 5 de
-[Dónde se calcula una simulación](/phonometry/es/simulation/compute/) recoge
+[Dónde se calcula una simulación](/es/simulation/compute/) recoge
 todos los campos.
 
 ## 2. Nombrar un nodo: el fichero de hosts
@@ -199,7 +199,7 @@ print(res.provenance.host, res.provenance.gpu)   # nas, y el nombre de la tarjet
 mismo modo. Un script entero puede nombrar el nodo una sola vez, con un
 bloque `simulation.use()` o con la variable de entorno `PHONOMETRY_COMPUTE`;
 la sección 3 de
-[Dónde se calcula una simulación](/phonometry/es/simulation/compute/) dice
+[Dónde se calcula una simulación](/es/simulation/compute/) dice
 cuál manda cuando más de uno nombra una ubicación. Un bloque `use()` aplica
 su petición a cada llamada hecha dentro de él que no pase `compute=`:
 
@@ -278,7 +278,7 @@ con las que se dibujan las figuras, y ffmpeg, una compilación estática que el
 Dockerfile fija por URL y SHA-256, con SVT-AV1, NVENC, VP9 y dav1d, así que un
 nodo no necesita un ffmpeg propio. La imagen para GPU añade el runtime de
 CUDA y CuPy 14.2.0, la versión con la que se hizo la prueba en GPU de
-[Dónde se calcula una simulación](/phonometry/es/simulation/compute/).
+[Dónde se calcula una simulación](/es/simulation/compute/).
 Ninguna de las dos imágenes lleva torch, y la imagen para CPU no lleva CuPy:
 un dispositivo de torch necesita un nodo Python o una imagen propia. Cada
 imagen base está fijada por digest.
@@ -315,7 +315,7 @@ El entorno necesita Python 3.12 o posterior, con NumPy 2.0.2 o posterior y
 SciPy 1.14.0 o posterior, los mínimos de la biblioteca en su Python más
 antiguo, que el nodo comprueba sea cual sea el suyo, y CuPy o torch para una
 GPU, instalados como dice
-[Dónde se calcula una simulación](/phonometry/es/simulation/compute/). No hace
+[Dónde se calcula una simulación](/es/simulation/compute/). No hace
 falta que phonometry esté instalado allí, y si lo está no se usa: el
 intérprete se ejecuta aislado (`-I`), sobre el paquete que envió el cliente,
 y el nodo comprueba que el phonometry que importó es ese. Un entorno por
@@ -334,7 +334,7 @@ cliente ejecuta ese `python` directamente, sin ningún script de activación
 antes, así que el entorno tiene que funcionar sin él.
 
 Un nodo que escribe vídeos
-([Escribir animaciones y simulaciones FDTD en vídeo](/phonometry/es/io/videos/))
+([Escribir animaciones y simulaciones FDTD en vídeo](/es/io/videos/))
 necesita dos cosas más: matplotlib en ese entorno, la 3.10.7 o posterior,
 como pide el extra `plot` de la biblioteca
 (`~/venvs/node/bin/pip install "matplotlib>=3.10.7"`), y ffmpeg en el `PATH`
@@ -469,7 +469,7 @@ nodo en la misma máquina. Entre dos máquinas, las funciones vectorizadas de
 NumPy, como la exponencial del perfil de la esponja, pueden redondear de
 forma distinta en una unidad en la última posición, porque cada CPU usa las
 instrucciones que tiene. En una GPU,
-[Dónde se calcula una simulación](/phonometry/es/simulation/compute/) dice
+[Dónde se calcula una simulación](/es/simulation/compute/) dice
 qué muestra la prueba en la GPU.
 
 ## 9. Para quien desarrolla la biblioteca
@@ -528,22 +528,22 @@ ejecuta en esta máquina.
 
 ## Véase también
 
-- [Dónde se calcula una simulación: NumPy, CuPy y torch](/phonometry/es/simulation/compute/):
+- [Dónde se calcula una simulación: NumPy, CuPy y torch](/es/simulation/compute/):
   los dispositivos en los que avanza una ejecución, aquí o en un nodo, y lo
   que se promete sobre los números en cada uno.
-- [Dónde se ejecuta el trabajo pesado: CPU, GPU o un nodo](/phonometry/es/simulation/where-it-runs/):
+- [Dónde se ejecuta el trabajo pesado: CPU, GPU o un nodo](/es/simulation/where-it-runs/):
   los dispositivos, los nodos y los codificadores en un sitio.
-- [Simulación de ondas FDTD 2D](/phonometry/es/simulation/fdtd-simulation/):
+- [Simulación de ondas FDTD 2D](/es/simulation/fdtd-simulation/):
   la ejecución acústica, sus fuentes, sondas y contornos.
-- [Ondas elásticas y acoplamiento fluido-sólido](/phonometry/es/simulation/elastic-waves/):
+- [Ondas elásticas y acoplamiento fluido-sólido](/es/simulation/elastic-waves/):
   la ejecución elástica, que va a un nodo del mismo modo.
-- [Escribir animaciones y simulaciones FDTD en vídeo](/phonometry/es/io/videos/):
+- [Escribir animaciones y simulaciones FDTD en vídeo](/es/io/videos/):
   las dos funciones que escriben vídeo, y en la sección 5 el vídeo de una
   ejecución hecho en un nodo.
-- Referencia de la API: [`simulation.compute`](/phonometry/es/reference/api/simulation/compute/),
-  [`simulation.fdtd`](/phonometry/es/reference/api/simulation/fdtd/),
-  [`simulation.elastic_fdtd`](/phonometry/es/reference/api/simulation/elastic-fdtd/),
-  [`simulation.video`](/phonometry/es/reference/api/simulation/video/).
+- Referencia de la API: [`simulation.compute`](/es/reference/api/simulation/compute/),
+  [`simulation.fdtd`](/es/reference/api/simulation/fdtd/),
+  [`simulation.elastic_fdtd`](/es/reference/api/simulation/elastic-fdtd/),
+  [`simulation.video`](/es/reference/api/simulation/video/).
 
 </SeeAlso>
 

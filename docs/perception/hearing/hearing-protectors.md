@@ -1,6 +1,6 @@
 <!-- Written by `make llms` from site/src/content/docs/perception/hearing/hearing-protectors.mdx: edit that page and its Spanish twin, then run `make llms`. -->
 
-← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/perception/hearing/hearing-protectors/
+← [Documentation index](../../README.md) · Published at https://phonometry.dev/perception/hearing/hearing-protectors/
 
 # Hearing Protectors (ISO 4869-1, -2, -3 and -6)
 
@@ -768,10 +768,10 @@ plt.show()
 - [Audiometric Test Methods (ISO 8253-1 and -2)](audiometry.md):
   the diffuse-field test the site of ISO 4869-3 shares, and the room and the
   rules behind every threshold a protector is measured with.
-- API reference: [`hearing`: real-ear attenuation](https://docs.jmrp.io/phonometry/reference/api/hearing/real-ear-attenuation/),
-  [`hearing.hearing_protectors`](https://docs.jmrp.io/phonometry/reference/api/hearing/hearing-protectors/),
-  [`hearing.active_noise_reduction`](https://docs.jmrp.io/phonometry/reference/api/hearing/active-noise-reduction/)
-  and [`hearing`: earmuff insertion loss](https://docs.jmrp.io/phonometry/reference/api/hearing/earmuff-insertion-loss/).
+- API reference: [`hearing`: real-ear attenuation](https://phonometry.dev/reference/api/hearing/real-ear-attenuation/),
+  [`hearing.hearing_protectors`](https://phonometry.dev/reference/api/hearing/hearing-protectors/),
+  [`hearing.active_noise_reduction`](https://phonometry.dev/reference/api/hearing/active-noise-reduction/)
+  and [`hearing`: earmuff insertion loss](https://phonometry.dev/reference/api/hearing/earmuff-insertion-loss/).
 
 ## References
 

@@ -53,10 +53,10 @@ $$
 `FpI` is the surface pressure-intensity indicator (equivalent to ISO 9614-1
 `F3` for uniform-area segments, Note 14); `F+/-` the negative-partial-power
 indicator (equivalent to ISO 9614-1 `F3-F2`, Note 15). Because Part 2 weights
-by segment area `Si` while [`phonometry.emission.field_indicators`](/phonometry/reference/api/power/intensity/#field_indicators) (ISO
+by segment area `Si` while [`phonometry.emission.field_indicators`](/reference/api/power/intensity/#field_indicators) (ISO
 9614-1) assumes equal-area positions, the indicators are computed directly
 here; only the dynamic-capability index $L_\mathrm{d} = \delta_{pI0} - K$
-is shared with [`phonometry.emission.dynamic_capability_index`](/phonometry/reference/api/power/intensity/#dynamic_capability_index).
+is shared with [`phonometry.emission.dynamic_capability_index`](/reference/api/power/intensity/#dynamic_capability_index).
 
 Qualification criteria per band (Annex B), where `K` is 10 (engineering) or
 7 (survey) per Table 1, criterion 2 is mandatory for grade 2 and optional for
@@ -152,7 +152,7 @@ returned.
 | `segment_pressure_levels` | `(N, NB)` segment pressure levels, dB. |
 | `time_window_intensity` | Optional `(M, NB)` window intensities for FT. |
 
-**Returns:** [`PrecisionFieldIndicators`](/phonometry/reference/api/power/sound-power-intensity/#precisionfieldindicators).
+**Returns:** [`PrecisionFieldIndicators`](/reference/api/power/sound-power-intensity/#precisionfieldindicators).
 
 **Raises**
 
@@ -182,7 +182,7 @@ Evaluate the five ISO 9614-3:2002 Annex C acceptance criteria per band.
 
 | Name | Description |
 | :--- | :--- |
-| `indicators` | The [`PrecisionFieldIndicators`](/phonometry/reference/api/power/sound-power-intensity/#precisionfieldindicators) (gives criteria 3 and 4 directly). |
+| `indicators` | The [`PrecisionFieldIndicators`](/reference/api/power/sound-power-intensity/#precisionfieldindicators) (gives criteria 3 and 4 directly). |
 | `scan_intensity_level_1` | `LIn(1)` per band (dB), first scan. |
 | `scan_intensity_level_2` | `LIn(2)` per band (dB), second scan; with the first scan and `s` this gives criterion 1 ($\lvert \Delta L \rvert \le s/2$). |
 | `pressure_residual_index` | `delta_pI0` (dB), scalar or per band; with $K = 10$ gives `Ld` for criterion 2 ($L_\mathrm{d} \ge F_{pI_\mathrm{n}}^{\mathrm{signed}}$). |
@@ -191,7 +191,7 @@ Evaluate the five ISO 9614-3:2002 Annex C acceptance criteria per band.
 | `frequencies` | `(NB,)` nominal mid-band frequencies (Hz), selecting the criterion-1 limit `s` from Table 1. |
 | `repeatability_limit` | Override for `s` (dB), scalar or per band. |
 
-**Returns:** [`PrecisionCriteria`](/phonometry/reference/api/power/sound-power-intensity/#precisioncriteria).
+**Returns:** [`PrecisionCriteria`](/reference/api/power/sound-power-intensity/#precisioncriteria).
 
 **Raises**
 
@@ -241,7 +241,7 @@ unless both criterion 1 and criterion 2 are evaluable.
 
 | Name | Description |
 | :--- | :--- |
-| `indicators` | The [`PrecisionFieldIndicators`](/phonometry/reference/api/power/sound-power-intensity/#precisionfieldindicators), which give criteria 3 and 4. |
+| `indicators` | The [`PrecisionFieldIndicators`](/reference/api/power/sound-power-intensity/#precisionfieldindicators), which give criteria 3 and 4. |
 | `scan_intensity_level_1` | `LIn(1)` per band, in dB, or `None`. |
 | `scan_intensity_level_2` | `LIn(2)` per band, in dB, or `None`. |
 | `frequencies` | Nominal mid-band frequencies per band, in Hz, from which Table 1 gives the criterion-1 limit `s`, or `None`. |
@@ -445,12 +445,12 @@ fields; the fiche prints them verbatim in its footer.
 | Name | Description |
 | :--- | :--- |
 | `path` | Destination path of the PDF file. |
-| `metadata` | Optional [`ReportMetadata`](/phonometry/reference/api/building/insulation/#reportmetadata) supplying the header (`client`, `specimen` the noise source, `test_room` the test environment, `instrumentation`, `temperature_c`, `relative_humidity_percent`, `pressure`, `test_date`), the footer identity (`laboratory`, `operator`, `report_id`, `notes`) and, via `requirement`, a declared A-weighted sound-power limit the fiche checks the result against (lower is better). |
+| `metadata` | Optional [`ReportMetadata`](/reference/api/building/insulation/#reportmetadata) supplying the header (`client`, `specimen` the noise source, `test_room` the test environment, `instrumentation`, `temperature_c`, `relative_humidity_percent`, `pressure`, `test_date`), the footer identity (`laboratory`, `operator`, `report_id`, `notes`) and, via `requirement`, a declared A-weighted sound-power limit the fiche checks the result against (lower is better). |
 | `engine` | Rendering back end; only `"reportlab"` is supported. |
 | `verbose` | When `True` the per-band table adds the four Annex B field indicators and the per-band grade cell. |
 | `language` | Fiche language: `"en"` (default) or `"es"`. |
-| `indicators` | Optional [`PrecisionFieldIndicators`](/phonometry/reference/api/power/sound-power-intensity/#precisionfieldindicators) from [`precision_field_indicators`](/phonometry/reference/api/power/sound-power-intensity/#precision_field_indicators), tabulated per band with `verbose` and summarised in the basis strip (clause 10 f) 1)). |
-| `criteria` | Optional [`PrecisionCriteria`](/phonometry/reference/api/power/sound-power-intensity/#precisioncriteria) from [`precision_qualification`](/phonometry/reference/api/power/sound-power-intensity/#precision_qualification), which decides the per-band grade cell and the clause 10 f) 2) omission described above. |
+| `indicators` | Optional [`PrecisionFieldIndicators`](/reference/api/power/sound-power-intensity/#precisionfieldindicators) from [`precision_field_indicators`](/reference/api/power/sound-power-intensity/#precision_field_indicators), tabulated per band with `verbose` and summarised in the basis strip (clause 10 f) 1)). |
+| `criteria` | Optional [`PrecisionCriteria`](/reference/api/power/sound-power-intensity/#precisioncriteria) from [`precision_qualification`](/reference/api/power/sound-power-intensity/#precision_qualification), which decides the per-band grade cell and the clause 10 f) 2) omission described above. |
 | `residual_index` | Optional pressure-residual intensity index `delta_pI0` of the probe and analyser (clause 10 d) 5)), a scalar or a per-band array; the strip states it and the dynamic capability `Ld = delta_pI0 - K` that criterion 2 tests. |
 
 **Returns:** The written `path` as a `str`.
@@ -525,7 +525,7 @@ achieved grade (clause 8.4) is returned when both a second sweep and
 (`pressure_levels` and `pressure_residual_index` supplied), the bands
 failing them are omitted from the A-weighted total and flagged in
 `a_weighting_omitted_bands` (clause 10.6 b); otherwise every determinable
-band is summed and a [`SoundPowerWarning`](/phonometry/reference/api/power/sound-power/#soundpowerwarning) notes the missing
+band is summed and a [`SoundPowerWarning`](/reference/api/power/sound-power/#soundpowerwarning) notes the missing
 screening.
 
 **Parameters**
@@ -542,7 +542,7 @@ screening.
 | `grade` | `'engineering'` (grade 2) or `'survey'` (grade 3); selects `K` for the reported `Ld` and the criterion-2 warning. |
 | `repeatability_limit` | Override for the criterion-3 limit `s` (dB), scalar or per band; defaults to ISO 9614-2 Table 2 by `frequencies` for `'engineering'`. For `'survey'` the default is the A-weighted 4 dB reused per band (extrapolated, non-normative). |
 
-**Returns:** [`SoundPowerIntensityResult`](/phonometry/reference/api/power/sound-power-intensity/#soundpowerintensityresult).
+**Returns:** [`SoundPowerIntensityResult`](/reference/api/power/sound-power-intensity/#soundpowerintensityresult).
 
 **Raises**
 
@@ -588,7 +588,7 @@ $$
 | `temperature_c` | Air temperature `theta` (deg C), for LW0 (Eq. 10). |
 | `static_pressure_pa` | Barometric pressure `B` (Pa), for LW0. |
 
-**Returns:** [`PrecisionIntensityResult`](/phonometry/reference/api/power/sound-power-intensity/#precisionintensityresult).
+**Returns:** [`PrecisionIntensityResult`](/reference/api/power/sound-power-intensity/#precisionintensityresult).
 
 **Raises**
 
@@ -756,7 +756,7 @@ indicators (`FpI`, `F+/-`) and the Annex B qualification criteria.
 | Name | Description |
 | :--- | :--- |
 | `path` | Destination path of the PDF file. |
-| `metadata` | Optional [`ReportMetadata`](/phonometry/reference/api/building/insulation/#reportmetadata) supplying the header (`client`, `specimen` the noise source, `test_room` the test environment, `instrumentation`, `temperature_c`, `relative_humidity_percent`, `pressure`, `test_date`), the footer identity (`laboratory`, `operator`, `report_id`, `notes`) and, via `requirement`, a declared A-weighted sound-power limit the fiche checks the result against (lower is better). |
+| `metadata` | Optional [`ReportMetadata`](/reference/api/building/insulation/#reportmetadata) supplying the header (`client`, `specimen` the noise source, `test_room` the test environment, `instrumentation`, `temperature_c`, `relative_humidity_percent`, `pressure`, `test_date`), the footer identity (`laboratory`, `operator`, `report_id`, `notes`) and, via `requirement`, a declared A-weighted sound-power limit the fiche checks the result against (lower is better). |
 | `engine` | Rendering back end; only `"reportlab"` is supported. |
 | `verbose` | When `True` the per-band table adds the field indicators `FpI` and `F+/-` and the per-band achieved grade. |
 | `language` | Fiche language: `"en"` (default) or `"es"`. |

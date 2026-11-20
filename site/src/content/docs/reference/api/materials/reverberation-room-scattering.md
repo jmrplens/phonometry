@@ -19,14 +19,14 @@ own scattering coefficient (Clause 8.1.4, Eq. (6)) against the Table 1
 limits (Clause 6.2). Air properties come from the speed-of-sound and
 energy-attenuation relations of Clause 8 (Eqs. (2)/(3), after ISO 9613-1;
 Eq. (3) is the conversion ISO 354 makes too, so it is
-[`power_attenuation_from_alpha`](/phonometry/reference/api/materials/sound-absorption/#power_attenuation_from_alpha), shared with the
+[`power_attenuation_from_alpha`](/reference/api/materials/sound-absorption/#power_attenuation_from_alpha), shared with the
 absorption measurement), and measurement accuracy from Annex A
 (Eqs. (A.1)-(A.5)).
 
 One subject: everything the reverberation-room method needs, from the four
 measured decay times to the scattering coefficient and its uncertainty. Part 2
 of ISO 17497 is a different measurement in a free field and lives in
-[`phonometry.materials.diffusers.scattering_diffusion`](/phonometry/reference/api/materials/scattering-diffusion/); the two parts share
+[`phonometry.materials.diffusers.scattering_diffusion`](/reference/api/materials/scattering-diffusion/); the two parts share
 no formula, and the helpers are named per part so they are never mixed. Neither
 part contains a numeric worked example.
 
@@ -120,7 +120,7 @@ Ideally $T_1 = T_3$; a slightly non-symmetrical base plate shortens
 `t3`
 and this quality metric captures the resulting spurious scattering, which
 must not exceed the Table 1 limits (Clause 6.2). See
-[`check_base_plate_scattering`](/phonometry/reference/api/materials/reverberation-room-scattering/#check_base_plate_scattering).
+[`check_base_plate_scattering`](/reference/api/materials/reverberation-room-scattering/#check_base_plate_scattering).
 
 **Parameters**
 
@@ -156,7 +156,7 @@ BasePlateScatteringCheck(
 The scattering of the base plate alone against Table 1 (ISO 17497-1, 6.2).
 
 6.2 has the scattering coefficient of the base plate alone, worked by
-8.1.4 ([`base_plate_scattering`](/phonometry/reference/api/materials/reverberation-room-scattering/#base_plate_scattering)), measured to check the quality of
+8.1.4 ([`base_plate_scattering`](/reference/api/materials/reverberation-room-scattering/#base_plate_scattering)), measured to check the quality of
 the arrangement, and says the values of Table 1 "shall not be exceeded".
 The limits are the table's, so they are read from the bands and are not
 fields: a check cannot be built against other limits, nor on bands the
@@ -166,7 +166,7 @@ table does not list.
 
 | Name | Description |
 | :--- | :--- |
-| `frequencies` | The eighteen one-third-octave bands of Table 1, [`BASE_PLATE_BANDS_HZ`](/phonometry/reference/api/materials/reverberation-room-scattering/#base_plate_bands_hz), in hertz (equivalent full scale). |
+| `frequencies` | The eighteen one-third-octave bands of Table 1, [`BASE_PLATE_BANDS_HZ`](/reference/api/materials/reverberation-room-scattering/#base_plate_bands_hz), in hertz (equivalent full scale). |
 | `scattering` | $s_\mathrm{base}$ in each band, dimensionless. |
 
 ### BasePlateScatteringCheck.exceeded_frequencies
@@ -239,18 +239,18 @@ check_base_plate_scattering(
 Is the base plate good enough for the measurement? (ISO 17497-1, 6.2).
 
 The scattering coefficient of the base plate alone, from
-[`base_plate_scattering`](/phonometry/reference/api/materials/reverberation-room-scattering/#base_plate_scattering), is held to the
-[`BASE_PLATE_MAX_SCATTERING`](/phonometry/reference/api/materials/reverberation-room-scattering/#base_plate_max_scattering) limit of each band of Table 1. A single
-[`ScatteringDiffusionWarning`](/phonometry/reference/api/materials/reverberation-room-scattering/#scatteringdiffusionwarning) names the bands over the limit, when
+[`base_plate_scattering`](/reference/api/materials/reverberation-room-scattering/#base_plate_scattering), is held to the
+[`BASE_PLATE_MAX_SCATTERING`](/reference/api/materials/reverberation-room-scattering/#base_plate_max_scattering) limit of each band of Table 1. A single
+[`ScatteringDiffusionWarning`](/reference/api/materials/reverberation-room-scattering/#scatteringdiffusionwarning) names the bands over the limit, when
 there are any.
 
 **Parameters**
 
 | Name | Description |
 | :--- | :--- |
-| `scattering` | Measured base-plate scattering coefficients, either a mapping keyed by one-third-octave centre frequency (Hz) or a sequence of 18 values ordered as [`BASE_PLATE_BANDS_HZ`](/phonometry/reference/api/materials/reverberation-room-scattering/#base_plate_bands_hz). |
+| `scattering` | Measured base-plate scattering coefficients, either a mapping keyed by one-third-octave centre frequency (Hz) or a sequence of 18 values ordered as [`BASE_PLATE_BANDS_HZ`](/reference/api/materials/reverberation-room-scattering/#base_plate_bands_hz). |
 
-**Returns:** The verdict, as a [`BasePlateScatteringCheck`](/phonometry/reference/api/materials/reverberation-room-scattering/#baseplatescatteringcheck); the bands over the limit are its [`exceeded_frequencies`](/phonometry/reference/api/materials/reverberation-room-scattering/#baseplatescatteringcheckexceeded_frequencies).
+**Returns:** The verdict, as a [`BasePlateScatteringCheck`](/reference/api/materials/reverberation-room-scattering/#baseplatescatteringcheck); the bands over the limit are its [`exceeded_frequencies`](/reference/api/materials/reverberation-room-scattering/#baseplatescatteringcheckexceeded_frequencies).
 
 **Raises**
 
@@ -291,11 +291,11 @@ situation 2 adds the test sample, still without turntable rotation
 | :--- | :--- |
 | `volume` | Reverberation-room volume `V`, in cubic metres. |
 | `area` | Test-sample area `S`, in square metres. |
-| `c1` | Speed of sound during `t1`, in m/s (see [`speed_of_sound_iso17497`](/phonometry/reference/api/materials/reverberation-room-scattering/#speed_of_sound_iso17497)). |
+| `c1` | Speed of sound during `t1`, in m/s (see [`speed_of_sound_iso17497`](/reference/api/materials/reverberation-room-scattering/#speed_of_sound_iso17497)). |
 | `t1` | Reverberation time without sample (base plate only), in seconds. |
 | `c2` | Speed of sound during `t2`, in m/s. |
 | `t2` | Reverberation time with the test sample, in seconds. |
-| `m1` | Energy attenuation coefficient during `t1`, in 1/m (see [`power_attenuation_from_alpha`](/phonometry/reference/api/materials/sound-absorption/#power_attenuation_from_alpha)); defaults to 0. |
+| `m1` | Energy attenuation coefficient during `t1`, in 1/m (see [`power_attenuation_from_alpha`](/reference/api/materials/sound-absorption/#power_attenuation_from_alpha)); defaults to 0. |
 | `m2` | Energy attenuation coefficient during `t2`, in 1/m; defaults to 0. |
 
 **Returns:** Random-incidence absorption coefficient `alpha_s` (per band). A `float` when `c1`, `t1`, `c2`, `t2`, `m1` and `m2` are all numbers, an array when one of them is a sequence or an array, a zero-dimensional one included.
@@ -412,10 +412,10 @@ scattering_coefficient_spectrum(
 
 Scattering-coefficient spectrum `s(f)` (ISO 17497-1, Eq. (5)).
 
-Convenience wrapper over [`scattering_coefficient`](/phonometry/reference/api/materials/reverberation-room-scattering/#scattering_coefficient) that pairs the
+Convenience wrapper over [`scattering_coefficient`](/reference/api/materials/reverberation-room-scattering/#scattering_coefficient) that pairs the
 per-band specular `alpha_spec` (Eq. (4)) and random-incidence `alpha_s`
 (Eq. (1)) absorptions with their band centres and returns a plottable
-[`ScatteringResult`](/phonometry/reference/api/materials/reverberation-room-scattering/#scatteringresult).
+[`ScatteringResult`](/reference/api/materials/reverberation-room-scattering/#scatteringresult).
 
 **Parameters**
 
@@ -426,7 +426,7 @@ per-band specular `alpha_spec` (Eq. (4)) and random-incidence `alpha_s`
 | `random_absorption` | Random-incidence absorption `alpha_s` per band. |
 | `truncate_negative` | Clip negative `s` to 0 (Clause 8.3 default). |
 
-**Returns:** A [`ScatteringResult`](/phonometry/reference/api/materials/reverberation-room-scattering/#scatteringresult) with `.plot()`.
+**Returns:** A [`ScatteringResult`](/reference/api/materials/reverberation-room-scattering/#scatteringresult) with `.plot()`.
 
 **Raises**
 
@@ -463,7 +463,7 @@ with the expanded uncertainty $U = 2 u_s$ (95 % confidence).
 | `u_alpha_spec` | Standard uncertainty of `alpha_spec` (Eq. (A.4)). |
 | `u_alpha_s` | Standard uncertainty of `alpha_s` (Eq. (A.3)). |
 
-**Returns:** A [`ScatteringUncertainty`](/phonometry/reference/api/materials/reverberation-room-scattering/#scatteringuncertainty) with `u_s` and $U = 2 u_s$.
+**Returns:** A [`ScatteringUncertainty`](/reference/api/materials/reverberation-room-scattering/#scatteringuncertainty) with `u_s` and $U = 2 u_s$.
 
 **Raises**
 
@@ -550,7 +550,7 @@ rating.
 | Name | Description |
 | :--- | :--- |
 | `path` | Destination path of the PDF file. |
-| `metadata` | Optional [`ReportMetadata`](/phonometry/reference/api/building/insulation/#reportmetadata); `None` produces a body-and-disclaimer fiche whose header shows only the measured frequency range. The applicable descriptive fields are `client`, `manufacturer`, `specimen`, `area`, `room_volume`, `mounting`, `test_room`, `test_date`, `temperature_c`, `relative_humidity_percent`, `pressure`, `measurement_standard`, `laboratory`, `operator`, `report_id` and `notes`. The `requirement` field is ignored (ISO 17497-1 has no verdict). |
+| `metadata` | Optional [`ReportMetadata`](/reference/api/building/insulation/#reportmetadata); `None` produces a body-and-disclaimer fiche whose header shows only the measured frequency range. The applicable descriptive fields are `client`, `manufacturer`, `specimen`, `area`, `room_volume`, `mounting`, `test_room`, `test_date`, `temperature_c`, `relative_humidity_percent`, `pressure`, `measurement_standard`, `laboratory`, `operator`, `report_id` and `notes`. The `requirement` field is ignored (ISO 17497-1 has no verdict). |
 | `engine` | Rendering back end; only `"reportlab"` is supported. |
 | `verbose` | When `True`, the value table inserts the specular absorption `alpha_spec` column beside `alpha_s` and `s`. |
 | `language` | Fiche language: `"en"` (default, English, decimal point) or `"es"` (Spanish, decimal comma). |

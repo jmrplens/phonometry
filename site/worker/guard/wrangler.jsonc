@@ -1,4 +1,4 @@
-// The quota guard of the phonometry.dev preview (lib/guard.mjs,
+// The quota guard of phonometry.dev (lib/guard.mjs,
 // site/worker/README.md, "Quota"): at 95 % of the day's 100 000 Workers
 // requests it blocks the beacon in the zone's WAF and rolls phonometry-docs
 // to its assets-only version, and after 00:00 UTC it switches both back.

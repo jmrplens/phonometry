@@ -1,6 +1,6 @@
 <!-- Written by `make llms` from site/src/content/docs/signals/spectra/time-frequency.mdx: edit that page and its Spanish twin, then run `make llms`. -->
 
-← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/signals/spectra/time-frequency/
+← [Documentation index](../../README.md) · Published at https://phonometry.dev/signals/spectra/time-frequency/
 
 # Time-frequency analysis
 
@@ -339,7 +339,7 @@ component's frequency in time, the
 - [Spectral analysis](spectral-analysis.md): the averaged Welch estimate for the stationary background, and the window figures of merit behind the segment taper.
 - [Levels](../levels/levels.md): the fractional-octave-band spectrogram with sound-level-meter ballistics.
 - [Correlation and delay](correlation-delay.md): the Hilbert instantaneous frequency for tracking one component.
-- API reference: [`signals.time_frequency`](https://docs.jmrp.io/phonometry/reference/api/signals/time-frequency/).
+- API reference: [`signals.time_frequency`](https://phonometry.dev/reference/api/signals/time-frequency/).
 - Theory: [Frequency Resolution vs FFT Bin Spacing](../../reference/theory/signal-analysis.md#frequency-resolution-vs-fft-bin-spacing): the bin spacing against the effective resolution, which is the trade this page spends its whole length on.
 
 ## References

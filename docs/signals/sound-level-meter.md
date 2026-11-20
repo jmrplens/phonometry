@@ -1,6 +1,6 @@
 <!-- Written by `make llms` from site/src/content/docs/signals/sound-level-meter.mdx: edit that page and its Spanish twin, then run `make llms`. -->
 
-← [Documentation index](../README.md) · Published at https://docs.jmrp.io/phonometry/signals/sound-level-meter/
+← [Documentation index](../README.md) · Published at https://phonometry.dev/signals/sound-level-meter/
 
 # Build a sound level meter
 
@@ -399,11 +399,11 @@ The meter built here is the trunk; the rest of the core grows from it.
   two microphones instead of one, and the delay between them.
 - [Block Processing](filters/block-processing.md): turn this page's
   offline meter into a streaming one with carried filter state.
-- API reference: [`metrology.calibration`](https://docs.jmrp.io/phonometry/reference/api/metrology/calibration/),
-  [`filters.weighting`](https://docs.jmrp.io/phonometry/reference/api/filters/weighting/),
-  [`signals.levels`](https://docs.jmrp.io/phonometry/reference/api/signals/levels/),
-  [`phonometry`](https://docs.jmrp.io/phonometry/reference/api/filters/phonometry/) and
-  [`filters.compliance`](https://docs.jmrp.io/phonometry/reference/api/filters/compliance/).
+- API reference: [`metrology.calibration`](https://phonometry.dev/reference/api/metrology/calibration/),
+  [`filters.weighting`](https://phonometry.dev/reference/api/filters/weighting/),
+  [`signals.levels`](https://phonometry.dev/reference/api/signals/levels/),
+  [`phonometry`](https://phonometry.dev/reference/api/filters/phonometry/) and
+  [`filters.compliance`](https://phonometry.dev/reference/api/filters/compliance/).
 
 ## References
 

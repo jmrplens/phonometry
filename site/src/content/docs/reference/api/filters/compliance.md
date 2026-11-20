@@ -103,13 +103,13 @@ the same response:
   class 1 and $+2.0$ dB and $-4.0$ dB for class 2 (4.9).
 
 The time-invariant operation of 5.14, tested with an exponential sweep
-(IEC 61260-2 7.4), is [`phonometry.filters.verify_time_invariance`](/phonometry/reference/api/filters/time-invariance/#verify_time_invariance): it
+(IEC 61260-2 7.4), is [`phonometry.filters.verify_time_invariance`](/reference/api/filters/time-invariance/#verify_time_invariance): it
 runs the bank itself, decimation included, rather than reading its transfer
 functions.
 
 The acceptance limits of the A/B/C/AU/Z frequency weightings, which qualify a
 network applied to the whole signal against a design-goal response, live in
-[`phonometry.filters.weighting_compliance`](/phonometry/reference/api/filters/weighting-compliance/).
+[`phonometry.filters.weighting_compliance`](/reference/api/filters/weighting-compliance/).
 
 > Auto-generated from the source docstrings by `scripts/generate_api_docs.py` (`make api-docs`). Do not edit by hand.
 
@@ -175,9 +175,9 @@ FilterComplianceResult(
 )
 ```
 
-IEC 61260-1 class-compliance verdict of an [`OctaveFilterBank`](/phonometry/reference/api/filters/core/#octavefilterbank).
+IEC 61260-1 class-compliance verdict of an [`OctaveFilterBank`](/reference/api/filters/core/#octavefilterbank).
 
-What [`verify_filter_class`](/phonometry/reference/api/filters/compliance/#verify_filter_class) returns: the verdict together with the
+What [`verify_filter_class`](/reference/api/filters/compliance/#verify_filter_class) returns: the verdict together with the
 minimal filter-bank data needed to redraw the measured relative-attenuation
 curve, so the result exposes the standard `plot` / `report` pair without
 holding a reference to the (possibly stateful) bank.
@@ -384,7 +384,7 @@ class-compliance result, an optional verdict row against a supplied
 | Name | Description |
 | :--- | :--- |
 | `path` | Destination path of the PDF file. |
-| `metadata` | Optional [`ReportMetadata`](/phonometry/reference/api/building/insulation/#reportmetadata); `None` produces a prediction fiche (body, result and disclaimer only). A supplied `required_class` drives the verdict row. |
+| `metadata` | Optional [`ReportMetadata`](/reference/api/building/insulation/#reportmetadata); `None` produces a prediction fiche (body, result and disclaimer only). A supplied `required_class` drives the verdict row. |
 | `engine` | Rendering back end; only `"reportlab"` is supported. |
 | `verbose` | Accepted for a uniform signature; it has no effect on the single-layout filter-compliance fiche. |
 | `language` | Fiche language: `"en"` (default, English) or `"es"` (Spanish, with a comma decimal separator). |
@@ -477,7 +477,7 @@ integrated response of IEC 61260:1995 4.5.3 of every band and the
 summation of 4.9 from the lowest to the highest mid-band frequency, the
 way its clauses 5.4 and 5.8 test them. A band's class, and so the
 bank's, is the strictest class met on every requirement graded;
-[`FilterComplianceResult.requirement_class`](/phonometry/reference/api/filters/compliance/#filtercomplianceresultrequirement_class) gives the class of each
+[`FilterComplianceResult.requirement_class`](/reference/api/filters/compliance/#filtercomplianceresultrequirement_class) gives the class of each
 requirement on its own.
 
 **Parameters**
@@ -489,7 +489,7 @@ requirement on its own.
 | `edition` | `"2014"` (IEC 61260-1:2014, classes 1/2) or `"1995"` (IEC 61260:1995, adds the stricter class 0). |
 | `points_per_bandwidth` | `S`, the test frequencies per filter bandwidth of IEC 61260-2:2016 Formula (1) and IEC 61260:1995 equation (15), at least 24 (7.2.1.4 and 5.3.3). For `edition="1995"` it is where S starts: 5.3.3 raises it in steps of 12 until the filter integrated response of every band reads the same to the nearest tenth of a decibel at S and at S + 12, and the result's `points_per_bandwidth` says where it stopped. |
 
-**Returns:** A [`FilterComplianceResult`](/phonometry/reference/api/filters/compliance/#filtercomplianceresult), which carries the verdict together with the sections, mid-band frequencies, decimation factors and sampling rate it was measured through, so it can redraw the relative attenuation and render an accredited `.report()` fiche without keeping a reference to the (possibly stateful) bank.
+**Returns:** A [`FilterComplianceResult`](/reference/api/filters/compliance/#filtercomplianceresult), which carries the verdict together with the sections, mid-band frequencies, decimation factors and sampling rate it was measured through, so it can redraw the relative attenuation and render an accredited `.report()` fiche without keeping a reference to the (possibly stateful) bank.
 
 **Raises**
 

@@ -71,8 +71,8 @@ defect of the printed text, registered in `docs/ERRATA.md`.
 procedure *shall* be used, so the three entry points that consume this module
 do not simply wait to be asked. When the room volume and the band centres are
 both in hand, a room that rounds below the trigger and names the three bands
-without bringing a [`LowFrequencyProcedure`](/phonometry/reference/api/building/low-frequency/#lowfrequencyprocedure) gets a
-[`LowFrequencyWarning`](/phonometry/reference/api/building/low-frequency/#lowfrequencywarning) rather than a quiet answer several decibels away
+without bringing a [`LowFrequencyProcedure`](/reference/api/building/low-frequency/#lowfrequencyprocedure) gets a
+[`LowFrequencyWarning`](/reference/api/building/low-frequency/#lowfrequencywarning) rather than a quiet answer several decibels away
 from the ISO 16283 one. They warn rather than refuse: the corner measurements
 may genuinely not exist, and the default-procedure spectrum is what a reader
 compares the ISO 16283 one against.
@@ -110,9 +110,9 @@ apply_low_frequency_procedure(
 Run the low-frequency procedure over one room's band values.
 
 The single implementation behind
-[`airborne_insulation`](/phonometry/reference/api/building/insulation/#airborne_insulation),
-[`impact_insulation`](/phonometry/reference/api/building/insulation/#impact_insulation) and
-[`facade_insulation`](/phonometry/reference/api/building/insulation/#facade_insulation): it
+[`airborne_insulation`](/reference/api/building/insulation/#airborne_insulation),
+[`impact_insulation`](/reference/api/building/insulation/#impact_insulation) and
+[`facade_insulation`](/reference/api/building/insulation/#facade_insulation): it
 takes $L_\mathrm{Corner}$ from the corner levels, combines it with
 the default-procedure level into $L_\mathrm{LF}$, writes the result
 back over the 50 Hz, 63 Hz and 80 Hz bands, and puts the 63 Hz octave
@@ -135,7 +135,7 @@ brings a 63 Hz octave value.
 | `reverberation_time` | Reverberation times of the whole measurement, in seconds. Required for `room="receiving"`; refused for `room="source"`. |
 | `room` | `"receiving"` (default) or `"source"`. It selects whether Clause 10.4 applies, and it is quoted in the messages so a two-room airborne measurement says which side failed. |
 
-**Returns:** A [`LowFrequencyResult`](/phonometry/reference/api/building/low-frequency/#lowfrequencyresult).
+**Returns:** A [`LowFrequencyResult`](/reference/api/building/low-frequency/#lowfrequencyresult).
 
 **Raises**
 
@@ -233,7 +233,7 @@ level and can never fall further than $10 \lg(2/3) = -1.76$ dB below
 | Name | Description |
 | :--- | :--- |
 | `level` | Energy-average level `L` from the default procedure, in dB, a scalar or one value per band. |
-| `corner` | Corner level $L_\mathrm{Corner}$ from [`corner_level`](/phonometry/reference/api/building/low-frequency/#corner_level), in dB, same bands. |
+| `corner` | Corner level $L_\mathrm{Corner}$ from [`corner_level`](/reference/api/building/low-frequency/#corner_level), in dB, same bands. |
 
 **Returns:** $L_\mathrm{LF}$, in dB, one value per band. A `float` when `level` and `corner` are both numbers, an array when either is a sequence or an array, a zero-dimensional one included.
 

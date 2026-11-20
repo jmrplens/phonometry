@@ -27,7 +27,7 @@ buscador del sitio sigue a los chips de normas: una búsqueda por designación
 pone primero las guías que la implementan, y encuentra después, por su texto,
 las que solo la citan. Lo que una página
 implementa apartado por apartado está reunido para toda la biblioteca en el
-[informe de conformidad](/phonometry/es/reference/conformance/), no aquí.
+[informe de conformidad](/es/reference/conformance/), no aquí.
 
 Esta página reúne esas fuentes en una sola lista: cada obra que cita una página
 del sitio, sea una guía, una página de teoría o un catálogo publicado, una sola

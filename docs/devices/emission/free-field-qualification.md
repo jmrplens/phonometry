@@ -1,6 +1,6 @@
 <!-- Written by `make llms` from site/src/content/docs/devices/emission/free-field-qualification.mdx: edit that page and its Spanish twin, then run `make llms`. -->
 
-← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/devices/emission/free-field-qualification/
+← [Documentation index](../../README.md) · Published at https://phonometry.dev/devices/emission/free-field-qualification/
 
 # Free Field and Reference Sources (ISO 26101 / ISO 6926)
 
@@ -699,8 +699,8 @@ the [errata registry](../../ERRATA.md) has the details.
   the comparison in the highest octave.
 - [Errata](../../ERRATA.md): the two spatial resolutions of the
   amended Annex A, and the $d_0$ of ISO 6926 Formula (A.1).
-- API reference: [`emission.free_field_qualification`](https://docs.jmrp.io/phonometry/reference/api/power/free-field-qualification/)
-  and [`emission.reference_sound_source`](https://docs.jmrp.io/phonometry/reference/api/power/reference-sound-source/).
+- API reference: [`emission.free_field_qualification`](https://phonometry.dev/reference/api/power/free-field-qualification/)
+  and [`emission.reference_sound_source`](https://phonometry.dev/reference/api/power/reference-sound-source/).
 
 ## References
 

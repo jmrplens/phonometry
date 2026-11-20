@@ -1,6 +1,6 @@
 <!-- Written by `make llms` from site/src/content/docs/signals/filters/block-processing.mdx: edit that page and its Spanish twin, then run `make llms`. -->
 
-← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/signals/filters/block-processing/
+← [Documentation index](../../README.md) · Published at https://phonometry.dev/signals/filters/block-processing/
 
 # Block Processing
 
@@ -376,7 +376,7 @@ and now it means the same thing either way.
 - [Multichannel and Performance](multichannel.md): one state per channel, and where the computation time actually goes.
 - [Time Weighting](../levels/time-weighting.md#6-block-processing): the functional detector API with the state passed by hand.
 - [Integrated and Statistical Levels](../levels/levels.md): which metrics accumulate across blocks and which must be recomputed on the pooled envelope.
-- API reference: [`filters.weighting`](https://docs.jmrp.io/phonometry/reference/api/filters/weighting/) and [`filters.core`](https://docs.jmrp.io/phonometry/reference/api/filters/core/).
+- API reference: [`filters.weighting`](https://phonometry.dev/reference/api/filters/weighting/) and [`filters.core`](https://phonometry.dev/reference/api/filters/core/).
 - Theory: [Filter Bank Design and Numerical Stability](../../reference/theory/signal-analysis.md#filter-bank-design--numerical-stability): why a bank is designed as second-order sections and decimated per band, which is what makes streaming state possible at all.
 
 ## References

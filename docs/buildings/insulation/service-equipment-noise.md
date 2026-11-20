@@ -1,6 +1,6 @@
 <!-- Written by `make llms` from site/src/content/docs/buildings/insulation/service-equipment-noise.mdx: edit that page and its Spanish twin, then run `make llms`. -->
 
-← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/buildings/insulation/service-equipment-noise/
+← [Documentation index](../../README.md) · Published at https://phonometry.dev/buildings/insulation/service-equipment-noise/
 
 # Service-Equipment and Activity Noise (ISO 16032)
 
@@ -690,7 +690,7 @@ report has to state it.
 - [Errata found in published sources](../../ERRATA.md): the six
   defects of the draft this method meets.
 - API reference:
-  [`building.measurement.service_equipment`](https://docs.jmrp.io/phonometry/reference/api/building/service-equipment/).
+  [`building.measurement.service_equipment`](https://phonometry.dev/reference/api/building/service-equipment/).
 
 ## References
 

@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Changed
+
+- **The documentation lives at <https://phonometry.dev/>.** Every page is
+  served at the root of phonometry.dev, and every address under
+  <https://docs.jmrp.io/phonometry/> answers a permanent redirect to the same
+  page there, the query string kept: a page, its Markdown copy, the llms
+  files, and every address the site had retired before, in one hop to the
+  page that replaced it. Links, bookmarks and citations that name the old
+  address keep working.
+
 ### Fixed
 
 - **The SBOM of a release carries a serial number, so the release attests

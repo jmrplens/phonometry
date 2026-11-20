@@ -698,9 +698,10 @@ def _linked(text: str, candidates: Iterable[str], *, kind: str = "md") -> list[s
 
 def _outside_code(text: str, kind: str) -> str:
     """*text* with its code blanked: the lines of every fence, as
-    ``markdown_fences`` reads them, and every code span, read block by block as
-    the page reads it, so that a lone backtick never pairs with one in another
-    paragraph, list item or heading.
+    ``markdown_fences`` reads them, and every code span and comment, read block
+    by block as the page reads them, so that a lone backtick never pairs with
+    one in another paragraph, list item, heading or comment, and a link in a
+    comment links nothing.
     """
     lines = text.split("\n")
     walked = list(page_lines(lines, kind=kind))
@@ -710,7 +711,7 @@ def _outside_code(text: str, kind: str) -> str:
             lines, code_lines(lines, kind=kind, walked=walked), strict=True
         )
     )
-    return blank_inline_spans_by_block(prose, kind=kind, walked=walked)
+    return blank_inline_spans_by_block(prose, comments=kind, walked=walked)
 
 
 def _linked_guides(overview: pathlib.Path, guides: set[str], folder: str) -> list[str]:

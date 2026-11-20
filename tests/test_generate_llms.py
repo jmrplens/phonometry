@@ -785,6 +785,16 @@ def test_a_link_written_only_inside_code_links_nothing(
     assert llms._linked(lone, candidates) == ["signals/b"]
     items = f"- A literal `\n- Read [A]({base}/signals/a/), then a literal `.\n"
     assert llms._linked(items, candidates) == ["signals/a"]
+    comment = (
+        "<!-- a lone ` here -->" if name.endswith(".md") else "{/* a lone ` here */}"
+    )
+    commented = f"{comment} Read [A]({base}/signals/a/), then a literal `.\n"
+    assert llms._linked(commented, candidates, kind=llms.page_kind(name)) == [
+        "signals/a"
+    ]
+    hidden = "<!-- [B](" if name.endswith(".md") else "{/* [B]("
+    hidden += f"{base}/signals/b/) " + ("-->" if name.endswith(".md") else "*/}")
+    assert llms._linked(hidden + "\n", candidates, kind=llms.page_kind(name)) == []
     wrapped = f"Write `[A]({base}/signals/a/)\nacross` two lines, then [B]({base}/signals/b/).\n"
     assert llms._linked(wrapped, candidates) == ["signals/b"]
 

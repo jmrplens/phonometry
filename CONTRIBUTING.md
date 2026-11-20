@@ -860,11 +860,13 @@ Releases are fully automated from the repository-root `VERSION` file:
      CHANGELOG heading for that version, and the docs workflow runs on any
      PR touching any of them.
    - Write the new version into the citations of the About page by hand, the
-     APA line and the BibTeX `version`, in its three editions
-     (`site/src/content/docs/start/about.md`,
-     `site/src/content/docs/es/start/about.md` and `docs/start/about.md`):
+     APA line and the BibTeX `version`, in its two site editions
+     (`site/src/content/docs/start/about.md` and
+     `site/src/content/docs/es/start/about.md`):
      `site/src/data/citation.mjs` fails the build when either names a
-     version other than `VERSION`.
+     version other than `VERSION`. The GitHub edition,
+     `docs/start/about.md`, is written from the English page by `make llms`,
+     run last as below.
    - Write the new version into the `__version__` row of
      `docs/reference/api/index.md` by hand. `make api-docs` leaves that cell
      alone, and `scripts/check_api_reference.py` fails when it differs from

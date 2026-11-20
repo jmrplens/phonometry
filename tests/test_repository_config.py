@@ -349,6 +349,100 @@ def test_every_request_of_the_indexnow_job_names_the_job() -> None:
     assert not bare, f"{bare} send no User-Agent"
 
 
+def _indexnow_submission() -> str:
+    """The Python of the IndexNow job's step that sends the pages."""
+    workflow = yaml.safe_load(_DOCS_WORKFLOW.read_text(encoding="utf-8"))
+    steps: list[dict[str, object]] = workflow["jobs"]["indexnow"]["steps"]
+    sources = [
+        match.group(1)
+        for step in steps
+        for match in re.finditer(
+            r"<<'PY'\n(.*?)\nPY", str(step.get("run", "")), re.DOTALL
+        )
+        if "api.indexnow.org" in match.group(1)
+    ]
+    assert len(sources) == 1, "one step of the indexnow job sends the pages"
+    return sources[0]
+
+
+@pytest.mark.parametrize(
+    ("answers", "posts", "ends"),
+    [
+        ([403, 200], 2, "IndexNow HTTP 200 (2 URLs submitted)"),
+        ([429, 429, 202], 3, "IndexNow HTTP 202 (2 URLs submitted)"),
+        ([403] * 5, 5, "HTTP Error 403: refused"),
+        ([400, 200], 1, "HTTP Error 400: refused"),
+    ],
+)
+def test_indexnow_tries_a_403_or_a_429_again_and_nothing_else(
+    tmp_path: pathlib.Path,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+    answers: list[int],
+    posts: int,
+    ends: str,
+) -> None:
+    """The submission retries what api.indexnow.org has refused for a moment.
+
+    Its first answer after the move to phonometry.dev was a 403 to a request
+    it took by hand a moment later, so a 403 or a 429 is tried again, five
+    tries in all, after a wait that doubles; any other refusal stops the job
+    at once. The step's own Python runs here with its requests answered
+    in-process.
+    """
+    import time
+    import urllib.error
+    import urllib.request
+
+    key, base = "k" * 32, "https://phonometry.dev"
+    (tmp_path / "indexnow").mkdir()
+    (tmp_path / "indexnow" / "urls.json").write_text(
+        json.dumps(
+            {
+                "urls": [f"{base}/a/", f"{base}/b/"],
+                "full": False,
+                "changed": ["a"],
+                "new": ["b"],
+                "removed": [],
+            }
+        ),
+        encoding="utf-8",
+    )
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setenv("INDEXNOW_KEY", key)
+    monkeypatch.setenv("PAGE_URL", f"{base}/")
+    monkeypatch.setattr(time, "sleep", lambda seconds: None)
+    left = list(answers)
+    sent: list[str] = []
+
+    class _Answer(io.BytesIO):
+        status = 200
+
+    def urlopen(request: urllib.request.Request, timeout: float) -> _Answer:
+        url = request.full_url
+        if url == f"{base}/{key}.txt":
+            return _Answer(key.encode())
+        assert url == "https://api.indexnow.org/IndexNow", url
+        sent.append(url)
+        code = left.pop(0)
+        if code >= 400:
+            raise urllib.error.HTTPError(url, code, "refused", {}, None)  # type: ignore[arg-type]
+        answer = _Answer(b"")
+        answer.status = code
+        return answer
+
+    monkeypatch.setattr(urllib.request, "urlopen", urlopen)
+    source = _indexnow_submission()
+    try:
+        exec(compile(source, "indexnow-submission", "exec"), {"__name__": "__main__"})  # noqa: S102 - the workflow's own script, run against stubs
+    except urllib.error.HTTPError as error:
+        outcome = str(error)
+    else:
+        outcome = capsys.readouterr().out.strip().splitlines()[-1]
+    assert len(sent) == posts
+    assert outcome == ends
+
+
 def test_a_urlopen_call_is_read_however_it_is_spaced() -> None:
     """The scripts are picked by the calls their AST holds, not by their text.
 

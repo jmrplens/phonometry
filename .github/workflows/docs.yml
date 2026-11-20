@@ -1008,7 +1008,7 @@ jobs:
             echo "::error::INDEXNOW_KEY secret is not set"; exit 1
           fi
           python3 - <<'PY'
-          import json, os, sys, time, urllib.request
+          import json, os, sys, time, urllib.error, urllib.request
           from urllib.parse import urlparse
 
           TIMEOUT = 30
@@ -1057,6 +1057,24 @@ jobs:
                       sys.exit(f"key file unreachable: {key_url} ({error!r})")
                   time.sleep(2 ** attempt)
 
+          # api.indexnow.org has answered 403 to a request it took a moment
+          # later (2026-11-20), and 429 is how it says too many came in a row:
+          # either is tried again, after a wait that doubles, before the job
+          # gives up. Any other refusal stops the job at once.
+          RETRIED = (403, 429)
+          ATTEMPTS = 5
+
+          def submit(req):
+              for attempt in range(ATTEMPTS):
+                  try:
+                      with urllib.request.urlopen(req, timeout=TIMEOUT) as r:
+                          return r.status, r.read()[:300]
+                  except urllib.error.HTTPError as error:
+                      if error.code not in RETRIED or attempt == ATTEMPTS - 1:
+                          raise
+                      print(f"IndexNow HTTP {error.code}, trying again in {2 ** attempt} s")
+                      time.sleep(2 ** attempt)
+
           for start in range(0, len(urls), BATCH):
               batch = urls[start:start + BATCH]
               payload = json.dumps({
@@ -1066,10 +1084,10 @@ jobs:
                   "https://api.indexnow.org/IndexNow", data=payload,
                   headers={"Content-Type": "application/json; charset=utf-8", "User-Agent": USER_AGENT},
               )
-              with urllib.request.urlopen(req, timeout=TIMEOUT) as r:
-                  print(f"IndexNow HTTP {r.status} ({len(batch)} URLs submitted)")
-                  if r.status not in (200, 202):
-                      sys.exit(f"unexpected status {r.status}: {r.read()[:300]}")
+              status, body = submit(req)
+              print(f"IndexNow HTTP {status} ({len(batch)} URLs submitted)")
+              if status not in (200, 202):
+                  sys.exit(f"unexpected status {status}: {body}")
           PY
       - name: Check that no deploy has gone out after this run's
         # The records follow the order of the deploys, not the order their

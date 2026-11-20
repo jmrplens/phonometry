@@ -329,7 +329,28 @@ jobs:
         # has gone out after this moment.
         id: deployed
         run: echo "at=$(date -u +%Y-%m-%dT%H:%M:%SZ)" >> "$GITHUB_OUTPUT"
+      - name: Check the zone rules
+        if: ${{ !inputs.apply_rules }}
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CF_PHONOMETRY_RULES_TOKEN }}
+        run: node site/worker/scripts/apply-rules.mjs --check
+      - name: Put the zone rules, keeping what was there
+        if: ${{ inputs.apply_rules }}
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CF_PHONOMETRY_RULES_TOKEN }}
+        run: node site/worker/scripts/apply-rules.mjs --apply --backup-dir "$RUNNER_TEMP/rules-backup"
+      - name: Keep the rules that were replaced
+        if: ${{ inputs.apply_rules && always() }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: zone-rules-before-${{ github.run_id }}
+          path: ${{ runner.temp }}/rules-backup/
+          if-no-files-found: ignore
+          retention-days: 90
       - name: Check what the assets answer
+        # After the rules are put: a deploy that moves the base path would
+        # otherwise find its home page behind the old rule that sent the root
+        # to the base path.
         env:
           # The beacon check reads the live deployment just before and after
           # its probe (scripts/check-beacon.mjs); the deploy token reads it.
@@ -380,24 +401,6 @@ jobs:
           n=$(curl -sS -o /dev/null -D - --max-time 30 "$base/signals/index.md" | grep -ci '^content-type:')
           if [ "$n" != 1 ]; then echo "::error::the copy carries $n Content-Type headers"; fail=1; else echo "ok   one Content-Type"; fi
           exit "$fail"
-      - name: Check the zone rules
-        if: ${{ !inputs.apply_rules }}
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CF_PHONOMETRY_RULES_TOKEN }}
-        run: node site/worker/scripts/apply-rules.mjs --check
-      - name: Put the zone rules, keeping what was there
-        if: ${{ inputs.apply_rules }}
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CF_PHONOMETRY_RULES_TOKEN }}
-        run: node site/worker/scripts/apply-rules.mjs --apply --backup-dir "$RUNNER_TEMP/rules-backup"
-      - name: Keep the rules that were replaced
-        if: ${{ inputs.apply_rules && always() }}
-        uses: actions/upload-artifact@v7
-        with:
-          name: zone-rules-before-${{ github.run_id }}
-          path: ${{ runner.temp }}/rules-backup/
-          if-no-files-found: ignore
-          retention-days: 90
       - name: Check what the zone rules answer
         env:
           ORIGIN: ${{ steps.site.outputs.origin }}

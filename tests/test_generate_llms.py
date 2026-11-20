@@ -751,6 +751,54 @@ def test_an_overview_whose_links_name_no_guide_stops_the_run(tmp_path: Path) -> 
     llms._require_site_links(overview, candidates)
 
 
+@pytest.mark.parametrize("name", ["index.md", "index.mdx"])
+def test_a_link_written_only_inside_code_links_nothing(
+    tmp_path: Path, name: str
+) -> None:
+    """A link inside a code span or a fence is shown as code, and orders nothing.
+
+    An overview whose only link to its area sits in code would otherwise pass
+    the check and order the area by an example; with a real link beside it,
+    the real one is read and the code one is not.
+    """
+    base = llms.SITE_BASE
+    overview = tmp_path / name
+    candidates = {"signals/a", "signals/b"}
+    for text in (
+        f"Write `[A]({base}/signals/a/)` to link it.\n",
+        f"Write ``[A]({base}/signals/a/)`` to link it.\n",
+        f"```markdown\n[A]({base}/signals/a/)\n```\n",
+        f"~~~\n[A]({base}/signals/a/)\n~~~\n",
+    ):
+        overview.write_text(text, encoding="utf-8")
+        with pytest.raises(SystemExit, match=r"links no guide of its area"):
+            llms._require_site_links(overview, candidates)
+    overview.write_text(
+        f"`[B]({base}/signals/b/)` aside, read [A]({base}/signals/a/) first.\n",
+        encoding="utf-8",
+    )
+    llms._require_site_links(overview, candidates)
+    assert llms._linked(overview.read_text(encoding="utf-8"), candidates) == [
+        "signals/a"
+    ]
+    lone = f"A lone ` here.\n\nRead [B]({base}/signals/b/), then ` closes nothing.\n"
+    assert llms._linked(lone, candidates) == ["signals/b"]
+    items = f"- A literal `\n- Read [A]({base}/signals/a/), then a literal `.\n"
+    assert llms._linked(items, candidates) == ["signals/a"]
+    comment = (
+        "<!-- a lone ` here -->" if name.endswith(".md") else "{/* a lone ` here */}"
+    )
+    commented = f"{comment} Read [A]({base}/signals/a/), then a literal `.\n"
+    assert llms._linked(commented, candidates, kind=llms.page_kind(name)) == [
+        "signals/a"
+    ]
+    hidden = "<!-- [B](" if name.endswith(".md") else "{/* [B]("
+    hidden += f"{base}/signals/b/) " + ("-->" if name.endswith(".md") else "*/}")
+    assert llms._linked(hidden + "\n", candidates, kind=llms.page_kind(name)) == []
+    wrapped = f"Write `[A]({base}/signals/a/)\nacross` two lines, then [B]({base}/signals/b/).\n"
+    assert llms._linked(wrapped, candidates) == ["signals/b"]
+
+
 def test_an_overview_linking_only_another_areas_guide_stops_the_run(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:

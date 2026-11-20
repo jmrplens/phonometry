@@ -272,6 +272,16 @@ describe('the checks after a deploy hold the site served at the root', () => {
 		assert.match(runBlock(rules), /if \[ -n "\$BASE" \]; then\n\s+check "the root goes to the base path"/);
 	});
 
+	test('the assets are checked after the zone rules are put, so an old rule does not answer for the home page', () => {
+		const names = [...steps.keys()];
+		const at = (start) => names.findIndex((name) => name.startsWith(start));
+		assert.ok(at('Check what the assets answer') !== -1, 'no step checks what the assets answer');
+		for (const earlier of ['Check the zone rules', 'Put the zone rules', 'Keep the rules that were replaced']) {
+			assert.ok(at(earlier) !== -1, `no step named ${earlier}`);
+			assert.ok(at(earlier) < at('Check what the assets answer'), `the assets are checked before "${earlier}"`);
+		}
+	});
+
 	test('the old base path answers one 301 to the same page at the root, its query kept', () => {
 		assert.match(rules, /LEGACY_BASE: \$\{\{ steps\.site\.outputs\.legacy_base \}\}/);
 		const script = runBlock(rules);

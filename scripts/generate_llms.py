@@ -85,8 +85,8 @@ from typing import TYPE_CHECKING
 
 import site_target
 from generate_site_reports import family_pages
-from markdown_fences import code_lines
-from markdown_spans import page_markup
+from markdown_fences import code_lines, page_kind, page_lines
+from markdown_spans import blank_inline_spans_by_block, page_markup
 
 if TYPE_CHECKING:
     from collections.abc import Iterable, Mapping, Sequence
@@ -669,7 +669,8 @@ def _require_site_links(overview: pathlib.Path, candidates: Iterable[str]) -> No
         those, and a link to one says nothing of its own reading order.
     :raises SystemExit: When none of its links names one of them.
     """
-    if not _linked(overview.read_text(encoding="utf-8"), candidates):
+    text = overview.read_text(encoding="utf-8")
+    if not _linked(text, candidates, kind=page_kind(overview.name)):
         shown = (
             overview.relative_to(ROOT) if overview.is_relative_to(ROOT) else overview
         )
@@ -681,12 +682,36 @@ def _require_site_links(overview: pathlib.Path, candidates: Iterable[str]) -> No
         raise SystemExit(msg)
 
 
-def _linked(text: str, candidates: Iterable[str]) -> list[str]:
-    """The *candidates* a text links, in the order it first links them."""
+def _linked(text: str, candidates: Iterable[str], *, kind: str = "md") -> list[str]:
+    """The *candidates* a text links, in the order it first links them.
+
+    A link written inside code, a fence or a code span, is shown as code and
+    links nothing, so it is read out of the text first (:func:`_outside_code`).
+
+    :param kind: The page's kind (:func:`markdown_fences.page_kind`); a copy
+        of a page is ``"md"``.
+    """
     allowed = set(candidates)
-    return [
-        route for route in dict.fromkeys(_SITE_LINK.findall(text)) if route in allowed
-    ]
+    found = _SITE_LINK.findall(_outside_code(text, kind))
+    return [route for route in dict.fromkeys(found) if route in allowed]
+
+
+def _outside_code(text: str, kind: str) -> str:
+    """*text* with its code blanked: the lines of every fence, as
+    ``markdown_fences`` reads them, and every code span and comment, read block
+    by block as the page reads them, so that a lone backtick never pairs with
+    one in another paragraph, list item, heading or comment, and a link in a
+    comment links nothing.
+    """
+    lines = text.split("\n")
+    walked = list(page_lines(lines, kind=kind))
+    prose = "\n".join(
+        "" if code else line
+        for line, code in zip(
+            lines, code_lines(lines, kind=kind, walked=walked), strict=True
+        )
+    )
+    return blank_inline_spans_by_block(prose, comments=kind, walked=walked)
 
 
 def _linked_guides(overview: pathlib.Path, guides: set[str], folder: str) -> list[str]:
@@ -698,9 +723,8 @@ def _linked_guides(overview: pathlib.Path, guides: set[str], folder: str) -> lis
     overview can order it.
     """
     text = overview.read_text(encoding="utf-8") if overview.exists() else ""
-    return [
-        route for route in _linked(text, guides) if route.rsplit("/", 1)[0] == folder
-    ]
+    linked = _linked(text, guides, kind=page_kind(overview.name))
+    return [route for route in linked if route.rsplit("/", 1)[0] == folder]
 
 
 def _folder_order(folder: str, guides: set[str]) -> list[str]:
@@ -721,8 +745,9 @@ def _subgroups(topic: str) -> list[str]:
         for path in (CONTENT / topic).rglob("index.md*")
         if path.parent != CONTENT / topic
     )
-    text = _overview(CONTENT / topic).read_text(encoding="utf-8")
-    mentioned = _linked(text, folders)
+    overview = _overview(CONTENT / topic)
+    text = overview.read_text(encoding="utf-8")
+    mentioned = _linked(text, folders, kind=page_kind(overview.name))
     return mentioned + [folder for folder in folders if folder not in mentioned]
 
 

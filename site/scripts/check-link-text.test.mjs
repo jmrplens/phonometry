@@ -103,6 +103,21 @@ const CASES = {
 		mobile: ['/hidden/ "More"', '/narrow/ "More"', '/svg-title/ "More"', '/across-tags/ "Read more"'],
 		desktop: ['/hidden/ "More"', '/svg-title/ "More"', '/across-tags/ "Read more"'],
 	},
+	// The text under the site's own `content-visibility: auto` rule, which
+	// site/src/styles/containment.css sets on collapsible sections, is read
+	// as the browser shows it once drawn, not as the empty text it has before.
+	'collapsible/index.html': {
+		lang: 'en',
+		body: [
+			'<style>.sl-markdown-content details { content-visibility: auto; contain-intrinsic-size: auto 2.5rem }</style>',
+			'<div class="sl-markdown-content">',
+			'<details open><summary>Sources</summary><p>See <a href="/sources/">here</a>.</p></details>',
+			'<details><summary>Further reading, <a href="/reading/">more</a></summary><p>A list.</p></details>',
+			'</div>',
+		].join('\n'),
+		mobile: ['/reading/ "more"', '/sources/ "here"'],
+		desktop: ['/reading/ "more"', '/sources/ "here"'],
+	},
 	// Each link is held to the list of its own language, and to every list when it has none.
 	'languages/index.html': {
 		lang: 'en',

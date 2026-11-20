@@ -27,11 +27,15 @@
 // check-link-text.test.mjs holds that the audit reads none, and that this
 // check finds what a full Lighthouse run finds on pages made to fail it.
 //
-// A page is read when its load event fires. Lighthouse also waits for the
-// network and the processor to go quiet, a second each by its own settings,
-// which would multiply the time of this check; nothing on the site writes a
-// link after the load event (the one script that shows a link, the language
-// bar, runs on DOMContentLoaded).
+// A page is read once its load event has fired and the browser has drawn two
+// frames since. The site sets `content-visibility: auto` on its collapsible
+// sections, and the text under such a block reads as empty until a frame has
+// decided whether the block is on screen; PageSpeed reads it decided. So each
+// page is open in a window of its own, never a background tab, which draws no
+// frames at all. Lighthouse also waits for the network and the processor to
+// go quiet, a second each by its own settings, which would multiply the time
+// of this check; nothing on the site writes a link after the load event (the
+// one script that shows a link, the language bar, runs on DOMContentLoaded).
 //
 // Usage: node scripts/with-preview.mjs -- node scripts/check-link-text.mjs
 //        [--base <origin>] [dist-directory]
@@ -100,7 +104,8 @@ export async function vagueLinks({ base, routes, forms = Object.keys(FORM_FACTOR
 	const browser = await launchBrowser();
 	try {
 		const worker = async (form, queue) => {
-			const page = await browser.newPage();
+			// A window of its own: a background tab draws no frames (see above).
+			const page = await browser.newPage({ type: 'window' });
 			const driver = new Driver(page);
 			await driver.connect();
 			await emulate(driver.defaultSession, FORM_FACTORS[form]);
@@ -121,6 +126,7 @@ export async function vagueLinks({ base, routes, forms = Object.keys(FORM_FACTOR
 					found.push({ form, route, href: '', text: '', unread: `HTTP ${status || 'no response'}` });
 					continue;
 				}
+				await page.evaluate(() => new Promise((drawn) => requestAnimationFrame(() => requestAnimationFrame(drawn))));
 				const anchors = await new AnchorElements().getArtifact(context);
 				const { details } = LinkText.audit({ URL: { finalDisplayedUrl: page.url() }, AnchorElements: anchors });
 				for (const { href, text } of details.items) found.push({ form, route, href: shown(href, base), text });

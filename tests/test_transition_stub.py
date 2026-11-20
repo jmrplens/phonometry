@@ -90,7 +90,7 @@ _RENAME_IS_ENOUGH = re.compile(
 )
 
 # Where a reader who has left the pin has to be sent instead.
-_UPGRADE_GUIDE = "docs.jmrp.io/phonometry/start/upgrading/"
+_UPGRADE_GUIDE = "phonometry.dev/start/upgrading/"
 
 
 #: The one-line keys a step may carry between its ``- name:`` and its

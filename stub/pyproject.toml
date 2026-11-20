@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "PyOctaveBand"
-version = "2.2.1"
+version = "2.2.2"
 authors = [
   { name="José Manuel Requena Plens", email="mail@jmrp.io" },
 ]
@@ -34,9 +34,9 @@ dependencies = [
 ]
 
 [project.urls]
-"Homepage" = "https://docs.jmrp.io/phonometry/"
+"Homepage" = "https://phonometry.dev/"
 "Author" = "https://jmrp.io/"
-"Documentation" = "https://docs.jmrp.io/phonometry/"
+"Documentation" = "https://phonometry.dev/"
 
 [tool.setuptools.packages.find]
 where = ["src"]

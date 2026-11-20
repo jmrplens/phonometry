@@ -66,9 +66,8 @@ the site build writes them (``--build``, run by ``site/package.json``
 ``prebuild``) into ``site/public/``, which the build publishes, and the check
 of the Markdown copies (``site/scripts/check-markdown-twins.mjs``) holds every
 page they carry to its copy. Where a shard is cut does not depend on the
-dates, nor on the ``Unreleased:`` line git decides for a page changed after
-the release, so the ``llms.txt`` that ``make llms`` writes from a dump without
-them names the same files the build writes.
+dates, so the ``llms.txt`` that ``make llms`` writes from a dump without them
+names the same files the build writes.
 """
 
 from __future__ import annotations
@@ -254,11 +253,6 @@ _DATED_LINE = re.compile(
     r"^(?:Published: [0-9]{4}-[0-9]{2}-[0-9]{2}"
     r"|Updated: [0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z)$"
 )
-
-#: The header line of a copy whose page changed after the latest release
-#: (site/src/lib/agent-md/header.mjs). Git decides it as it decides the dates,
-#: so a shard is measured as if every page held it (:func:`_measured_head`).
-_UNRELEASED_LINE = re.compile(r"^Unreleased: \S[^\n]*$")
 
 #: What closes every page in a shard and in llms-full.txt: a blank line and a
 #: rule. A page opens with the ``# `` title of its copy and the sentence under
@@ -502,38 +496,6 @@ def _routes_stamp() -> tuple[int, int] | None:
     except OSError:
         return None
     return (stat.st_mtime_ns, stat.st_size)
-
-
-@functools.cache
-def _read_unreleased_line(pages: pathlib.Path, _stamp: tuple[int, int] | None) -> str:
-    """The ``Unreleased:`` line ``routes.json`` gives (``unreleasedLine``).
-
-    It is the line an English copy carries when its page changed after the
-    latest release (site/src/lib/release-commit.mjs), which git decides as it
-    decides the dates: a dated dump holds it on some pages, an undated one on
-    none, and every page is measured as if it held it.
-    """
-    listing = pages / "routes.json"
-    try:
-        line = json.loads(listing.read_text(encoding="utf-8"))["unreleasedLine"]
-    except (OSError, ValueError, KeyError, TypeError) as error:
-        msg = (
-            f"generate_llms.py: cannot read the Unreleased line of {listing} "
-            f"({error}). {_REDUMP}"
-        )
-        raise SystemExit(msg) from error
-    if not isinstance(line, str) or not _UNRELEASED_LINE.match(line):
-        msg = (
-            f"generate_llms.py: {listing} gives {line!r} as the Unreleased line, "
-            f"which is no header line of that key. {_REDUMP}"
-        )
-        raise SystemExit(msg)
-    return line
-
-
-def _unreleased_line() -> str:
-    """The ``Unreleased:`` line of the dump this run reads (:data:`PAGES`)."""
-    return _read_unreleased_line(PAGES, _routes_stamp())
 
 
 def _content_routes() -> set[str]:
@@ -1787,32 +1749,11 @@ def _copy(route: str) -> Copy:
 def _measured_head(head: str) -> int:
     """What a page's head takes in a shard, dated or not.
 
-    The lines git decides are counted whether they are there or not: the two
-    dated lines (:data:`DATED_LINES_BYTES`) and the ``Unreleased:`` line the
-    dump names (:func:`_unreleased_line`). A copy that holds an
-    ``Unreleased:`` line other than that one comes from another dump, or from
-    another release, and is refused rather than measured.
+    The two dated lines, which git decides, are counted whether they are there
+    or not (:data:`DATED_LINES_BYTES`).
     """
-    unreleased = _unreleased_line()
-    kept = []
-    for line in head.split("\n"):
-        if _DATED_LINE.match(line):
-            continue
-        if _UNRELEASED_LINE.match(line):
-            if line != unreleased:
-                msg = (
-                    f"generate_llms.py: a copy says {line!r}, and the dump's "
-                    f"routes.json gives {unreleased!r}. {_REDUMP}"
-                )
-                raise SystemExit(msg)
-            continue
-        kept.append(line)
-    return (
-        len("\n".join(kept).encode("utf-8"))
-        + DATED_LINES_BYTES
-        + len(unreleased.encode("utf-8"))
-        + 1
-    )
+    kept = [line for line in head.split("\n") if not _DATED_LINE.match(line)]
+    return len("\n".join(kept).encode("utf-8")) + DATED_LINES_BYTES
 
 
 def _lines_bytes(lines: Iterable[str]) -> int:

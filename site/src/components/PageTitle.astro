@@ -15,9 +15,7 @@
  * added was the maintainer's name between the reader and the first sentence.
  *
  * Under the chips, the line that says which conformance checks verify the
- * page, when any do (VerifiedBy.astro), and, on a page whose content changed
- * after the latest release, the notice that says it may describe code that
- * release does not have (ReleaseNotice.astro).
+ * page, when any do (VerifiedBy.astro).
  *
  * The title takes the page's search weight, when it sets one
  * (SearchWeight.astro).
@@ -25,7 +23,6 @@
 import Default from '@astrojs/starlight/components/PageTitle.astro';
 import PageChips from './PageChips.astro';
 import VerifiedBy from './VerifiedBy.astro';
-import ReleaseNotice from './ReleaseNotice.astro';
 import PhIcon from './PhIcon.astro';
 import SearchWeight from './SearchWeight.astro';
 import { topics } from '../data/topics.mjs';
@@ -61,7 +58,6 @@ const topicId = topics.find((topic) => topic.link === `/${slug}/`)?.id;
   }
   <PageChips />
   <VerifiedBy />
-  <ReleaseNotice />
 </SearchWeight>
 
 <style>

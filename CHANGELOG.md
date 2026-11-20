@@ -14,6 +14,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   links and the `FutureWarning` that `import pyoctaveband` raises send
   readers to the new address of the upgrading guide, where 2.2.1 named the
   old host. It is still pinned below phonometry 4.
+- **A page of the documentation no longer says it changed after the latest
+  release.** A page whose text had changed since the release on PyPI carried
+  a notice under its title, and an `Unreleased:` line in its Markdown copy,
+  saying it might describe code that release did not have yet. Any change to
+  the page set it off, so a correction or an addition to the text alone marked
+  the page as ahead of the release when the code it describes was the same.
+  The notice and the line are gone; what is new since the release is listed
+  under Unreleased in this changelog.
 
 ## [4.0.1] - 2026-11-20
 

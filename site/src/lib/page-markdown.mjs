@@ -131,24 +131,11 @@ export const markdownCopyPath = (route, base = '') => `${base}/${route ? `${rout
 export const VERIFIED_BY_ATTRIBUTE = 'data-verified-by';
 
 /**
- * The attribute the notice under the title of a page whose content changed
- * after the latest release carries, with that release's version as its value
- * (src/components/ReleaseNotice.astro). The copy of such a page says the same
- * in its `Unreleased:` header line, and a check of the built site finds the
- * notice by the attribute rather than by its words, which are the page's
- * language.
- */
-export const NEWER_THAN_RELEASE_ATTRIBUTE = 'data-newer-than-release';
-
-/**
  * The header lines of a copy that name the release rather than the page: the
- * version it documents, the command that installs it, while the version is a
- * pre-release the line that says so, and, on a page whose content changed
- * after the release, the line that says it may describe code the release
- * does not have (src/lib/release-commit.mjs). A copy opens with a block of
+ * version it documents, the command that installs it and, while the version
+ * is a pre-release, the line that says so. A copy opens with a block of
  * `Key: value` lines, and a release changes these on every page at once
- * while no page says anything new: the first two take the new version, and
- * the last leaves every page it stood on.
+ * while no page says anything new.
  *
  * scripts/indexnow-diff.mjs tells search engines which pages changed by
  * hashing each copy, and it hashes the copy without these lines, so stamping
@@ -156,7 +143,7 @@ export const NEWER_THAN_RELEASE_ATTRIBUTE = 'data-newer-than-release';
  * writer (src/lib/agent-md/header.mjs) writes its release lines from this
  * list and has no list of its own, so that the two cannot drift apart.
  */
-export const releaseHeaderKeys = Object.freeze(['Version', 'Install', 'Pre-release', 'Unreleased']);
+export const releaseHeaderKeys = Object.freeze(['Version', 'Install', 'Pre-release']);
 
 /** One `Key: value` line of a copy's header. */
 const HEADER_FIELD = /^([A-Z][A-Za-z-]*): /;

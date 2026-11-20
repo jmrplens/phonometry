@@ -109,14 +109,14 @@ describe('the header', () => {
   });
 
   test('a new release changes only the lines releaseHeaderKeys names, so a comparison across releases can leave them out', () => {
-    // A page changed after each release, so every release line stands on both sides.
+    // Both versions are pre-releases, so every release line stands on both sides.
     const before = header({
       ...FULL,
-      release: { version: '4.0.0rc1', install: 'pip install "phonometry[full]"', preRelease: true, changedSince: true },
+      release: { version: '4.0.0rc1', install: 'pip install "phonometry[full]"', preRelease: true },
     }).split('\n');
     const after = header({
       ...FULL,
-      release: { version: '4.0.1rc1', install: 'pip install "phonometry[full]==4.0.1rc1"', preRelease: true, changedSince: true },
+      release: { version: '4.0.1rc1', install: 'pip install "phonometry[full]==4.0.1rc1"', preRelease: true },
     }).split('\n');
     assert.equal(before.length, after.length);
     const changed = before.filter((one, i) => one !== after[i]).map((one) => one.split(':')[0]);

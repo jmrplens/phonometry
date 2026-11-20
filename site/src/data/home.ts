@@ -9,7 +9,7 @@
  * src/components/home/. A page is dated by the commits to the files it shows
  * (site/date-sources.json), and the two objects once shared this file: a
  * commit that changed only the Spanish text then dated the English landing
- * page as well, and gave it the notice of a page changed after the release.
+ * page as well.
  * This module keeps what both pages show alike, the DOI and the two code
  * examples, so a commit to it moves both.
  *

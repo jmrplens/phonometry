@@ -32,13 +32,9 @@
 //       rendered.
 //       `--undated` leaves out the two dated header lines, `Published:` and
 //       `Updated:`, which llms.txt does not state and which cost a question to
-//       git per page, and the `Unreleased:` line, which git decides as well:
-//       `make llms` writes llms.txt alone and passes it. It is refused with
-//       `--public`, since the copies the site publishes state their dates.
-//       routes.json also gives, as `unreleasedLine`, the `Unreleased:` line an
-//       English copy carries when the page changed after the release, dated
-//       dump or not, so generate_llms.py measures every page as if it held it
-//       and cuts the shards at the same places either way.
+//       git per page: `make llms` writes llms.txt alone and passes it. It is
+//       refused with `--public`, since the copies the site publishes state
+//       their dates.
 //       With `--public` in the same run, both are written from one rendering,
 //       so the llms files the build publishes carry the copies byte for byte
 //       (package.json `prebuild`).
@@ -91,12 +87,9 @@ import {
 import { pageMarkdown, titleOf } from '../src/lib/agent-md/page.mjs';
 import { CONTENT_DIR, REPO_DIR, SITE_DIR, renderFile } from '../src/lib/agent-md/render.mjs';
 import { loadRegistry } from '../src/lib/agent-md/registry.mjs';
-import { UNRELEASED } from '../src/lib/agent-md/header.mjs';
 import { unreadPage } from './check-markdown-writers.mjs';
 import { verifiedProvider } from '../src/lib/agent-md/verified.mjs';
 import { loadContentDates } from '../src/lib/content-dates.mjs';
-import { loadRelease } from '../src/lib/release-commit.mjs';
-import { version } from '../src/data/repo-stats.mjs';
 import { readCommittedText } from '../src/lib/line-ends.mjs';
 import { FULL_TEXT_KINDS, hasMarkdownCopy, pageKind, routeOf } from '../src/lib/page-markdown.mjs';
 import { implementedStandards } from '../src/lib/reference-chips.ts';
@@ -110,15 +103,11 @@ const shown = (file) => relative(CONTENT_DIR, file).split(sep).join('/');
  * the readers the build uses for the same dates: the last change from the
  * history of the content tree (src/lib/content-dates.mjs), the first
  * publication from one pass over the history of the docs tree
- * (src/lib/page-dates.mjs). With them, the latest release
- * (src/lib/release-commit.mjs), which a page whose content changed after it
- * says it is newer than, in the `Unreleased:` line, as the page does under its
- * title.
+ * (src/lib/page-dates.mjs).
  */
 async function pageDates() {
   const dates = await loadContentDates({ siteRoot: SITE_DIR });
-  const release = await loadRelease({ siteRoot: SITE_DIR, version });
-  return { dateOf: dates.dateOf, publishedOf: firstPublished, release };
+  return { dateOf: dates.dateOf, publishedOf: firstPublished };
 }
 
 /** The name of the file of a dump that lists its routes. */
@@ -411,11 +400,7 @@ export async function writePages({ publicOut, dumpDir, docsDir, undated = false,
     }
     routes.sort((a, b) => (a.route < b.route ? -1 : a.route > b.route ? 1 : 0));
     mkdirSync(dumpDir, { recursive: true });
-    // The line a dated copy carries when its page changed after the release:
-    // generate_llms.py counts it on every page, there or not, so that the
-    // shards are cut at the same places from a dated dump and an undated one.
-    const unreleasedLine = `Unreleased: ${UNRELEASED.en(version)}`;
-    writeFileSync(join(dumpDir, ROUTES_FILE), `${JSON.stringify({ pages: routes, unreleasedLine }, null, 1)}\n`, 'utf8');
+    writeFileSync(join(dumpDir, ROUTES_FILE), `${JSON.stringify({ pages: routes }, null, 1)}\n`, 'utf8');
     console.log(
       `[agent-md] dumped ${dumped.size} English copies${undated ? ' without their dates' : ''} and ${routes.length} routes into ${relative(SITE_DIR, dumpDir) || '.'}`,
     );

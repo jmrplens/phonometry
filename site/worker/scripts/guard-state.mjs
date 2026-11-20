@@ -1,5 +1,5 @@
 // Whether the quota guard has switched the code paths off, read before a
-// deploy (site-preview.yml) so the deploy keeps them off.
+// deploy (site-deploy.yml) so the deploy keeps them off.
 //
 // Usage:
 //   CLOUDFLARE_API_TOKEN=... node site/worker/scripts/guard-state.mjs

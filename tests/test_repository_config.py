@@ -287,14 +287,22 @@ _CONDITION_TOKEN = re.compile(
 )
 
 
-def _runs_on(condition: object, event: str) -> bool:
+def _runs_on(
+    condition: object,
+    event: str,
+    variables: Mapping[str, str] | None = None,
+    ref: str | None = None,
+) -> bool:
     """Whether a job or a step whose ``if:`` is *condition* runs on *event*.
 
     No ``if:`` runs on every event. The reader knows ``github.event_name``
     compared with a string (case-insensitively, as GitHub compares strings),
-    ``!``, ``&&``, ``||``, parentheses and ``success()``; anything else raises,
-    so a condition that also depends on what this test cannot see is never
-    judged by half of it.
+    ``!``, ``&&``, ``||``, parentheses and ``success()``, a repository
+    variable ``vars.NAME`` when *variables* is given (one it does not name is
+    unset and reads as the empty string, as on GitHub), and ``github.ref``
+    when *ref* is given, the ref the run was started on
+    (``refs/heads/main``); anything else raises, so a condition that also
+    depends on what this test cannot see is never judged by half of it.
     """
     if condition is None:
         return True
@@ -337,8 +345,12 @@ def _runs_on(condition: object, event: str) -> bool:
             return token[1:-1].replace("''", "'")
         if token == "github.event_name":
             return event
+        if token == "github.ref" and ref is not None:
+            return ref
         if token == "success()":
             return True
+        if token.startswith("vars.") and variables is not None:
+            return variables.get(token.removeprefix("vars."), "")
         msg = f"{condition!r} reads {token}, which this test cannot know"
         raise ValueError(msg)
 
@@ -385,10 +397,24 @@ def test_the_event_reader_follows_the_conditions_the_workflows_write() -> None:
     assert _runs_on(condition, "workflow_dispatch")
     assert not _runs_on(condition, "push")
     assert not _runs_on("success() && github.event_name == 'push'", "pull_request")
+    held = "github.event_name == 'push' && vars.HOLD != 'true'"
+    assert _runs_on(held, "push", {})
+    assert _runs_on(held, "push", {"HOLD": "false"})
+    assert not _runs_on(held, "push", {"HOLD": "True"})
+    assert not _runs_on(held, "pull_request", {})
+    on_main = "github.event_name != 'pull_request' && github.ref == 'refs/heads/main'"
+    assert _runs_on(on_main, "workflow_dispatch", ref="refs/heads/main")
+    assert not _runs_on(on_main, "workflow_dispatch", ref="refs/heads/feature")
+    assert not _runs_on(on_main, "pull_request", ref="refs/heads/main")
+    with pytest.raises(
+        ValueError, match=r"reads github\.ref, which this test cannot know"
+    ):
+        _runs_on(on_main, "workflow_dispatch")
     for unknown in (
         "steps.found.outputs.run-id != ''",
         "always()",
         "github.ref == 'x'",
+        "vars.HOLD != 'true'",
     ):
         with pytest.raises(ValueError, match="which this test cannot know"):
             _runs_on(unknown, "push")
@@ -1243,6 +1269,151 @@ def test_the_deploy_takes_the_pages_of_the_build_it_needs() -> None:
     assert deployed == of_the_build, (
         f"the deploy takes {deployed!r}, and the build it needs hands its pages "
         f"on as {uploaded!r}"
+    )
+
+
+_SITE_DEPLOY_WORKFLOW = _ROOT / ".github" / "workflows" / "site-deploy.yml"
+
+
+def test_every_build_that_publishes_is_deployed_to_phonometry_dev_by_its_own_run() -> (
+    None
+):
+    """docs.yml calls site-deploy.yml after the build, with this run's pages.
+
+    The site on phonometry.dev follows main only if nothing has to be
+    dispatched by hand: the job that calls the deploy runs on every event
+    that publishes and never on a pull request, waits for the build, and
+    hands it this run's id and the attempt the build ran in, so a re-run of
+    the deploy alone takes the pages that build uploaded, as the Pages deploy
+    does. It passes no secrets: the Cloudflare tokens are secrets of the
+    environment the called job names, and nothing else reaches it. The
+    called workflow takes the same three inputs by hand as when called, and
+    hands back the address it deployed, the moment the pages went out and
+    the attempt it ran in, the three things the IndexNow job reads of a
+    deploy.
+
+    A rollback by hand lasts only until the next run on main deploys again,
+    so the repository variable ``SITE_DEPLOY_HOLD`` set to ``true`` skips the
+    job until it is cleared; unset or anything else, every publishing run
+    deploys. Its own concurrency group, which runs by hand share, keeps two
+    deploys from uploading their pairs at once and never cancels one halfway.
+    """
+    docs = yaml.safe_load(_DOCS_WORKFLOW.read_text(encoding="utf-8"))
+    jobs: dict[str, dict[str, object]] = docs["jobs"]
+    callers = [
+        name
+        for name, job in jobs.items()
+        if job.get("uses") == "$/.github/workflows/site-deploy.yml"
+    ]
+    assert callers == ["deploy-site"], f"site-deploy.yml is called by {callers}"
+    caller = jobs["deploy-site"]
+    assert _needs(caller) == {"build"}
+    main = "refs/heads/main"
+    for unheld in ({}, {"SITE_DEPLOY_HOLD": "false"}):
+        for event in _DEPLOYING_EVENTS:
+            assert _runs_on(caller.get("if"), event, unheld, main), (
+                f"the site is not deployed on {event} with {unheld}"
+            )
+        assert not _runs_on(caller.get("if"), "pull_request", unheld, main), (
+            "a pull request would deploy the site"
+        )
+        # docs.yml dispatched by hand on another branch builds it, and the
+        # called deploy refuses a build of anything but main: the job is
+        # skipped there, so the run does not end red after a good build.
+        assert not _runs_on(
+            caller.get("if"), "workflow_dispatch", unheld, "refs/heads/feature"
+        ), "a run dispatched on a branch would call the deploy, which refuses it"
+    for event in _DEPLOYING_EVENTS:
+        assert not _runs_on(
+            caller.get("if"), event, {"SITE_DEPLOY_HOLD": "true"}, main
+        ), f"SITE_DEPLOY_HOLD does not hold the deploy on {event}"
+    assert caller.get("with") == {
+        "run_id": "${{ github.run_id }}",
+        "attempt": "${{ needs.build.outputs.attempt }}",
+        "apply_rules": True,
+    }
+    assert "secrets" not in caller, (
+        "the call hands the deploy secrets; the environment of the called job holds them"
+    )
+    assert caller.get("permissions") == {"contents": "read", "actions": "read"}
+    assert not caller.get("continue-on-error")
+
+    deploy = yaml.safe_load(_SITE_DEPLOY_WORKFLOW.read_text(encoding="utf-8"))
+    triggers = deploy[True] if True in deploy else deploy["on"]
+    assert set(triggers) == {"workflow_call", "workflow_dispatch"}, (
+        "site-deploy.yml runs on something else than a call or a dispatch by hand"
+    )
+    called = triggers["workflow_call"]
+    by_hand = triggers["workflow_dispatch"]
+    inputs = {"run_id": "string", "attempt": "string", "apply_rules": "boolean"}
+    for trigger, how in ((called, "called"), (by_hand, "by hand")):
+        declared = trigger["inputs"]
+        assert {name: spec["type"] for name, spec in declared.items()} == inputs, how
+        assert declared["run_id"]["required"] is True, how
+    deploy_jobs: dict[str, dict[str, object]] = deploy["jobs"]
+    assert len(deploy_jobs) == 1, "site-deploy.yml deploys in one job"
+    [(job_name, job)] = deploy_jobs.items()
+    assert job.get("concurrency") == {
+        "group": "site-deploy",
+        "cancel-in-progress": False,
+    }, "a deploy called and one run by hand can upload their pairs at once"
+    job_outputs = job.get("outputs")
+    assert isinstance(job_outputs, dict)
+    assert job_outputs.get("attempt") == "${{ github.run_attempt }}"
+    handed = called.get("outputs")
+    assert isinstance(handed, dict)
+    for name in ("page_url", "deployed-at", "attempt"):
+        assert name in job_outputs, f"the deploy job writes no {name}"
+        assert handed[name]["value"] == f"${{{{ jobs.{job_name}.outputs.{name} }}}}", (
+            f"the call hands back no {name}"
+        )
+
+    # The moment the pages went out is taken once the Worker is deployed.
+    steps: list[dict[str, object]] = job["steps"]  # type: ignore[assignment]
+    clock = re.fullmatch(
+        r"\$\{\{ steps\.([\w-]+)\.outputs\.(\w+) \}\}",
+        str(job_outputs["deployed-at"]),
+    )
+    assert clock, job_outputs["deployed-at"]
+    deployed_at, _ = _the_one(
+        [
+            (index, step)
+            for index, step in enumerate(steps)
+            if str(step.get("name", "")).startswith("Deploy the Worker")
+        ],
+        "deploy the Worker",
+    )
+    clock_at, clock_step = _the_one(
+        [
+            (index, step)
+            for index, step in enumerate(steps)
+            if step.get("id") == clock.group(1)
+        ],
+        "write the moment the pages went out",
+    )
+    assert deployed_at < clock_at, "the moment is taken before the Worker went out"
+    assert f"{clock.group(2)}=$(date -u +%Y-%m-%dT%H:%M:%SZ)" in str(clock_step["run"])
+
+
+def test_a_push_to_main_never_cancels_the_deploy_of_the_push_before() -> None:
+    """A newer run on main waits for the one deploying, a pull request does not.
+
+    The deploy uploads two Worker versions as a pair and puts one live; a run
+    cancelled between the two leaves the quota guard half a pair. Runs on main
+    therefore queue (GitHub keeps the newest one waiting), while a push to a
+    pull request still cancels the build of the commit it replaces. A
+    cancellation of the calling run reaches the called deploy too, so the
+    deploy's own concurrency group alone would not protect it.
+    """
+    docs = yaml.safe_load(_DOCS_WORKFLOW.read_text(encoding="utf-8"))
+    concurrency = docs.get("concurrency")
+    assert isinstance(concurrency, dict)
+    assert concurrency.get("cancel-in-progress") == (
+        "${{ github.event_name == 'pull_request' }}"
+    )
+    group = str(concurrency.get("group"))
+    assert "github.event.pull_request.number" in group, (
+        "pull requests share one group and cancel each other's builds"
     )
 
 

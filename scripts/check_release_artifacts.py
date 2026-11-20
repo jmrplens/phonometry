@@ -67,11 +67,13 @@ SDIST_WRITTEN = ("PKG-INFO", "setup.cfg")
 #: which setuptools packs by default, and the ``MANIFEST.in`` that keeps the
 #: tests out.
 SDIST_BESIDE = ("README.md", "MANIFEST.in")
-#: The SPDX expression phonometry declares.
-LICENSE_EXPRESSION = "MIT"
-#: The licence files it declares, by the path PEP 639 records. Each carries the
-#: text of the repository's file of the same name.
-LICENSE_FILES = ("LICENSE",)
+#: The SPDX expression phonometry declares: MIT for the code, and EASA's own
+#: terms for the ANP tables it bundles.
+LICENSE_EXPRESSION = "MIT AND LicenseRef-EASA-ANP"
+#: The licence files it declares, by the path PEP 639 records, one per
+#: identifier of the expression. Each carries the text of the repository's
+#: file of the same name.
+LICENSE_FILES = ("LICENSE", "LICENSES/LicenseRef-EASA-ANP.txt")
 #: How long a git query may take [s]: it takes well under a second, so the
 #: bound only ends a hang.
 _GIT_S = 60.0

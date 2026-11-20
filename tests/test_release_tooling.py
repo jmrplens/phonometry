@@ -34,7 +34,7 @@ import tarfile
 import urllib.error
 import zipfile
 from importlib import metadata
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 import child_process
 import pytest
@@ -50,6 +50,9 @@ import check_installed_package
 import check_release_artifacts as artifacts
 import release_notes
 import release_sbom
+
+if TYPE_CHECKING:
+    from collections.abc import Mapping
 
 _CHANGELOG = """# Changelog
 
@@ -186,11 +189,18 @@ _TRACKED = [
     "phonometry/building/data/ashrae-2019-table-40.json",
 ]
 
-#: The licence text the built files carry: the repository's.
-_LICENSE = (_ROOT / "LICENSE").read_bytes()
+#: The text of the EASA ANP terms, the second licence file phonometry declares.
+_EASA = "LICENSES/LicenseRef-EASA-ANP.txt"
+
+#: The licence files the built files carry, each with the repository's text.
+_LICENSE_TEXTS = {name: (_ROOT / name).read_bytes() for name in artifacts.LICENSE_FILES}
 
 #: The licence headers setuptools writes from ``pyproject.toml``.
-_LICENSE_HEADERS = "License-Expression: MIT\nLicense-File: LICENSE\n"
+_LICENSE_HEADERS = f"License-Expression: {artifacts.LICENSE_EXPRESSION}\n" + "".join(
+    f"License-File: {name}\n" for name in artifacts.LICENSE_FILES
+)
+#: The ``License-File`` headers alone.
+_FILE_HEADERS = "".join(f"License-File: {name}\n" for name in artifacts.LICENSE_FILES)
 
 
 def _metadata(version: str, license_headers: str) -> str:
@@ -204,7 +214,7 @@ def _wheel(
     *,
     metadata_version: str | None = None,
     license_headers: str = _LICENSE_HEADERS,
-    license_text: bytes | None = _LICENSE,
+    license_texts: Mapping[str, bytes] = _LICENSE_TEXTS,
 ) -> None:
     dist_info = f"phonometry-{version}.dist-info/"
     with zipfile.ZipFile(path, "w") as archive:
@@ -214,8 +224,8 @@ def _wheel(
             f"{dist_info}METADATA",
             _metadata(metadata_version or version, license_headers),
         )
-        if license_text is not None:
-            archive.writestr(f"{dist_info}licenses/LICENSE", license_text)
+        for name, text in license_texts.items():
+            archive.writestr(f"{dist_info}licenses/{name}", text)
 
 
 def _sdist(
@@ -230,8 +240,8 @@ def _sdist(
         for name in names:
             if name == "PKG-INFO":
                 data = _metadata(version, license_headers).encode()
-            elif name == "LICENSE":
-                data = _LICENSE
+            elif name in _LICENSE_TEXTS:
+                data = _LICENSE_TEXTS[name]
             else:
                 data = b"x"
             info = tarfile.TarInfo(top + name)
@@ -369,7 +379,7 @@ def test_an_sdist_that_cannot_rebuild_the_wheel_is_reported(
         [
             "PKG-INFO",
             "pyproject.toml",
-            "LICENSE",
+            *artifacts.LICENSE_FILES,
             "README_PYPI.md",
             "src/phonometry/__init__.py",
         ],
@@ -381,48 +391,78 @@ def test_an_sdist_that_cannot_rebuild_the_wheel_is_reported(
     ]
 
 
+_EXPECTED = artifacts.LICENSE_EXPRESSION
+_ONLY_LICENSE = {"LICENSE": _LICENSE_TEXTS["LICENSE"]}
+
+
 @pytest.mark.parametrize(
-    ("license_headers", "license_text", "expected"),
+    ("license_headers", "license_texts", "expected"),
     [
         pytest.param(
-            "License-File: LICENSE\n",
-            _LICENSE,
-            "License-Expression is missing, expected 'MIT'. "
-            'Declare license = "MIT" in pyproject.toml.',
+            _FILE_HEADERS,
+            _LICENSE_TEXTS,
+            f"License-Expression is missing, expected '{_EXPECTED}'. "
+            f'Declare license = "{_EXPECTED}" in pyproject.toml.',
             id="no-expression",
         ),
         pytest.param(
-            "License-Expression: Apache-2.0\nLicense-File: LICENSE\n",
-            _LICENSE,
-            "License-Expression is ['Apache-2.0'], expected 'MIT'.",
-            id="another-expression",
+            "License-Expression: MIT\n" + _FILE_HEADERS,
+            _LICENSE_TEXTS,
+            f"License-Expression is ['MIT'], expected '{_EXPECTED}'.",
+            id="mit-alone",
         ),
         pytest.param(
-            "License-Expression: MIT\n",
-            _LICENSE,
-            "License-File is missing, expected ['LICENSE'].",
+            f"License-Expression: {_EXPECTED}\n",
+            _LICENSE_TEXTS,
+            f"License-File is missing, expected {list(artifacts.LICENSE_FILES)}.",
             id="no-license-file",
         ),
         pytest.param(
+            f"License-Expression: {_EXPECTED}\nLicense-File: LICENSE\n",
+            _LICENSE_TEXTS,
+            f"License-File is ['LICENSE'], expected {list(artifacts.LICENSE_FILES)}.",
+            id="easa-not-declared",
+        ),
+        pytest.param(
             _LICENSE_HEADERS,
-            None,
+            {_EASA: _LICENSE_TEXTS[_EASA]},
             "phonometry-2.0.0.dist-info/licenses/LICENSE is missing.",
             id="no-license-text",
+        ),
+        pytest.param(
+            _LICENSE_HEADERS,
+            _ONLY_LICENSE,
+            f"phonometry-2.0.0.dist-info/licenses/{_EASA} is missing.",
+            id="no-easa-text",
+        ),
+        pytest.param(
+            _LICENSE_HEADERS,
+            {**_ONLY_LICENSE, "LicenseRef-EASA-ANP.txt": _LICENSE_TEXTS[_EASA]},
+            f"phonometry-2.0.0.dist-info/licenses/{_EASA} is missing.",
+            id="easa-misplaced",
+        ),
+        pytest.param(
+            _LICENSE_HEADERS,
+            {**_ONLY_LICENSE, _EASA: b"Other terms\n"},
+            f"is not the repository's {_EASA}",
+            id="easa-different",
         ),
     ],
 )
 def test_a_wheel_that_does_not_declare_or_carry_the_licence_is_reported(
     tmp_path: pathlib.Path,
     license_headers: str,
-    license_text: bytes | None,
+    license_texts: Mapping[str, bytes],
     expected: str,
 ) -> None:
     """What PyOctaveBand 2.2.0 shipped, one part at a time, in phonometry's wheel.
 
     Each can happen to phonometry. A build of this repository without
-    ``license = "MIT"`` in ``pyproject.toml`` declares no expression, and one
-    with ``license-files = []`` declares no licence file and carries none;
-    setuptools builds both without a word.
+    ``license`` in ``pyproject.toml`` declares no expression, and one with
+    ``license-files = []`` declares no licence file and carries none;
+    setuptools builds both without a word. 4.0.0 declared ``MIT`` alone and
+    carried no text of EASA's terms, though the ANP tables it bundles keep
+    them; that text left out, misplaced or out of date is caught too.
     """
     wheel = tmp_path / "phonometry-2.0.0-py3-none-any.whl"
     _wheel(
@@ -430,7 +470,7 @@ def test_a_wheel_that_does_not_declare_or_carry_the_licence_is_reported(
         "2.0.0",
         _TRACKED,
         license_headers=license_headers,
-        license_text=license_text,
+        license_texts=license_texts,
     )
     problems = artifacts.wheel_problems(wheel, "2.0.0", _TRACKED)
     assert len(problems) == 1, problems
@@ -442,22 +482,28 @@ def test_a_wheel_that_does_not_declare_or_carry_the_licence_is_reported(
     ("license_headers", "names", "expected"),
     [
         pytest.param(
-            "License-File: LICENSE\n",
-            ["LICENSE"],
-            "License-Expression is missing, expected 'MIT'.",
+            _FILE_HEADERS,
+            list(artifacts.LICENSE_FILES),
+            f"License-Expression is missing, expected '{_EXPECTED}'.",
             id="no-expression",
         ),
         pytest.param(
-            "License-Expression: MIT\n",
-            ["LICENSE"],
-            "License-File is missing, expected ['LICENSE'].",
+            f"License-Expression: {_EXPECTED}\n",
+            list(artifacts.LICENSE_FILES),
+            f"License-File is missing, expected {list(artifacts.LICENSE_FILES)}.",
             id="no-license-file",
         ),
         pytest.param(
             _LICENSE_HEADERS,
-            [],
+            [_EASA],
             "phonometry-2.0.0/LICENSE is missing.",
             id="no-license-text",
+        ),
+        pytest.param(
+            _LICENSE_HEADERS,
+            ["LICENSE"],
+            f"phonometry-2.0.0/{_EASA} is missing.",
+            id="no-easa-text",
         ),
     ],
 )

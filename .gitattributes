@@ -17,6 +17,7 @@ docker/node/deadsnakes.asc text eol=lf
 /pyproject.toml text eol=lf
 /VERSION text eol=lf
 /LICENSE text eol=lf
+/LICENSES/** text eol=lf
 /README.md text eol=lf
 /README_PYPI.md text eol=lf
 /MANIFEST.in text eol=lf

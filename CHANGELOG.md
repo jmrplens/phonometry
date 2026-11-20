@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [4.0.1] - 2026-11-20
+
 ### Changed
 
 - **The documentation lives at <https://phonometry.dev/>.** Every page is
@@ -4654,7 +4656,8 @@ Chebyshev I/II, Elliptic, Bessel), A/C/Z weighting, Fast/Slow/Impulse time
 weighting, Linkwitz-Riley crossover, calibration and dBFS modes,
 multichannel support.
 
-[Unreleased]: https://github.com/jmrplens/phonometry/compare/v4.0.0...HEAD
+[Unreleased]: https://github.com/jmrplens/phonometry/compare/v4.0.1...HEAD
+[4.0.1]: https://github.com/jmrplens/phonometry/compare/v4.0.0...v4.0.1
 [4.0.0]: https://github.com/jmrplens/phonometry/compare/v3.3.0...v4.0.0
 [4.0.0rc1]: https://github.com/jmrplens/phonometry/compare/v3.3.0...v4.0.0rc1
 [3.3.0]: https://github.com/jmrplens/phonometry/compare/v3.2.0...v3.3.0

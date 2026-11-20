@@ -184,6 +184,13 @@ const authorId = `${authorUrl}/#person`;
 const websiteId = `${fullUrl}/#website`;
 const softwareId = `${repositoryUrl}#software`;
 const sourceCodeId = `${repositoryUrl}#source-code`;
+// MIT for the code; the EASA ANP tables the package bundles keep EASA's terms,
+// whose text is the LicenseRef file pyproject.toml declares beside LICENSE
+// (`MIT AND LicenseRef-EASA-ANP`).
+const softwareLicenses = [
+  'https://opensource.org/license/MIT',
+  `${repositoryUrl}/blob/main/LICENSES/LicenseRef-EASA-ANP.txt`,
+];
 const socialImage = {
   '@type': 'ImageObject',
   url: socialImageUrl,
@@ -425,7 +432,7 @@ const jsonLd = JSON.stringify({
       codeRepository: repositoryUrl,
       image: socialImage,
       screenshot: socialImage,
-      license: 'https://opensource.org/license/MIT',
+      license: softwareLicenses,
       isAccessibleForFree: true,
       identifier: {
         '@type': 'PropertyValue',
@@ -478,7 +485,7 @@ const jsonLd = JSON.stringify({
       codeRepository: repositoryUrl,
       programmingLanguage: 'Python',
       runtimePlatform: 'Windows, Linux, macOS',
-      license: 'https://opensource.org/license/MIT',
+      license: softwareLicenses,
       dateCreated,
       // Software Heritage keeps every visit of the repository under this one
       // address, so the code stays readable whatever becomes of GitHub.

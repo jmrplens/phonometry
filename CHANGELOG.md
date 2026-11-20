@@ -16,6 +16,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   files, and every address the site had retired before, in one hop to the
   page that replaced it. Links, bookmarks and citations that name the old
   address keep working.
+- **The package declares the licence of the data it bundles.** The EASA
+  Aircraft Noise and Performance (ANP) tables under
+  `phonometry/aircraft/data/anp/` keep EASA's terms, while 4.0.0 declared MIT
+  alone. The metadata now declares `MIT AND LicenseRef-EASA-ANP`, and the
+  wheel and the sdist carry `LICENSES/LicenseRef-EASA-ANP.txt`, the text of
+  those terms and the acknowledgement they ask for, as a licence file beside
+  `LICENSE`. The code is MIT as before, and the tables' terms are unchanged:
+  reproduction is authorised provided the source is acknowledged. The
+  provenance note beside the tables points to that file. The release refuses
+  a wheel or an sdist that does not declare both or does not carry both as
+  the repository holds them.
 
 ### Fixed
 

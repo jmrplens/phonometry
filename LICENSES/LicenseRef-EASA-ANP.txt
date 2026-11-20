@@ -1,0 +1,29 @@
+LicenseRef-EASA-ANP
+
+Applies to: the EASA/EUROCONTROL Aircraft Noise and Performance (ANP)
+database tables bundled with phonometry under
+src/phonometry/aircraft/data/anp/ (installed as phonometry/aircraft/data/anp/),
+namely the files ending in .csv in that directory. Everything else in
+phonometry is under the MIT licence in LICENSE.
+
+Source: EASA ANP database, archive version 2.3 (released 14 October 2020),
+published by the European Union Aviation Safety Agency at
+https://www.easa.europa.eu/en/domains/environment/policy-support-and-research/aircraft-noise-and-performance-anp-data
+
+Terms: the tables are reproduced under EASA's copyright notice,
+https://www.easa.europa.eu/en/copyright-disclaimer, which reads:
+
+    Reproduction is authorised, provided the source is acknowledged, save
+    where otherwise stated.
+
+The archive states no terms of its own, so that notice is the one that
+applies.
+
+Acknowledgement: the tables are the EASA/EUROCONTROL Aircraft Noise and
+Performance (ANP) database, archive version 2.3, developed by the aircraft
+manufacturers and reviewed by the US DOT Volpe Center, the US FAA, EASA and
+EUROCONTROL. Anyone who passes the tables on keeps this acknowledgement with
+them. The authoritative and complete dataset remains the one EASA publishes.
+
+The provenance of the tables, what each file holds and how phonometry reads
+them, is set out in src/phonometry/aircraft/data/anp/PROVENANCE.md.

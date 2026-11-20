@@ -1943,7 +1943,7 @@ See [sound levels](/phonometry/signals/levels/levels/) and the
 <a id="f77"></a>
 ### F77. Give every link a text that names where it goes, never a bare "here", "more" or "start"
 
-**Why.** Lighthouse's SEO audit "Links do not have descriptive text" fails a page that carries a link whose whole text is a word that names no destination, and a search engine and a screen reader both read a link by its text alone. The topic list above the sidebar linked the Start topic with the word "Start" on all 626 English pages, and PageSpeed Insights flagged the home page, with every check of the build green.
+**Why.** Lighthouse's SEO audit "Links do not have descriptive text" fails a page that carries a link whose whole text is a word that names no destination, and a search engine and a screen reader both read a link by its text alone. The topic list above the sidebar linked the Start topic with the word "Start" on every English page, and PageSpeed Insights flagged the home page, with every check of the build green.
 
 **Do**
 
@@ -1959,4 +1959,4 @@ To install phonometry, start [here](/start/getting-started/).
 
 **Enforced by:** `site/scripts/check-link-text.mjs`, `CI: docs.yml:build/link-text`, `site/scripts/check-link-text.test.mjs`, `CI: docs.yml:build/script-tests`
 
-**Exceptions.** The check reads only what Lighthouse reads: it leaves out a link with no address, a `javascript:` or `mailto:` link, a `rel="nofollow"` link and a link to a place on its own page, and the redirect stubs, which are no pages. It holds the English and the Spanish lists on every page, so a Spanish word in an English page fails too, and its test holds both lists to the ones in the installed Lighthouse. A label is read whole, so "Start here" and "Inicio" pass; the text is the one a reader sees, an icon's markup and the spacing around it left out.
+**Exceptions.** The check is Lighthouse's own audit, run on every page of the build in Chrome at the two form factors PageSpeed Insights reports, so what it leaves out is what Lighthouse leaves out: a link with no address, a `javascript:` or `mailto:` link, a `rel="nofollow"` link and a link to a place on its own page, and text the browser does not render, under the `hidden` attribute, hidden by a stylesheet at that width or in an SVG title. A link is held to the list of its own language, and to every list Lighthouse has when its language is not marked. The redirect stubs, which are no pages, are not read. A label is read whole, so "Start here" and "Inicio" pass.

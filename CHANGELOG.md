@@ -20,9 +20,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 - **Every link of the documentation names where it goes.** The topic list
   above the sidebar linked the Start topic with the word "Start" on every
   English page, which Lighthouse's SEO audit "Links do not have descriptive
-  text" fails; the topic is called "Start here" now. The site's build check
-  fails on any link whose whole text is a word that audit lists for English
-  or Spanish.
+  text" fails; the topic is called "Start here" now. A new check of the
+  site's build runs that audit itself, with Lighthouse's own code, on every
+  page in Chrome as a phone and as a desktop, and fails on a link it would
+  fail, leaving out the links the audit leaves out (same-page, `nofollow`,
+  `mailto:` and `javascript:` links, and text the browser does not show).
 
 ## [4.0.1] - 2026-11-20
 

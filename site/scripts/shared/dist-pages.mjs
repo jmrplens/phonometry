@@ -1,10 +1,9 @@
 // Shared plumbing for the checks that read the built HTML the way a crawler
 // does, with no browser and no server: check-crawl.mjs, which holds titles,
-// headings, head links, the sitemap and the links a page carries,
-// check-descriptions.mjs, which holds the meta descriptions, and
-// check-link-text.mjs, which holds the words of every link.
+// headings, head links, the sitemap and the links a page carries, and
+// check-descriptions.mjs, which holds the meta descriptions.
 //
-// All three walk the same build, skip the same redirect stubs, decode the same
+// Both walk the same build, skip the same redirect stubs, decode the same
 // entities and print the same ok/FAIL lines, so those live here once.
 import { readdirSync } from 'node:fs';
 import { join } from 'node:path';

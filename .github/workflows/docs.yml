@@ -296,6 +296,19 @@ jobs:
         # The tests of the build checks below need them.
         run: pnpm install --frozen-lockfile
         working-directory: site
+      - name: Install the browser the audits drive
+        # After the install, because this asks pnpm to run a binary the install
+        # is what puts there, and before the tests of the build checks, which
+        # drive the browser too: the link-text check's tests load their pages
+        # in it. Explicit, rather than left to puppeteer's own install script:
+        # since pnpm 10 a dependency's lifecycle scripts do not run unless
+        # they are allow-listed, so the download quietly stopped happening.
+        # Nothing failed at install time; the accessibility audit failed much
+        # later, on a page that was fine, with "Could not find Chrome". Asking
+        # for the browser in as many words cannot go quiet that way, whatever
+        # the package manager decides about scripts next.
+        run: pnpm exec puppeteer browsers install chrome
+        working-directory: site
       - name: Check the icon sheet is not stale
         # The sheet is the index of the site's own icons and the only place a
         # changed drawing is visible in a diff. It costs nothing to keep in
@@ -544,17 +557,6 @@ jobs:
       - name: Check the types of every page and component
         run: pnpm run check:types
         working-directory: site
-      - name: Install the browser the audits drive
-        # After the install, because this asks pnpm to run a binary the install
-        # is what puts there. Explicit, rather than left to puppeteer's own
-        # install script: since pnpm 10 a dependency's lifecycle scripts do not
-        # run unless they are allow-listed, so the download quietly stopped
-        # happening. Nothing failed at install time; the accessibility audit
-        # failed much later, on a page that was fine, with "Could not find
-        # Chrome". Asking for the browser in as many words cannot go quiet that
-        # way, whatever the package manager decides about scripts next.
-        run: pnpm exec puppeteer browsers install chrome
-        working-directory: site
       - name: Check no published address was left behind
         # Renaming a page changes its URL, and nothing here noticed: Astro does
         # not know an address used to exist and the link validator only reads
@@ -652,10 +654,11 @@ jobs:
         # Lighthouse's SEO audit fails a page with a link whose whole text is
         # a word that names no destination, "Start", "here" or "read more".
         # The topic list above the sidebar linked the Start topic with the
-        # word "Start" on all 626 English pages, and PageSpeed Insights
-        # flagged the home page, with this whole job green. This reads the
-        # build and fails on a link whose text is one of the words
-        # Lighthouse lists for English or Spanish.
+        # word "Start" on every English page, and PageSpeed Insights flagged
+        # the home page, with this whole job green. This loads every page in
+        # Chrome at the two form factors PageSpeed reports and runs
+        # Lighthouse's own link collection and link-text audit on it, so it
+        # fails a page exactly when PageSpeed would.
         run: pnpm run check:link-text
         working-directory: site
       - name: Check every page fits in what a search engine reads

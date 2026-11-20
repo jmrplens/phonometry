@@ -15,6 +15,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   readers to the new address of the upgrading guide, where 2.2.1 named the
   old host. It is still pinned below phonometry 4.
 
+### Fixed
+
+- **Every link of the documentation names where it goes.** The topic list
+  above the sidebar linked the Start topic with the word "Start" on every
+  English page, which Lighthouse's SEO audit "Links do not have descriptive
+  text" fails; the topic is called "Start here" now. The site's build check
+  fails on any link whose whole text is a word that audit lists for English
+  or Spanish.
+
 ## [4.0.1] - 2026-11-20
 
 ### Changed

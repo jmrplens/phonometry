@@ -11,6 +11,7 @@
     "check:descriptions": "node scripts/check-descriptions.mjs",
     "check:guides": "node scripts/check-guides-index.mjs",
     "check:i18n": "node scripts/check-i18n-parity.mjs",
+    "check:link-text": "node scripts/check-link-text.mjs",
     "check:icons": "node scripts/icon-sheet.mjs --check",
     "check:markdown-twins": "node scripts/check-markdown-twins.mjs",
     "check:markdown-writers": "node scripts/check-markdown-writers.mjs",

@@ -647,6 +647,17 @@ jobs:
         # characters or one another page of its language repeats.
         run: pnpm run check:descriptions
         working-directory: site
+      - name: Check every link names where it goes
+        id: link-text
+        # Lighthouse's SEO audit fails a page with a link whose whole text is
+        # a word that names no destination, "Start", "here" or "read more".
+        # The topic list above the sidebar linked the Start topic with the
+        # word "Start" on all 626 English pages, and PageSpeed Insights
+        # flagged the home page, with this whole job green. This reads the
+        # build and fails on a link whose text is one of the words
+        # Lighthouse lists for English or Spanish.
+        run: pnpm run check:link-text
+        working-directory: site
       - name: Check every page fits in what a search engine reads
         id: page-size
         # Googlebot fetches the first 2 MB of a page's HTML, uncompressed, and

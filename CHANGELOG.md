@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Changed
+
+- **The PyOctaveBand transition package moves to 2.2.2 and links the
+  documentation at <https://phonometry.dev/>.** Its PyPI page, its project
+  links and the `FutureWarning` that `import pyoctaveband` raises send
+  readers to the new address of the upgrading guide, where 2.2.1 named the
+  old host. It is still pinned below phonometry 4.
+
 ## [4.0.1] - 2026-11-20
 
 ### Changed

@@ -859,6 +859,13 @@ jobs:
       run_id: ${{ github.run_id }}
       attempt: ${{ needs.build.outputs.attempt }}
       apply_rules: true
+    # The two Cloudflare tokens are secrets of the environment the called job
+    # names, and a called workflow reads an environment secret only when the
+    # caller hands it by name: unnamed, it reads as an empty string, with no
+    # error. Named here, nothing else of this repository's secrets reaches it.
+    secrets:
+      CF_PHONOMETRY_DEPLOY_TOKEN: ${{ secrets.CF_PHONOMETRY_DEPLOY_TOKEN }}
+      CF_PHONOMETRY_RULES_TOKEN: ${{ secrets.CF_PHONOMETRY_RULES_TOKEN }}
 
   indexnow:
     name: Submit URLs to IndexNow

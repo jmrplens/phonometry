@@ -1285,8 +1285,9 @@ def test_every_build_that_publishes_is_deployed_to_phonometry_dev_by_its_own_run
     that publishes and never on a pull request, waits for the build, and
     hands it this run's id and the attempt the build ran in, so a re-run of
     the deploy alone takes the pages that build uploaded, as the Pages deploy
-    does. It passes no secrets: the Cloudflare tokens are secrets of the
-    environment the called job names, and nothing else reaches it. The
+    does. It names the two Cloudflare tokens, secrets of the environment the
+    called job names, which a called workflow reads only when the caller hands
+    them by name, and nothing else of the repository's secrets reaches it. The
     called workflow takes the same three inputs by hand as when called, and
     hands back the address it deployed, the moment the pages went out and
     the attempt it ran in, the three things the IndexNow job reads of a
@@ -1332,9 +1333,13 @@ def test_every_build_that_publishes_is_deployed_to_phonometry_dev_by_its_own_run
         "attempt": "${{ needs.build.outputs.attempt }}",
         "apply_rules": True,
     }
-    assert "secrets" not in caller, (
-        "the call hands the deploy secrets; the environment of the called job holds them"
-    )
+    # A called workflow reads an environment secret only when the caller
+    # names it (unnamed it is an empty string, with no error), so the call
+    # names the two Cloudflare tokens and nothing else, never `inherit`.
+    assert caller.get("secrets") == {
+        "CF_PHONOMETRY_DEPLOY_TOKEN": "${{ secrets.CF_PHONOMETRY_DEPLOY_TOKEN }}",
+        "CF_PHONOMETRY_RULES_TOKEN": "${{ secrets.CF_PHONOMETRY_RULES_TOKEN }}",
+    }, "the call must name the two Cloudflare tokens, and only them"
     assert caller.get("permissions") == {"contents": "read", "actions": "read"}
     assert not caller.get("continue-on-error")
 
@@ -1343,6 +1348,11 @@ def test_every_build_that_publishes_is_deployed_to_phonometry_dev_by_its_own_run
     assert set(triggers) == {"workflow_call", "workflow_dispatch"}, (
         "site-deploy.yml runs on something else than a call or a dispatch by hand"
     )
+    called_secrets = triggers["workflow_call"].get("secrets") or {}
+    assert {name: spec.get("required") for name, spec in called_secrets.items()} == {
+        "CF_PHONOMETRY_DEPLOY_TOKEN": True,
+        "CF_PHONOMETRY_RULES_TOKEN": True,
+    }, "a call must hand both Cloudflare tokens, or it would deploy with empty ones"
     called = triggers["workflow_call"]
     by_hand = triggers["workflow_dispatch"]
     inputs = {"run_id": "string", "attempt": "string", "apply_rules": "boolean"}

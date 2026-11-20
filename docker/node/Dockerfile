@@ -68,7 +68,7 @@ RUN pip install --no-cache-dir --no-deps cupy-cuda13x==14.2.0 cuda-pathfinder==1
 COPY src/phonometry/simulation/_remote/bootstrap.py /usr/local/share/phonometry-node/bootstrap.py
 COPY docker/node/Dockerfile /usr/local/share/phonometry-node/Dockerfile
 
-FROM ubuntu:24.04@sha256:fe81560990fae86dc4743202b2cb4d3df98d0bcf949173cecef15ce1127ef852 AS cpu
+FROM ubuntu:24.04@sha256:73b999393d07f2bf65a40373778a44dc9a6d54ad7718d29247d8ff9413c4d6a8 AS cpu
 ARG FFMPEG_URL
 ARG FFMPEG_SHA256
 ENV DEBIAN_FRONTEND=noninteractive PYTHONDONTWRITEBYTECODE=1

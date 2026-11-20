@@ -1,0 +1,68 @@
+name: Pages tombstone
+
+# The documentation lives at https://phonometry.dev/ and nothing deploys it to
+# GitHub Pages any more. The old project site stays published, because an
+# unpublished project would leave docs.jmrp.io/phonometry/ to the hub's 404 if
+# the redirect rule in front of it ever failed. What it publishes is replaced
+# here, once, by two copies of one page that sends the visitor to the same
+# path on phonometry.dev, so a failed rule can never bring the old pages back
+# as if they were current. Run it by hand from main; it changes nothing else.
+
+on:
+  workflow_dispatch:
+
+permissions: {}
+
+concurrency:
+  # The queue docs.yml used for its Pages deploys on main, so this never runs
+  # beside one of them.
+  group: pages-main
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    name: Publish the tombstone to GitHub Pages
+    runs-on: ubuntu-26.04
+    timeout-minutes: 10
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Write index.html and 404.html
+        run: |
+          set -euo pipefail
+          site="$RUNNER_TEMP/tombstone"
+          mkdir -p "$site"
+          # The project site answers under /phonometry/; the rest of the path
+          # is the page's path on phonometry.dev.
+          cat > "$site/index.html" <<'HTML'
+          <!doctype html>
+          <html lang="en">
+          <head>
+          <meta charset="utf-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1">
+          <meta name="robots" content="noindex">
+          <title>phonometry has moved to phonometry.dev</title>
+          <link rel="canonical" href="https://phonometry.dev/">
+          <script>
+          var rest = location.pathname.replace(/^\/(?:phonometry(?:\/|$))?/, "");
+          location.replace("https://phonometry.dev/" + rest + location.search + location.hash);
+          </script>
+          <noscript><meta http-equiv="refresh" content="0; url=https://phonometry.dev/"></noscript>
+          </head>
+          <body>
+          <p>The phonometry documentation now lives at <a href="https://phonometry.dev/">phonometry.dev</a>.</p>
+          </body>
+          </html>
+          HTML
+          cp "$site/index.html" "$site/404.html"
+
+      - uses: actions/upload-pages-artifact@v5
+        with:
+          path: ${{ runner.temp }}/tombstone
+
+      - id: deployment
+        uses: actions/deploy-pages@v5

@@ -35,7 +35,7 @@ release renames keeps working, with a `DeprecationWarning` that names its
 replacement, and goes only in the next major release
 ([rule A16](docs/contributing/api.md#a16) of the contributor guide). The step
 from 3.x to 4.x is the one that breaks, on purpose:
-[Upgrading from 3.3 to 4.0](https://docs.jmrp.io/phonometry/start/upgrading/)
+[Upgrading from 3.3 to 4.0](https://phonometry.dev/start/upgrading/)
 maps every 3.x name to its new home, and it also lists what changed after
 4.0.0rc1.
 

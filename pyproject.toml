@@ -188,9 +188,9 @@ full = [
 ]
 
 [project.urls]
-"Homepage" = "https://docs.jmrp.io/phonometry/"
+"Homepage" = "https://phonometry.dev/"
 "Author" = "https://jmrp.io/"
-"Documentation" = "https://docs.jmrp.io/phonometry/"
+"Documentation" = "https://phonometry.dev/"
 "Source" = "https://github.com/jmrplens/phonometry"
 "Changelog" = "https://github.com/jmrplens/phonometry/blob/main/CHANGELOG.md"
 "Bug Tracker" = "https://github.com/jmrplens/phonometry/issues"

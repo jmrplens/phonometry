@@ -7,7 +7,7 @@ import { dirname, join } from 'node:path';
 import { test } from 'node:test';
 
 import { fences } from '../src/lib/markdown-fences.mjs';
-import { ALLOWED, SCANNED, SITE, basePathFindings, basePathReport } from './base-path.mjs';
+import { ALLOWED, OUTSIDE, SCANNED, SITE, basePathFindings, basePathReport, outsideReport } from './base-path.mjs';
 
 /** A site folder with every path the check reads, the pages and astro.config.mjs empty. */
 function emptySite() {
@@ -142,4 +142,31 @@ test('either clip host the Worker README names is one edit of site-targets.json,
 	const optional = ALLOWED.filter((entry) => entry.optional);
 	assert.equal(optional.length, 1);
 	assert.equal(basePathFindings(`  ${optional[0].line}\n`, 'src/data/home-en.ts').length, 1, 'the fallback is allowed only in its file');
+});
+
+test('no repository file outside the site that names it writes the old host', () => {
+	const { files, findings } = outsideReport();
+	assert.ok(files >= OUTSIDE.length, `${files} files read`);
+	assert.deepEqual(findings, []);
+});
+
+test('outside the site the old host is found, and a bare /phonometry is not taken for a site link', () => {
+	const root = mkdtempSync(join(tmpdir(), 'base-path-outside-'));
+	const site = join(root, 'site');
+	mkdirSync(site);
+	plant(root, 'README.md', 'pip install phonometry\nSee https://docs.jmrp.io/phonometry/signals/ for more.\nsrc/phonometry/signals and /phonometry are paths.\n');
+	plant(root, 'pyproject.toml', '"Homepage" = "https://docs.jmrp.io/phonometry/"\n');
+	plant(root, '.github/ISSUE_TEMPLATE/config.yml', 'url: https://phonometry.dev/\n');
+	const report = outsideReport(site, ['../README.md', '../pyproject.toml', '../.github/ISSUE_TEMPLATE']);
+	assert.equal(report.files, 3);
+	assert.deepEqual(report.findings, [
+		{ file: 'README.md', line: 2, text: 'See https://docs.jmrp.io/phonometry/signals/ for more.' },
+		{ file: 'pyproject.toml', line: 1, text: '"Homepage" = "https://docs.jmrp.io/phonometry/"' },
+	]);
+});
+
+test('a file outside the site the check is meant to read and cannot find fails it', () => {
+	const root = mkdtempSync(join(tmpdir(), 'base-path-outside-'));
+	mkdirSync(join(root, 'site'));
+	assert.throws(() => outsideReport(join(root, 'site'), ['../SECURITY.md']), /SECURITY\.md/);
 });

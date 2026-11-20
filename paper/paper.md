@@ -49,9 +49,9 @@ numerical conformance checks across 111 domains, against 230 normative
 designations and 121 further published sources, on every change, and the
 per-check report (source and clause, expected value, computed value, delta,
 verdict) is published with the documentation
-(<https://docs.jmrp.io/phonometry/reference/conformance/>), alongside a
+(<https://phonometry.dev/reference/conformance/>), alongside a
 bibliography of every source the guides cite, standards included with their
-catalogue records (<https://docs.jmrp.io/phonometry/reference/bibliography/>).
+catalogue records (<https://phonometry.dev/reference/bibliography/>).
 A regression that moves a computed value outside a standard's acceptance limit
 fails the build, so the conformance claim cannot silently stop being true
 between releases. \autoref{fig:mask} shows one such check as the user sees it:

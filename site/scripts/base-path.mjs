@@ -28,6 +28,28 @@ export const SITE = fileURLToPath(new URL('..', import.meta.url));
  */
 export const SCANNED = Object.freeze(['src', 'astro.config.mjs']);
 
+/**
+ * The repository files outside the site that name it, from the site folder:
+ * the README and its PyPI copy, the security policy, the package metadata,
+ * the Zenodo record, the paper, the two hand-written pages of the GitHub
+ * edition and the issue and discussion templates. They link the site by its
+ * full address, so only the old host is looked for in them: `/phonometry`
+ * is no site link outside the site (`pip install phonometry`, a repository
+ * path), and a path of the site never starts there.
+ */
+export const OUTSIDE = Object.freeze([
+	'../README.md',
+	'../README_PYPI.md',
+	'../SECURITY.md',
+	'../pyproject.toml',
+	'../.zenodo.json',
+	'../paper/paper.md',
+	'../docs/README.md',
+	'../docs/reference/api/index.md',
+	'../.github/ISSUE_TEMPLATE',
+	'../.github/DISCUSSION_TEMPLATE',
+]);
+
 /** The files read: every text file a page, a data file or code can live in. */
 const TEXT = /\.(?:md|mdx|astro|ts|mjs|js|json|css|ya?ml|txt|html)$/;
 
@@ -133,12 +155,51 @@ export function basePathReport(site = SITE, allowed = ALLOWED) {
 	return { files: files.length, findings, stale };
 }
 
+/**
+ * The lines of the repository files outside the site that write the old host.
+ *
+ * @param {string} [site]
+ * @param {readonly string[]} [outside]
+ * @returns {{files: number, findings: {file: string, line: number, text: string}[]}} Paths from the repository root.
+ * @throws {Error} When a path of `outside` is not there.
+ */
+export function outsideReport(site = SITE, outside = OUTSIDE) {
+	const root = join(site, '..');
+	const files = [];
+	const walk = (dir) => {
+		for (const entry of readdirSync(dir, { withFileTypes: true })) {
+			const path = join(dir, entry.name);
+			if (entry.isDirectory()) walk(path);
+			else if (TEXT.test(entry.name) || entry.name.endsWith('.toml')) files.push(path);
+		}
+	};
+	for (const name of outside) {
+		const path = join(site, name);
+		if (!existsSync(path)) throw new Error(`scripts/base-path.mjs reads ${name}, which is not there: moved or renamed?`);
+		if (statSync(path).isDirectory()) walk(path);
+		else files.push(path);
+	}
+	const findings = [];
+	for (const path of files.sort()) {
+		const file = relative(root, path).split('\\').join('/');
+		readFileSync(path, 'utf8').split('\n').forEach((line, index) => {
+			if (OLD_HOST.test(line)) findings.push({ file, line: index + 1, text: line.trim() });
+		});
+	}
+	return { files: files.length, findings };
+}
+
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
 	const { files, findings, stale } = basePathReport();
+	const outside = outsideReport();
 	for (const { file, line, text } of findings) {
 		console.log(`::error file=site/${file},line=${line}::a site link with the old base path or host (docs/contributing F76): ${text}`);
 	}
+	for (const { file, line, text } of outside.findings) {
+		console.log(`::error file=${file},line=${line}::a link to the old host of the site (docs/contributing F76): ${text}`);
+	}
 	for (const entry of stale) console.log(`::error::an allowance of scripts/base-path.mjs excuses no line any more: ${entry}`);
 	console.log(`${files} files read (${SCANNED.join(', ')}): ${findings.length} finding(s), ${stale.length} stale allowance(s)`);
-	process.exit(findings.length + stale.length === 0 && files > 0 ? 0 : 1);
+	console.log(`${outside.files} files read outside the site: ${outside.findings.length} finding(s)`);
+	process.exit(findings.length + outside.findings.length + stale.length === 0 && files > 0 && outside.files > 0 ? 0 : 1);
 }

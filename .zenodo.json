@@ -73,7 +73,7 @@
     },
     {
       "relation": "isDocumentedBy",
-      "identifier": "https://docs.jmrp.io/phonometry/"
+      "identifier": "https://phonometry.dev/"
     }
   ]
 }

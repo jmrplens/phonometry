@@ -64,6 +64,14 @@ on:
       - "CHANGELOG.md"
       - "CITATION.cff"
       - ".zenodo.json"
+      # The repository files outside the site that name it by its address,
+      # which scripts/base-path.mjs reads for the old host (F76).
+      - "README.md"
+      - "README_PYPI.md"
+      - "SECURITY.md"
+      - "paper/paper.md"
+      - ".github/ISSUE_TEMPLATE/**"
+      - ".github/DISCUSSION_TEMPLATE/**"
       - ".github/workflows/docs.yml"
       # A re-rendered clip changes nothing here but this one line, and the
       # site has to be rebuilt to serve it.
@@ -96,6 +104,14 @@ on:
       - "CHANGELOG.md"
       - "CITATION.cff"
       - ".zenodo.json"
+      # The repository files outside the site that name it by its address,
+      # which scripts/base-path.mjs reads for the old host (F76).
+      - "README.md"
+      - "README_PYPI.md"
+      - "SECURITY.md"
+      - "paper/paper.md"
+      - ".github/ISSUE_TEMPLATE/**"
+      - ".github/DISCUSSION_TEMPLATE/**"
       - ".github/workflows/docs.yml"
       # A re-rendered clip changes nothing here but this one line, and the
       # site has to be rebuilt to serve it.

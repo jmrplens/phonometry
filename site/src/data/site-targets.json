@@ -1,0 +1,10 @@
+{
+  "default": "docs.jmrp.io",
+  "targets": {
+    "docs.jmrp.io": { "siteUrl": "https://docs.jmrp.io", "basePath": "/phonometry" },
+    "phonometry.dev": { "siteUrl": "https://phonometry.dev", "basePath": "/phonometry" }
+  },
+  "legacy": [],
+  "mediaOrigins": ["https://docs.jmrp.io"],
+  "clipBase": "https://docs.jmrp.io/phonometry/media/"
+}

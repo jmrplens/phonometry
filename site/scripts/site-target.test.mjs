@@ -1,4 +1,6 @@
-// PHONOMETRY_SITE: which host the build is made for, with closed values.
+// PHONOMETRY_SITE: which host the build is made for, with closed values,
+// read from src/data/site-targets.json (scripts/site_target.py reads the same
+// file for the Python generators, tests/test_site_target.py holds that side).
 //
 // Unset, the build is the one docs.jmrp.io serves, byte for byte; the
 // phonometry.dev preview builds with PHONOMETRY_SITE=phonometry.dev; anything
@@ -6,10 +8,21 @@
 // whose canonical URLs name a host nobody serves.
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
+import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { test } from 'node:test';
 
-import { SITE_TARGETS, basePath, siteTarget, siteUrl } from '../src/data/site.mjs';
+import {
+	DEFAULT_SITE,
+	LEGACY_ORIGINS,
+	SITE_TARGETS,
+	basePath,
+	checkedTarget,
+	clipBase,
+	mediaOrigins,
+	siteTarget,
+	siteUrl,
+} from '../src/data/site.mjs';
 
 const SITE = fileURLToPath(new URL('../src/data/site.mjs', import.meta.url));
 
@@ -47,4 +60,34 @@ test('the table is closed and frozen, and this process reads it like the others'
 	assert.ok(Object.isFrozen(SITE_TARGETS));
 	for (const target of Object.values(SITE_TARGETS)) assert.ok(Object.isFrozen(target));
 	assert.deepEqual([siteUrl, basePath], readWith(process.env.PHONOMETRY_SITE));
+});
+
+test('every value comes from site-targets.json, the file the Python generators read too', () => {
+	const file = JSON.parse(readFileSync(new URL('../src/data/site-targets.json', import.meta.url), 'utf8'));
+	assert.deepEqual(SITE_TARGETS, file.targets);
+	assert.equal(DEFAULT_SITE, file.default);
+	assert.deepEqual(LEGACY_ORIGINS, file.legacy);
+	assert.deepEqual(mediaOrigins, file.mediaOrigins);
+	assert.equal(clipBase, file.clipBase);
+	assert.ok(Object.isFrozen(LEGACY_ORIGINS) && LEGACY_ORIGINS.every(Object.isFrozen));
+	assert.ok(Object.isFrozen(mediaOrigins));
+});
+
+test('the clip host is one the pages allow', () => {
+	assert.ok(mediaOrigins.includes(new URL(clipBase).origin), `${clipBase} is not under ${mediaOrigins.join(', ')}`);
+});
+
+test('a target is an https origin and a base path every reader can append a route to', () => {
+	assert.deepEqual(checkedTarget({ siteUrl: 'https://example.org', basePath: '' }, 't'), { siteUrl: 'https://example.org', basePath: '' });
+	assert.deepEqual(checkedTarget({ siteUrl: 'https://example.org', basePath: '/a/b-c' }, 't'), { siteUrl: 'https://example.org', basePath: '/a/b-c' });
+	assert.ok(Object.isFrozen(checkedTarget({ siteUrl: 'https://example.org', basePath: '' }, 't')));
+	// A port is refused here and by scripts/site_target.py alike (its test
+	// holds the same case): every reader joins a host and a path, and none
+	// of them carries a port.
+	for (const siteUrl of ['http://example.org', 'https://example.org/', 'https://example.org/docs', 'https://example.org:8443', 'example.org', 42]) {
+		assert.throws(() => checkedTarget({ siteUrl, basePath: '' }, 't'), /the t siteUrl .* is not an https origin/, String(siteUrl));
+	}
+	for (const base of ['/', 'docs', '/docs/', '/Docs', undefined]) {
+		assert.throws(() => checkedTarget({ siteUrl: 'https://example.org', basePath: base }, 't'), /the t basePath .* is neither empty nor \/segment/, String(base));
+	}
 });

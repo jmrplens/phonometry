@@ -14,10 +14,13 @@ import { readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import { siteUrl } from '../src/data/site.mjs';
+import { DEFAULT_SITE, SITE_TARGETS, siteUrl } from '../src/data/site.mjs';
 
-/** The origin public/ is written for. */
-export const CANONICAL_ORIGIN = 'https://docs.jmrp.io';
+/**
+ * The origin public/ is written for: that of the build made with nothing set
+ * (scripts/public-files.test.mjs holds the files to it).
+ */
+export const CANONICAL_ORIGIN = SITE_TARGETS[DEFAULT_SITE].siteUrl;
 
 /** The files of public/ that name it, as dist/ holds them. */
 export const ORIGIN_FILES = Object.freeze(['robots.txt', 'sitemap.xml']);

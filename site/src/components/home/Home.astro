@@ -14,15 +14,17 @@
  * a mock-up.
  */
 import PhIcon from '../PhIcon.astro';
+import { basePath } from '../../data/site.mjs';
 import { topics } from '../../data/topics.mjs';
 
 /**
  * The area rows carry the same drawing the sidebar gives that topic, matched
- * on the route the row links to: the landing names every topic that teaches,
- * and a reader who meets a drawing here meets it again in the tree.
+ * on the route the row links to (the href less the base path the site is
+ * served under): the landing names every topic that teaches, and a reader who
+ * meets a drawing here meets it again in the tree.
  */
 const topicIdOf = (href: string) => {
-  const route = href.replace(/^\/phonometry/, '');
+  const route = href.startsWith(`${basePath}/`) ? href.slice(basePath.length) : href;
   return topics.find((topic) => topic.link === route)?.id ?? '';
 };
 

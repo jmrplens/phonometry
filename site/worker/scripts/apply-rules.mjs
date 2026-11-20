@@ -30,16 +30,40 @@ import { join } from 'node:path';
 import { parseArgs } from 'node:util';
 import { fileURLToPath } from 'node:url';
 
-import { basePath, mediaOrigins } from '../../src/data/site.mjs';
+import { LEGACY_ORIGINS, basePath, clipBase, mediaOrigins } from '../../src/data/site.mjs';
 import { CloudflareError, ZONE_ID, cfApi, ignoredTargets } from '../lib/cloudflare.mjs';
 import { GUARD_RULE_REF } from '../lib/guard.mjs';
+import { SERVED_ORIGIN } from '../lib/staging.mjs';
 import { firewallRules, rateLimitRules, redirectRules, responseHeaderRules } from '../lib/rules.mjs';
 import { ruleDrift } from '../lib/rulesets.mjs';
 import { twinExclusions } from '../lib/twins.mjs';
 
-export const HOST = 'phonometry.dev';
-/** Until the R2 bucket serves the clips, docs.jmrp.io does: it answers ranges with 206. */
-export const CLIP_BASE = 'https://docs.jmrp.io/phonometry/media/';
+/** The zone the rules belong to: the host the Worker serves. */
+export const HOST = new URL(SERVED_ORIGIN).host;
+/**
+ * Where a clip goes: a host that answers ranges with 206, `clipBase` in
+ * site/src/data/site-targets.json beside the `mediaOrigins` the pages allow.
+ */
+export const CLIP_BASE = clipBase;
+
+/**
+ * The base path the site was served under before: the one every legacy
+ * origin of site-targets.json served it under (the preview on this host
+ * served the same /phonometry/ as docs.jmrp.io), or `` while there is none.
+ * At the root, lib/rules.mjs sends an address under it to the same path
+ * there.
+ *
+ * @param {readonly {basePath: string}[]} origins The legacy origins.
+ * @returns {string} The base path, or ``.
+ * @throws {Error} When the legacy origins served the site under different base paths.
+ */
+export function legacyPrefixOf(origins) {
+	const bases = [...new Set(origins.map((origin) => origin.basePath).filter((base) => base !== ''))];
+	if (bases.length > 1) throw new Error(`the legacy origins served the site under ${bases.join(' and ')}; one rule pair covers one base path`);
+	return bases[0] ?? '';
+}
+
+export const LEGACY_PREFIX = legacyPrefixOf(LEGACY_ORIGINS);
 
 /**
  * Refuses a clip host the pages do not allow.
@@ -73,10 +97,10 @@ export function checkClipBase(clipBase) {
 }
 
 /** The two phases and the rules each takes. */
-export function generatedPhases({ clipBase = CLIP_BASE, prefix = basePath } = {}) {
+export function generatedPhases({ clipBase = CLIP_BASE, prefix = basePath, legacyPrefix = LEGACY_PREFIX } = {}) {
 	checkClipBase(clipBase);
 	return [
-		{ phase: 'http_request_dynamic_redirect', rules: redirectRules({ host: HOST, prefix, exclusions: twinExclusions(prefix), clipBase }) },
+		{ phase: 'http_request_dynamic_redirect', rules: redirectRules({ host: HOST, prefix, exclusions: twinExclusions(prefix), clipBase, legacyPrefix }) },
 		{ phase: 'http_response_headers_transform', rules: responseHeaderRules({ host: HOST, prefix }) },
 	];
 }

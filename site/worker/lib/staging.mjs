@@ -14,7 +14,7 @@
 import { cpSync, existsSync, mkdirSync, readFileSync, readdirSync, statSync, writeFileSync } from 'node:fs';
 import { join, relative, sep } from 'node:path';
 
-import { mediaOrigins } from '../../src/data/site.mjs';
+import { DEFAULT_SITE, SITE_TARGETS, mediaOrigins } from '../../src/data/site.mjs';
 import { agentPaths, runsWorker } from './agent-paths.mjs';
 import { beaconScript } from './beacon.mjs';
 import { headersFile, parseHeaders, HEADER_LINE_LIMIT, HEADER_RULE_LIMIT } from './headers.mjs';
@@ -128,6 +128,47 @@ export function exclusionProblems(noTwin, pages, exclusions) {
 		if (!without.has(page)) problems.push(`${page} has a Markdown copy, or no page, but is excluded (lib/twins.mjs)`);
 	}
 	return problems;
+}
+
+/** The origin this Worker serves: the zone the routes of wrangler.jsonc name. */
+export const SERVED_ORIGIN = 'https://phonometry.dev';
+
+/**
+ * The canonical site: the origin of the target a build with PHONOMETRY_SITE
+ * unset is made for (src/data/site-targets.json).
+ */
+export const CANONICAL_ORIGIN = SITE_TARGETS[DEFAULT_SITE].siteUrl;
+
+/**
+ * Whether the staged build drops the noindex every response carries: exactly
+ * when the build names the host it is served on as canonical and that host is
+ * the canonical site. A build made for another host stays noindex wherever it
+ * is served, so a copy never competes with its canonical; so does a build made
+ * for this host while another host is the canonical site, since it is a second
+ * copy of that site under another name. Once this host is the canonical site,
+ * a build made for it is the site, and a forgotten flag cannot ship it telling
+ * crawlers not to index it.
+ *
+ * @param {string | null} built The origin the build names as canonical (buildOrigin), null when it names none.
+ * @param {boolean} asked Whether --indexable was passed, which now only states what is expected.
+ * @param {string} canonical The canonical site's origin (CANONICAL_ORIGIN).
+ * @returns {boolean} True when the noindex goes.
+ * @throws {Error} When --indexable is passed for a build that would stay noindex.
+ */
+export function indexableBuild(built, asked, canonical) {
+	if (asked && built !== SERVED_ORIGIN) {
+		throw new Error(
+			`--indexable is refused: the build names ${built ?? 'no canonical origin'} as canonical, not ${SERVED_ORIGIN}, ` +
+				'and served here without the noindex it would compete with the site it names',
+		);
+	}
+	if (asked && canonical !== SERVED_ORIGIN) {
+		throw new Error(
+			`--indexable is refused: the canonical site is ${canonical}, not ${SERVED_ORIGIN} ` +
+				'(the default target of site-targets.json), and served here without the noindex this build would compete with it',
+		);
+	}
+	return built === SERVED_ORIGIN && canonical === SERVED_ORIGIN;
 }
 
 /**

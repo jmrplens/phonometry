@@ -11,8 +11,9 @@ import { dirname, join } from 'node:path';
 import { test } from 'node:test';
 
 import { checkCopiesAgainstSources } from '../../../../scripts/check-markdown-twins.mjs';
+import { basePath as SITE_BASE, siteUrl as SITE_ORIGIN } from '../../../data/site.mjs';
 
-const SITE = 'https://docs.jmrp.io/phonometry';
+const SITE = `${SITE_ORIGIN}${SITE_BASE}`;
 const SOURCE = [
   '---',
   'title: "A guide"',
@@ -39,7 +40,7 @@ const SOURCE = [
 const COPY = [
   '# A guide',
   '',
-  'Canonical: https://docs.jmrp.io/phonometry/signals/guide/',
+  `Canonical: ${SITE_ORIGIN}${SITE_BASE}/signals/guide/`,
   '',
   'Some text.',
   '',
@@ -102,9 +103,9 @@ test("the bibliography's copy holds one entry per entry its built page lists", a
   const root = mkdtempSync(join(tmpdir(), 'source-copies-'));
   t.after(() => rmSync(root, { recursive: true, force: true }));
   mkdirSync(join(root, 'dist', 'reference', 'bibliography'), { recursive: true });
-  const items = '<li id="std-iso-1">ISO 1. <span data-cited-by>Cited by <a href="/phonometry/a/">A</a></span></li>'.repeat(2);
+  const items = `<li id="std-iso-1">ISO 1. <span data-cited-by>Cited by <a href="${SITE_BASE}/a/">A</a></span></li>`.repeat(2);
   writeFileSync(join(root, 'dist', 'reference', 'bibliography', 'index.html'), `<main><ul>${items}</ul></main>`);
-  const entry = '- ISO 1. Cited by [A](https://docs.jmrp.io/phonometry/a/).\n';
+  const entry = `- ISO 1. Cited by [A](${SITE_ORIGIN}${SITE_BASE}/a/).\n`;
   writeFileSync(join(root, 'dist', 'reference', 'bibliography', 'index.md'), `# Bibliography\n\n${entry}`);
   const found = await checkCopiesAgainstSources(join(root, 'dist'), { contentDir: join(root, 'content'), routes: [] });
   assert.equal(found.length, 1, JSON.stringify(found));

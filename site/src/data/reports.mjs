@@ -38,6 +38,7 @@ import { fileURLToPath } from 'node:url';
 
 import { pageMarkup } from '../../scripts/shared/markdown-spans.mjs';
 import { readCommittedText } from '../lib/line-ends.mjs';
+import { basePath } from './site.mjs';
 
 /** The repository root, found the way `repo-stats.mjs` finds it. */
 function findRoot() {
@@ -87,10 +88,10 @@ function areaOf(path) {
   return area.endsWith('.mdx') ? area.replace(/\.mdx$/, '') : area;
 }
 
-/** The site path of a guide, as its URL is built. */
+/** The site path of a guide, under the base path the site is served at, as its URL is built. */
 function hrefOf(path) {
   const slug = relative(DOCS, path).replace(/\.mdx$/, '').split(sep).join('/');
-  return `/phonometry/${slug.replace(/\/index$/, '')}/`;
+  return `${basePath}/${slug.replace(/\/index$/, '')}/`;
 }
 
 /**

@@ -6,7 +6,14 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import test from 'node:test';
 
-import { cloudflareItems, copyOf, retiredAddresses, retiredShards } from './cloudflare-redirects.mjs';
+import { cloudflareItems, copyOf, legacyItems, redirectPairs, retiredAddresses, retiredShards } from './cloudflare-redirects.mjs';
+import { basePath, siteUrl } from '../src/data/site.mjs';
+
+// The site the fixtures are written for, named rather than read from the
+// build, so they hold whatever site the build is made for.
+const docs = { target: { siteUrl: 'https://docs.jmrp.io', basePath: '/phonometry' } };
+const legacy = { siteUrl: 'https://docs.jmrp.io', basePath: '/phonometry' };
+const root = { siteUrl: 'https://phonometry.dev', basePath: '' };
 
 const record = (content) => {
 	const file = join(mkdtempSync(join(tmpdir(), 'llms-shards-')), 'llms-shards.json');
@@ -15,7 +22,7 @@ const record = (content) => {
 };
 
 test('a retired page answers in both spellings, and its Markdown copy leads to the copy of the page it moved to', () => {
-	const addresses = retiredAddresses({ '/guides/levels/': '/phonometry/signals/levels/levels/' }, {});
+	const addresses = retiredAddresses({ '/guides/levels/': '/phonometry/signals/levels/levels/' }, {}, docs);
 	assert.deepEqual(Object.fromEntries(addresses), {
 		'docs.jmrp.io/phonometry/guides/levels/': 'https://docs.jmrp.io/phonometry/signals/levels/levels/',
 		'docs.jmrp.io/phonometry/guides/levels': 'https://docs.jmrp.io/phonometry/signals/levels/levels/',
@@ -24,9 +31,9 @@ test('a retired page answers in both spellings, and its Markdown copy leads to t
 });
 
 test('a retired Spanish API page leads its copy to the English copy, the only one there is', () => {
-	assert.equal(copyOf('/phonometry/es/reference/api/building/facade/'), '/phonometry/reference/api/building/facade/index.md');
-	assert.equal(copyOf('/phonometry/es/start/about/'), '/phonometry/es/start/about/index.md');
-	const addresses = retiredAddresses({ '/es/reference/api/building/fa/': '/phonometry/es/reference/api/building/facade/' }, {});
+	assert.equal(copyOf('/phonometry/es/reference/api/building/facade/', '/phonometry'), '/phonometry/reference/api/building/facade/index.md');
+	assert.equal(copyOf('/phonometry/es/start/about/', '/phonometry'), '/phonometry/es/start/about/index.md');
+	const addresses = retiredAddresses({ '/es/reference/api/building/fa/': '/phonometry/es/reference/api/building/facade/' }, {}, docs);
 	assert.equal(
 		addresses.get('docs.jmrp.io/phonometry/es/reference/api/building/fa/index.md'),
 		'https://docs.jmrp.io/phonometry/reference/api/building/facade/index.md',
@@ -34,14 +41,14 @@ test('a retired Spanish API page leads its copy to the English copy, the only on
 });
 
 test('a retired llms shard name answers with the file that now carries its first page', () => {
-	const addresses = retiredAddresses({}, { simulation: 'simulation-1' });
+	const addresses = retiredAddresses({}, { simulation: 'simulation-1' }, docs);
 	assert.deepEqual(Object.fromEntries(addresses), {
 		'docs.jmrp.io/phonometry/llms/llms-simulation.txt': 'https://docs.jmrp.io/phonometry/llms/llms-simulation-1.txt',
 	});
 });
 
 test('every item is a 301 that keeps the query and matches its source alone', () => {
-	const items = cloudflareItems({ '/about/': '/phonometry/start/about/' }, { theory: 'theory-1' });
+	const items = cloudflareItems({ '/about/': '/phonometry/start/about/' }, { theory: 'theory-1' }, docs);
 	assert.equal(items.length, 4);
 	for (const { redirect } of items) {
 		assert.equal(redirect.status_code, 301);
@@ -70,5 +77,39 @@ test('a record of shard names of another shape stops the list', () => {
 });
 
 test('an address retired twice stops the list', () => {
-	assert.throws(() => retiredAddresses({ '/a/': '/phonometry/b/', '/a': '/phonometry/c/' }, {}), /is retired twice/);
+	assert.throws(() => retiredAddresses({ '/a/': '/phonometry/b/', '/a': '/phonometry/c/' }, {}, docs), /is retired twice/);
+});
+
+test('an address the old site retired goes straight to its page on the current site, in one hop', () => {
+	const items = legacyItems(legacy, { '/guides/levels/': '/signals/levels/levels/', '/es/reference/api/building/fa/': '/es/reference/api/building/facade/' }, { simulation: 'simulation-1' }, root);
+	assert.deepEqual(
+		Object.fromEntries(items.map(({ redirect }) => [redirect.source_url, redirect.target_url])),
+		{
+			'docs.jmrp.io/phonometry/guides/levels/': 'https://phonometry.dev/signals/levels/levels/',
+			'docs.jmrp.io/phonometry/guides/levels': 'https://phonometry.dev/signals/levels/levels/',
+			'docs.jmrp.io/phonometry/es/reference/api/building/fa/': 'https://phonometry.dev/es/reference/api/building/facade/',
+			'docs.jmrp.io/phonometry/es/reference/api/building/fa': 'https://phonometry.dev/es/reference/api/building/facade/',
+			'docs.jmrp.io/phonometry/guides/levels/index.md': 'https://phonometry.dev/signals/levels/levels/index.md',
+			'docs.jmrp.io/phonometry/es/reference/api/building/fa/index.md': 'https://phonometry.dev/reference/api/building/facade/index.md',
+			'docs.jmrp.io/phonometry/llms/llms-simulation.txt': 'https://phonometry.dev/llms/llms-simulation-1.txt',
+		},
+	);
+	for (const { redirect } of items) {
+		assert.equal(redirect.status_code, 301);
+		assert.equal(redirect.preserve_query_string, true);
+	}
+});
+
+test("the build's own list and _redirects pairs answer on the site the build is made for", () => {
+	const host = new URL(siteUrl).host;
+	const items = cloudflareItems();
+	assert.ok(items.length > 0);
+	for (const { redirect } of items) {
+		assert.ok(redirect.source_url.startsWith(`${host}${basePath}/`), redirect.source_url);
+		assert.ok(redirect.target_url.startsWith(`${siteUrl}${basePath}/`), redirect.target_url);
+	}
+	assert.deepEqual(
+		redirectPairs().map(({ from, to }) => [`${host}${from}`, `${siteUrl}${to}`]),
+		items.map(({ redirect }) => [redirect.source_url, redirect.target_url]),
+	);
 });

@@ -102,10 +102,10 @@ test('the guard: a cron every 15 minutes, no route, no binding, dry run until to
 	for (const key of [...CODE_KEYS.filter((key) => key !== 'triggers' && key !== 'vars'), 'assets', 'analytics_engine_datasets', 'ratelimits']) assert.equal(key in guard, false, `guard sets ${key}`);
 });
 
-test('the base path the Worker and its patterns assume is the site\'s', async () => {
+test('the base path the Worker and its patterns assume is the one the deploy stages', async () => {
 	// The Worker refuses a 404-page beacon at agentPaths(BASE_PATH), and the
-	// staged 404 page skips the same list built from site.basePath.
+	// staged 404 page skips the same list built from site.basePath. The deploy
+	// stages the build made with nothing set, whose target the Worker reads.
 	const site = await import('../../src/data/site.mjs');
-	assert.equal(site.basePath, BASE_PATH);
-	assert.equal(BASE_PATH, '/phonometry');
+	assert.equal(BASE_PATH, site.SITE_TARGETS[site.DEFAULT_SITE].basePath);
 });

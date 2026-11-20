@@ -35,6 +35,7 @@ sys.path.insert(0, str(ROOT / "scripts"))
 
 import generate_llms as llms
 import generate_site_reports as site_reports
+import site_target
 import yaml
 
 if TYPE_CHECKING:
@@ -672,9 +673,10 @@ def test_the_index_says_a_pre_release_is_not_on_pypi_yet_and_nothing_at_the_stam
 def test_the_site_url_follows_phonometry_site_as_the_site_build_does() -> None:
     """The llms files name the host the site was built for, from the same closed table.
 
-    ``PHONOMETRY_SITE`` picks the host in ``site/src/data/site.mjs`` and here,
-    so the llms files a phonometry.dev build publishes link phonometry.dev
-    pages; unset, both name docs.jmrp.io; any other value stops the run.
+    ``PHONOMETRY_SITE`` picks the host in ``site/src/data/site-targets.json``,
+    which the site build reads too, so the llms files a phonometry.dev build
+    publishes link phonometry.dev pages; unset, both name docs.jmrp.io; any
+    other value stops the run.
     """
     assert llms.site_url(None) == "https://docs.jmrp.io/phonometry"
     assert llms.site_url("") == "https://docs.jmrp.io/phonometry"
@@ -684,14 +686,117 @@ def test_the_site_url_follows_phonometry_site_as_the_site_build_does() -> None:
         SystemExit, match=r"PHONOMETRY_SITE=phonometry\.org is not one of"
     ):
         llms.site_url("phonometry.org")
-    site = (llms.ROOT / "site" / "src" / "data" / "site.mjs").read_text(
-        encoding="utf-8"
+    table = json.loads(site_target.TARGETS.read_text(encoding="utf-8"))
+    for name, target in table["targets"].items():
+        assert llms.site_url(name) == f"{target['siteUrl']}{target['basePath']}"
+
+
+def test_the_guide_order_reads_the_links_the_pages_write() -> None:
+    """The reading order of an area comes from the links its overview writes.
+
+    A link in the source carries the base path the pages are written under,
+    and one in a copy the site the run links; a route named in prose or in
+    code is no link. When the pattern reads none of an overview's links (a
+    base path it lags), the run stops instead of listing the guides in
+    sorted order.
+    """
+    base, site = llms.SITE_BASE, llms.SITE_URL
+    text = (
+        f"Read [B]({base}/signals/b/) first, then [A]({site}/signals/a/#x); "
+        f"the path `{base}/signals/c/` and {base}/signals/d/ are no links."
     )
-    targets = {
-        name: f"{url}{base}"
-        for name, url, base in re.findall(
-            r"'([^']+)': Object\.freeze\(\{ siteUrl: '([^']+)', basePath: '([^']*)' \}\)",
-            site,
-        )
+    assert llms._linked(text, ["signals/a", "signals/b", "signals/c", "signals/d"]) == [
+        "signals/b",
+        "signals/a",
+    ]
+    assert llms._linked(f"[A]({base}/other/a/)", ["signals/a"]) == []
+
+
+def test_an_overview_whose_links_name_no_guide_stops_the_run(tmp_path: Path) -> None:
+    """An overview none of whose links names a page of its area fails loudly.
+
+    Matching the pattern is not enough: at the root the base is empty, and
+    every root-relative link matches, a stale one too. What the reading order
+    needs is a link that names a guide or a subgroup, so that is what the run
+    asks for, and a link to no such page stops it at any base.
+    """
+    overview = tmp_path / "index.md"
+    candidates = {"signals/a", "signals/metrology"}
+    overview.write_text(
+        f"[A]({llms.SITE_BASE}/no-such-area/a/) and [B](/somewhere-else/signals/a/)\n",
+        encoding="utf-8",
+    )
+    with pytest.raises(SystemExit, match=r"index\.md links no guide of its area by"):
+        llms._require_site_links(overview, candidates)
+    overview.write_text(
+        f"![Diagram]({llms.SITE_BASE}/signals/a/diagram.svg)\n", encoding="utf-8"
+    )
+    with pytest.raises(SystemExit, match=r"index\.md links no guide of its area by"):
+        llms._require_site_links(overview, candidates)
+    overview.write_text(f"[A]({llms.SITE_BASE}/signals/a/)\n", encoding="utf-8")
+    llms._require_site_links(overview, candidates)
+    overview.write_text(
+        f'[A]({llms.SITE_BASE}/signals/a/#levels "Levels")\n', encoding="utf-8"
+    )
+    llms._require_site_links(overview, candidates)
+    overview.write_text(f"[M]({llms.SITE_URL}/signals/metrology/)\n", encoding="utf-8")
+    llms._require_site_links(overview, candidates)
+
+
+def test_an_overview_linking_only_another_areas_guide_stops_the_run(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """A link to a guide of another area is no link of the overview's own area.
+
+    An overview cross-references guides elsewhere, and those links say nothing
+    about its own reading order: one whose only link names a guide of another
+    area would let its area fall back to sorted order without a word, so the
+    run stops on it as it does on an overview that links nothing.
+    """
+    base = llms.SITE_BASE
+    pages = {
+        "signals/index.md": f"See [rooms]({base}/buildings/rooms/room-acoustics/).\n",
+        "signals/a.md": "",
+        "buildings/index.md": f"Start with [rooms]({base}/buildings/rooms/).\n",
+        "buildings/rooms/index.md": "",
+        "buildings/rooms/room-acoustics.md": "",
     }
-    assert targets == dict(llms.SITE_TARGETS)
+    for name, text in pages.items():
+        (tmp_path / name).parent.mkdir(parents=True, exist_ok=True)
+        (tmp_path / name).write_text(text, encoding="utf-8")
+    monkeypatch.setattr(llms, "CONTENT", tmp_path)
+    monkeypatch.setattr(
+        llms, "AREAS", (("signals", "Signals"), ("buildings", "Buildings"))
+    )
+    with pytest.raises(
+        SystemExit, match=r"signals[\\/]index\.md links no guide of its area"
+    ):
+        llms._area_members()
+    (tmp_path / "signals/index.md").write_text(
+        f"Read [A]({base}/signals/a/), then [rooms]({base}/buildings/rooms/room-acoustics/).\n",
+        encoding="utf-8",
+    )
+    assert llms._area_members() == {
+        "signals": ["signals/a"],
+        "buildings": ["buildings/rooms/room-acoustics"],
+    }
+
+
+def test_at_the_root_a_link_under_the_old_base_stops_the_run(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """With the pages served at the root, a link left under the old base fails loudly.
+
+    The pattern built from an empty base reads ``](/phonometry/signals/a/)`` as
+    the route ``phonometry/signals/a``, which names no guide, so the run stops
+    instead of listing the area in sorted order.
+    """
+    monkeypatch.setattr(
+        llms, "_SITE_LINK", llms._site_link("https://phonometry.dev", "")
+    )
+    overview = tmp_path / "index.md"
+    overview.write_text("[A](/phonometry/signals/a/)\n", encoding="utf-8")
+    with pytest.raises(SystemExit, match=r"links no guide of its area"):
+        llms._require_site_links(overview, {"signals/a"})
+    overview.write_text("[A](/signals/a/)\n", encoding="utf-8")
+    llms._require_site_links(overview, {"signals/a"})

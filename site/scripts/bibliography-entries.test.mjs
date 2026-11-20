@@ -38,6 +38,7 @@ import {
 } from '../src/lib/bibliography-entries.mjs';
 import { remarkBibliography, withBibliographyLists } from '../src/lib/remark-bibliography.mjs';
 import { printed } from './shared/markdown-reader.mjs';
+import { basePath as SITE_BASE } from '../src/data/site.mjs';
 
 const EN = 'https://example.org/docs/reference/bibliography/';
 const ES = 'https://example.org/docs/es/reference/bibliography/';
@@ -409,7 +410,7 @@ test('the plugin puts each section where the page marks it, every item carrying 
   const [, cited] = html.match(/<li id="std-iso-1-2000">[\s\S]*?<span data-cited-by="">([\s\S]*?)<\/span>/);
   assert.deepEqual(
     [...cited.matchAll(/href="([^"]+)"/g)].map(([, href]) => href),
-    ['/phonometry/signals/a/', '/phonometry/signals/b/'],
+    [`${SITE_BASE}/signals/a/`, `${SITE_BASE}/signals/b/`],
   );
   assert.ok(html.indexOf('id="doi-10-1000-book"') < html.indexOf('<h2 id="signals"') || !html.includes('<h2 id="signals"'));
 });
@@ -460,7 +461,7 @@ test('a list the page writes itself, an entry added by hand, stops the build, wh
   await assert.rejects(
     render(
       docs,
-      `## General\n\n${marked}\n- **Reviewer, C. (2003).** *A work written into the page by hand*. Wiley.\n  Cited by [Page A](/phonometry/signals/a/).\n`,
+      `## General\n\n${marked}\n- **Reviewer, C. (2003).** *A work written into the page by hand*. Wiley.\n  Cited by [Page A](${SITE_BASE}/signals/a/).\n`,
       DATA,
     ),
     /holds a list src\/data\/bibliography\.mjs did not write, from "Reviewer, C\. \(2003\)\. A work written into the page by hand\. Wiley\./,

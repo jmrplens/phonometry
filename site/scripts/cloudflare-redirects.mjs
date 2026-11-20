@@ -60,46 +60,60 @@ export function retiredShards(file = SHARD_NAMES) {
 	return map;
 }
 
+/** The site this build is made for: where every retired address now answers. */
+const CURRENT = Object.freeze({ siteUrl, basePath });
+
 /**
  * The Markdown copy of the page at *to*, a destination with the base path. A
  * Spanish API page is the English entry served again (src/lib/fallback-routes.mjs)
  * and has no copy of its own, so its English twin's copy stands for it.
  *
  * @param {string} to
+ * @param {string} [base] The base path *to* carries; the build's by default.
  * @returns {string} The copy's path, with the base path.
  */
-export function copyOf(to) {
-	return `${isFallbackRoute(to, basePath) ? englishTwin(to, basePath) : to}index.md`;
+export function copyOf(to, base = basePath) {
+	return `${isFallbackRoute(to, base) ? englishTwin(to, base) : to}index.md`;
 }
 
 /**
  * Every retired address and where it answers, as absolute sources without
  * the scheme (what a list item matches) and absolute targets.
  *
+ * The sources are the old addresses on the site that published them, and the
+ * targets the pages that replace them on the site they are served from now.
+ * By default both are this build's site; with a legacy origin
+ * (src/data/site.mjs `LEGACY_ORIGINS`) as *source*, each address the old site
+ * retired goes straight to its final page on the current one, in one hop.
+ *
  * @param {Record<string, string>} map Old address without the base path ->
- *   destination with it, as src/data/redirects.mjs exports them.
+ *   destination with the target's base path, as src/data/redirects.mjs exports them.
  * @param {Record<string, string>} shards Retired shard name -> current name.
+ * @param {object} [sites]
+ * @param {{siteUrl: string, basePath: string}} [sites.target] Where the pages answer now.
+ * @param {{siteUrl: string, basePath: string}} [sites.source] Where the old addresses were published.
  * @returns {Map<string, string>} Source URL -> target URL, in the order listed.
  */
-export function retiredAddresses(map = redirects, shards = retiredShards()) {
-	const host = new URL(siteUrl).host;
+export function retiredAddresses(map = redirects, shards = retiredShards(), { target = CURRENT, source = target } = {}) {
+	const host = new URL(source.siteUrl).host;
+	const old = `${host}${source.basePath}`;
 	/** @type {Map<string, string>} */
 	const addresses = new Map();
-	const add = (source, target) => {
-		if (addresses.has(source)) throw new Error(`${source} is retired twice`);
-		addresses.set(source, target);
+	const add = (from, to) => {
+		if (addresses.has(from)) throw new Error(`${from} is retired twice`);
+		addresses.set(from, to);
 	};
 	for (const [from, to] of Object.entries(map)) {
-		const target = `${siteUrl}${to}`;
-		add(`${host}${basePath}${from}`, target);
-		if (from.endsWith('/') && from.length > 1) add(`${host}${basePath}${from.slice(0, -1)}`, target);
+		const answer = `${target.siteUrl}${to}`;
+		add(`${old}${from}`, answer);
+		if (from.endsWith('/') && from.length > 1) add(`${old}${from.slice(0, -1)}`, answer);
 	}
 	for (const [from, to] of Object.entries(map)) {
 		if (!from.endsWith('/') || !to.endsWith('/')) continue;
-		add(`${host}${basePath}${from}index.md`, `${siteUrl}${copyOf(to)}`);
+		add(`${old}${from}index.md`, `${target.siteUrl}${copyOf(to, target.basePath)}`);
 	}
 	for (const [from, to] of Object.entries(shards)) {
-		add(`${host}${basePath}/llms/llms-${from}.txt`, `${siteUrl}${basePath}/llms/llms-${to}.txt`);
+		add(`${old}/llms/llms-${from}.txt`, `${target.siteUrl}${target.basePath}/llms/llms-${to}.txt`);
 	}
 	return addresses;
 }
@@ -130,13 +144,14 @@ export function redirectPairs(map = redirects, shards = retiredShards()) {
  * The list items for a redirect map.
  *
  * @param {Record<string, string>} [map] Old address without the base path ->
- *   destination with it, as src/data/redirects.mjs exports them.
+ *   destination with the target's base path, as src/data/redirects.mjs exports them.
  * @param {Record<string, string>} [shards] Retired shard name -> current name.
+ * @param {object} [sites] The target and source sites, as retiredAddresses takes them.
  * @returns {object[]} One item per source URL: two per address that ends in a
  *   slash, one for its Markdown copy, and one per retired shard name.
  */
-export function cloudflareItems(map = redirects, shards = retiredShards()) {
-	return [...retiredAddresses(map, shards)].map(([source_url, target_url]) => ({
+export function cloudflareItems(map = redirects, shards = retiredShards(), sites = {}) {
+	return [...retiredAddresses(map, shards, sites)].map(([source_url, target_url]) => ({
 		redirect: {
 			source_url,
 			target_url,
@@ -147,6 +162,22 @@ export function cloudflareItems(map = redirects, shards = retiredShards()) {
 			preserve_path_suffix: false,
 		},
 	}));
+}
+
+/**
+ * The list items that send each address a legacy origin retired straight to
+ * its page on the current site: the sources on the old host under its old
+ * base path, the targets where the pages answer now.
+ *
+ * @param {{siteUrl: string, basePath: string}} legacy The old site (an entry of LEGACY_ORIGINS).
+ * @param {Record<string, string>} [map] Old address without the base path ->
+ *   destination with the current base path.
+ * @param {Record<string, string>} [shards] Retired shard name -> current name.
+ * @param {{siteUrl: string, basePath: string}} [target] The current site.
+ * @returns {object[]} The items, as cloudflareItems writes them.
+ */
+export function legacyItems(legacy, map = redirects, shards = retiredShards(), target = CURRENT) {
+	return cloudflareItems(map, shards, { target, source: legacy });
 }
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) {

@@ -2,7 +2,7 @@
 import assert from 'node:assert/strict';
 import { describe, test } from 'node:test';
 
-import { IMMUTABLE, redirectRules, responseHeaderRules, wildcardMatch } from '../lib/rules.mjs';
+import { IMMUTABLE, redirectRules, responseHeaderRules, wildcardMatch, wildcardReplace } from '../lib/rules.mjs';
 import { twinExclusions } from '../lib/twins.mjs';
 
 const prefix = '/phonometry';
@@ -101,6 +101,59 @@ describe('redirectRules', () => {
 	});
 });
 
+describe('legacy-base, the old base path sent to the root', () => {
+	const root = { ...options, prefix: '', exclusions: twinExclusions('') };
+	const rules = redirectRules({ ...root, legacyPrefix: '/phonometry' });
+	const byRef = Object.fromEntries(rules.map((rule) => [rule.ref, rule]));
+
+	test('not generated while the site keeps a base path, nor at the root with no old one', () => {
+		for (const set of [redirectRules(options), redirectRules({ ...options, legacyPrefix: '/phonometry' }), redirectRules(root)]) {
+			assert.equal(set.some(({ ref }) => ref.startsWith('legacy-base')), false);
+		}
+	});
+
+	test('at the root, right after www and before the clip and Markdown rules', () => {
+		assert.deepEqual(
+			rules.map(({ ref }) => ref),
+			['www-to-apex', 'legacy-base-slash', 'legacy-base-bare', 'clips-to-range-host', 'markdown-twin'],
+		);
+		for (const ref of ['legacy-base-slash', 'legacy-base-bare']) {
+			assert.equal(byRef[ref].action, 'redirect');
+			assert.equal(byRef[ref].enabled, true);
+			assert.equal(byRef[ref].action_parameters.from_value.status_code, 301);
+			assert.equal(byRef[ref].action_parameters.from_value.preserve_query_string, true);
+		}
+	});
+
+	test('an address under the old base answers the same path at the root, one hop', () => {
+		const { expression, action_parameters: p } = byRef['legacy-base-slash'];
+		assert.equal(expression, 'http.host eq "phonometry.dev" and http.request.uri.path wildcard "/phonometry/*"');
+		assert.deepEqual(p.from_value.target_url, {
+			expression: 'wildcard_replace(http.request.uri.path, "/phonometry/*", "https://phonometry.dev/${1}")',
+		});
+		const sent = (path) => (wildcardMatch(path, '/phonometry/*') ? wildcardReplace(path, '/phonometry/*', 'https://phonometry.dev/${1}') : null);
+		assert.equal(sent('/phonometry/signals/levels/'), 'https://phonometry.dev/signals/levels/');
+		assert.equal(sent('/phonometry/signals/index.md'), 'https://phonometry.dev/signals/index.md');
+		assert.equal(sent('/phonometry/'), 'https://phonometry.dev/');
+		assert.equal(sent('/PHONOMETRY/llms.txt'), 'https://phonometry.dev/llms.txt');
+		assert.equal(sent('/phonometryx/'), null);
+		assert.equal(sent('/signals/phonometry/'), null);
+		assert.equal(sent('/phonometry'), null);
+	});
+
+	test('the old base itself answers the root', () => {
+		const { expression, action_parameters: p } = byRef['legacy-base-bare'];
+		assert.equal(expression, 'http.host eq "phonometry.dev" and http.request.uri.path wildcard "/phonometry"');
+		assert.deepEqual(p.from_value.target_url, { value: 'https://phonometry.dev/' });
+		assert.equal(wildcardMatch('/phonometry', '/phonometry'), true);
+		assert.equal(wildcardMatch('/phonometry/', '/phonometry'), false);
+	});
+
+	test('a legacy prefix that could end the expression string is refused', () => {
+		assert.throws(() => redirectRules({ ...root, legacyPrefix: '/a"b' }), /legacy prefix/);
+	});
+});
+
 describe('responseHeaderRules', () => {
 	const rules = responseHeaderRules({ host: 'phonometry.dev', prefix });
 	const byRef = Object.fromEntries(rules.map((rule) => [rule.ref, rule]));
@@ -149,6 +202,14 @@ describe('responseHeaderRules', () => {
 		assert.equal(IMMUTABLE, 'public, max-age=31536000, immutable');
 		const root = responseHeaderRules({ host: 'phonometry.dev', prefix: '' }).at(-1);
 		assert.match(root.expression, /starts_with\(http\.request\.uri\.path, "\/_astro\/"\)$/);
+	});
+});
+
+describe('wildcardReplace, the model of wildcard_replace', () => {
+	test('fills ${n} with the run each * matched, case-insensitively', () => {
+		assert.equal(wildcardReplace('/Phonometry/a/b', '/phonometry/*', 'https://x/${1}'), 'https://x/a/b');
+		assert.equal(wildcardReplace('/m/a.webm', '/m/*.webm', 'https://y/${1}.webm'), 'https://y/a.webm');
+		assert.equal(wildcardReplace('/other', '/phonometry/*', 'https://x/${1}'), '/other');
 	});
 });
 

@@ -4,7 +4,8 @@
 // (https://developers.cloudflare.com/rules/url-forwarding/, "Execution
 // order"), so they cost no Worker invocation and keep working whatever the
 // daily quota says. A Free zone takes ten Single Redirect rules with wildcard
-// matching and no regular expressions; these are four.
+// matching and no regular expressions; these are four, or five at the root
+// once the site has an old base path to send home.
 //
 // scripts/apply-rules.mjs puts them in the two phase entrypoints, and with
 // --check fails when the live rules differ from these.
@@ -34,13 +35,18 @@ const anyAccept = (pattern) => `any(http.request.headers["accept"][*] wildcard $
  * @param {string} options.host The zone apex: `phonometry.dev`.
  * @param {string} options.prefix The base path the site is served under, or `` at the root.
  * @param {{pages: string[], subtrees: string[]}} options.exclusions Pages without a Markdown copy.
- * @param {string} options.clipBase Where a clip is answered with byte ranges, ending in `/`:
- *   `https://docs.jmrp.io/phonometry/media/` until the R2 bucket exists.
+ * @param {string} options.clipBase Where a clip is answered with byte ranges, ending in `/`
+ *   (`clipBase` in site/src/data/site-targets.json).
+ * @param {string} [options.legacyPrefix] The base path the site was served under before, or ``
+ *   when there was none. At the root (`prefix` ``) an address under it answers a 301 to the
+ *   same path at the root (legacy-base-slash) and the old base itself to the root
+ *   (legacy-base-bare); while the site keeps a base path they are not generated.
  * @returns {object[]} The rules.
  */
-export function redirectRules({ host, prefix, exclusions, clipBase }) {
+export function redirectRules({ host, prefix, exclusions, clipBase, legacyPrefix = '' }) {
 	const h = literal(host, 'host');
 	literal(clipBase, 'clip base');
+	literal(legacyPrefix, 'legacy prefix');
 	const rules = [
 		{
 			ref: 'www-to-apex',
@@ -57,6 +63,41 @@ export function redirectRules({ host, prefix, exclusions, clipBase }) {
 			enabled: true,
 		},
 	];
+	if (prefix === '' && legacyPrefix !== '') {
+		// Before the clip and Markdown rules: a clip or a Markdown request under
+		// the old base would otherwise take a second hop.
+		const under = literal(`${legacyPrefix}/*`, 'legacy prefix');
+		rules.push(
+			{
+				ref: 'legacy-base-slash',
+				description: 'an address under the old base path answers the same path at the root, query kept',
+				expression: `http.host eq ${h} and http.request.uri.path wildcard ${under}`,
+				action: 'redirect',
+				action_parameters: {
+					from_value: {
+						status_code: 301,
+						target_url: { expression: `wildcard_replace(http.request.uri.path, ${under}, ${literal(`https://${host}/\${1}`, 'host')})` },
+						preserve_query_string: true,
+					},
+				},
+				enabled: true,
+			},
+			{
+				ref: 'legacy-base-bare',
+				description: 'the old base path itself answers the root, query kept',
+				expression: `http.host eq ${h} and http.request.uri.path wildcard ${literal(legacyPrefix, 'legacy prefix')}`,
+				action: 'redirect',
+				action_parameters: {
+					from_value: {
+						status_code: 301,
+						target_url: { value: `https://${host}/` },
+						preserve_query_string: true,
+					},
+				},
+				enabled: true,
+			},
+		);
+	}
 	if (prefix !== '') {
 		rules.push({
 			ref: 'root-to-base',
@@ -209,6 +250,26 @@ export function wildcardMatch(value, pattern) {
 		.map((part) => part.replace(/[.+?^${}()|[\]\\/]/g, '\\$&'))
 		.join('.*');
 	return new RegExp(`^${body}$`, 'is').test(value);
+}
+
+/**
+ * The `wildcard_replace` function: when the whole value matches the pattern
+ * (as `wildcard` does), the replacement with each `${n}` filled by the run the
+ * n-th `*` matched; otherwise the value unchanged.
+ *
+ * @param {string} value The field value.
+ * @param {string} pattern The literal with `*`.
+ * @param {string} replacement The target, `${1}` for the first run.
+ * @returns {string} What the function returns.
+ */
+export function wildcardReplace(value, pattern, replacement) {
+	const body = pattern
+		.split('*')
+		.map((part) => part.replace(/[.+?^${}()|[\]\\/]/g, '\\$&'))
+		.join('(.*)');
+	const match = new RegExp(`^${body}$`, 'is').exec(value);
+	if (!match) return value;
+	return replacement.replace(/\$\{(\d+)\}/g, (_, n) => match[Number(n)] ?? '');
 }
 
 /**

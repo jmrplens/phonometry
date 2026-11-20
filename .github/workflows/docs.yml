@@ -33,6 +33,9 @@ on:
       - "scripts/markdown_spans.py"
       - "scripts/generate_site_reports.py"
       - "scripts/ast_scan.py"
+      # Both generators take the site's host and base path from
+      # site/src/data/site-targets.json through this module.
+      - "scripts/site_target.py"
       # The other scripts the job runs: the static check of the examples the
       # llms files restate, and the check of the claims, after the build. A
       # change to one that breaks the job has to fail here, on its own pull
@@ -84,6 +87,7 @@ on:
       - "scripts/markdown_spans.py"
       - "scripts/generate_site_reports.py"
       - "scripts/ast_scan.py"
+      - "scripts/site_target.py"
       - "scripts/check_doc_snippets.py"
       - "scripts/check_conformance_claims.py"
       - "scripts/github_edition.py"

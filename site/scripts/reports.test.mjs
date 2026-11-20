@@ -18,10 +18,18 @@ import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { test } from 'node:test';
 import { fileURLToPath, pathToFileURL } from 'node:url';
+import { basePath as SITE_BASE } from '../src/data/site.mjs';
 
 const SITE = join(dirname(fileURLToPath(import.meta.url)), '..');
 /** The module and the readers it imports, by their place under the site. */
-const MODULES = ['src/data/reports.mjs', 'scripts/shared/markdown-spans.mjs', 'src/lib/markdown-fences.mjs', 'src/lib/line-ends.mjs'];
+const MODULES = [
+  'src/data/reports.mjs',
+  'src/data/site.mjs',
+  'src/data/site-targets.json',
+  'scripts/shared/markdown-spans.mjs',
+  'src/lib/markdown-fences.mjs',
+  'src/lib/line-ends.mjs',
+];
 
 /** Import the reports module in a repository whose one guide is `guide` and whose fiches are `fiches`. */
 async function reportsOf(t, guide, fiches = ['iso_x']) {
@@ -60,9 +68,9 @@ test('a fiche a guide renders is listed with that guide', async (t) => {
   const { reports, reportsEs } = await reportsOf(t, `---\ntitle: Guide\n---\n\n${FICHE}\n`);
   assert.deepEqual(
     reports.map((report) => [report.name, report.page, report.title]),
-    [['iso_x', '/phonometry/guides/guide/', 'A fiche']],
+    [['iso_x', `${SITE_BASE}/guides/guide/`, 'A fiche']],
   );
-  assert.deepEqual(reportsEs.map((report) => report.page), ['/phonometry/es/guides/guide/']);
+  assert.deepEqual(reportsEs.map((report) => report.page), [`${SITE_BASE}/es/guides/guide/`]);
 });
 
 test('a fiche a guide only quotes is shown by no guide, and the module refuses to build', async (t) => {

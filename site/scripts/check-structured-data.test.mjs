@@ -80,6 +80,9 @@ import {
 	TARGET_PLATFORM,
 	VERSION,
 } from './shared/structured-data-fixture.mjs';
+import { basePath as SITE_BASE } from '../src/data/site.mjs';
+
+
 
 const EN = `${ORIGIN}/reference/bibliography/`;
 const ES = `${ORIGIN}/es/reference/bibliography/`;
@@ -311,7 +314,7 @@ function listOf(built, lang) {
 		fragment: id.slice(id.indexOf('#') + 1),
 		citedBy: Object.values(built)
 			.filter(({ article }) => [article?.citation ?? []].flat().some((item) => item?.['@id'] === id))
-			.map(({ article }) => article.url.replace(ORIGIN, '/phonometry')),
+			.map(({ article }) => article.url.replace(ORIGIN, SITE_BASE)),
 	}));
 }
 
@@ -2546,7 +2549,7 @@ test("a report Dataset that hands out a file of another commit than the one its 
 				`is of main, not of commit ${commit}`,
 		),
 	);
-	assert.match(ran.err, /FAIL \/es\/reference\/conformance\/: the conformance report's Dataset: https:\/\/github\.com\/jmrplens\/phonometry\/tree\/main\/docs is of main/);
+	assert.match(ran.err, new RegExp(String.raw`FAIL \/es\/reference\/conformance\/: the conformance report's Dataset: https:\/\/github\.com\/jmrplens\/phonometry\/tree\/main\/docs is of main`));
 });
 
 test('a report page that names no commit its rows are of fails', (t) => {
@@ -2584,7 +2587,7 @@ test('a work the bibliography describes with no entry on the page fails, and nam
 
 test('a "Cited by" list that lacks a citing page, or names a page that cites nothing, fails', (t) => {
 	const built = build();
-	const guide = `/phonometry/${GUIDE}/`;
+	const guide = `${SITE_BASE}/${GUIDE}/`;
 	built['es/bibliography'].text = listHtml(
 		listOf(built, 'es').map((entry) =>
 			entry.fragment === 'std-iso-1-2000'
@@ -2655,7 +2658,7 @@ test('an item of the list written by hand, which no work of the page is, fails a
 	built['en/bibliography'].text =
 		listHtml(listOf(built, 'en')) +
 		'<ul><li><strong>Bendat, J. S., &amp; Piersol, A. G. (2010).</strong> <em>Random data</em>. Wiley. ' +
-		'Cited by <a href="/phonometry/nowhere/">Nowhere</a>.</li></ul>';
+		`Cited by <a href="${SITE_BASE}/nowhere/">Nowhere</a>.</li></ul>`;
 	const ran = check(t, built);
 	assert.equal(ran.status, 1);
 	assert.match(

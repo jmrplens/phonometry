@@ -9,6 +9,12 @@ import { codeSpan, renderTree, SITE } from '../render.mjs';
 import { parse } from '../processor.mjs';
 import { absolutizeRootLinks, pointDroppedAnchors, rewriteLinks } from '../links.mjs';
 import { Box, Show, registryOf, render } from './helpers.mjs';
+import { basePath as SITE_BASE, siteUrl as SITE_ORIGIN } from '../../../data/site.mjs';
+
+/** The site's address and base path as a regular expression matches them literally. */
+const escapeRe = (text) => text.replace(/[.*+?^${}()|[\]\\/]/g, '\\$&');
+const SITE_RE = escapeRe(`${SITE_ORIGIN}${SITE_BASE}`);
+
 
 describe('what is kept byte for byte', () => {
   test('the imports of a Python example survive the imports of the page', () => {
@@ -194,10 +200,10 @@ describe('raw HTML', () => {
 
   test('code, strong, em, a, br, and an empty anchor span', () => {
     const source =
-      '<span id="old-anchor"></span>\n\nA <code>x`y</code>, <strong>b</strong>, <em>i</em>, <a href="/phonometry/start/">start</a>.\n';
+      `<span id="old-anchor"></span>\n\nA <code>x\`y</code>, <strong>b</strong>, <em>i</em>, <a href="${SITE_BASE}/start/">start</a>.\n`;
     assert.equal(
       render(source).markdown,
-      'A ``x`y``, **b**, *i*, [start](https://docs.jmrp.io/phonometry/start/).\n',
+      `A \`\`x\`y\`\`, **b**, *i*, [start](${SITE_ORIGIN}${SITE_BASE}/start/).\n`,
     );
   });
 
@@ -270,16 +276,16 @@ describe('raw HTML', () => {
 describe('links', () => {
   test('root-relative links are made absolute, and code is left alone', () => {
     const source = [
-      'See [the guide](/phonometry/signals/) and ![a figure](/phonometry/media/a.svg).',
+      `See [the guide](${SITE_BASE}/signals/) and ![a figure](${SITE_BASE}/media/a.svg).`,
       '',
-      '`[x](/phonometry/not-a-link/)` stays as written, and so does',
+      `\`[x](${SITE_BASE}/not-a-link/)\` stays as written, and so does`,
       '`a span that opens here',
-      'and closes here`; see [`f`](/phonometry/reference/api/f/#f).',
+      `and closes here\`; see [\`f\`](${SITE_BASE}/reference/api/f/#f).`,
       '',
-      '[ref]: /phonometry/reference/',
+      `[ref]: ${SITE_BASE}/reference/`,
       '',
       '```markdown',
-      '[sample](/phonometry/sample/)',
+      `[sample](${SITE_BASE}/sample/)`,
       '```',
       '',
     ].join('\n');
@@ -287,16 +293,16 @@ describe('links', () => {
     assert.equal(
       markdown,
       [
-        'See [the guide](https://docs.jmrp.io/phonometry/signals/) and ![a figure](https://docs.jmrp.io/phonometry/media/a.svg).',
+        `See [the guide](${SITE_ORIGIN}${SITE_BASE}/signals/) and ![a figure](${SITE_ORIGIN}${SITE_BASE}/media/a.svg).`,
         '',
-        '`[x](/phonometry/not-a-link/)` stays as written, and so does',
+        `\`[x](${SITE_BASE}/not-a-link/)\` stays as written, and so does`,
         '`a span that opens here',
-        'and closes here`; see [`f`](https://docs.jmrp.io/phonometry/reference/api/f/#f).',
+        `and closes here\`; see [\`f\`](${SITE_ORIGIN}${SITE_BASE}/reference/api/f/#f).`,
         '',
-        '[ref]: https://docs.jmrp.io/phonometry/reference/',
+        `[ref]: ${SITE_ORIGIN}${SITE_BASE}/reference/`,
         '',
         '```markdown',
-        '[sample](/phonometry/sample/)',
+        `[sample](${SITE_BASE}/sample/)`,
         '```',
         '',
       ].join('\n'),
@@ -307,10 +313,13 @@ describe('links', () => {
     // A copy with no `](/` or `]: /` in it is not parsed for links at all,
     // so every form a root-relative destination can take has to show that
     // pair, or the link would be skipped as if there were none.
-    const source = '[a]( /phonometry/a/) and [b](</phonometry/b/>) and [c](\n  /phonometry/c/).\n\n[d]:\n  /phonometry/d/\n';
+    const source = `[a]( ${SITE_BASE}/a/) and [b](<${SITE_BASE}/b/>) and [c](\n  ${SITE_BASE}/c/).\n\n[d]:\n  ${SITE_BASE}/d/\n`;
     const { markdown } = render(source, { mdx: false });
-    for (const name of ['a', 'b', 'c', 'd']) assert.ok(markdown.includes(`https://docs.jmrp.io/phonometry/${name}/`), name);
-    assert.doesNotMatch(markdown, /[(<\s]\/phonometry\//u);
+    for (const name of ['a', 'b', 'c', 'd']) assert.ok(markdown.includes(`${SITE_ORIGIN}${SITE_BASE}/${name}/`), name);
+    // Every one of them was made absolute: no root-relative form is left beside the absolute one.
+    for (const name of ['a', 'b', 'c', 'd']) {
+      assert.equal(markdown.split(`${SITE_BASE}/${name}/`).length, markdown.split(`${SITE_ORIGIN}${SITE_BASE}/${name}/`).length, name);
+    }
     const none = '| a | b |\n| --- | --- |\n| [x](https://example.org/) | `](/` in code |\n';
     assert.equal(render(none, { mdx: false }).markdown, none);
   });
@@ -318,54 +327,54 @@ describe('links', () => {
   test('a destination written with a character reference or an escape is still made absolute', () => {
     // The parser hands over the destination decoded, so it cannot be found by
     // searching the source for the decoded text.
-    const source = '[search](/phonometry/?a=1&amp;b=2) and [a](/phonometry/a\\_b/).\n\n[d]: </phonometry/d&#95;e/>\n';
+    const source = `[search](${SITE_BASE}/?a=1&amp;b=2) and [a](${SITE_BASE}/a\\_b/).\n\n[d]: <${SITE_BASE}/d&#95;e/>\n`;
     const { markdown } = render(source, { mdx: false });
     assert.equal(
       markdown,
-      '[search](https://docs.jmrp.io/phonometry/?a=1&amp;b=2) and [a](https://docs.jmrp.io/phonometry/a\\_b/).\n\n' +
-        '[d]: <https://docs.jmrp.io/phonometry/d&#95;e/>\n',
+      `[search](${SITE_ORIGIN}${SITE_BASE}/?a=1&amp;b=2) and [a](${SITE_ORIGIN}${SITE_BASE}/a\\_b/).\n\n` +
+        `[d]: <${SITE_ORIGIN}${SITE_BASE}/d&#95;e/>\n`,
     );
   });
 
   test('a destination on the next line of a block quote is still made absolute', () => {
-    const source = '> [a](/phonometry/a/)\n> [b](\n>   /phonometry/b/)\n';
+    const source = `> [a](${SITE_BASE}/a/)\n> [b](\n>   ${SITE_BASE}/b/)\n`;
     assert.equal(
       render(source, { mdx: false }).markdown,
-      '> [a](https://docs.jmrp.io/phonometry/a/)\n> [b](\n>   https://docs.jmrp.io/phonometry/b/)\n',
+      `> [a](${SITE_ORIGIN}${SITE_BASE}/a/)\n> [b](\n>   ${SITE_ORIGIN}${SITE_BASE}/b/)\n`,
     );
   });
 
   test('a title that holds a link form leaves the destination to be the one rewritten', () => {
-    const source = '[x](/phonometry/p/ "see ](/phonometry/p/)")\n';
-    assert.equal(render(source, { mdx: false }).markdown, '[x](https://docs.jmrp.io/phonometry/p/ "see ](/phonometry/p/)")\n');
+    const source = `[x](${SITE_BASE}/p/ "see ](${SITE_BASE}/p/)")\n`;
+    assert.equal(render(source, { mdx: false }).markdown, `[x](${SITE_ORIGIN}${SITE_BASE}/p/ "see ](${SITE_BASE}/p/)")\n`);
   });
 
   test('an autolink and a bare address are left as written', () => {
-    const text = 'See <https://docs.jmrp.io/phonometry/a/> and https://docs.jmrp.io/phonometry/a/.\n';
+    const text = `See <${SITE_ORIGIN}${SITE_BASE}/a/> and ${SITE_ORIGIN}${SITE_BASE}/a/.\n`;
     assert.equal(rewriteLinks(text, () => '/elsewhere/'), text);
   });
 
   test('a destination before a lone CR line end is found', () => {
-    assert.equal(absolutizeRootLinks('[x](/phonometry/p\r)\n', 'https://docs.jmrp.io'), '[x](https://docs.jmrp.io/phonometry/p\r)\n');
+    assert.equal(absolutizeRootLinks(`[x](${SITE_BASE}/p\r)\n`, `${SITE_ORIGIN}`), `[x](${SITE_ORIGIN}${SITE_BASE}/p\r)\n`);
   });
 
   test('an escaped bracket in a label is never taken for the end of the label', () => {
     const rewrite = (url) => (url === '/p"' ? '/new/' : undefined);
     assert.equal(rewriteLinks('[a\\](/p" "b](/p")\n', rewrite), '[a\\](/p" "b](/new/)\n');
     assert.equal(
-      absolutizeRootLinks('![a\\](/phonometry/p" "b](/phonometry/p")\n', 'https://docs.jmrp.io'),
-      '![a\\](/phonometry/p" "b](https://docs.jmrp.io/phonometry/p")\n',
+      absolutizeRootLinks(`![a\\](${SITE_BASE}/p" "b](${SITE_BASE}/p")\n`, `${SITE_ORIGIN}`),
+      `![a\\](${SITE_BASE}/p" "b](${SITE_ORIGIN}${SITE_BASE}/p")\n`,
     );
     // An escaped backslash before the bracket leaves the bracket the label's end.
-    assert.equal(absolutizeRootLinks('![a\\\\](/phonometry/p)\n', 'https://docs.jmrp.io'), '![a\\\\](https://docs.jmrp.io/phonometry/p)\n');
+    assert.equal(absolutizeRootLinks(`![a\\\\](${SITE_BASE}/p)\n`, `${SITE_ORIGIN}`), `![a\\\\](${SITE_ORIGIN}${SITE_BASE}/p)\n`);
   });
 
   test('a label that holds an escaped bracket is left as the label', () => {
     const rewrite = (url) => (url === '/p' ? '/new/' : undefined);
     assert.equal(rewriteLinks('[x][a\\]: /p ]\n\n[a\\]: /p ]: /p\n', rewrite), '[x][a\\]: /p ]\n\n[a\\]: /p ]: /new/\n');
     assert.equal(
-      render('![a\\](/phonometry/p/) b](/phonometry/p/)\n', { mdx: false }).markdown,
-      '![a\\](/phonometry/p/) b](https://docs.jmrp.io/phonometry/p/)\n',
+      render(`![a\\](${SITE_BASE}/p/) b](${SITE_BASE}/p/)\n`, { mdx: false }).markdown,
+      `![a\\](${SITE_BASE}/p/) b](${SITE_ORIGIN}${SITE_BASE}/p/)\n`,
     );
   });
 
@@ -375,9 +384,9 @@ describe('links', () => {
   });
 
   test('the site address builds absolute URLs from any of the forms writers hold', () => {
-    assert.equal(SITE.url('/phonometry/start/'), 'https://docs.jmrp.io/phonometry/start/');
-    assert.equal(SITE.url('/reference/conformance/'), 'https://docs.jmrp.io/phonometry/reference/conformance/');
-    assert.equal(SITE.url('llms.txt'), 'https://docs.jmrp.io/phonometry/llms.txt');
+    assert.equal(SITE.url(`${SITE_BASE}/start/`), `${SITE_ORIGIN}${SITE_BASE}/start/`);
+    assert.equal(SITE.url('/reference/conformance/'), `${SITE_ORIGIN}${SITE_BASE}/reference/conformance/`);
+    assert.equal(SITE.url('llms.txt'), `${SITE_ORIGIN}${SITE_BASE}/llms.txt`);
     assert.equal(SITE.url('https://example.org/x'), 'https://example.org/x');
   });
 });
@@ -445,15 +454,15 @@ describe('anchors the copy drops', () => {
       registry: new Map(),
       issues,
       lang: 'es',
-      pageUrl: 'https://docs.jmrp.io/phonometry/es/a/',
+      pageUrl: `${SITE_ORIGIN}${SITE_BASE}/es/a/`,
     });
-    assert.match(markdown, /\[the tube\]\(https:\/\/docs\.jmrp\.io\/phonometry\/es\/a\/#tubo-o-camara\)/);
+    assert.match(markdown, new RegExp(String.raw`\[the tube\]\(${SITE_RE}\/es\/a\/#tubo-o-camara\)`));
     assert.match(markdown, /\[the heading\]\(#tubo-o-cámara\)/);
     assert.deepEqual(issues, []);
   });
 
   test('a reference link and an angle-bracketed fragment lead to the page too', () => {
-    const page = 'https://docs.jmrp.io/phonometry/a/';
+    const page = `${SITE_ORIGIN}${SITE_BASE}/a/`;
     const anchors = new Set(['old']);
     assert.equal(
       pointDroppedAnchors('See [details][target] and [here](<#old>).\n\n[target]: #old\n', anchors, page),

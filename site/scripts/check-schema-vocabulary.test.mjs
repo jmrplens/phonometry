@@ -33,10 +33,11 @@ import { VOCABULARY_PATH, compactVocabulary, serializeVocabulary } from './gener
 import { personId } from '../src/data/site.mjs';
 import { readCommittedText } from '../src/lib/line-ends.mjs';
 import { referenceNode } from '../src/lib/citations.mjs';
+import { basePath as SITE_BASE, siteUrl as SITE_ORIGIN } from '../src/data/site.mjs';
 
 const CHECK = join(dirname(fileURLToPath(import.meta.url)), 'check-schema-vocabulary.mjs');
 const vocabulary = loadVocabulary();
-const ORIGIN = 'https://docs.jmrp.io/phonometry';
+const ORIGIN = `${SITE_ORIGIN}${SITE_BASE}`;
 
 /**
  * The software node as the site publishes it, carrying the two properties

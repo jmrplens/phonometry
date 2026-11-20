@@ -191,6 +191,24 @@ test('a page that does not load is reported, not passed', async () => {
 	assert.deepEqual(missing, [{ form: 'mobile', route: '/missing/', href: '', text: '', unread: 'HTTP 404' }]);
 });
 
+test('a page that cannot be read once loaded is reported, and the pages after it are still read', async () => {
+	// The page takes away what the check waits on before it reads, so the
+	// reading fails on that page alone.
+	const unreadable = await serve({
+		'broken/index.html': page('<a href="/a/">here</a><script>window.requestAnimationFrame = undefined;</script>'),
+		'a/index.html': page('<a href="/start/">Start</a>'),
+	});
+	try {
+		const read = await vagueLinks({ base: unreadable.base, routes: ['/broken/', '/a/'], forms: ['mobile'], pages: 1 });
+		assert.equal(read.length, 2, JSON.stringify(read));
+		assert.deepEqual(read[0], { form: 'mobile', route: '/a/', href: '/start/', text: 'Start' });
+		assert.equal(read[1].route, '/broken/');
+		assert.match(read[1].unread, /requestAnimationFrame/);
+	} finally {
+		await unreadable.close();
+	}
+});
+
 test('run as CI runs it, a link that reads "Start" fails at both form factors and "Start here" passes', async () => {
 	const vague = await serve({ 'index.html': page('<a href="/start/">Start</a>'), 'old/index.html': STUB });
 	try {
@@ -237,7 +255,9 @@ test('the check finds what a full Lighthouse run finds, at both form factors', a
 				);
 				const audit = result.lhr.audits['link-text'];
 				assert.equal(result.lhr.configSettings.formFactor, form);
-				const items = (audit.details?.items ?? [])
+				// An audit that errored has no details, which would read as no failing link.
+				assert.ok(audit.details, `${form} ${route}: Lighthouse did not run the audit: ${audit.errorMessage}`);
+				const items = audit.details.items
 					.map(({ href, text }) => `${href.startsWith(`${build.base}/`) ? href.slice(build.base.length) : href} "${text}"`)
 					.sort();
 				assert.deepEqual(foundOn(route, form), items, `${form} ${route}: the check and Lighthouse disagree`);

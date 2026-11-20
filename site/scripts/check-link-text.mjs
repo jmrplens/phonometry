@@ -27,15 +27,16 @@
 // check-link-text.test.mjs holds that the audit reads none, and that this
 // check finds what a full Lighthouse run finds on pages made to fail it.
 //
-// A page is read once its load event has fired and the browser has drawn two
-// frames since. The site sets `content-visibility: auto` on its collapsible
+// A page is read once its load event has fired and two animation frames have
+// run since. The site sets `content-visibility: auto` on its collapsible
 // sections, and the text under such a block reads as empty until a frame has
 // decided whether the block is on screen; PageSpeed reads it decided. So each
 // page is open in a window of its own, never a background tab, which draws no
 // frames at all. Lighthouse also waits for the network and the processor to
 // go quiet, a second each by its own settings, which would multiply the time
 // of this check; nothing on the site writes a link after the load event (the
-// one script that shows a link, the language bar, runs on DOMContentLoaded).
+// one script that shows a link, the language bar, runs inline as the page is
+// parsed, before the load event).
 //
 // Usage: node scripts/with-preview.mjs -- node scripts/check-link-text.mjs
 //        [--base <origin>] [dist-directory]
@@ -95,7 +96,8 @@ function shown(href, base) {
  * @param {string[]} [options.forms] The form factors, keys of FORM_FACTORS.
  * @param {number} [options.pages] How many pages are open at once.
  * @returns {Promise<{form: string, route: string, href: string, text: string, unread?: string}[]>}
- *   One entry per failing link, and one with `unread` set per page that did not load.
+ *   One entry per failing link, and one with `unread` set per page that did
+ *   not load or could not be read once loaded.
  */
 export async function vagueLinks({ base, routes, forms = Object.keys(FORM_FACTORS), pages }) {
 	const open = Math.max(forms.length, pages ?? Math.min(8, availableParallelism()));
@@ -126,10 +128,16 @@ export async function vagueLinks({ base, routes, forms = Object.keys(FORM_FACTOR
 					found.push({ form, route, href: '', text: '', unread: `HTTP ${status || 'no response'}` });
 					continue;
 				}
-				await page.evaluate(() => new Promise((drawn) => requestAnimationFrame(() => requestAnimationFrame(drawn))));
-				const anchors = await new AnchorElements().getArtifact(context);
-				const { details } = LinkText.audit({ URL: { finalDisplayedUrl: page.url() }, AnchorElements: anchors });
-				for (const { href, text } of details.items) found.push({ form, route, href: shown(href, base), text });
+				// A page that goes on to another, or a gatherer that fails on it,
+				// is reported and the run goes on to the next page.
+				try {
+					await page.evaluate(() => new Promise((ran) => requestAnimationFrame(() => requestAnimationFrame(ran))));
+					const anchors = await new AnchorElements().getArtifact(context);
+					const { details } = LinkText.audit({ URL: { finalDisplayedUrl: page.url() }, AnchorElements: anchors });
+					for (const { href, text } of details.items) found.push({ form, route, href: shown(href, base), text });
+				} catch (error) {
+					found.push({ form, route, href: '', text: '', unread: error.message });
+				}
 			}
 			await driver.disconnect();
 			await page.close();

@@ -25,6 +25,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Fixed
 
+- **The run record the compute guide prints is the one the proof machine
+  printed.** It named phonometry 4.0.0 while the CuPy proof of 9 November ran
+  4.0.0rc1. `gpu-parity.lock` now records the phonometry version of the run
+  (`scripts/gpu_parity.py` writes it from the run's own record), and a test
+  holds the `phonometry_version` and `numpy_version` both languages print to
+  the lock, beside the CuPy, CUDA and GPU it already held.
+- **Every EU directive the documentation cites names the European Union as
+  its publisher.** Directives 2003/10/EC and 2002/44/EC were cited as reports
+  from an anonymous "Official Journal of the European Union", one Spanish page
+  spelling it "Diario Oficial de la Unión Europea", while the four CNOSSOS-EU
+  directives named the EU's identity in the structured data. A test and the
+  structured-data check now refuse a publisher that writes a known body out
+  inside a longer name, and list with their reason the organizations whose
+  names hold a body's and are not it.
 - **A page is dated by a change a reader can see.** Both landing pages, the
   index of report fiches and the bibliography, in both languages, and the
   Spanish guides index carried the date of a commit that changed nothing they

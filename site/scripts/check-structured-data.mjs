@@ -100,7 +100,7 @@ import { knownSlugs } from '../src/lib/breadcrumbs.mjs';
 import { isoDay } from '../src/lib/date-rules.mjs';
 import { englishTwin, isApiRoute, isFallbackRoute } from '../src/lib/fallback-routes.mjs';
 import { readCommittedText } from '../src/lib/line-ends.mjs';
-import { isBodyName, referenceId } from '../src/lib/citations.mjs';
+import { bodyNamedIn, isBodyName, referenceId } from '../src/lib/citations.mjs';
 import { SAME_WORKS, conformanceEvidence, governingDocuments } from '../src/lib/conformance-evidence.mjs';
 import { DATA_COMPONENTS } from '../src/lib/page-markdown.mjs';
 import { readPageReferences } from '../src/lib/page-references.mjs';
@@ -2280,7 +2280,10 @@ for (const file of files) {
 		const unnamedBodies = new Map();
 		for (const work of otherWorks) {
 			const publisher = work.publisher;
-			if (publisher && typeof publisher === 'object' && !publisher['@id'] && isBodyName(publisher.name)) {
+			// A body's name inside a longer one is the body too ("Official Journal
+			// of the European Union"), unless citations.mjs says it is another
+			// organization (NOT_THE_BODY).
+			if (publisher && typeof publisher === 'object' && !publisher['@id'] && (isBodyName(publisher.name) || bodyNamedIn(publisher.name))) {
 				unnamedBodies.set(publisher.name, (unnamedBodies.get(publisher.name) ?? 0) + 1);
 			}
 		}

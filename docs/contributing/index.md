@@ -251,7 +251,7 @@ Each rule on a page has the same parts:
 | [F4](docs-and-figures.md#f4) | Register a new guide in `topics.mjs` and the guides index, counted in figures and words | `site/scripts/check-guides-index.mjs`, `CI: docs.yml:build/guides-index` |
 | [F5](docs-and-figures.md#f5) | Never edit a generated file by hand; change its source and regenerate it | `site/scripts/agent-md.mjs`, `scripts/check_conformance_artifact.py`, `make conformance`, `CI: guards-package/conformance-artifact`, `CI: guards-package/conformance`, `CI: guards-prose/llms` |
 | [F6](docs-and-figures.md#f6) | Never type a conformance count in prose; `make conformance` writes it | `scripts/check_conformance_claims.py`, `make conformance`, `CI: guards-package/conformance-claims`, `CI: guards-package/conformance` |
-| [F7](docs-and-figures.md#f7) | Put a site page's references in its frontmatter, never under a hand-written heading | `CI: docs.yml:build/build` |
+| [F7](docs-and-figures.md#f7) | Put a site page's references in its frontmatter, never under a hand-written heading | `CI: docs.yml:build/build`, `site/scripts/check-structured-data.mjs`, `CI: docs.yml:build/structured-data`, `site/scripts/citations.test.mjs`, `CI: docs.yml:build/script-tests` |
 | [F8](docs-and-figures.md#f8) | Give every `<ScopeClaim>` its `status` | `CI: docs.yml:build/build` |
 | [F9](docs-and-figures.md#f9) | Pass `<ThemeImage>` the plain figure name; it adds the language and theme suffixes | `CI: docs.yml:build/build` |
 | [F10](docs-and-figures.md#f10) | Link an API reference page by its hyphenated module slug | review |

@@ -352,7 +352,13 @@ const STANDARDS_BODIES = [
     url: 'https://www.bipm.org/',
     spelled: ['BIPM'],
   },
-  { id: 'eu', name: 'European Union', alternateName: 'EU', url: 'https://european-union.europa.eu/' },
+  {
+    id: 'eu',
+    name: 'European Union',
+    alternateName: 'EU',
+    url: 'https://european-union.europa.eu/',
+    spelled: ['European Union', 'Unión Europea'],
+  },
   {
     id: 'es-ministerio-de-la-presidencia',
     name: 'Ministerio de la Presidencia',
@@ -384,6 +390,41 @@ const BODY_BY_NAME = new Map(
  */
 export function isBodyName(name) {
   return typeof name === 'string' && BODY_BY_NAME.has(name);
+}
+
+/**
+ * Organizations whose name holds the name of a body above and that are not
+ * that body, each with the reason: a publisher written out under such a name
+ * is no body written out anonymously.
+ */
+export const NOT_THE_BODY = Object.freeze({
+  'Publications Office of the European Union':
+    'the office that publishes the reports of the EU institutions, named as their publisher; the EU itself issues its directives',
+  'Oficina de Publicaciones de la Unión Europea': 'the same office, as the Spanish pages name it',
+  'VDI Verlag': 'the publishing house of the VDI, a company of its own that publishes its books',
+  'Acoustical Society of America, Working Group S3-79':
+    'a working group of the society that publishes its own page, named as the page names it',
+});
+
+/** A name as a whole word or phrase of a longer one, letters and digits around it ending it. */
+const wordIn = (name) => new RegExp(`(?<![\\p{L}\\p{N}])${name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}(?![\\p{L}\\p{N}])`, 'u');
+
+/**
+ * The body a longer publisher name writes out: "Official Journal of the
+ * European Union" for the EU, the gazette the directives are printed in, so
+ * two directives were cited from an anonymous publisher while four others
+ * named the EU's identity. A name of a body itself, and a name of
+ * {@link NOT_THE_BODY}, give nothing.
+ *
+ * @param {unknown} name
+ * @returns {string | undefined}  The body's id.
+ */
+export function bodyNamedIn(name) {
+  if (typeof name !== 'string' || isBodyName(name) || Object.hasOwn(NOT_THE_BODY, name)) return undefined;
+  const body = STANDARDS_BODIES.find((one) =>
+    [one.name, ...(one.spelled ?? []), ...(one.alternateName ? [one.alternateName] : [])].some((spelling) => wordIn(spelling).test(name)),
+  );
+  return body?.id;
 }
 
 /**

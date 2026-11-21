@@ -64,6 +64,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   crawler with a group of its own (GPTBot, ClaudeBot and the rest) never reads.
   Every group now carries `search=yes, ai-input=yes, ai-train=yes`, and the
   file names more search and AI crawlers.
+- **A pull request runs the jobs of Python CI its files reach.** Python CI
+  ran every job on every pull request, some nine hours of runners, whatever it
+  changed. A new scope job reads the files a pull request changes and skips
+  each job none of them reaches: a page runs one leg of the tests and the
+  snippets and fiches beside the jobs that always run; a test runs every leg
+  and the engines but not the figures; a guard runs the suite, and the
+  figures or fiches too when they run it; the
+  site's code and the other workflows reach no job that can skip. Each job's
+  reach names the paths it reads and the scripts it runs, with every module
+  they import. One leg of the tests, lint, the guard groups, the release
+  builds, SonarCloud and the comment run on every pull request, and the
+  library, the dependencies, `VERSION`, the Makefile and the workflow itself
+  run everything, as do a push, a run dispatched by hand, a file the map does
+  not know and an answer the scope job could not give.
 - **About says when 4.0.0 came out and where the documentation was before
   phonometry.dev.** The History of About, in English and Spanish, now dates
   4.0.0 (17 November 2026) and the move of the documentation to phonometry.dev

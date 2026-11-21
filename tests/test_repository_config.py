@@ -3349,7 +3349,12 @@ def _lane_shape_problems(
     assert isinstance(lanes, list)
     assert isinstance(parallel, dict)
     assert isinstance(after, dict)
+    # The scope job answers before anything that may skip reads it, and waits
+    # on nothing: a job's wait on it is no place in the lanes.
+    scope = str(record.get("scope_job", ""))
     problems = []
+    if scope and scope in jobs and _needs(dict(jobs[scope])):
+        problems.append(f"{scope}: the scope job waits on another job")
     if len(lanes) > 2:
         problems.append(f"{len(lanes)} lanes, where two hold the short jobs")
     lane_of: dict[str, int] = {}
@@ -3359,7 +3364,12 @@ def _lane_shape_problems(
                 problems.append(f"{name}: in lane {lane_of[name]} and in lane {number}")
             else:
                 lane_of[name] = number
-    kinds = (("a lane", lane_of), ("parallel_jobs", parallel), ("after_jobs", after))
+    kinds = (
+        ("a lane", lane_of),
+        ("parallel_jobs", parallel),
+        ("after_jobs", after),
+        ("scope_job", {scope} - {""}),
+    )
     for name in sorted(set(jobs) | set(lane_of) | set(parallel) | set(after)):
         listed = [kind for kind, names in kinds if name in names]
         if name not in jobs:
@@ -3376,7 +3386,7 @@ def _lane_shape_problems(
             if name not in jobs:
                 continue
             job = jobs[name]
-            needs = _needs(dict(job))
+            needs = _needs(dict(job)) - {scope}
             before = lane[index - 1] if index else None
             wanted = {before} if before else set()
             if needs != wanted:
@@ -3394,10 +3404,10 @@ def _lane_shape_problems(
     problems += [
         f"{name}: waits on another job, so it does not start with the run"
         for name in sorted(set(parallel) & set(jobs))
-        if _needs(dict(jobs[name]))
+        if _needs(dict(jobs[name])) - {scope}
     ]
     for name in sorted(set(after) & set(jobs)):
-        needs = _needs(dict(jobs[name]))
+        needs = _needs(dict(jobs[name])) - {scope}
         if not needs:
             problems.append(
                 f"{name}: waits on no job, so it is no job that runs after one"
@@ -4178,6 +4188,7 @@ def test_the_llms_gate_reader_names_an_output_left_out_of_the_diff() -> None:
 
 #: The groups of Python CI, in the order their jobs stand in the file.
 _JOB_GROUPS = (
+    "Scope",
     "Tests",
     "Generated",
     "Docs",

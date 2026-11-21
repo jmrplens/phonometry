@@ -97,6 +97,7 @@ def _tracked() -> list[str]:
         check=True,
         text=True,
         encoding="utf-8",
+        timeout=60,
     ).stdout
     return [name for name in listing.split("\0") if name]
 

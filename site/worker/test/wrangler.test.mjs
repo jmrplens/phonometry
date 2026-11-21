@@ -98,6 +98,6 @@ test('the guard: a cron every 15 minutes, no route, no binding, dry run until to
 	assert.equal('routes' in guard || 'route' in guard, false);
 	assert.equal(guard.workers_dev, false);
 	assert.equal(guard.preview_urls, false);
-	assert.deepEqual(guard.vars, { THRESHOLD: '95000', MODE: 'dry-run' });
+	assert.deepEqual(guard.vars, { THRESHOLD: '95000', MODE: 'auto' });
 	for (const key of [...CODE_KEYS.filter((key) => key !== 'triggers' && key !== 'vars'), 'assets', 'analytics_engine_datasets', 'ratelimits']) assert.equal(key in guard, false, `guard sets ${key}`);
 });

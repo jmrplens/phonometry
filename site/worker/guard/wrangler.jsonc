@@ -17,7 +17,7 @@
 		"THRESHOLD": "95000",
 		// dry-run logs the decision and changes nothing; auto acts; off and on
 		// pin a state by hand. Without the CF_GUARD_TOKEN secret every run is dry.
-		"MODE": "dry-run"
+		"MODE": "auto"
 	},
 	// No route, no workers.dev address and no preview URLs: nothing but the
 	// cron reaches this Worker.

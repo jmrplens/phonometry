@@ -1195,9 +1195,9 @@ compute the field.
 
 - **International Organization for Standardization. (2017).** [*Underwater acoustics — Terminology*](https://www.iso.org/standard/62406.html) (ISO 18405:2017).
   The standardized definitions (propagation loss, source level, sound pressure level re 1 µPa) behind the quantities of this page.
-- **Jensen, F. B., Kuperman, W. A., Porter, M. B., & Schmidt, H. (2011).** *Computational ocean acoustics* (2nd ed.). Springer. https://doi.org/10.1007/978-1-4419-8678-8
+- **Jensen, F. B., Kuperman, W. A., Porter, M. B., & Schmidt, H. (2011).** *Computational ocean acoustics* (2nd ed.). Springer. <https://doi.org/10.1007/978-1-4419-8678-8>
   The reference monograph implemented here: the modal derivation of section 2 (Ch. 5, Eqs. 5.3-5.17), the ray equations of section 3 (Ch. 3, Eqs. 3.23-3.24) and its eigenray arrivals (§3.3.5, Eqs. 3.65-3.68), the Gaussian beams of section 4 (Ch. 3, §3.5, Eqs. 3.88-3.92), the split-step Fourier parabolic equation of section 5 (Ch. 6) and the model-selection guidance of section 6 (Ch. 1).
 - **Medwin, H., & Clay, C. S. (1998).** [*Fundamentals of acoustical oceanography*](https://shop.elsevier.com/books/fundamentals-of-acoustical-oceanography/medwin/978-0-12-487570-8). Academic Press.
   ISBN 978-0-12-487570-8. The closed-form travel time along the circular-arc ray of a linear sound-speed gradient (Equation 3.3.20) that the travel times of section 3 are held to.
-- **Munk, W. H. (1974).** Sound channel in an exponentially stratified ocean, with application to SOFAR. *The Journal of the Acoustical Society of America*, *55*(2), 220-226. https://doi.org/10.1121/1.1914492
+- **Munk, W. H. (1974).** Sound channel in an exponentially stratified ocean, with application to SOFAR. *The Journal of the Acoustical Society of America*, *55*(2), 220-226. <https://doi.org/10.1121/1.1914492>
   The canonical deep-water sound-speed profile used by the section 1 figure and snippets.

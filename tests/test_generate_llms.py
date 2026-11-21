@@ -338,6 +338,95 @@ def test_the_index_is_held_to_its_budget() -> None:
     assert len(committed) <= llms.LLMS_TXT_LIMIT_BYTES
 
 
+#: An address as a reader of plain text takes it: from the scheme to the
+#: first character no address holds unescaped, or a single quote
+#: (site/scripts/check-markdown-twins.mjs, ``ADDRESS``).
+_ADDRESS = re.compile(r"https?://[^\s<>\"'`\[\]{}|\\^]+")
+
+
+def _bare_addresses_read_with_punctuation(text: str) -> list[str]:
+    """Every bare address of *text* that runs into the punctuation after it.
+
+    The rule of site/scripts/check-markdown-twins.mjs (``bareAddressProblems``),
+    which holds the built llms files to it: a link's destination and an
+    autolink end where Markdown ends them, and any other address that ends on
+    a full stop, a comma, a semicolon, a colon, ``!``, ``?``, ``*``, ``_``,
+    ``~`` or a closing parenthesis it did not open is fetched with it.
+    """
+    found = []
+    for line in text.splitlines():
+        for match in _ADDRESS.finditer(line):
+            before = line[max(0, match.start() - 2) : match.start()]
+            address = match.group()
+            if before.endswith("<") or before == "](":
+                continue
+            if address[-1] in ".,;:!?*_~" or (
+                address.endswith(")") and address.count(")") > address.count("(")
+            ):
+                found.append(address)
+    return found
+
+
+def test_the_index_ends_no_sentence_on_a_bare_address() -> None:
+    """A crawler that reads an address up to the next space fetches its full stop too.
+
+    Two did, on the day the site moved to its own host: 24 requests for agent
+    files with the full stop of the sentence that named them on the end, every
+    one a 404. The index names each address as a link.
+    """
+    assert (
+        _bare_addresses_read_with_punctuation(
+            (ROOT / "llms.txt").read_text(encoding="utf-8")
+        )
+        == []
+    )
+
+
+def test_a_shard_head_and_a_part_head_link_every_address_they_name() -> None:
+    head = llms._part_head(
+        slug="signals",
+        title="Signal analysis",
+        number=2,
+        count=3,
+        single_page=False,
+        cuts=["page", "section"],
+    )
+    assert _bare_addresses_read_with_punctuation(head) == []
+    assert f"Part of [llms.txt]({llms.SITE_URL}/llms.txt). " in head
+    assert (
+        f"[part 1]({llms.SITE_URL}/llms/llms-signals-1.txt), "
+        f"[part 2]({llms.SITE_URL}/llms/llms-signals-2.txt) and "
+        f"[part 3]({llms.SITE_URL}/llms/llms-signals-3.txt)."
+    ) in head
+    shards = {"theory": ("theory-1", "theory-2"), "glossary": ("glossary",)}
+    assert llms._shard_links(shards, "theory", "theory") == (
+        f"[theory, part 1 of 2]({llms.SITE_URL}/llms/llms-theory-1.txt) and "
+        f"[theory, part 2 of 2]({llms.SITE_URL}/llms/llms-theory-2.txt)"
+    )
+    assert llms._shard_links(shards, "glossary", "glossary") == (
+        f"[glossary]({llms.SITE_URL}/llms/llms-glossary.txt)"
+    )
+
+
+def test_the_rule_finds_what_a_crawler_misreads_and_passes_what_markdown_ends() -> None:
+    misread = (
+        "Part of https://x.dev/llms.txt. Then https://x.dev/a, https://x.dev/b; "
+        "https://x.dev/c: and (index: https://x.dev/d/)."
+    )
+    assert _bare_addresses_read_with_punctuation(misread) == [
+        "https://x.dev/llms.txt.",
+        "https://x.dev/a,",
+        "https://x.dev/b;",
+        "https://x.dev/c:",
+        "https://x.dev/d/).",
+    ]
+    ended = (
+        "Part of [llms.txt](https://x.dev/llms.txt). An autolink <https://x.dev/a>. "
+        "On https://en.wikipedia.org/wiki/Decibel_(unit) and at the end https://x.dev/b"
+    )
+    assert _bare_addresses_read_with_punctuation(ended) == []
+
+
 _NODE = shutil.which("node")
 
 

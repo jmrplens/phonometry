@@ -344,7 +344,7 @@ component's frequency in time, the
 
 ## References
 
-- **Bendat, J. S., & Piersol, A. G. (2010).** *Random data: Analysis and measurement procedures* (4th ed.). Wiley. https://doi.org/10.1002/9781118032428
+- **Bendat, J. S., & Piersol, A. G. (2010).** *Random data: Analysis and measurement procedures* (4th ed.). Wiley. <https://doi.org/10.1002/9781118032428>
   Section 12.6.4.2 (spectrograms and their random errors), Section 11.5.4 (zoom transform procedures, Eqs. 11.122-11.130) and Sections 8.5.1/8.5.4 (resolution bandwidth and the statistical errors of unaveraged estimates). ISBN 978-0-470-24877-5.
-- **Harris, F. J. (1978).** On the use of windows for harmonic analysis with the discrete Fourier transform. *Proceedings of the IEEE*, *66*(1), 51-83. https://doi.org/10.1109/PROC.1978.10837
+- **Harris, F. J. (1978).** On the use of windows for harmonic analysis with the discrete Fourier transform. *Proceedings of the IEEE*, *66*(1), 51-83. <https://doi.org/10.1109/PROC.1978.10837>
   The taper catalogue behind the segment window: main-lobe width versus sidelobe leakage, the trade-off that sets what a spectrogram column can resolve at a given segment length.

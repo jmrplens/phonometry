@@ -627,17 +627,17 @@ Reverberation-time prediction fiche (ReverberationModelResult.report), the five-
   The classical formulae predate the normative world and enter it through this standard, whose Clause 4 model is a Sabine calculation with object and air terms; see the enclosed-space absorption guide. The linked catalogue record is the BSI Knowledge page for BS EN 12354-6:2003.
 - **Everest, F. A. (2001).** [*Master handbook of acoustics*](https://openlibrary.org/isbn/9780071360975) (4th ed.). McGraw-Hill.
   The Fig. 7-22 worked example the conformance suite reproduces: Example 1, an untreated 23.3 × 16 × 10 ft room, whose six printed Sabine reverberation times the SI implementation reproduces to ≤ 0.02 s, reinforced by hand-computed closed-form values and the model identities (every model collapses to Eyring for uniform absorption; Eyring collapses to Sabine as the absorption tends to zero), which transitively carry that real-data anchor to the whole family. ISBN 978-0-07-136097-5.
-- **Eyring, C. F. (1930).** Reverberation time in "dead" rooms. *The Journal of the Acoustical Society of America*, *1*(2A), 217-241. https://doi.org/10.1121/1.1915175
+- **Eyring, C. F. (1930).** Reverberation time in "dead" rooms. *The Journal of the Acoustical Society of America*, *1*(2A), 217-241. <https://doi.org/10.1121/1.1915175>
   The mean-free-path derivation behind the −S ln(1−ᾱ) term of §1.
-- **Fitzroy, D. (1959).** Reverberation formula which seems to be more accurate with nonuniform distribution of absorption. *The Journal of the Acoustical Society of America*, *31*(7), 893-897. https://doi.org/10.1121/1.1907814
+- **Fitzroy, D. (1959).** Reverberation formula which seems to be more accurate with nonuniform distribution of absorption. *The Journal of the Acoustical Society of America*, *31*(7), 893-897. <https://doi.org/10.1121/1.1907814>
   The axial split into three wall-pair decays of §2.
 - **International Organization for Standardization. (1993).** [*Acoustics — Attenuation of sound during propagation outdoors — Part 1: Calculation of the absorption of sound by the atmosphere*](https://www.iso.org/standard/17426.html) (ISO 9613-1:1993).
   The atmospheric-absorption coefficient behind the air term 4mV; see the outdoor propagation guide.
 - **International Organization for Standardization. (2003).** [*Acoustics — Measurement of sound absorption in a reverberation room*](https://www.iso.org/standard/34545.html) (ISO 354:2003).
   Defines the measured absorption coefficient via Sabine's formula, the self-consistency argument of §4.
-- **Kuttruff, H. (2016).** *Room acoustics* (6th ed.). CRC Press. https://doi.org/10.1201/9781315372150
+- **Kuttruff, H. (2016).** *Room acoustics* (6th ed.). CRC Press. <https://doi.org/10.1201/9781315372150>
   The diffuse-field theory, its limits and the modern assessment of the classical formulae behind §4.
-- **Millington, G. (1932).** A modified formula for reverberation. *The Journal of the Acoustical Society of America*, *4*(1), 69-82. https://doi.org/10.1121/1.1915588
+- **Millington, G. (1932).** A modified formula for reverberation. *The Journal of the Acoustical Society of America*, *4*(1), 69-82. <https://doi.org/10.1121/1.1915588>
   The per-surface logarithmic absorption term of §1.
 - **Sabine, W. C. (1922).** [*Collected papers on acoustics*](https://archive.org/details/collectedpaperso00sabi). Harvard University Press.
   The original reverberation experiments and the T = 0.161 V/A law of §1. The linked copy is the free scan at the Internet Archive.

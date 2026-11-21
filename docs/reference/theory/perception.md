@@ -521,15 +521,15 @@ See the [Noise-Induced Hearing Loss guide](../../perception/hearing/noise-induce
   The critical-band model and the TNR and PR procedures of the tone-prominence section. The linked PDF is the free download.
 - **Ecma International. (2025).** [*Psychoacoustic metrics for ITT equipment — Part 2 (methods for describing human perception based on the Sottek Hearing Model)*](https://ecma-international.org/publications-and-standards/standards/ecma-418/) (ECMA-418-2:2025).
   The Sottek Hearing Model: the Clause 5 auditory front end, the tonality of Clause 6, the roughness Formulae 113-117 and the sharpness input of Clause 7.1.10. The edition read is the 4th, of June 2025, whose PDF the linked page carries free.
-- **Fastl, H., & Zwicker, E. (2007).** *Psychoacoustics: Facts and models* (3rd ed.). Springer. https://doi.org/10.1007/978-3-540-68888-4
+- **Fastl, H., & Zwicker, E. (2007).** *Psychoacoustics: Facts and models* (3rd ed.). Springer. <https://doi.org/10.1007/978-3-540-68888-4>
   The critical-band, masking and loudness psychoacoustics underneath the Zwicker model and the sharpness and roughness sensations.
-- **Fletcher, H., & Munson, W. A. (1933).** Loudness, its definition, measurement and calculation. *The Journal of the Acoustical Society of America*, *5*(2), 82-108. https://doi.org/10.1121/1.1915637
+- **Fletcher, H., & Munson, W. A. (1933).** Loudness, its definition, measurement and calculation. *The Journal of the Acoustical Society of America*, *5*(2), 82-108. <https://doi.org/10.1121/1.1915637>
   The original equal-loudness measurements behind the contour concept of the first section.
-- **French, N. R., & Steinberg, J. C. (1947).** Factors governing the intelligibility of speech sounds. *The Journal of the Acoustical Society of America*, *19*(1), 90-119. https://doi.org/10.1121/1.1916407
+- **French, N. R., & Steinberg, J. C. (1947).** Factors governing the intelligibility of speech sounds. *The Journal of the Acoustical Society of America*, *19*(1), 90-119. <https://doi.org/10.1121/1.1916407>
   The articulation-band experiments behind the SII band-importance function.
 - **Google. (2019).** [*speech_intelligibility_index*](https://github.com/google/speech_intelligibility_index). GitHub.
   One of the two independent public implementations the four vocal-effort spectra were cross-verified against band by band. Used for verification only.
-- **Houtgast, T., & Steeneken, H. J. M. (1985).** A review of the MTF concept in room acoustics and its use for estimating speech intelligibility in auditoria. *The Journal of the Acoustical Society of America*, *77*(3), 1069-1077. https://doi.org/10.1121/1.392224
+- **Houtgast, T., & Steeneken, H. J. M. (1985).** A review of the MTF concept in room acoustics and its use for estimating speech intelligibility in auditoria. *The Journal of the Acoustical Society of America*, *77*(3), 1069-1077. <https://doi.org/10.1121/1.392224>
   The modulation-transfer framework of the STI section.
 - **International Electrotechnical Commission. (2020).** [*Sound system equipment — Part 16: Objective rating of speech intelligibility by speech transmission index*](https://webstore.iec.ch/en/publication/26771) (IEC 60268-16:2020 (Edition 5)).
   The STI section: the modulation frequencies (A.1.4; A.2.2 in Ed. 4), the index mapping (A.5.4/A.5.5 in the Ed. 4 numbering the page cites), the Table A.1 band weights, the Table A.2/A.3 masking and reception-threshold data, the Annex B STIPA method and the Annex F qualification bands.
@@ -547,7 +547,7 @@ See the [Noise-Induced Hearing Loss guide](../../perception/hearing/noise-induce
   The time-varying extension of Part 2 (Formulae 2-5 and 7-9), with the short-term and long-term loudness smoothers of the same section.
 - **International Organization for Standardization. (2023).** [*Acoustics — Normal equal-loudness-level contours*](https://www.iso.org/standard/83117.html) (ISO 226:2023).
   The Formula (1)/(2) contour model and the Table 1 parameters of the equal-loudness section.
-- **Passchier-Vermeer, W. (1974).** Hearing loss due to continuous exposure to steady-state broad-band noise. *The Journal of the Acoustical Society of America*, *56*(5), 1585-1593. https://doi.org/10.1121/1.1903482
+- **Passchier-Vermeer, W. (1974).** Hearing loss due to continuous exposure to steady-state broad-band noise. *The Journal of the Acoustical Society of America*, *56*(5), 1585-1593. <https://doi.org/10.1121/1.1903482>
   A field study of the exposure-response relations later codified in ISO 1999.
 - **Warnes, G. R. (2018).** [*SII: Calculate ANSI S3.5-1997 Speech Intelligibility Index (version 1.0.3.1)*](https://cran.r-project.org/src/contrib/Archive/SII/). CRAN archive.
   The second independent implementation used for the same band-by-band cross-verification of the vocal-effort spectra. Archived from CRAN in 2022; the last release is the one used.

@@ -929,10 +929,10 @@ print(p0.value, p0.unit, p0.printed)  # 2e-05 Pa 20 µPa
 
 ## References
 
-- **Bies, D. A., Hansen, C. H., & Howard, C. Q. (2017).** *Engineering noise control* (5th ed.). CRC Press. https://doi.org/10.1201/9781351228152
+- **Bies, D. A., Hansen, C. H., & Howard, C. Q. (2017).** *Engineering noise control* (5th ed.). CRC Press. <https://doi.org/10.1201/9781351228152>
   Section 2.5 (the noise measures: Leq, L10/L90 and their intended uses) and Section 2.15 (environmental noise surveys). ISBN 978-1-4987-2405-0.
 - **International Electrotechnical Commission. (1993).** [*Electroacoustics — Specifications for personal sound exposure meters*](https://webstore.iec.ch/en/publication/5054) (IEC 61252:1993).
-  The sound exposure E in Pa²h and the normalized 8 h level LEX,8h (≡ LEP,d), anchored at 3.2 Pa²h ⇔ exactly 90 dB. Since revised as IEC 61252:2025 (https://webstore.iec.ch/en/publication/68929); the first edition is the implemented one.
+  The sound exposure E in Pa²h and the normalized 8 h level LEX,8h (≡ LEP,d), anchored at 3.2 Pa²h ⇔ exactly 90 dB. Since revised as IEC 61252:2025 (<https://webstore.iec.ch/en/publication/68929>); the first edition is the implemented one.
 - **International Electrotechnical Commission. (2013).** [*Electroacoustics — Sound level meters — Part 1: Specifications*](https://webstore.iec.ch/en/publication/5708) (IEC 61672-1:2013).
   The Fast/Slow/Impulse envelope ballistics behind the percentile levels, the C-weighted peak of clause 5.13 (verified against the Table 5 tone bursts) and the sound exposure level verified against the Table 4 LAE column.
 - **International Organization for Standardization. (2015).** *Acoustics. Preferred reference values for acoustical and vibratory levels* (ISO 1683:2015).

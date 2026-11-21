@@ -824,15 +824,15 @@ The fit window plus a safety margin must fit inside the impulse-to-noise ratio (
 
 ## References
 
-- **Hak, C. C. J. M., Wenmaekers, R. H. C., & van Luxemburg, L. C. J. (2012).** Measuring room impulse responses: Impact of the decay range on derived room acoustic parameters. *Acta Acustica united with Acustica*, *98*(6), 907-915. https://doi.org/10.3813/aaa.918574
+- **Hak, C. C. J. M., Wenmaekers, R. H. C., & van Luxemburg, L. C. J. (2012).** Measuring room impulse responses: Impact of the decay range on derived room acoustic parameters. *Acta Acustica united with Acustica*, *98*(6), 907-915. <https://doi.org/10.3813/aaa.918574>
   The INR analysis behind the dynamic-range discussion and the tightened validity flags of this page.
 - **International Organization for Standardization. (2008).** [*Acoustics — Measurement of room acoustic parameters — Part 2: Reverberation time in ordinary rooms*](https://www.iso.org/standard/36201.html) (ISO 3382-2:2008).
   The accuracy grades and the dynamic-range criterion behind the decay analysis; its position rules are applied in the room-impulse-response guide.
 - **International Organization for Standardization. (2009).** [*Acoustics — Measurement of room acoustic parameters — Part 1: Performance spaces*](https://www.iso.org/standard/40979.html) (ISO 3382-1:2009).
   The parameter definitions and just-noticeable differences behind the decay analysis.
-- **Kuttruff, H. (2016).** *Room acoustics* (6th ed.). CRC Press. https://doi.org/10.1201/9781315372150
+- **Kuttruff, H. (2016).** *Room acoustics* (6th ed.). CRC Press. <https://doi.org/10.1201/9781315372150>
   The reference monograph behind this page: the statistical theory of decaying sound fields, the Schroeder frequency and the perceptual room parameters of this page.
-- **Schroeder, M. R. (1965).** New method of measuring reverberation time. *The Journal of the Acoustical Society of America*, *37*(3), 409-412. https://doi.org/10.1121/1.1909343
+- **Schroeder, M. R. (1965).** New method of measuring reverberation time. *The Journal of the Acoustical Society of America*, *37*(3), 409-412. <https://doi.org/10.1121/1.1909343>
   The backward-integration method that turns the squared impulse response into the smooth decay curve of this page.
-- **Zerwas, M., & Kayku, S. (2026).** [*Room acoustic measurement and decay analysis data of the St. Nicholas Chapel, Aachen Cathedral*](https://zenodo.org/records/20428705) \[Data set\]. Zenodo. https://doi.org/10.5281/zenodo.20428705
+- **Zerwas, M., & Kayku, S. (2026).** [*Room acoustic measurement and decay analysis data of the St. Nicholas Chapel, Aachen Cathedral*](https://zenodo.org/records/20428705) \[Data set\]. Zenodo. <https://doi.org/10.5281/zenodo.20428705>
   The measured chapel of the worked case: the impulse response of source 1 and receiver 1, whose omnidirectional channel the repository keeps, and the per-band parameters its authors published.

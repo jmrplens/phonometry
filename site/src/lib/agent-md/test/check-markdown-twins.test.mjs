@@ -22,6 +22,7 @@ import {
   PAGE_CLASSES,
   PAGE_END,
   REMEDIES,
+  bareAddressProblems,
   checkMarkdownTwins,
   headAndRest,
   headerOf,
@@ -99,7 +100,7 @@ function page(route, { lang = route.startsWith('/es/') || route === '/es/' ? 'es
 /** The `Pre-release:` value a copy of `lang` carries while VERSION is a pre-release. */
 const preReleaseLine = (lang) => (preRelease ? PRE_RELEASE[lang](version) : undefined);
 
-function copy(route, { lang = route.startsWith('/es/') || route === '/es/' ? 'es' : 'en', title = `Page ${route}`, other, updated = UPDATED_AT, verified = false, body = 'The body.', published = PUBLISHED, license = true, summary = 'A page & its copy.', release = `phonometry ${version}`, install = 'pip install "phonometry[full]"', pre = preReleaseLine(lang), author = 'José Manuel Requena Plens (https://orcid.org/0000-0003-1250-6212)' } = {}) {
+function copy(route, { lang = route.startsWith('/es/') || route === '/es/' ? 'es' : 'en', title = `Page ${route}`, other, updated = UPDATED_AT, verified = false, body = 'The body.', published = PUBLISHED, license = true, summary = 'A page & its copy.', release = `phonometry ${version}`, install = 'pip install "phonometry[full]"', pre = preReleaseLine(lang), author = 'José Manuel Requena Plens <https://orcid.org/0000-0003-1250-6212>' } = {}) {
   return [
     `# ${title}`,
     '',
@@ -115,7 +116,7 @@ function copy(route, { lang = route.startsWith('/es/') || route === '/es/' ? 'es
     ...(published ? [`Published: ${published}`] : []),
     `Updated: ${updated}`,
     ...(verified ? [`Verified: 3 conformance checks (IEC 61260-1:2014) ${SITE}/reference/conformance/#filters`] : []),
-    ...(license ? ['License: MIT (https://github.com/jmrplens/phonometry/blob/main/LICENSE)'] : []),
+    ...(license ? ['License: MIT <https://github.com/jmrplens/phonometry/blob/main/LICENSE>'] : []),
     `Summary: ${summary}`,
     '',
     '---',
@@ -200,7 +201,7 @@ const asPage = (text) => text.replace(/\n$/u, '');
  * @param {readonly string[]} pages
  */
 function shardFile(title, pages) {
-  const head = `# phonometry: ${title}\n\nPart of ${SITE}/llms.txt. Full text of the pages in this area.\n\n---\n`;
+  const head = `# phonometry: ${title}\n\nPart of [llms.txt](${SITE}/llms.txt). Full text of the pages in this area.\n\n---\n`;
   return head + pages.map((one) => `\n${one}${PAGE_END}`).join('');
 }
 
@@ -409,6 +410,61 @@ describe('the copies the old cut-and-paste left short', () => {
     assert.match(problems[0], /a component tag, "<ThemeImage/u);
     assert.match(problems[1], /raw HTML, "<sub>"/u);
     assert.match(problems[3], /the ::: of an aside/u);
+  });
+});
+
+describe('an address a crawler reads with the punctuation after it', () => {
+  // Two crawlers asked for 24 agent files with the full stop of the
+  // sentence that named them on the end, every one a 404: they read an
+  // address up to the next space.
+  test('a bare address before a full stop, a comma, a semicolon, a colon or a closing parenthesis, in a copy', (t) => {
+    const { found } = check(t, (files) => {
+      files['a/index.md'] = copy('/a/', {
+        other: '/es/a/',
+        body: [
+          'Read https://example.org/stop. Then https://example.org/comma, https://example.org/semi;',
+          'and https://example.org/colon: the last (https://example.org/paren) too.',
+        ].join('\n'),
+      });
+    });
+    // Once, in the copy: the shard and llms-full.txt carry it byte for byte.
+    const addresses = found.filter((line) => line.startsWith('address: '));
+    assert.equal(addresses.length, 5, found.join('\n'));
+    assert.match(addresses[0], /^address: \/a\/index\.md line \d+: a bare address read with the "\." after it, "https:\/\/example\.org\/stop\."$/u);
+    assert.match(addresses[4], /read with the "\)" after it, "https:\/\/example\.org\/paren\)"$/u);
+  });
+
+  test('the head of a shard that ends a sentence on the address of llms.txt', (t) => {
+    const { found } = check(t, undefined, PAGE_CLASSES, (llms) => {
+      for (const name of Object.keys(llms).filter((one) => one.startsWith('llms/'))) {
+        llms[name] = llms[name].replace(`[llms.txt](${SITE}/llms.txt).`, `${SITE}/llms.txt.`);
+      }
+    });
+    const addresses = found.filter((line) => line.startsWith('address: '));
+    assert.ok(addresses.length > 0, found.join('\n'));
+    for (const line of addresses) assert.match(line, /^address: \/llms\/llms-[a-z0-9-]+\.txt line 3: a bare address read with the "\." after it/u);
+  });
+
+  test('a link, an autolink, an address at the end of its line, one in parentheses it closes itself, and one in quotes or braces pass', () => {
+    const text = [
+      'See [the index](https://example.org/a). An autolink <https://example.org/b>, then <https://example.org/c>.',
+      'Author: A. Person <https://orcid.org/0000-0000-0000-0000>',
+      'The address ends the line https://example.org/d',
+      'A page on https://en.wikipedia.org/wiki/Decibel_(unit) and its talk.',
+      '```python',
+      'url = "https://example.org/e"',
+      "other = 'https://example.org/f'",
+      '```',
+      '@misc{x, url = {https://example.org/g},}',
+      'In code `https://example.org/h`.',
+    ].join('\n');
+    assert.deepEqual(bareAddressProblems(text), []);
+  });
+
+  test('an address that runs into its sentence inside code is read too, since a crawler does not know where code is', () => {
+    const problems = bareAddressProblems('```text\nsee https://example.org/x.\n```');
+    assert.equal(problems.length, 1);
+    assert.match(problems[0], /^line 2: /u);
   });
 });
 
@@ -678,7 +734,7 @@ describe('the llms files, which carry the copies as they read', () => {
     });
     files['llms.txt'] = (files['llms.txt'] ?? '').replace(
       `${SITE}/llms/llms-a.txt`,
-      parts.map((_, i) => `${SITE}/llms/llms-a-${i + 1}.txt`).join(') (')
+      parts.map((_, i) => `${SITE}/llms/llms-a-${i + 1}.txt`).join(`) [a, part 2](`)
     );
   };
 
@@ -802,7 +858,7 @@ describe('the llms files, which carry the copies as they read', () => {
     const extra = check(t, change, undefined, (files) => {
       asParts(files, [first, second]);
       files['llms/llms-a-3.txt'] = shardFile('a, part 3 of 2', ['stale']);
-      files['llms.txt'] = files['llms.txt']?.replace('llms-a-2.txt)', `llms-a-2.txt) (${SITE}/llms/llms-a-3.txt)`);
+      files['llms.txt'] = files['llms.txt']?.replace('llms-a-2.txt)', `llms-a-2.txt) [a, part 3](${SITE}/llms/llms-a-3.txt)`);
     }).found;
     assert.ok(
       extra.includes('llms: llms/llms-a-3.txt opens as part 3 of 2, past the parts llms-a is cut into'),
@@ -822,7 +878,7 @@ describe('the llms files, which carry the copies as they read', () => {
       files['llms/llms-catalogues-solids-2.txt'] = shardFile('catalogues-solids, part 2 of 2', [second]);
       files['llms.txt'] = files['llms.txt']?.replace(
         `${SITE}/llms/llms-catalogues-solids.txt`,
-        `${SITE}/llms/llms-catalogues-solids-1.txt) (${SITE}/llms/llms-catalogues-solids-2.txt`,
+        `${SITE}/llms/llms-catalogues-solids-1.txt) [part 2](${SITE}/llms/llms-catalogues-solids-2.txt`,
       );
     };
     assert.deepEqual(check(t, undefined, undefined, (files) => write(files, parts[1])).found, []);

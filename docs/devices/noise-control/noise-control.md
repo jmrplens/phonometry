@@ -590,11 +590,11 @@ with a value computed here compares two different things.
 
 ## References
 
-- **Bies, D. A., Hansen, C. H., & Howard, C. Q. (2017).** *Engineering noise control* (5th ed.). CRC Press. https://doi.org/10.1201/9781351228152
+- **Bies, D. A., Hansen, C. H., & Howard, C. Q. (2017).** *Engineering noise control* (5th ed.). CRC Press. <https://doi.org/10.1201/9781351228152>
   The HVAC duct methods (§8.11-8.17) and the machine-enclosure noise reduction (§7.4) of this page.
 - **International Organization for Standardization. (1995).** [*Acoustics — Determination of sound insulation performances of enclosures — Part 1: Measurements under laboratory conditions (for declaration purposes)*](https://www.iso.org/standard/19500.html) (ISO 11546-1:1995).
   The substitution measurement of the enclosure insertion loss of section 2.2: the choice of method (Clause 4), the with/without series (Clause 6) and what has to be recorded (Clause 9).
 - **International Organization for Standardization. (1995).** [*Acoustics — Determination of sound insulation performances of enclosures — Part 2: Measurements in situ (for acceptance and verification purposes)*](https://www.iso.org/standard/21033.html) (ISO 11546-2:1995).
   The in-situ form of the same measurement, with the environmental-correction and background-noise requirements of Table C.1.
-- **Vér, I. L., & Beranek, L. L. (2006).** *Noise and vibration control engineering: Principles and applications* (2nd ed.). Wiley. https://doi.org/10.1002/9780470172568
+- **Vér, I. L., & Beranek, L. L. (2006).** *Noise and vibration control engineering: Principles and applications* (2nd ed.). Wiley. <https://doi.org/10.1002/9780470172568>
   The companion treatment of the ducts and enclosures of this page.

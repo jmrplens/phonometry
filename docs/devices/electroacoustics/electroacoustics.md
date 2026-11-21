@@ -642,7 +642,7 @@ plt.show()
 
 - **Audio Engineering Society. (2015).** [*AES standard method for digital audio engineering — Measurement of digital audio equipment*](https://www.aes.org/publications/standards/search.cfm?docID=21) (AES17-2015).
   Clauses 5.2.5, 5.2.8 and 6.3.1: the THD+N ratio via the standard notch filter and the standard measurement bandwidth; SINAD is derived from it. Since revised as AES17-2020 (same catalogue page); the 2015 edition is the implemented one.
-- **Bendat, J. S., & Piersol, A. G. (2010).** *Random data: Analysis and measurement procedures* (4th ed.). Wiley. https://doi.org/10.1002/9781118032428
+- **Bendat, J. S., & Piersol, A. G. (2010).** *Random data: Analysis and measurement procedures* (4th ed.). Wiley. <https://doi.org/10.1002/9781118032428>
   ISBN 978-0-470-24877-5. The H1 and H2 frequency-response estimators and the ordinary coherence γ² of section 5.
 - **International Electrotechnical Commission. (2013).** [*Sound system equipment – Part 3: Amplifiers*](https://webstore.iec.ch/en/publication/1220) (IEC 60268-3:2013).
   Clauses 14.12.2-14.12.11: total harmonic distortion THD_F/THD_R (the 14.12.3.2 formula defines the R form), nth-order harmonic distortion d_n, the per-order modulation (d_m,n) and difference-frequency (d_d,n) intermodulation, total difference-frequency distortion, dynamic intermodulation (DIM) and the ITU-R BS.468-4 / IEC 60268-1 weighted THD.

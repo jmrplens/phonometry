@@ -406,5 +406,5 @@ error corrupts the averaging and the identification together.
 
 - **International Organization for Standardization. (2009).** [*Acoustics — Determination of airborne sound power levels emitted by machinery using vibration measurement — Part 1: Survey method using a fixed radiation factor*](https://www.iso.org/standard/40537.html) (ISO/TS 7849-1:2009).
   The limit Annex A.1 sets on a clamping magnet: below 2.5 kHz, on smooth flat surfaces of steel.
-- **McFadden, P. D. (1987).** A revised model for the extraction of periodic waveforms by time domain averaging. *Mechanical Systems and Signal Processing*, *1*(1), 83-95. https://doi.org/10.1016/0888-3270(87)90085-9
+- **McFadden, P. D. (1987).** A revised model for the extraction of periodic waveforms by time domain averaging. *Mechanical Systems and Signal Processing*, *1*(1), 83-95. <https://doi.org/10.1016/0888-3270(87)90085-9>
   The comb-filter model of synchronous averaging (Eq. 8, with the unit height of its teeth in Eq. 9), the revised finite-record model that yields an exactly periodic result, and the observation that a non-harmonic interfering order is best rejected by choosing the number of averages so that a comb node lands on it, not by the habitual power of two.

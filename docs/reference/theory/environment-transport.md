@@ -572,9 +572,9 @@ usage.
 
 ## References
 
-- **Attenborough, K., & Van Renterghem, T. (2021).** *Predicting outdoor sound* (2nd ed.). CRC Press. https://doi.org/10.1201/9780429470806
+- **Attenborough, K., & Van Renterghem, T. (2021).** *Predicting outdoor sound* (2nd ed.). CRC Press. <https://doi.org/10.1201/9780429470806>
   The ground impedance and meteorological effects underlying the ground-effect and barrier terms.
-- **Fahy, F. J. (1995).** *Sound intensity* (2nd ed.). E&FN Spon. https://doi.org/10.4324/9780203475386
+- **Fahy, F. J. (1995).** *Sound intensity* (2nd ed.). E&FN Spon. <https://doi.org/10.4324/9780203475386>
   ISBN 978-0-419-19810-9. The intensity physics behind the scanning methods: active intensity and the p-p error budget.
 - **International Organization for Standardization. (1993).** [*Acoustics — Attenuation of sound during propagation outdoors — Part 1: Calculation of the absorption of sound by the atmosphere*](https://www.iso.org/standard/17426.html) (ISO 9613-1:1993).
   The pure-tone attenuation coefficient and its relaxation physics.
@@ -596,9 +596,9 @@ usage.
   The survey standard that requires an adjustment for prominent impulsive sounds in the first place; the objective procedure only decides how large it is.
 - **International Organization for Standardization. (2022).** [*Acoustics — Description, measurement and assessment of environmental noise — Part 3: Objective method for the measurement of prominence of impulsive sounds and for adjustment of LAeq*](https://www.iso.org/standard/77035.html) (ISO/PAS 1996-3:2022).
   The ISO successor built on the NT ACOU 112 prominence.
-- **Maekawa, Z. (1968).** Noise reduction by screens. *Applied Acoustics*, *1*(3), 157-173. https://doi.org/10.1016/0003-682X(68)90020-0
+- **Maekawa, Z. (1968).** Noise reduction by screens. *Applied Acoustics*, *1*(3), 157-173. <https://doi.org/10.1016/0003-682X(68)90020-0>
   The screen-attenuation chart that the barrier insertion-loss formulas descend from.
 - **Nordtest. (2002).** [*Acoustics: Prominence of impulsive sounds and for adjustment of LAeq*](https://www.nordtest.info/wp/2002/05/01/acoustics-prominence-of-impulsive-sounds-and-for-adjustment-of-laeq-nt-acou-112/) (NT ACOU 112:2002).
   The onset-rate prominence and LAeq adjustment of the impulsive-sound section.
-- **Salomons, E. M. (2001).** *Computational atmospheric acoustics*. Kluwer Academic Publishers. https://doi.org/10.1007/978-94-010-0660-6
+- **Salomons, E. M. (2001).** *Computational atmospheric acoustics*. Kluwer Academic Publishers. <https://doi.org/10.1007/978-94-010-0660-6>
   ISBN 978-1-4020-0390-5. The wave-based outdoor propagation theory behind the engineering approximations of the ISO 9613-2 section.

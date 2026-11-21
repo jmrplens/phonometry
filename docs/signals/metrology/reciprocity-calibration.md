@@ -517,5 +517,5 @@ plt.show()
   The free-field calibration: Formulas (6) to (9) and (D.1), the acoustic centre of 6.5, the arrangement of 6.4 and 7.3, the attenuation of Annex B, Table B.1 and the uncertainty components of Table 1. Read from Edition 2.0 (2016-06), English-French, with its corrigendum IEC 61094-3:2016/COR1:2016 (2016-12), which makes Formula (9) the complex sensitivity.
 - **International Organization for Standardization. (1993).** [*Acoustics — Attenuation of sound during propagation outdoors — Part 1: Calculation of the absorption of sound by the atmosphere*](https://www.iso.org/standard/17426.html) (ISO 9613-1:1993).
   The method Table B.1 of IEC 61094-3 is computed by, and which B.2 adjusts.
-- **Joint Committee for Guides in Metrology. (2008).** [*Evaluation of measurement data — Guide to the expression of uncertainty in measurement*](https://www.bipm.org/documents/20126/2071204/JCGM_100_2008_E.pdf) (JCGM 100:2008, the GUM). BIPM. https://doi.org/10.59161/JCGM100-2008E
+- **Joint Committee for Guides in Metrology. (2008).** [*Evaluation of measurement data — Guide to the expression of uncertainty in measurement*](https://www.bipm.org/documents/20126/2071204/JCGM_100_2008_E.pdf) (JCGM 100:2008, the GUM). BIPM. <https://doi.org/10.59161/JCGM100-2008E>
   The combination both budgets ask for; also published as ISO/IEC Guide 98-3:2008.

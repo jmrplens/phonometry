@@ -1354,23 +1354,23 @@ found in the sources during this work are recorded in the
 
 ## References
 
-- **Allard, J. F., & Atalla, N. (2009).** *Propagation of sound in porous media: Modelling sound absorbing materials* (2nd ed.). Wiley. https://doi.org/10.1002/9780470747339
+- **Allard, J. F., & Atalla, N. (2009).** *Propagation of sound in porous media: Modelling sound absorbing materials* (2nd ed.). Wiley. <https://doi.org/10.1002/9780470747339>
   Chapter 6: the Biot theory of an elastic-framed porous material, its elastic coefficients, its two compressional waves and its shear wave, and the surface impedance and quarter-wave frame resonance of a hard-backed layer (Eqs 6.107-6.111). Chapter 11: the transfer-matrix method, the six-variable poroelastic layer matrix (Table 11.1), the coupling matrices (Sect. 11.4) and the global assembly (Sect. 11.5). Section 11.3.4: the rigid and limp frame limits of the Biot theory, the decoupling frequency and the limp effective density (Eqs 11.53-11.55, after Panneton 2007). ISBN 978-0-470-74661-5.
-- **Attenborough, K., & Van Renterghem, T. (2021).** *Predicting outdoor sound* (2nd ed.). CRC Press. https://doi.org/10.1201/9780429470806
+- **Attenborough, K., & Van Renterghem, T. (2021).** *Predicting outdoor sound* (2nd ed.). CRC Press. <https://doi.org/10.1201/9780429470806>
   Chapter 5: ground-impedance models, including the JCA family.
-- **Bies, D. A., Hansen, C. H., & Howard, C. Q. (2017).** *Engineering noise control* (5th ed.). CRC Press. https://doi.org/10.1201/9781351228152
+- **Bies, D. A., Hansen, C. H., & Howard, C. Q. (2017).** *Engineering noise control* (5th ed.). CRC Press. <https://doi.org/10.1201/9781351228152>
   Appendix D: porous-material properties, Table D.1 coefficient sets and the layered-construction recursions D.91-D.99.
-- **Cox, T. J., & D'Antonio, P. (2017).** *Acoustic absorbers and diffusers: Theory, design and application* (3rd ed.). CRC Press. https://doi.org/10.1201/9781315369211
+- **Cox, T. J., & D'Antonio, P. (2017).** *Acoustic absorbers and diffusers: Theory, design and application* (3rd ed.). CRC Press. <https://doi.org/10.1201/9781315369211>
   Transfer-matrix modelling (Sect. 2.6), porous models (Sect. 6.5) and resonant-absorber design equations (Sects. 7.3/7.5).
-- **Delany, M. E., & Bazley, E. N. (1970).** Acoustical properties of fibrous absorbent materials. *Applied Acoustics*, *3*(2), 105-116. https://doi.org/10.1016/0003-682X(70)90031-9
+- **Delany, M. E., & Bazley, E. N. (1970).** Acoustical properties of fibrous absorbent materials. *Applied Acoustics*, *3*(2), 105-116. <https://doi.org/10.1016/0003-682X(70)90031-9>
   The original empirical relations and their stated validity.
-- **Hopkins, C. (2007).** *Sound insulation*. Butterworth-Heinemann. https://doi.org/10.4324/9780080550473
+- **Hopkins, C. (2007).** *Sound insulation*. Butterworth-Heinemann. <https://doi.org/10.4324/9780080550473>
   Section 1.3.2.2: the equivalent-gas model and the Delany-Bazley SI form.
-- **Johnson, D. L., Koplik, J., & Dashen, R. (1987).** Theory of dynamic permeability and tortuosity in fluid-saturated porous media. *Journal of Fluid Mechanics*, *176*, 379-402. https://doi.org/10.1017/S0022112087000727
+- **Johnson, D. L., Koplik, J., & Dashen, R. (1987).** Theory of dynamic permeability and tortuosity in fluid-saturated porous media. *Journal of Fluid Mechanics*, *176*, 379-402. <https://doi.org/10.1017/S0022112087000727>
   The dynamic-tortuosity model behind the JCA effective density.
-- **Maa, D.-Y. (1998).** Potential of microperforated panel absorber. *The Journal of the Acoustical Society of America*, *104*(5), 2861-2866. https://doi.org/10.1121/1.423870
+- **Maa, D.-Y. (1998).** Potential of microperforated panel absorber. *The Journal of the Acoustical Society of America*, *104*(5), 2861-2866. <https://doi.org/10.1121/1.423870>
   The exact MPP impedance (Eq. 2), end corrections, design formulas and the Fig. 5 example pinned in the tests.
-- **Mechel, F. P. (Ed.). (2008).** *Formulas of acoustics* (2nd ed.). Springer. https://doi.org/10.1007/978-3-540-76833-3
+- **Mechel, F. P. (Ed.). (2008).** *Formulas of acoustics* (2nd ed.). Springer. <https://doi.org/10.1007/978-3-540-76833-3>
   Sections D.3-D.6 (layer reflection, multilayer scheme, diffuse-field integrals) and G.11 (empirical porous relations).
-- **Miki, Y. (1990).** Acoustical properties of porous materials — Modifications of Delany-Bazley models. *Journal of the Acoustical Society of Japan (E)*, *11*(1), 19-24. https://doi.org/10.1250/ast.11.19
+- **Miki, Y. (1990).** Acoustical properties of porous materials — Modifications of Delany-Bazley models. *Journal of the Acoustical Society of Japan (E)*, *11*(1), 19-24. <https://doi.org/10.1250/ast.11.19>
   The positive-real regression implemented in miki.

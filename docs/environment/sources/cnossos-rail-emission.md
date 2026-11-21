@@ -607,5 +607,5 @@ scope.
   The amendment in force since 31 December 2021. Replaces Tables G-1b, G-2, G-3a, G-4 and G-7, substitutes a new curve-squeal rule and a new bridge model, and rewrites the vertical directivity of source A.
 - **International Organization for Standardization. (1996).** [*Acoustics — Attenuation of sound during propagation outdoors — Part 2: General method of calculation*](https://www.iso.org/standard/20649.html) (ISO 9613-2:1996).
   The propagation model used here to carry the emission to a receiver. CNOSSOS-EU has its own propagation method in section 2.5 of Annex II, which is not ISO 9613-2.
-- **Kephalopoulos, S., Paviotti, M., & Anfosso-Lédée, F. (2012).** [*Common noise assessment methods in Europe (CNOSSOS-EU)*](https://publications.jrc.ec.europa.eu/repository/handle/JRC72550) (EUR 25379 EN). Publications Office of the European Union. https://doi.org/10.2788/31776
+- **Kephalopoulos, S., Paviotti, M., & Anfosso-Lédée, F. (2012).** [*Common noise assessment methods in Europe (CNOSSOS-EU)*](https://publications.jrc.ec.europa.eu/repository/handle/JRC72550) (EUR 25379 EN). Publications Office of the European Union. <https://doi.org/10.2788/31776>
   The Joint Research Centre reference report the Directive text descends from, with the IMAGINE measurement campaigns behind the Appendix G coefficients.

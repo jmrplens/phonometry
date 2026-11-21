@@ -639,7 +639,7 @@ Flanking impact level fiche (FlankingImpactLevelResult.report), Ln,f,w (CI).
 
 - **ASTM International. (2022).** [*Classification for Rating Sound Insulation*](https://www.astm.org/e0413-22.html) (ASTM E413-22).
   Table 1 is the reference contour and clause 5 the fitting rules that ASTM E1414 invokes to produce the ceiling attenuation class.
-- **Hopkins, C. (2007).** *Sound insulation*. Butterworth-Heinemann. https://doi.org/10.4324/9780080550473
+- **Hopkins, C. (2007).** *Sound insulation*. Butterworth-Heinemann. <https://doi.org/10.4324/9780080550473>
   The reference monograph for flanking transmission and the vibration reduction index, including the statistical-energy-analysis footing of the validity checks. ISBN 978-0-7506-6526-1.
 - **International Organization for Standardization. (1985).** [*Acoustics — Measurement of sound insulation in buildings and of building elements — Part 9: Laboratory measurement of room-to-room airborne sound insulation of a suspended ceiling with a plenum above it*](https://www.iso.org/standard/3965.html) (ISO 140-9:1985).
   Clause 3.3 defines the normalized ceiling attenuation Dn,c with A0 = 10 m2, and the facility clauses give the plenum depth, the room volumes and the required lining absorption.
@@ -653,5 +653,5 @@ Flanking impact level fiche (FlankingImpactLevelResult.report), Ln,f,w (CI).
   Application to junctions with at least one heavy element, with the modal-density, band-mode-count and modal-overlap validity checks (M < 0.25 bands bracketed, Clause 9).
 - **International Organization for Standardization. (2017).** [*Acoustics — Laboratory and field measurement of flanking transmission for airborne, impact and building service equipment sound between adjoining rooms — Part 1: Frame document*](https://www.iso.org/standard/67226.html) (ISO 10848-1:2017).
   The current frame document, whose Clauses 7.2 to 7.4 and 9 carry the acquisition rules quoted here: accelerometer mounting and the mass-loading inequality (7.2.3), excitation (7.2.4), the excitation and measurement position counts and separations (7.2.5), the structural reverberation time (7.3) and the shielding requirement (Clause 9).
-- **Vigran, T. E. (2008).** *Building acoustics*. CRC Press. https://doi.org/10.1201/9781482266016
+- **Vigran, T. E. (2008).** *Building acoustics*. CRC Press. <https://doi.org/10.1201/9781482266016>
   Section 9.2.3 presents Mechel's one-dimensional plenum model, Eqs. (9.13) to (9.20). ISBN 978-0-415-42853-8.

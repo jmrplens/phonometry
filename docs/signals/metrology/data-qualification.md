@@ -653,9 +653,9 @@ conscience.
 
 ## References
 
-- **Bendat, J. S., & Piersol, A. G. (2010).** *Random data: Analysis and measurement procedures* (4th ed.). Wiley. https://doi.org/10.1002/9781118032428
+- **Bendat, J. S., & Piersol, A. G. (2010).** *Random data: Analysis and measurement procedures* (4th ed.). Wiley. <https://doi.org/10.1002/9781118032428>
   Section 4.5.2 with Table A.6 (the nonparametric reverse arrangement trend test, its mean and variance, the tabulated percentage points and Example 4.4), Section 10.3 (data qualification: classification, validation, editing; the segment mean-square stationarity procedure of 10.3.1.1 and Example 10.3) and Section 5.5 (level crossings and peak values: Eqs. (5.195)-(5.196), (5.206), (5.211), (5.217)-(5.223) and Examples 5.12-5.15). ISBN 978-0-470-24877-5. The runs companion appeared in the third edition's percentage points of the run distribution.
-- **Rice, S. O. (1945).** Mathematical analysis of random noise. *The Bell System Technical Journal*, *24*(1), 46-156. https://doi.org/10.1002/j.1538-7305.1945.tb00453.x
+- **Rice, S. O. (1945).** Mathematical analysis of random noise. *The Bell System Technical Journal*, *24*(1), 46-156. <https://doi.org/10.1002/j.1538-7305.1945.tb00453.x>
   The original derivations of the expected level-crossing and maxima rates and the peak distribution of Gaussian noise that Bendat & Piersol Section 5.5 presents (their Ref. 6; Parts I-II are in volume 23, 1944).
-- **Wald, A., & Wolfowitz, J. (1940).** On a test whether two samples are from the same population. *The Annals of Mathematical Statistics*, *11*(2), 147-162. https://doi.org/10.1214/aoms/1177731909
+- **Wald, A., & Wolfowitz, J. (1940).** On a test whether two samples are from the same population. *The Annals of Mathematical Statistics*, *11*(2), 147-162. <https://doi.org/10.1214/aoms/1177731909>
   The exact conditional distribution of the number of runs, from which the runs-about-the-median acceptance regions are computed.

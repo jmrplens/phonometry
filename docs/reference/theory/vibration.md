@@ -313,11 +313,11 @@ or lightly damped element.*
 
 ## References
 
-- **Cremer, L., Heckl, M., & Petersson, B. A. T. (2005).** *Structure-borne sound: Structural vibrations and sound radiation at audio frequencies* (3rd ed.). Springer. https://doi.org/10.1007/b137728
+- **Cremer, L., Heckl, M., & Petersson, B. A. T. (2005).** *Structure-borne sound: Structural vibrations and sound radiation at audio frequencies* (3rd ed.). Springer. <https://doi.org/10.1007/b137728>
   ISBN 978-3-540-22696-3. The driving-point power W = (1/2) \|F\|^2 Re{Y} (Eq. 5.23) and the closed-form infinite-structure mobilities and impedances (Table 5.1) of the point-mobility section.
 - **Griffin, M. J. (1996).** [*Handbook of human vibration*](https://shop.elsevier.com/books/handbook-of-human-vibration/griffin/978-0-12-303041-2). Academic Press.
   ISBN 978-0-12-303041-2. The biodynamic and health-effect evidence behind the ISO 8041-1 weightings, the rms/MTVV/VDV dose measures and the spinal-injury rationale of the multiple-shock model.
-- **Hopkins, C. (2007).** *Sound insulation*. Butterworth-Heinemann. https://doi.org/10.4324/9780080550473
+- **Hopkins, C. (2007).** *Sound insulation*. Butterworth-Heinemann. <https://doi.org/10.4324/9780080550473>
   ISBN 978-0-7506-6526-1. The bending-plate radiation-efficiency theory (Eqs 2.227-2.230, the Leppington/Maidanik high-frequency limit) behind the radiation-efficiency section.
 - **International Organization for Standardization. (2009).** [*Acoustics — Determination of airborne sound power levels emitted by machinery using vibration measurement — Part 1: Survey method using a fixed radiation factor*](https://www.iso.org/standard/40537.html) (ISO/TS 7849-1:2009).
   The radiation factor that equals the radiation efficiency, closing the sound-power-from-vibration chain of the radiation-efficiency section (survey method, fixed radiation factor).

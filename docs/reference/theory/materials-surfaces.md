@@ -386,23 +386,23 @@ See the [Impedance Tube guide](../../materials/absorbers/impedance-tube.md) for 
 
 ## References
 
-- **Allard, J. F., & Atalla, N. (2009).** *Propagation of sound in porous media: Modelling sound absorbing materials* (2nd ed.). Wiley. https://doi.org/10.1002/9780470747339
+- **Allard, J. F., & Atalla, N. (2009).** *Propagation of sound in porous media: Modelling sound absorbing materials* (2nd ed.). Wiley. <https://doi.org/10.1002/9780470747339>
   ISBN 978-0-470-74661-5. The porous-material theory linking the airflow-resistance and impedance-tube quantities of the characterisation section.
 - **ASTM International. (2019).** [*Standard test method for normal incidence determination of porous material acoustical properties based on the transfer matrix method*](https://store.astm.org/e2611-19.html) (ASTM E2611-19).
-  The four-microphone transfer-matrix decomposition and its transmission loss. The edition implemented here; since revised as ASTM E2611-24 (https://store.astm.org/e2611-24.html).
-- **Cox, T. J., & D'Antonio, P. (2017).** *Acoustic absorbers and diffusers: Theory, design and application* (3rd ed.). CRC Press. https://doi.org/10.1201/9781315369211
+  The four-microphone transfer-matrix decomposition and its transmission loss. The edition implemented here; since revised as ASTM E2611-24 (<https://store.astm.org/e2611-24.html>).
+- **Cox, T. J., & D'Antonio, P. (2017).** *Acoustic absorbers and diffusers: Theory, design and application* (3rd ed.). CRC Press. <https://doi.org/10.1201/9781315369211>
   ISBN 978-1-4987-4099-9. Absorber and diffuser measurement and design, by the authors behind the ISO 17497-2 diffusion-coefficient method.
 - **International Organization for Standardization. (1998).** [*Acoustics — Determination of sound absorption coefficient and impedance in impedance tubes — Part 2: Transfer-function method*](https://www.iso.org/standard/22851.html) (ISO 10534-2:1998).
-  The two-microphone transfer-function method of the impedance-tube section. Adopted in Europe as EN ISO 10534-2:2001; since revised as ISO 10534-2:2023 (https://www.iso.org/standard/81294.html).
+  The two-microphone transfer-function method of the impedance-tube section. Adopted in Europe as EN ISO 10534-2:2001; since revised as ISO 10534-2:2023 (<https://www.iso.org/standard/81294.html>).
 - **International Organization for Standardization. (2004).** [*Acoustics — Sound-scattering properties of surfaces — Part 1: Measurement of the random-incidence scattering coefficient in a reverberation room*](https://www.iso.org/standard/31397.html) (ISO 17497-1:2004+A1:2014).
   The edition implemented here: the turntable scattering-coefficient method and its Annex A uncertainty chain.
 - **International Organization for Standardization. (2012).** [*Acoustics — Sound-scattering properties of surfaces — Part 2: Measurement of the directional diffusion coefficient in a free field*](https://www.iso.org/standard/55293.html) (ISO 17497-2:2012).
   The free-field directional diffusion coefficient and its solid-angle area weighting.
 - **International Organization for Standardization. (2018).** [*Acoustics — Determination of airflow resistance — Part 1: Static airflow method*](https://www.iso.org/standard/69869.html) (ISO 9053-1:2018).
   The static airflow-resistance method and its reference velocity.
-- **Jiménez, N., Cox, T. J., Romero-García, V., & Groby, J.-P. (2017).** Metadiffusers: Deep-subwavelength sound diffusers. *Scientific Reports*, *7*, 5389. https://doi.org/10.1038/s41598-017-05710-5
+- **Jiménez, N., Cox, T. J., Romero-García, V., & Groby, J.-P. (2017).** Metadiffusers: Deep-subwavelength sound diffusers. *Scientific Reports*, *7*, 5389. <https://doi.org/10.1038/s41598-017-05710-5>
   Open access. Deep-subwavelength panel diffusers whose slow-sound resonant slots reach the diffusion of a Schroeder or quadratic-residue diffuser in a fraction of the depth; co-authored with Cox, behind the ISO 17497-2 diffusion-coefficient method.
-- **Jiménez, N., Groby, J.-P., Pagneux, V., & Romero-García, V. (2017).** Iridescent perfect absorption in critically-coupled acoustic metamaterials using the transfer matrix method. *Applied Sciences*, *7*(6), 618. https://doi.org/10.3390/app7060618
+- **Jiménez, N., Groby, J.-P., Pagneux, V., & Romero-García, V. (2017).** Iridescent perfect absorption in critically-coupled acoustic metamaterials using the transfer matrix method. *Applied Sciences*, *7*(6), 618. <https://doi.org/10.3390/app7060618>
   Open access. A transfer-matrix-method tutorial for rigidly-backed resonant absorbers with the critical-coupling condition for perfect absorption, using the same layer machinery as the multilayer impedance-tube prediction here.
-- **Jiménez, N., Romero-García, V., & Groby, J.-P. (2018).** Perfect absorption of sound by rigidly-backed high-porous materials. *Acta Acustica united with Acustica*, *104*(3), 396-409. https://doi.org/10.3813/AAA.919183
+- **Jiménez, N., Romero-García, V., & Groby, J.-P. (2018).** Perfect absorption of sound by rigidly-backed high-porous materials. *Acta Acustica united with Acustica*, *104*(3), 396-409. <https://doi.org/10.3813/AAA.919183>
   The critical-coupling condition applied to a rigidly-backed layer of ordinary high-porosity absorber, connecting the porous-material models of the characterisation section to perfect single-frequency absorption.

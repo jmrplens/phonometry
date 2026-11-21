@@ -275,11 +275,11 @@ fills in.
 
 ## References
 
-- **Bradley, J. S. (2011).** Review of objective room acoustics measures and future needs. *Applied Acoustics*, *72*(10), 713-720. https://doi.org/10.1016/j.apacoust.2011.04.004
+- **Bradley, J. S. (2011).** Review of objective room acoustics measures and future needs. *Applied Acoustics*, *72*(10), 713-720. <https://doi.org/10.1016/j.apacoust.2011.04.004>
   A review of what the Table A.1 quantities are for and how their just-noticeable differences came about.
 - **International Electrotechnical Commission. (2014).** [*Electroacoustics — Octave-band and fractional-octave-band filters — Part 1: Specifications*](https://webstore.iec.ch/en/publication/5063) (IEC 61260-1:2014).
   The band centres every average on this page is taken over.
 - **International Organization for Standardization. (2009).** [*Acoustics — Measurement of room acoustic parameters — Part 1: Performance spaces*](https://www.iso.org/standard/40979.html) (ISO 3382-1:2009).
   Table 1 and 4.2.1, Table A.1, Table A.2 with A.4, A.5 and Clause 9: the tables and the reporting rules of this page.
-- **Witew, I. B., Behler, G. K., & Vorländer, M. (2017).** About just noticeable differences for aspects of spatial impressions in concert halls. *Acoustics Australia*, *45*(2), 195-202. https://doi.org/10.1007/s40857-017-0094-7
+- **Witew, I. B., Behler, G. K., & Vorländer, M. (2017).** About just noticeable differences for aspects of spatial impressions in concert halls. *Acoustics Australia*, *45*(2), 195-202. <https://doi.org/10.1007/s40857-017-0094-7>
   Why Table A.1 prints no just-noticeable difference for the late lateral sound level.

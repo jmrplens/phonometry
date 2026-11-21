@@ -534,11 +534,11 @@ grids.
 
 ## References
 
-- **Bendat, J. S., & Piersol, A. G. (2010).** *Random data: Analysis and measurement procedures* (4th ed.). Wiley. https://doi.org/10.1002/9781118032428
+- **Bendat, J. S., & Piersol, A. G. (2010).** *Random data: Analysis and measurement procedures* (4th ed.). Wiley. <https://doi.org/10.1002/9781118032428>
   Section 13.1.4: the Hilbert-transform relation between log-magnitude and phase behind the minimum-phase reconstruction. ISBN 978-0-470-24877-5.
 - **Farina, A. (2000).** [*Simultaneous measurement of impulse response and distortion with a swept-sine technique*](https://www.aes.org/e-lib/browse.cfm?elib=10211) (108th AES Convention, Paris, preprint 5093).
   The exponential-sweep deconvolution and the L·ln(n) packing of each distortion order ahead of the linear impulse response.
 - **Müller, S., & Massarani, P. (2001).** [Transfer-function measurement with sweeps](https://aes.org/publications/elibrary-page/?id=10189). *Journal of the Audio Engineering Society*, *49*(6), 443-471.
   The sweep-measurement monograph behind the practice notes: inverse filters, fades and the rejection of distortion from the linear impulse response.
-- **Novak, A., Lotton, P., & Simon, L. (2015).** Synchronized swept-sine: Theory, application and implementation. *Journal of the Audio Engineering Society*, *63*(10), 786-798. https://doi.org/10.17743/jaes.2015.0071
+- **Novak, A., Lotton, P., & Simon, L. (2015).** Synchronized swept-sine: Theory, application and implementation. *Journal of the Audio Engineering Society*, *63*(10), 786-798. <https://doi.org/10.17743/jaes.2015.0071>
   The synchronization condition that makes harmonic phases system properties, the closed-form inverse-filter spectrum used for the deconvolution and the fractional-sample separation.

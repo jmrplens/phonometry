@@ -625,7 +625,7 @@ road traffic, whose energy sits at low frequency. $C$ is typically 0 to
 
 ## References
 
-- **Hopkins, C. (2007).** *Sound insulation*. Butterworth-Heinemann. https://doi.org/10.4324/9780080550473
+- **Hopkins, C. (2007).** *Sound insulation*. Butterworth-Heinemann. <https://doi.org/10.4324/9780080550473>
   The interpretation of the single-number ratings and what they hide about the underlying band spectra. ISBN 978-0-7506-6526-1.
 - **International Organization for Standardization. (2020).** [*Acoustics — Rating of sound insulation in buildings and of building elements — Part 1: Airborne sound insulation*](https://www.iso.org/standard/77435.html) (ISO 717-1:2020).
   The reference-curve rating and the spectrum adaptation terms C and Ctr interpreted above; also the single-number engine for the façade quantity (Annex F).

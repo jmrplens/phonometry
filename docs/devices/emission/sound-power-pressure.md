@@ -1094,7 +1094,7 @@ with
 
 ## References
 
-- **Beranek, L. L., & Mellow, T. J. (2012).** *Acoustics: Sound fields and transducers*. Academic Press. https://doi.org/10.1016/C2011-0-05897-0
+- **Beranek, L. L., & Mellow, T. J. (2012).** *Acoustics: Sound fields and transducers*. Academic Press. <https://doi.org/10.1016/C2011-0-05897-0>
   ISBN 978-0-12-391421-7. Radiation and sound fields: the free-field relations between pressure and power that the enveloping-surface and anechoic methods rest on.
 - **International Organization for Standardization. (2010).** [*Acoustics — Determination of sound power levels and sound energy levels of noise sources using sound pressure — Engineering methods for an essentially free field over a reflecting plane*](https://www.iso.org/standard/52055.html) (ISO 3744:2010).
   The enveloping-surface method of section 1: hemisphere and box surface areas, the K1/K2 corrections, the Annex B microphone positions and the Annex E A-weighting.

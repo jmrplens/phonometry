@@ -1815,7 +1815,7 @@ build prints "LaTeX-incompatible input and strict mode is set to 'warn'"
 <a id="f73"></a>
 ### F73. Publish beside every page a Markdown copy that carries what the page carries
 
-**Why.** An agent reads a page through its copy at `<page>/index.md`, which the page's head, its structured data, its page actions and the llms files all point to. The copies cut from the page source by regular expressions fell short of the page where nobody looked: the two landing pages had none, the Spanish copies started without a title, a self-closing component took its data with it, and `{totalChecks}`, `:::` asides, HTML comments, links that only resolve on the site and a link written relative to the file the text was copied from reached the text. A copy is now written from the page source by `site/src/lib/agent-md/` before the build: the title, a header that says where the page lives, in which language, for which release, by whom, when and against which standards, the body, and the references the page prints. The build is then read the way a crawler reads it, and every copy is held to its page.
+**Why.** An agent reads a page through its copy at `<page>/index.md`, which the page's head, its structured data, its page actions and the llms files all point to. The copies cut from the page source by regular expressions fell short of the page where nobody looked: the two landing pages had none, the Spanish copies started without a title, a self-closing component took its data with it, and `{totalChecks}`, `:::` asides, HTML comments, links that only resolve on the site and a link written relative to the file the text was copied from reached the text. A copy is now written from the page source by `site/src/lib/agent-md/` before the build: the title, a header that says where the page lives, in which language, for which release, by whom, when and against which standards, the body, and the references the page prints. The build is then read the way a crawler reads it, and every copy is held to its page. A crawler also reads an address up to the next space: two asked the site for 24 agent files with the full stop of the sentence that named them on the end, so in a copy and in an llms file an address is a link, an autolink or bare with nothing after it but a space or the end of its line.
 
 **Do**
 
@@ -1846,6 +1846,8 @@ dist/llms.txt                      links every shard file, and no other
 site/src/data/llms-shards.json     every shard name the site has published,
                                    each written again or redirected to the
                                    file that carries its first page
+every address of a copy or an      [label](https://...), <https://...>, or
+llms file                          bare at a space or the end of its line
 ```
 
 **Don't**
@@ -1855,7 +1857,9 @@ a kind of page that publishes no copy, a copy written or edited by hand, a
 header line that says something the page does not (a day other than the
 sitemap's <lastmod>), a copy that lost the body or a row of its tables, an
 llms file that carries a page other than its copy reads, twice, or not at all,
-or a shard name the site published that no file answers
+a shard name the site published that no file answers, or an address the
+sentence's full stop, comma, semicolon, colon or closing parenthesis follows:
+"Part of https://phonometry.dev/llms.txt." asks for /llms.txt. with the stop on
 ```
 
 **Enforced by:** `site/scripts/check-markdown-twins.mjs`, `CI: docs.yml:build/markdown-twins`, `site/src/lib/agent-md/test/check-markdown-twins.test.mjs`, `CI: docs.yml:build/agent-md-tests`, `scripts/generate_llms.py`, `tests/test_generate_llms_names.py`

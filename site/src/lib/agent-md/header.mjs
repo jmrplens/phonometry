@@ -67,8 +67,12 @@ import { line } from './markdown-table.mjs';
 /** Where the index of every copy is. */
 export const INDEX_URL = `${siteUrl}${basePath}/llms.txt`;
 
-/** The licence line every page but a catalogue carries. */
-export const LICENSE = `MIT (${repositoryUrl}/blob/main/LICENSE)`;
+/**
+ * The licence line every page but a catalogue carries. Its address is an
+ * autolink, as the author's is: written in parentheses, a reader of plain
+ * text took the closing one for part of it.
+ */
+export const LICENSE = `MIT <${repositoryUrl}/blob/main/LICENSE>`;
 
 /**
  * The words the sentence under every copy's title opens with, per language:
@@ -161,7 +165,7 @@ export function header(fields) {
     ['Language', fields.lang],
     ['Alternate', fields.alternate],
     ...releaseLines(fields.release, fields.lang),
-    ['Author', fields.author ? `${fields.author.name} (${fields.author.orcid})` : undefined],
+    ['Author', fields.author ? `${fields.author.name} <${fields.author.orcid}>` : undefined],
     ['Published', fields.published],
     ['Updated', fields.updated],
     ['Standards', fields.standards?.length ? fields.standards.join(LIST_SEPARATOR) : undefined],

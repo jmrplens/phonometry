@@ -1213,13 +1213,13 @@ against a closed form or a 3D solver.
 
 ## References
 
-- **Attenborough, K., & Van Renterghem, T. (2021).** *Predicting outdoor sound* (2nd ed.). CRC Press. https://doi.org/10.1201/9780429470806
+- **Attenborough, K., & Van Renterghem, T. (2021).** *Predicting outdoor sound* (2nd ed.). CRC Press. <https://doi.org/10.1201/9780429470806>
   Chapter 4: the pressure-velocity FDTD reference model implemented here, from the governing equations (4.3-4.4) and the staggered leapfrog update (4.11-4.12) through the Courant condition (4.13-4.14), the phase-error analysis (4.15) and the rigid and finite-impedance boundary conditions (4.32-4.35). The module implements this textbook numerical method rather than a measurement standard, with this chapter as the citable reference formulation.
-- **Jiménez, N., Cox, T. J., Romero-García, V., & Groby, J.-P. (2017).** Metadiffusers: Deep-subwavelength sound diffusers. *Scientific Reports*, *7*, 5389. https://doi.org/10.1038/s41598-017-05710-5
+- **Jiménez, N., Cox, T. J., Romero-García, V., & Groby, J.-P. (2017).** Metadiffusers: Deep-subwavelength sound diffusers. *Scientific Reports*, *7*, 5389. <https://doi.org/10.1038/s41598-017-05710-5>
   The meshed Table-1 panel and the near-to-far-field polar comparison of section 4 reproduce, with this solver, the TMM-vs-full-wave cross-check the paper reports.
-- **Kuttruff, H. (2016).** *Room acoustics* (6th ed.). CRC Press. https://doi.org/10.1201/9781315372150
+- **Kuttruff, H. (2016).** *Room acoustics* (6th ed.). CRC Press. <https://doi.org/10.1201/9781315372150>
   Section 3.5 places time-domain wave-based methods among the numerical approaches to the wave equation in enclosures, and chapter 3 gives the rigid-room normal modes used as the analytic oracle.
-- **Mechel, F. P. (Ed.). (2008).** *Formulas of acoustics* (2nd ed.). Springer. https://doi.org/10.1007/978-3-540-76833-3
+- **Mechel, F. P. (Ed.). (2008).** *Formulas of acoustics* (2nd ed.). Springer. <https://doi.org/10.1007/978-3-540-76833-3>
   Section D.5: the absorption of a locally reacting plane at oblique incidence (the integrand of Eq. 6) and its diffuse-field averages in two and three dimensions (Eqs. 1, 2 and 4), which section 2 reads an impedance edge against.
-- **Williams, E. G. (1999).** *Fourier acoustics: Sound radiation and nearfield acoustical holography*. Academic Press. https://doi.org/10.1016/B978-0-12-753960-7.X5000-1
+- **Williams, E. G. (1999).** *Fourier acoustics: Sound radiation and nearfield acoustical holography*. Academic Press. <https://doi.org/10.1016/B978-0-12-753960-7.X5000-1>
   Chapter 8: the Helmholtz integral equation behind far_field_from_contour, with the outgoing free-space Green function and the far-field limit of the near-to-far-field transformation of section 4.

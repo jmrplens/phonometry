@@ -568,9 +568,9 @@ and the equalized responses feed the same downstream chain as every
 
 ## References
 
-- **Golay, M. J. E. (1961).** Complementary series. *IRE Transactions on Information Theory*, *7*(2), 82-87. https://doi.org/10.1109/TIT.1961.1057620
+- **Golay, M. J. E. (1961).** Complementary series. *IRE Transactions on Information Theory*, *7*(2), 82-87. <https://doi.org/10.1109/TIT.1961.1057620>
   The original construction of the complementary pairs of §1.
-- **Havelock, D., Kuwano, S., & Vorländer, M. (Eds.). (2008).** *Handbook of signal processing in acoustics*. Springer. https://doi.org/10.1007/978-0-387-30441-0
+- **Havelock, D., Kuwano, S., & Vorländer, M. (Eds.). (2008).** *Handbook of signal processing in acoustics*. Springer. <https://doi.org/10.1007/978-0-387-30441-0>
   Part I Chapter 6 (Xiang, Digital Sequences): the Golay recursion of §1, the complementary-autocorrelation identity of Eq. (2) and the frequency-domain recovery procedure of Eq. (4) and Fig. 2. ISBN 978-0-387-77698-9.
 - **Kirkeby, O., & Nelson, P. A. (1999).** [Digital filter design for inversion problems in sound reproduction](https://aes.org/publications/elibrary-page/?id=12098). *Journal of the Audio Engineering Society*, *47*(7/8), 583-595.
   The frequency-dependent Tikhonov regularization of §3 (their Eq. (17)) and the modeling delay that makes the mixed-phase inverse causal (Sec. 2.4).

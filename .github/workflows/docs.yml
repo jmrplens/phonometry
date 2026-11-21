@@ -528,7 +528,10 @@ jobs:
         # catalogue's tables, and a text a Markdown reader can use. The llms
         # files the build wrote carry every English guide, catalogue and errata
         # family once in llms-full.txt and in exactly one shard, as its copy
-        # reads, and llms.txt links every shard file and no other.
+        # reads, and llms.txt links every shard file and no other. No address
+        # of a copy or an llms file runs into the full stop, comma or
+        # parenthesis after it, which a crawler that reads an address up to
+        # the next space fetches with it.
         run: pnpm run check:markdown-twins
         working-directory: site
       - name: Check the Python examples the llms files restate

@@ -935,7 +935,7 @@ for lowest in (0.9, 0.8, 0.6, 0.3, 0.15):
 
 ## References
 
-- **Cox, T. J., & D'Antonio, P. (2017).** *Acoustic absorbers and diffusers: Theory, design and application* (3rd ed.). CRC Press. https://doi.org/10.1201/9781315369211
+- **Cox, T. J., & D'Antonio, P. (2017).** *Acoustic absorbers and diffusers: Theory, design and application* (3rd ed.). CRC Press. <https://doi.org/10.1201/9781315369211>
   Absorber measurement in practice: the room method, mountings, and the edge-effect discussion behind the tube-or-reverberation-room section. ISBN 978-1-4987-4099-9.
 - **International Organization for Standardization. (1997).** [*Acoustics — Sound absorbers for use in buildings — Rating of sound absorption*](https://www.iso.org/standard/19583.html) (ISO 11654:1997).
   The weighted sound-absorption rating of section 3: the practical coefficient, the shifted reference curve, the shape indicators and the absorption class, validated against the standard's own Annex A worked example.

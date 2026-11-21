@@ -732,7 +732,7 @@ decides the result.
   The façade sound insulation prediction (Annex F worked example). The linked catalogue record is the BSI Knowledge page for BS EN 12354-3:2000.
 - **European Committee for Standardization. (2000).** [*Building acoustics — Estimation of acoustic performance of buildings from the performance of elements — Part 4: Transmission of indoor sound to the outside*](https://knowledge.bsigroup.com/products/building-acoustics-estimation-of-acoustic-performance-in-buildings-from-the-performance-of-elements-transmission-of-indoor-sound-to-the-outside) (EN 12354-4:2000).
   The outdoor-radiation prediction (Annex G worked example). The linked catalogue record is the BSI Knowledge page for BS EN 12354-4:2000.
-- **Hopkins, C. (2007).** *Sound insulation*. Butterworth-Heinemann. https://doi.org/10.4324/9780080550473
+- **Hopkins, C. (2007).** *Sound insulation*. Butterworth-Heinemann. <https://doi.org/10.4324/9780080550473>
   The transmission physics of the envelope behind both the measured and the predicted façade quantities. ISBN 978-0-7506-6526-1.
 - **International Organization for Standardization. (2016).** [*Acoustics — Field measurement of sound insulation in buildings and of building elements — Part 3: Façade sound insulation*](https://www.iso.org/standard/59748.html) (ISO 16283-3:2016).
   The field façade element and global methods, with the angle-of-incidence corrections.

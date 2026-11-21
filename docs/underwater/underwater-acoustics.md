@@ -460,7 +460,7 @@ the published onset criteria) is
 
 ## References
 
-- **Ainslie, M. A. (2010).** *Principles of sonar performance modelling*. Springer. https://doi.org/10.1007/978-3-540-87662-5
+- **Ainslie, M. A. (2010).** *Principles of sonar performance modelling*. Springer. <https://doi.org/10.1007/978-3-540-87662-5>
   The systematic treatment of underwater acoustical quantities in the line that ISO 18405 standardised; supports the reference levels and the source level of sections 1-2.
 - **International Organization for Standardization. (2015).** *Acoustics. Preferred reference values for acoustical and vibratory levels* (ISO 1683:2015).
   The 20 µPa of Table 1 and the 1 µPa of Table 2 between which section 1 re-references a level, and note b of Table 2, the 26.0 dB between them; published as metrology.REFERENCE_VALUES. Read in the Spanish adoption UNE-EN ISO 1683:2016.

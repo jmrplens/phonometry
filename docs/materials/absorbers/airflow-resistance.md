@@ -563,7 +563,7 @@ the model, is $\sigma$.
 
 ## References
 
-- **Allard, J. F., & Atalla, N. (2009).** *Propagation of sound in porous media: Modelling sound absorbing materials* (2nd ed.). Wiley. https://doi.org/10.1002/9780470747339
+- **Allard, J. F., & Atalla, N. (2009).** *Propagation of sound in porous media: Modelling sound absorbing materials* (2nd ed.). Wiley. <https://doi.org/10.1002/9780470747339>
   The porous-material theory that consumes the measured resistivity: viscous and thermal dissipation in the pores, and the equivalent-fluid models of section 4. ISBN 978-0-470-74661-5.
 - **International Organization for Standardization. (2018).** [*Acoustics — Determination of airflow resistance — Part 1: Static airflow method*](https://www.iso.org/standard/69869.html) (ISO 9053-1:2018).
   The static method of section 2, with the through-origin regression and the 0.5 mm/s reference velocity.

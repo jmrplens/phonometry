@@ -310,7 +310,7 @@ Additional performance notes:
 
 ## References
 
-- **Bendat, J. S., & Piersol, A. G. (2010).** *Random data: Analysis and measurement procedures* (4th ed.). Wiley. https://doi.org/10.1002/9781118032428
+- **Bendat, J. S., & Piersol, A. G. (2010).** *Random data: Analysis and measurement procedures* (4th ed.). Wiley. <https://doi.org/10.1002/9781118032428>
   Section 10.4.2 (the procedure for analyzing multiple data records: individual per-record analysis first, joint cross-record analysis as a separate, deliberate step) and Chapter 7 (the multiple-input/output models that joint step leads to). ISBN 978-0-470-24877-5.
 - **International Electrotechnical Commission. (2013).** [*Electroacoustics — Sound level meters — Part 1: Specifications*](https://webstore.iec.ch/en/publication/5708) (IEC 61672-1:2013).
   The weighting and time-integration semantics applied per channel, exactly as the single-channel standard prescribes.

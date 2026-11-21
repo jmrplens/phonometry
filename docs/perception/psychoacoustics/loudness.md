@@ -498,11 +498,11 @@ ISO 226:2023 clause 4.1 defines the normal equal-loudness-level contours from 20
 
 ## References
 
-- **Fastl, H., & Zwicker, E. (2007).** *Psychoacoustics: Facts and models* (3rd ed.). Springer. https://doi.org/10.1007/978-3-540-68888-4
+- **Fastl, H., & Zwicker, E. (2007).** *Psychoacoustics: Facts and models* (3rd ed.). Springer. <https://doi.org/10.1007/978-3-540-68888-4>
   The critical-band and masking psychoacoustics behind the Zwicker model.
-- **Fletcher, H., & Munson, W. A. (1933).** Loudness, its definition, measurement and calculation. *The Journal of the Acoustical Society of America*, *5*(2), 82-108. https://doi.org/10.1121/1.1915637
+- **Fletcher, H., & Munson, W. A. (1933).** Loudness, its definition, measurement and calculation. *The Journal of the Acoustical Society of America*, *5*(2), 82-108. <https://doi.org/10.1121/1.1915637>
   The original equal-loudness measurements behind the loudness-level concept of the pure-tone section.
-- **Grangeiro de Barros, A., & Vuye, C. (2023).** [*Psychoacoustic indicators of pass-by road traffic noise*](https://zenodo.org/records/7904680) \[Data set\]. Zenodo. https://doi.org/10.5281/zenodo.7904680
+- **Grangeiro de Barros, A., & Vuye, C. (2023).** [*Psychoacoustic indicators of pass-by road traffic noise*](https://zenodo.org/records/7904680) \[Data set\]. Zenodo. <https://doi.org/10.5281/zenodo.7904680>
   The road pass-bys of the worked case: five 4 s excerpts recorded by an NTi Audio XL2, and the levels and N50 its authors published for each.
 - **International Organization for Standardization. (2017).** [*Acoustics — Methods for calculating loudness — Part 1: Zwicker method*](https://www.iso.org/standard/63077.html) (ISO 532-1:2017).
   Stationary and time-varying loudness in sones from the normative Annex A.4 reference program, with the N5/N10 percentile loudness, validated against the Annex B set.

@@ -947,11 +947,11 @@ resolve.
 
 ## References
 
-- **Allard, J. F., & Atalla, N. (2009).** *Propagation of sound in porous media: Modelling sound absorbing materials* (2nd ed.). Wiley. https://doi.org/10.1002/9780470747339
+- **Allard, J. F., & Atalla, N. (2009).** *Propagation of sound in porous media: Modelling sound absorbing materials* (2nd ed.). Wiley. <https://doi.org/10.1002/9780470747339>
   The porous-material theory behind the measured quantities: the surface impedance and absorption the tube recovers, and the models fitted to them. ISBN 978-0-470-74661-5.
 - **ASTM International. (2019).** [*Standard test method for normal incidence determination of porous material acoustical properties based on the transfer matrix method*](https://store.astm.org/e2611-19.html) (ASTM E2611-19).
-  The four-microphone transfer-matrix method of section 4 behind the transmission-loss helpers. The edition implemented here; since revised as ASTM E2611-24 (https://store.astm.org/e2611-24.html).
+  The four-microphone transfer-matrix method of section 4 behind the transmission-loss helpers. The edition implemented here; since revised as ASTM E2611-24 (<https://store.astm.org/e2611-24.html>).
 - **International Organization for Standardization. (1996).** [*Acoustics — Determination of sound absorption coefficient and impedance in impedance tubes — Part 1: Method using standing wave ratio*](https://www.iso.org/standard/18603.html) (ISO 10534-1:1996).
   The standing-wave-ratio method of section 2; the edition implemented here is its European adoption BS EN ISO 10534-1:2001.
 - **International Organization for Standardization. (1998).** [*Acoustics — Determination of sound absorption coefficient and impedance in impedance tubes — Part 2: Transfer-function method*](https://www.iso.org/standard/22851.html) (ISO 10534-2:1998).
-  The two-microphone transfer-function method of section 3 and its plane-wave frequency-range limits. Adopted in Europe as EN ISO 10534-2:2001, the edition implemented here; since revised as ISO 10534-2:2023 (https://www.iso.org/standard/81294.html).
+  The two-microphone transfer-function method of section 3 and its plane-wave frequency-range limits. Adopted in Europe as EN ISO 10534-2:2001, the edition implemented here; since revised as ISO 10534-2:2023 (<https://www.iso.org/standard/81294.html>).

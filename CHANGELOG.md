@@ -25,6 +25,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Fixed
 
+- **No address in the files written for agents runs into the punctuation
+  after it.** A crawler that reads an address up to the next space took the
+  full stop, comma or closing parenthesis after a bare address for part of
+  it: two asked phonometry.dev for 24 agent files with the full stop of a
+  sentence on their names, every one a 404. The llms files and the Markdown
+  copies now write each address as a link or an autolink (`<https://...>`):
+  the head of every shard and of every part, the sentences of `llms.txt`
+  that named shard files, the upgrade guide, the errata and catalogue
+  indexes and a copy, the author's ORCID and the licence in the header of
+  every copy, the addresses in the notes of the references, and the pointer
+  of the Spanish conformance copy to the English rows. The check of the
+  build's copies and llms files fails on a bare address the punctuation after
+  it would join.
 - **Every link of the documentation names where it goes.** The topic list
   above the sidebar linked the Start topic with the word "Start" on every
   English page, which Lighthouse's SEO audit "Links do not have descriptive

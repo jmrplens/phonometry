@@ -529,7 +529,7 @@ shares its band-limited kernel with the public
 
 ## References
 
-- **Bendat, J. S., & Piersol, A. G. (2010).** *Random data: Analysis and measurement procedures* (4th ed.). Wiley. https://doi.org/10.1002/9781118032428
+- **Bendat, J. S., & Piersol, A. G. (2010).** *Random data: Analysis and measurement procedures* (4th ed.). Wiley. <https://doi.org/10.1002/9781118032428>
   Sections 5.1.4 and 5.2.6-5.2.7 (time delay via correlation and cross-spectrum), 8.4 (random errors of correlation estimates and of the peak location), 11.4 (FFT computation with zero padding) and Chapter 13 (Hilbert transforms, envelope and instantaneous phase). ISBN 978-0-470-24877-5.
-- **Knapp, C. H., & Carter, G. C. (1976).** The generalized correlation method for estimation of time delay. *IEEE Transactions on Acoustics, Speech, and Signal Processing*, *24*(4), 320-327. https://doi.org/10.1109/TASSP.1976.1162830
+- **Knapp, C. H., & Carter, G. C. (1976).** The generalized correlation method for estimation of time delay. *IEEE Transactions on Acoustics, Speech, and Signal Processing*, *24*(4), 320-327. <https://doi.org/10.1109/TASSP.1976.1162830>
   The GCC framework, the Table I weightings and their conditions, and the maximum-likelihood (Hannan-Thomson) processor.

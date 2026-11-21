@@ -960,7 +960,7 @@ same result against the exact half-plane and coherent-ground models.
 
 ## References
 
-- **Attenborough, K., & Van Renterghem, T. (2021).** *Predicting outdoor sound* (2nd ed.). CRC Press. https://doi.org/10.1201/9780429470806
+- **Attenborough, K., & Van Renterghem, T. (2021).** *Predicting outdoor sound* (2nd ed.). CRC Press. <https://doi.org/10.1201/9780429470806>
   Ground impedance models, the spherical-wave reflection coefficient behind the ground dip of section 2, and the meteorological effects on barriers.
 - **International Organization for Standardization. (1993).** [*Acoustics — Attenuation of sound during propagation outdoors — Part 1: Calculation of the absorption of sound by the atmosphere*](https://www.iso.org/standard/17426.html) (ISO 9613-1:1993).
   The implemented pure-tone attenuation coefficient of section 1: alpha (Eq. (5)) with the oxygen and nitrogen relaxation frequencies (Eq. (3)/(4)), the Annex B humidity conversion and the exact Table 1 midbands (Eq. (6), Note 5).
@@ -970,9 +970,9 @@ same result against the exact half-plane and coherent-ground models.
   Only the clause 8.1.2.1 conversion m = alpha/(10 lg e) behind air_power_attenuation_per_m; the reverberation-room method itself is covered in the Room Acoustics guide.
 - **International Organization for Standardization. (2015).** [*Acoustics — Software for the calculation of sound outdoors — Part 3: Recommendations for quality assured implementation of ISO 9613-2 in software according to ISO 17534-1*](https://www.iso.org/standard/66128.html) (ISO/TR 17534-3:2015).
   The nineteen worked test cases and the ±0.05 dB envelope they are judged by; the length-weighted region ground factors of 6.2.5 behind region_ground_factors; and test cases T01 to T07, the ones it marks as answerable by ISO 9613-2 alone.
-- **Kephalopoulos, S., Paviotti, M., & Anfosso-Lédée, F. (2012).** [*Common noise assessment methods in Europe (CNOSSOS-EU)*](https://publications.jrc.ec.europa.eu/repository/handle/JRC72550) (EUR 25379 EN). Publications Office of the European Union. https://doi.org/10.2788/31776
+- **Kephalopoulos, S., Paviotti, M., & Anfosso-Lédée, F. (2012).** [*Common noise assessment methods in Europe (CNOSSOS-EU)*](https://publications.jrc.ec.europa.eu/repository/handle/JRC72550) (EUR 25379 EN). Publications Office of the European Union. <https://doi.org/10.2788/31776>
   The common EU framework contrasted with ISO 9613-2 in section 4.
-- **Maekawa, Z. (1968).** Noise reduction by screens. *Applied Acoustics*, *1*(3), 157-173. https://doi.org/10.1016/0003-682X(68)90020-0
+- **Maekawa, Z. (1968).** Noise reduction by screens. *Applied Acoustics*, *1*(3), 157-173. <https://doi.org/10.1016/0003-682X(68)90020-0>
   The screen-attenuation chart against Fresnel number that Eq. (14)'s diffraction term descends from.
-- **Salomons, E. M. (2001).** *Computational atmospheric acoustics*. Kluwer Academic Publishers. https://doi.org/10.1007/978-94-010-0660-6
+- **Salomons, E. M. (2001).** *Computational atmospheric acoustics*. Kluwer Academic Publishers. <https://doi.org/10.1007/978-94-010-0660-6>
   ISBN 978-1-4020-0390-5. The wave-based theory (parabolic equation, fast field program, refraction and turbulence) that quantifies what the favourable-condition assumption and the K_met factor approximate.

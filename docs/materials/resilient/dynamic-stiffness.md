@@ -574,5 +574,5 @@ weighted single number, is
 
 - **International Organization for Standardization. (1989).** [*Acoustics — Determination of dynamic stiffness — Part 1: Materials used under floating floors in dwellings*](https://www.iso.org/standard/16620.html) (EN 29052-1:1992 (ISO 9052-1:1989)).
   EN 29052-1:1992 is the identical European adoption of ISO 9052-1:1989 and is the designation this page uses throughout; the ISO URL is the citable one. The method implemented here: the dynamic stiffness per unit area (Formula 1), the resonance relations (Formulae 2-4), the enclosed-gas term (Formula 7, clause 8.2 NOTE s'a = 111/d MN/m³) and the airflow-resistivity regimes (Formulae 5-6). Conformance is anchored on the standard's own numeric NOTE plus hand-computed closed-form values of the resonance relations.
-- **Vigran, T. E. (2008).** *Building acoustics*. CRC Press. https://doi.org/10.1201/9781482266016
+- **Vigran, T. E. (2008).** *Building acoustics*. CRC Press. <https://doi.org/10.1201/9781482266016>
   Floating-floor design and the role of the resilient layer's dynamic stiffness in the impact-sound improvement. ISBN 978-0-415-42853-8.

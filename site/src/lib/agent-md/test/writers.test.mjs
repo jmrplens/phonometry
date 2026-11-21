@@ -7,6 +7,7 @@ import { readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { before, describe, test } from 'node:test';
 
+import { bareAddressProblems } from '../../../../scripts/check-markdown-twins.mjs';
 import { conformanceMarkdown } from '../../../components/Conformance.md.mjs';
 import { entryHeadings } from '../../../components/ErrataFamily.md.mjs';
 import { termItem } from '../../../components/Glossary.md.mjs';
@@ -269,9 +270,10 @@ describe('Conformance', () => {
     assert.doesNotMatch(markdown, /\]\(conformance\.json\)/u);
   });
 
-  test('the Spanish page points to the English copy', () => {
+  test('the Spanish page points to the English copy, by a link whose full stop is no part of its address', () => {
     const { markdown } = write('<Conformance lang="es" />\n', { lang: 'es' });
-    assert.match(markdown, new RegExp(String.raw`en texto plano en la copia en Markdown de la página en inglés: ${SITE_RE}\/reference\/conformance\/index\.md\.\n$`, 'u'));
+    assert.match(markdown, new RegExp(String.raw`en texto plano en la \[copia en Markdown de la página en inglés\]\(${SITE_RE}\/reference\/conformance\/index\.md\)\.\n$`, 'u'));
+    assert.deepEqual(bareAddressProblems(markdown), []);
   });
 });
 

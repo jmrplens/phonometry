@@ -796,13 +796,13 @@ output.
 
 ## References
 
-- **Bendat, J. S., & Piersol, A. G. (2010).** *Random data: Analysis and measurement procedures* (4th ed.). Wiley. https://doi.org/10.1002/9781118032428
+- **Bendat, J. S., & Piersol, A. G. (2010).** *Random data: Analysis and measurement procedures* (4th ed.). Wiley. <https://doi.org/10.1002/9781118032428>
   Sections 5.2 and 8.5 (autospectra and their random/bias errors, chi-square intervals), 9.1-9.2 (cross-spectra, coherent output spectrum and their errors) and 11.5 (Welch processing, tapering and overlap). ISBN 978-0-470-24877-5.
-- **Harris, F. J. (1978).** On the use of windows for harmonic analysis with the discrete Fourier transform. *Proceedings of the IEEE*, *66*(1), 51-83. https://doi.org/10.1109/PROC.1978.10837
+- **Harris, F. J. (1978).** On the use of windows for harmonic analysis with the discrete Fourier transform. *Proceedings of the IEEE*, *66*(1), 51-83. <https://doi.org/10.1109/PROC.1978.10837>
   The window figures of merit (Table 1): equivalent noise bandwidth, coherent gain, scalloping loss, worst-case processing loss, highest sidelobe level and main-lobe width, computed by window_metrics for any scipy taper.
-- **Percival, D. B., & Walden, A. T. (1993).** *Spectral analysis for physical applications: Multitaper and conventional univariate techniques*. Cambridge University Press. https://doi.org/10.1017/CBO9780511622762
+- **Percival, D. B., & Walden, A. T. (1993).** *Spectral analysis for physical applications: Multitaper and conventional univariate techniques*. Cambridge University Press. <https://doi.org/10.1017/CBO9780511622762>
   Chapter 7 (multitaper estimation: eigenspectra, adaptive weighting, equivalent degrees of freedom) and Chapter 8 (computing the Slepian sequences); the Table 382 eigenvalues anchor the taper oracle in the test suite. ISBN 978-0-521-43541-3.
-- **Thomson, D. J. (1982).** Spectrum estimation and harmonic analysis. *Proceedings of the IEEE*, *70*(9), 1055-1096. https://doi.org/10.1109/PROC.1982.12433
+- **Thomson, D. J. (1982).** Spectrum estimation and harmonic analysis. *Proceedings of the IEEE*, *70*(9), 1055-1096. <https://doi.org/10.1109/PROC.1982.12433>
   The multitaper method: Slepian tapers, eigenspectra and the adaptive weights implemented by multitaper_psd.
-- **Welch, P. D. (1967).** The use of fast Fourier transform for the estimation of power spectra: A method based on time averaging over short, modified periodograms. *IEEE Transactions on Audio and Electroacoustics*, *15*(2), 70-73. https://doi.org/10.1109/TAU.1967.1161901
+- **Welch, P. D. (1967).** The use of fast Fourier transform for the estimation of power spectra: A method based on time averaging over short, modified periodograms. *IEEE Transactions on Audio and Electroacoustics*, *15*(2), 70-73. <https://doi.org/10.1109/TAU.1967.1161901>
   The overlapped-segment variance formula behind the effective number of averages (Bendat & Piersol Section 11.5.2.2, Ref. 11).

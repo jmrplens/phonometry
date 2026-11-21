@@ -483,6 +483,6 @@ Pages elsewhere on the site that this section leans on:
 ## References
 
 - **European Civil Aviation Conference. (2016).** [*Report on standard method of computing noise contours around civil airports, Volume 2: Technical guide*](https://www.ecac-ceac.org/images/documents/ECAC-Doc_29_4th_edition_Dec_2016_Volume_2.pdf) (ECAC.CEAC Doc 29, 4th ed.).
-  The NPD and profile conventions the database follows, and the single-event chain the aircraft records feed. The linked PDF is the free download; the volumes are catalogued on the ECAC documents page (https://www.ecac-ceac.org/documents/ecac-documents-and-international-agreements).
+  The NPD and profile conventions the database follows, and the single-event chain the aircraft records feed. The linked PDF is the free download; the volumes are catalogued on the ECAC documents page (<https://www.ecac-ceac.org/documents/ecac-documents-and-international-agreements>).
 - **European Union Aviation Safety Agency. (2020).** [*Aircraft Noise and Performance (ANP) database, version 2.3*](https://www.easa.europa.eu/en/domains/environment/policy-support-and-research/aircraft-noise-and-performance-anp-data). EASA.
   The NPD tables, aircraft metadata and default fixed-point profiles this guide reads. The database is published by EASA and EUROCONTROL and shipped with phonometry; its provenance is recorded in aircraft/data/anp/PROVENANCE.md.

@@ -536,7 +536,7 @@ per-band field indicators then decide the grade actually achieved.
 
 ## References
 
-- **Beranek, L. L., & Mellow, T. J. (2012).** *Acoustics: Sound fields and transducers*. Academic Press. https://doi.org/10.1016/C2011-0-05897-0
+- **Beranek, L. L., & Mellow, T. J. (2012).** *Acoustics: Sound fields and transducers*. Academic Press. <https://doi.org/10.1016/C2011-0-05897-0>
   ISBN 978-0-12-391421-7. Radiation and sound fields: the free-field and diffuse-field relations between pressure and power that the whole method family rests on.
 - **International Organization for Standardization. (1996).** [*Acoustics — Declaration and verification of noise emission values of machinery and equipment*](https://www.iso.org/standard/10855.html) (ISO 4871:1996).
   The declaration section: the dual/single-number forms, L_WAd = L_WA + K_WA (clause 3.15) and the clause 6.2 verification.

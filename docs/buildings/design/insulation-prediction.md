@@ -616,5 +616,5 @@ ISO 16283-3 measurement they are compared against, in
   The simplified airborne flanking-transmission prediction (Annex E junctions, worked example H.3). The linked catalogue record is the BSI Knowledge page for BS EN 12354-1:2000.
 - **European Committee for Standardization. (2000).** [*Building acoustics — Estimation of acoustic performance of buildings from the performance of elements — Part 2: Impact sound insulation between rooms*](https://knowledge.bsigroup.com/products/building-acoustics-estimation-of-acoustic-performance-in-buildings-from-the-performance-of-elements-impact-sound-insulation-between-rooms) (EN 12354-2:2000).
   The simplified impact flanking-transmission prediction (worked example E.3). The linked catalogue record is the BSI Knowledge page for BS EN 12354-2:2000.
-- **Hopkins, C. (2007).** *Sound insulation*. Butterworth-Heinemann. https://doi.org/10.4324/9780080550473
+- **Hopkins, C. (2007).** *Sound insulation*. Butterworth-Heinemann. <https://doi.org/10.4324/9780080550473>
   The full treatment of flanking transmission and the EN 12354 prediction framework, from the vibration reduction index to its statistical basis. ISBN 978-0-7506-6526-1.

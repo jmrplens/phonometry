@@ -920,13 +920,13 @@ texts' own numeric anchors (see the
 
 ## References
 
-- **Allen, J. B., & Berkley, D. A. (1979).** Image method for efficiently simulating small-room acoustics. *The Journal of the Acoustical Society of America*, *65*(4), 943-950. https://doi.org/10.1121/1.382599
+- **Allen, J. B., & Berkley, D. A. (1979).** Image method for efficiently simulating small-room acoustics. *The Journal of the Acoustical Society of America*, *65*(4), 943-950. <https://doi.org/10.1121/1.382599>
   The reflection-count decomposition of the rectangular-room image lattice used in §1.
-- **Bies, D. A., Hansen, C. H., & Howard, C. Q. (2017).** *Engineering noise control* (5th ed.). CRC Press. https://doi.org/10.1201/9781351228152
+- **Bies, D. A., Hansen, C. H., & Howard, C. Q. (2017).** *Engineering noise control* (5th ed.). CRC Press. <https://doi.org/10.1201/9781351228152>
   The steady-state room field and the room constant of §2 (§6.4, Equations (6.43) and (6.44)).
-- **Kuttruff, H. (2016).** *Room acoustics* (6th ed.). CRC Press. https://doi.org/10.1201/9781315372150
+- **Kuttruff, H. (2016).** *Room acoustics* (6th ed.). CRC Press. <https://doi.org/10.1201/9781315372150>
   The image-source construction (§4.1), the impulse response it sums and the rate of its reflections (§4.2, Equations (4.4) to (4.6)), the Eyring reverberation (§5.4, Equation (5.23)), the reverberation distance (§5.6, Equation (5.44)), the Schroeder frequency (§3.6, Equation (3.44)) and the audible image count (§9.8, Equation (9.23)) of this page.
-- **Long, M. (2014).** *Architectural acoustics* (2nd ed.). Academic Press. https://doi.org/10.1016/C2012-0-03257-5
+- **Long, M. (2014).** *Architectural acoustics* (2nd ed.). Academic Press. <https://doi.org/10.1016/C2012-0-03257-5>
   The rectangular-room modes of §3: the eigenfrequencies of Equation (8.43), the Table 8.1 example room and the Morse/Pierce mode count and modal density of Equations (8.45) and (8.46).
-- **Vorländer, M. (2020).** *Auralization: Fundamentals of acoustics, modelling, simulation, algorithms and acoustic virtual reality* (2nd ed.). Springer. https://doi.org/10.1007/978-3-030-51202-6
+- **Vorländer, M. (2020).** *Auralization: Fundamentals of acoustics, modelling, simulation, algorithms and acoustic virtual reality* (2nd ed.). Springer. <https://doi.org/10.1007/978-3-030-51202-6>
   The mirror-source model of §1 (Chapter 11), with the image positions, delay and reflection-factor expressions of Equations (11.36), (11.38) and (11.39).

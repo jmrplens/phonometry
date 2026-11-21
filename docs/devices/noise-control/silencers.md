@@ -896,11 +896,11 @@ algebra does not.
 
 ## References
 
-- **Bies, D. A., Hansen, C. H., & Howard, C. Q. (2017).** *Engineering noise control* (5th ed.). CRC Press. https://doi.org/10.1201/9781351228152
+- **Bies, D. A., Hansen, C. H., & Howard, C. Q. (2017).** *Engineering noise control* (5th ed.). CRC Press. <https://doi.org/10.1201/9781351228152>
   The muffler four-pole method, the expansion-chamber TL and the resonator tuning formulas (§8.8-8.9) of this guide.
 - **International Organization for Standardization. (2003).** [*Acoustics — Laboratory measurement procedures for ducted silencers and air-terminal units — Insertion loss, flow noise and total pressure loss*](https://www.iso.org/standard/30385.html) (ISO 7235:2003).
   The substitution measurement of section 3: the source, modal filter, transition and substitution duct of Clause 5.2, the three receiving-side arrangements of 5.2.4, the two series of 6.2.1 with the Table 6 spread limits, and the limiting insertion loss of Clause 7.4 and Annex C. Europe adopts it unchanged as EN ISO 7235:2009.
-- **Munjal, M. L. (2014).** *Acoustics of ducts and mufflers* (2nd ed.). Wiley. https://doi.org/10.1002/9781118443767
+- **Munjal, M. L. (2014).** *Acoustics of ducts and mufflers* (2nd ed.). Wiley. <https://doi.org/10.1002/9781118443767>
   The transfer-matrix formulation, the element matrices and the transmission loss from the compound matrix (Eq. (3.27)), and the reference treatment of dissipative and combined mufflers.
-- **Vér, I. L., & Beranek, L. L. (2006).** *Noise and vibration control engineering: Principles and applications* (2nd ed.). Wiley. https://doi.org/10.1002/9780470172568
+- **Vér, I. L., & Beranek, L. L. (2006).** *Noise and vibration control engineering: Principles and applications* (2nd ed.). Wiley. <https://doi.org/10.1002/9780470172568>
   The companion treatment of reactive and dissipative silencers.

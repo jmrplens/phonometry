@@ -515,17 +515,17 @@ honest grade.
 
 ## References
 
-- **Cox, T. J., & D'Antonio, P. (2017).** *Acoustic absorbers and diffusers: Theory, design and application* (3rd ed.). CRC Press. https://doi.org/10.1201/9781315369211
+- **Cox, T. J., & D'Antonio, P. (2017).** *Acoustic absorbers and diffusers: Theory, design and application* (3rd ed.). CRC Press. <https://doi.org/10.1201/9781315369211>
   ISBN 978-1-4987-4099-9. The Schroeder sequences, the Fraunhofer far-field model and the diffusion-coefficient machinery the metadiffuser is evaluated with.
 - **International Organization for Standardization. (2012).** [*Acoustics — Sound-scattering properties of surfaces — Part 2: Measurement of the directional diffusion coefficient in a free field*](https://www.iso.org/standard/55293.html) (ISO 17497-2:2012).
   The directional diffusion coefficient the far field of the panel is reduced to, and its normalisation against a flat reference of the same footprint (Formula (7)); the goniometer measurement that grades a built panel is in the Diffusers guide.
 - **Jiménez, N., Cox, T. J., Groby, J.-P., & Romero-García, V. (2019).** [Beyond phase grating diffusers using locally-resonant metamaterials](https://pub.dega-akustik.de/ICA2019/data/articles/000706.pdf). *Proceedings of the 23rd International Congress on Acoustics (ICA 2019)*.
   The congress companion to the 2017 paper: the transfer-matrix chain, the slow-sound dispersion picture and the far-field comparisons that section 3 condenses.
-- **Jiménez, N., Cox, T. J., Romero-García, V., & Groby, J.-P. (2017).** Metadiffusers: Deep-subwavelength sound diffusers. *Scientific Reports*, *7*, 5389. https://doi.org/10.1038/s41598-017-05710-5
+- **Jiménez, N., Cox, T. J., Romero-García, V., & Groby, J.-P. (2017).** Metadiffusers: Deep-subwavelength sound diffusers. *Scientific Reports*, *7*, 5389. <https://doi.org/10.1038/s41598-017-05710-5>
   The metadiffuser model implemented here: slits loaded by Helmholtz resonators reproduce Schroeder phase profiles and ternary sequences from panels 1/46 to 1/20 of the design wavelength thick, including the quadratic-residue design of section 2.
-- **Jiménez, N., Groby, J.-P., Pagneux, V., & Romero-García, V. (2017).** Iridescent perfect absorption in critically-coupled acoustic metamaterials using the transfer matrix method. *Applied Sciences*, *7*(6), 618. https://doi.org/10.3390/app7060618
+- **Jiménez, N., Groby, J.-P., Pagneux, V., & Romero-García, V. (2017).** Iridescent perfect absorption in critically-coupled acoustic metamaterials using the transfer matrix method. *Applied Sciences*, *7*(6), 618. <https://doi.org/10.3390/app7060618>
   The slit + Helmholtz-resonator transfer-matrix chain each well is evaluated with, and the critical-coupling condition behind the ternary 0 state.
-- **Jiménez, N., Huang, W., Romero-García, V., Pagneux, V., & Groby, J.-P. (2016).** Ultra-thin metamaterial for perfect and quasi-omnidirectional sound absorption. *Applied Physics Letters*, *109*(12), 121902. https://doi.org/10.1063/1.4962328
+- **Jiménez, N., Huang, W., Romero-García, V., Pagneux, V., & Groby, J.-P. (2016).** Ultra-thin metamaterial for perfect and quasi-omnidirectional sound absorption. *Applied Physics Letters*, *109*(12), 121902. <https://doi.org/10.1063/1.4962328>
   The resonator impedance (Eq. A23) and its radiation end corrections (Eqs. A24-A27) used in every loaded slit.
-- **Jiménez, N., Umnova, O., & Groby, J.-P. (Eds.). (2021).** *Acoustic waves in periodic structures, metamaterials, and porous media*. Springer. https://doi.org/10.1007/978-3-030-84300-7
+- **Jiménez, N., Umnova, O., & Groby, J.-P. (Eds.). (2021).** *Acoustic waves in periodic structures, metamaterials, and porous media*. Springer. <https://doi.org/10.1007/978-3-030-84300-7>
   Topics in Applied Physics, Vol. 143. The book-length treatment of resonant metamaterial absorbers and diffusers; the modern companion to Cox & D'Antonio for this whole family.

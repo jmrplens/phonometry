@@ -693,6 +693,6 @@ and `absorption_per_table` are callable directly.
 ## References
 
 - **International Organization for Standardization. (2012).** [*Acoustics — Measurement of room acoustic parameters — Part 3: Open plan offices*](https://www.iso.org/standard/46520.html) (ISO 3382-3:2012).
-  The open-plan speech-privacy quantities this page implements. Since revised as ISO 3382-3:2022 (https://www.iso.org/standard/77437.html); the 2012 edition is the implemented one.
-- **Long, M. (2014).** *Architectural acoustics* (2nd ed.). Academic Press. https://doi.org/10.1016/C2012-0-03257-5
+  The open-plan speech-privacy quantities this page implements. Since revised as ISO 3382-3:2022 (<https://www.iso.org/standard/77437.html>); the 2012 edition is the implemented one.
+- **Long, M. (2014).** *Architectural acoustics* (2nd ed.). Academic Press. <https://doi.org/10.1016/C2012-0-03257-5>
   The crowd self-noise model of Chapter 17, Equations (17.50) to (17.54).

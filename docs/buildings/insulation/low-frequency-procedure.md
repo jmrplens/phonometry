@@ -621,7 +621,7 @@ corner procedure whether the report mentions it or not.
 
 ## References
 
-- **Hopkins, C. (2007).** *Sound insulation*. Butterworth-Heinemann. https://doi.org/10.4324/9780080550473
+- **Hopkins, C. (2007).** *Sound insulation*. Butterworth-Heinemann. <https://doi.org/10.4324/9780080550473>
   The modal behaviour of small rooms below 100 Hz that the corner procedure exists to sample, and the statistics of rooms behind every field quantity here. ISBN 978-0-7506-6526-1.
 - **International Organization for Standardization. (2014).** [*Acoustics — Field measurement of sound insulation in buildings and of building elements — Part 1: Airborne sound insulation*](https://www.iso.org/standard/55997.html) (ISO 16283-1:2014).
   Clause 8 (the corner procedure, Formulae (12) and (13)) and Clause 10.4 (the 63 Hz octave reverberation time). The only part whose corner procedure admits the source room as well as the receiving one.

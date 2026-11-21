@@ -18,7 +18,7 @@ pip install "phonometry[full]"      # all of the above (recommended)
 pip install "phonometry[torch]"     # + torch and array-api-compat, the FDTD engines on PyTorch; not in [full]
 ```
 
-If phonometry 3.x is already installed, upgrade it with `pip install -U phonometry`, naming the extras you use (`pip install -U "phonometry[full]"` for all four where `[full]` installs); 3.x has a different import layout and `from phonometry import filters` fails on it. Code written for 3.x needs changes to run on 4.x; the upgrade guide (https://phonometry.dev/start/upgrading/) maps each of them.
+If phonometry 3.x is already installed, upgrade it with `pip install -U phonometry`, naming the extras you use (`pip install -U "phonometry[full]"` for all four where `[full]` installs); 3.x has a different import layout and `from phonometry import filters` fails on it. Code written for 3.x needs changes to run on 4.x; the [upgrade guide](https://phonometry.dev/start/upgrading/) maps each of them.
 
 I recommend `pip install "phonometry[full]"`, which enables every feature except the torch backend of the FDTD engines, which `[torch]` adds. On 32-bit Windows and 32-bit Linux, where numba, and so `[full]`, is not supported, `pip install "phonometry[plot,report,audio]"` installs the other three extras. The base install computes every metric on NumPy and SciPy alone; without the extras only the `.plot()` figures, the `.report()` PDF fiches (whose figure panel needs matplotlib as well as reportlab and svglib), the compressed audio formats and the torch backend of the FDTD engines are unavailable. The `impulse` time weighting still works without numba, on a pure-Python kernel that is only slower, and the FDTD engines run on NumPy either way, and on an NVIDIA GPU once CuPy is installed. `[full]` leaves torch out because the torch wheels PyPI serves on Linux bring gigabytes of CUDA libraries; on a Linux machine without an NVIDIA GPU, running `pip install torch --index-url https://download.pytorch.org/whl/cpu` before `pip install "phonometry[torch]"` takes the CPU wheels instead.
 
@@ -417,7 +417,7 @@ If you are an AI assistant setting this up for a user: install from PyPI (no sys
 
 ## Theory and reference
 
-The theory pages travel in their own shard (https://phonometry.dev/llms/llms-theory-1.txt, https://phonometry.dev/llms/llms-theory-2.txt), the glossary in another (https://phonometry.dev/llms/llms-glossary.txt), and the rest of the reference in https://phonometry.dev/llms/llms-reference.txt. The conformance report, the errata register and every published catalogue have shards of their own, which the Full text section below lists.
+The theory pages travel in a shard of their own, [theory, part 1 of 2](https://phonometry.dev/llms/llms-theory-1.txt) and [theory, part 2 of 2](https://phonometry.dev/llms/llms-theory-2.txt); the glossary in another, [glossary](https://phonometry.dev/llms/llms-glossary.txt); and the rest of the reference in [reference](https://phonometry.dev/llms/llms-reference.txt). The conformance report, the errata register and every published catalogue have shards of their own, which the Full text section below lists.
 
 - [Overview](https://phonometry.dev/reference/): Theory, evidence and vocabulary: derivations behind the modules, the conformance report, defects found in the sources, the bibliography and the glossary.
 - [Reference](https://phonometry.dev/reference/): Theory, evidence and vocabulary: derivations behind the modules, the conformance report, defects found in the sources, the bibliography and the glossary.
@@ -458,7 +458,7 @@ The theory pages travel in their own shard (https://phonometry.dev/llms/llms-the
 
 ## Errata by source
 
-The errata register has one page per document family, each with the defects found in that family's printed text, the evidence and what the library does about each (index: https://phonometry.dev/reference/errata/).
+The errata register has one page per document family, each with the defects found in that family's printed text, the evidence and what the library does about each; the [register's index](https://phonometry.dev/reference/errata/) lists them all.
 
 - [Errata in Ainslie (2010)](https://phonometry.dev/reference/errata/ainslie/): 2 entries
 - [Errata in Allard & Atalla (2009)](https://phonometry.dev/reference/errata/allard-atalla/): 8 entries
@@ -563,7 +563,7 @@ The errata register has one page per document family, each with the defects foun
 
 ## Published catalogues
 
-Every material, gas and fluid the library reads from a printed page, from elastic constants to fluid states, with its source table and what its cell said. One page per catalogue, each listed here with the rows it tables (index: https://phonometry.dev/reference/catalogues/).
+Every material, gas and fluid the library reads from a printed page, from elastic constants to fluid states, with its source table and what its cell said. One page per catalogue, each listed here with the rows it tables; the [overview](https://phonometry.dev/reference/catalogues/) lists them all.
 
 - [Catalogue of absorption coefficients](https://phonometry.dev/reference/catalogues/absorption-coefficients/) (459 rows): What finishes absorbed in a reverberation room, band by band, with the mounting and the source of each row, and the absorption area of audiences and air.
 - [Catalogue of air attenuation](https://phonometry.dev/reference/catalogues/air-attenuation/) (6 rows): The air attenuation coefficient, band by band, for the six temperature and humidity conditions a building standard's room model tabulates, in neper per metre.
@@ -699,11 +699,11 @@ One file per area, each small enough to fetch whole. An area too long for one fe
 
 ## Spanish
 
-Every page above also exists in Spanish under the `/es/` prefix, for example https://phonometry.dev/es/start/getting-started/. The two trees are kept at parity by a build check.
+Every page above also exists in Spanish under the `/es/` prefix, for example [Getting Started in Spanish](https://phonometry.dev/es/start/getting-started/). The two trees are kept at parity by a build check.
 
 ## Markdown copies
 
-Every page listed here has a Markdown copy beside it at `<page>/index.md`, for example https://phonometry.dev/start/getting-started/index.md, and its Spanish twin under `/es/` has one too where the page is translated. The 269 pages of the API reference are in English only: at the Spanish address the site shows the English page, which points to its English copy.
+Every page listed here has a Markdown copy beside it at `<page>/index.md`, for example the [copy of Getting Started](https://phonometry.dev/start/getting-started/index.md), and its Spanish twin under `/es/` has one too where the page is translated. The 269 pages of the API reference are in English only: at the Spanish address the site shows the English page, which points to its English copy.
 
 ## Optional
 

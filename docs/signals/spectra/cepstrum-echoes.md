@@ -582,13 +582,13 @@ is modulated, the domain metrics quantify it normatively.
 
 ## References
 
-- **Bendat, J. S., & Piersol, A. G. (2010).** *Random data: Analysis and measurement procedures* (4th ed.). Wiley. https://doi.org/10.1002/9781118032428
+- **Bendat, J. S., & Piersol, A. G. (2010).** *Random data: Analysis and measurement procedures* (4th ed.). Wiley. <https://doi.org/10.1002/9781118032428>
   Section 13.1.4 (the Hilbert relation between log magnitude and phase behind the minimum-phase folding) and Section 13.3 with Figure 13.11 (envelope detection followed by DC removal, the structure of the envelope spectrum). ISBN 978-0-470-24877-5.
-- **Havelock, D., Kuwano, S., & Vorländer, M. (Eds.). (2008).** *Handbook of signal processing in acoustics*. Springer. https://doi.org/10.1007/978-0-387-30441-0
+- **Havelock, D., Kuwano, S., & Vorländer, M. (Eds.). (2008).** *Handbook of signal processing in acoustics*. Springer. <https://doi.org/10.1007/978-0-387-30441-0>
   Chapter 27 (Milner: the cepstral transform as the inverse DFT of the log power spectrum, quefrency, lowpass/highpass liftering), Chapter 87 (Neelamani: the complex cepstrum, homomorphic deconvolution, periodic spike trains from reverberation) and Chapter 75 (Tohyama: minimum-phase/all-pass manipulation in the cepstral domain). ISBN 978-0-387-77698-9.
 - **International Organization for Standardization. (1998).** *Mechanical vibration and shock — Mechanical mounting of accelerometers* (ISO 5348:1998).
-  The mounting methods behind the usable upper frequency of an envelope-analysis measurement: the working range of 5.2.1, a fifth of the mounted resonance, and the characteristic responses of Figures 5 to 9 for stud, adhesive, magnet and hand-held probe. The edition read is its unchanged German adoption DIN ISO 5348:1999-07; since revised as ISO 5348:2021 (https://www.iso.org/standard/78160.html).
+  The mounting methods behind the usable upper frequency of an envelope-analysis measurement: the working range of 5.2.1, a fifth of the mounted resonance, and the characteristic responses of Figures 5 to 9 for stud, adhesive, magnet and hand-held probe. The edition read is its unchanged German adoption DIN ISO 5348:1999-07; since revised as ISO 5348:2021 (<https://www.iso.org/standard/78160.html>).
 - **International Organization for Standardization. (2009).** [*Acoustics — Determination of airborne sound power levels emitted by machinery using vibration measurement — Part 1: Survey method using a fixed radiation factor*](https://www.iso.org/standard/40537.html) (ISO/TS 7849-1:2009).
   The rule that sets the upper frequency limit of an accelerometer at one third of its resonance, for 1 dB (5.2), and the limits Annex A.1 gives for adhesive, wax and clamping magnets.
-- **Norton, M. P., & Karczub, D. G. (2003).** *Fundamentals of noise and vibration analysis for engineers* (2nd ed.). Cambridge University Press. https://doi.org/10.1017/CBO9781139163927
+- **Norton, M. P., & Karczub, D. G. (2003).** *Fundamentals of noise and vibration analysis for engineers* (2nd ed.). Cambridge University Press. <https://doi.org/10.1017/CBO9781139163927>
   Section 4.3.2 (p. 272), the five common ways of mounting an accelerometer: a threaded stud, a cementing stud and a thin layer of wax give very good frequency responses, a magnet limits the response to about 6000 Hz and a hand-held probe to about 1000 Hz.

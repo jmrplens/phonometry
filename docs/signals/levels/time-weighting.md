@@ -421,7 +421,7 @@ correction on $L_\mathrm{AIeq} - L_\mathrm{Aeq}$, which is why
 
 - **American National Standards Institute. (1983).** [*Specification for sound level meters*](https://webstore.ansi.org/standards/asa/ansis11983r20064a1985) (ANSI S1.4-1983).
   The classic analog meter specification: the FAST/SLOW dynamic characteristics the F and S constants descend from, and the IMPULSE characteristic that IEC 61672-1 no longer specifies, defined in clause 2.7 as a 35 ms exponential-time-averaging constant for increasing portions of the signal and a 1500 ms constant for decreasing portions.
-- **Bies, D. A., Hansen, C. H., & Howard, C. Q. (2017).** *Engineering noise control* (5th ed.). CRC Press. https://doi.org/10.1201/9781351228152
+- **Bies, D. A., Hansen, C. H., & Howard, C. Q. (2017).** *Engineering noise control* (5th ed.). CRC Press. <https://doi.org/10.1201/9781351228152>
   Sections 3.2 and 3.6 (sound level meters and the measurement of time-varying sound: what the F/S/I readouts mean in instrument practice). ISBN 978-1-4987-2405-0.
 - **International Electrotechnical Commission. (2013).** [*Electroacoustics — Sound level meters — Part 1: Specifications*](https://webstore.iec.ch/en/publication/5708) (IEC 61672-1:2013).
   The exponential time-weighting detector (clause 3.8) with the F and S design-goal time constants and decay rates (clause 5.8.1), the maximum time-weighted sound level (clause 3.7) and its hold feature (clause 5.1.14), and the 4 kHz toneburst reference responses of Table 4 and its Equation (7) (class 1 acceptance limits) the ballistics are verified against in CI.

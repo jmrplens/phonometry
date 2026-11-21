@@ -593,7 +593,7 @@ warnings.
 
 ## References
 
-- **Beranek, L. L., & Mellow, T. J. (2012).** *Acoustics: Sound fields and transducers*. Academic Press. https://doi.org/10.1016/C2011-0-05897-0
+- **Beranek, L. L., & Mellow, T. J. (2012).** *Acoustics: Sound fields and transducers*. Academic Press. <https://doi.org/10.1016/C2011-0-05897-0>
   ISBN 978-0-12-391421-7. Radiation and sound fields: the diffuse-field relation between pressure and power that the reverberation-room method rests on.
 - **International Organization for Standardization. (2010).** [*Acoustics — Determination of sound power levels and sound energy levels of noise sources using sound pressure — Precision methods for reverberation test rooms*](https://www.iso.org/standard/52053.html) (ISO 3741:2010).
   The direct (Eq. 20) and comparison (Eq. 21) methods of this guide, with the Waterhouse and meteorological corrections and the Table 1 qualification criteria.

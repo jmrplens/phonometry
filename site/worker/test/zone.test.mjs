@@ -13,7 +13,7 @@ import { twinExclusions } from '../lib/twins.mjs';
 import { DNS_RECORDS, ZONE_SETTINGS, zonePlan } from '../lib/zone.mjs';
 import { LEGACY_ORIGINS, mediaOrigins } from '../../src/data/site.mjs';
 import { ZONE_ID } from '../lib/cloudflare.mjs';
-import { CLIP_BASE, LEGACY_PREFIX, checkClipBase, generatedPhases, legacyPrefixOf, runApplyRules } from '../scripts/apply-rules.mjs';
+import { CLIP_BASE, LEGACY_PREFIX, checkClipBase, generatedPhases, legacyPrefixOf, runApplyRules, wafPhases } from '../scripts/apply-rules.mjs';
 import { runApplyZone } from '../scripts/apply-zone.mjs';
 
 const zone = 'phonometry.dev';
@@ -217,14 +217,14 @@ describe('apply-rules', () => {
 	test('the generated phases follow the site: its base path, the clip host and the old base path', () => {
 		const clip = CLIP_BASE;
 		const refs = (options) => generatedPhases({ clipBase: clip, ...options })[0].rules.map(({ ref }) => ref);
-		assert.deepEqual(refs({ prefix: '/phonometry', legacyPrefix: '' }), ['www-to-apex', 'root-to-base', 'clips-to-range-host', 'markdown-twin']);
-		assert.deepEqual(refs({ prefix: '', legacyPrefix: '' }), ['www-to-apex', 'clips-to-range-host', 'markdown-twin']);
-		assert.deepEqual(refs({ prefix: '', legacyPrefix: '/phonometry' }), ['www-to-apex', 'legacy-base-slash', 'legacy-base-bare', 'clips-to-range-host', 'markdown-twin']);
+		assert.deepEqual(refs({ prefix: '/phonometry', legacyPrefix: '' }), ['www-to-apex', 'root-to-base', 'clips-to-range-host', 'trailing-slash', 'markdown-twin']);
+		assert.deepEqual(refs({ prefix: '', legacyPrefix: '' }), ['www-to-apex', 'clips-to-range-host', 'trailing-slash', 'markdown-twin']);
+		assert.deepEqual(refs({ prefix: '', legacyPrefix: '/phonometry' }), ['www-to-apex', 'legacy-base-slash', 'legacy-base-bare', 'clips-to-range-host', 'trailing-slash', 'markdown-twin']);
 		const [redirects, headers] = generatedPhases({ clipBase: clip, prefix: '/phonometry', legacyPrefix: '' });
 		assert.deepEqual(redirects.rules, redirectRules({ host: zone, prefix: '/phonometry', exclusions: twinExclusions('/phonometry'), clipBase: clip }));
 		assert.deepEqual(headers.rules, responseHeaderRules({ host: zone, prefix: '/phonometry' }));
 		// What the deploy puts: the site at the root, the old base path sent there.
-		assert.deepEqual(generatedPhases()[0].rules.map(({ ref }) => ref), ['www-to-apex', 'legacy-base-slash', 'legacy-base-bare', 'clips-to-range-host', 'markdown-twin']);
+		assert.deepEqual(generatedPhases()[0].rules.map(({ ref }) => ref), ['www-to-apex', 'legacy-base-slash', 'legacy-base-bare', 'clips-to-range-host', 'trailing-slash', 'markdown-twin']);
 	});
 
 	test('the old base path is the one the legacy origins served the site under', () => {
@@ -258,6 +258,28 @@ describe('apply-rules', () => {
 		assert.equal(await runApplyRules({ argv: [], env: { ...env, CLOUDFLARE_ZONE_ID: 'f1e3b5d7a9c0e2f4a6b8c0d2e4f6a8b0' }, fetchImpl, sink }), 1);
 		assert.ok(calls.length > 0 && calls.every(({ path }) => path.startsWith(`/zones/${ZONE_ID}/`)));
 		assert.match(sink.log.join('\n'), /CLOUDFLARE_ZONE_ID names another zone and is ignored/);
+	});
+
+	test('--print writes the JSON --apply would put, with no credential and no request', async () => {
+		const { calls, fetchImpl } = api({});
+		const sink = sinkOf();
+		assert.equal(await runApplyRules({ argv: ['--print'], env: {}, fetchImpl, sink }), 0);
+		assert.deepEqual(calls, []);
+		assert.deepEqual(JSON.parse(sink.log.join('\n')), generatedPhases());
+		const waf = sinkOf();
+		assert.equal(await runApplyRules({ argv: ['--print', '--phase', 'waf'], env: {}, fetchImpl, sink: waf }), 0);
+		assert.deepEqual(JSON.parse(waf.log.join('\n')), wafPhases());
+		assert.deepEqual(calls, []);
+	});
+
+	test('--print goes alone', async () => {
+		const { calls, fetchImpl } = api({});
+		for (const other of ['--check', '--apply']) {
+			const sink = sinkOf();
+			assert.equal(await runApplyRules({ argv: ['--print', other], env, fetchImpl, sink }), 2);
+			assert.match(sink.log.join('\n'), /pass at most one of --print, --check and --apply/);
+		}
+		assert.deepEqual(calls, []);
 	});
 
 	test('an API error other than "no entrypoint" stops it', async () => {

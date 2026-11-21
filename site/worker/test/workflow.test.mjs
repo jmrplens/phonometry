@@ -290,6 +290,10 @@ describe('the checks after a deploy hold the site served at the root', () => {
 		assert.match(script, /check "the old base path itself goes to the home page" 301 "\$ORIGIN\/\[\[:space:\]\]\*\$" "\$ORIGIN\$LEGACY_BASE"/);
 	});
 
+	test('a page without its slash answers one 301 to the page, its query kept', () => {
+		assert.match(runBlock(rules), /check "a page without its slash goes to the page" 301 "\$ORIGIN\$BASE\/signals\/\\\?q=1" "\$ORIGIN\$BASE\/signals\?q=1"/);
+	});
+
 	test('robots.txt names a sitemap the stage holds', () => {
 		const step = named('Check robots.txt names a sitemap the stage holds');
 		assert.ok(step, 'no step holds the robots.txt sitemap to the stage');

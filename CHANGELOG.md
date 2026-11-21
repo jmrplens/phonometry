@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Added
+
+- **The documentation build holds its software node to what jmrp.io states
+  about it.** jmrp.io publishes the same SoftwareApplication node as every
+  page of the documentation, under the same `@id`, and the two had come to
+  state different licences. The docs job now reads the record jmrp.io
+  publishes for the project and fails when the name, either description, the
+  licence, the language, the category, the systems or the repository differs
+  between the two, where both state it and jmrp.io does not list the
+  difference as one it accepts. It compares them by jmrp.io's own rules,
+  copied here and held to jmrp.io's on every run, so the two sites change
+  such a value together, jmrp.io first.
+
 ### Changed
 
 - **About says when 4.0.0 came out and where the documentation was before
@@ -74,7 +87,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   `reports.mjs`, the old base path taken out of a link in `bibliography.mjs`,
   one `inLanguage` taken out of the structured data a page's head carries. A
   commit to a data source now dates its pages only when it changes what they
-  render: one that only takes the old base path or host out of its links, or
+  show: one that only takes the old base path or host out of its links, or
   changes only the comments or the layout of a JavaScript or TypeScript
   module, moves no date. The landing pages read the Python floor and the
   install line from `pyproject.toml`, and no other key of it dates them; the
@@ -96,6 +109,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   of the Spanish conformance copy to the English rows. The check of the
   build's copies and llms files fails on a bare address the punctuation after
   it would join.
+- **A page address written without its trailing slash answers a permanent
+  redirect.** `https://phonometry.dev/signals` answered a 307 Temporary
+  Redirect to `/signals/`, the asset server's own answer, which tells a search
+  engine the move may not last. A zone rule now answers first, with a 301 to
+  the address with its slash, the query string kept, for any address that ends
+  in no slash and holds no dot, Cloudflare's own `/cdn-cgi/` aside; files,
+  pages with their slash and the home page are left as they were.
+  `apply-rules.mjs --print` writes the exact rules the zone receives, with no
+  credential, and the staging of a build refuses a file whose address holds no
+  dot or a page under a folder whose name holds one, the two things the rule
+  takes for granted.
+- **robots.txt answers whatever the day's Worker count.** phonometry.dev ran
+  its Worker for robots.txt, to log who read it, so on a day the free Workers
+  quota ran out it would have answered 429 until midnight UTC, which Google
+  reads as a server error and holds the crawl of the whole site for. It is
+  served as a plain file now, like the pages, and Cloudflare's analytics of
+  the zone still count every read of it.
 - **Every link of the documentation names where it goes.** The topic list
   above the sidebar linked the Start topic with the word "Start" on every
   English page, which Lighthouse's SEO audit "Links do not have descriptive

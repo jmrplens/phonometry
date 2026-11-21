@@ -169,7 +169,7 @@ describe('an agent file', () => {
 	test('a HEAD and a 304 count 0 bytes; the 304 is logged as not-modified, not as a redirect', async () => {
 		for (const [method, status] of [['HEAD', 200], ['GET', 304]]) {
 			const b = bindings({ assets: () => new Response(null, { status, headers: { etag: '"x"' } }) });
-			const response = await worker.fetch(new Request(`${ORIGIN}/robots.txt`, { method, headers: { 'if-none-match': '"x"' } }), b.env, b.ctx);
+			const response = await worker.fetch(new Request(`${ORIGIN}/llms.txt`, { method, headers: { 'if-none-match': '"x"' } }), b.env, b.ctx);
 			assert.equal(response.status, status);
 			await b.settle();
 			assert.equal(b.points.length, 1, `${method} ${status}`);
@@ -206,6 +206,6 @@ describe('an agent file', () => {
 		b.env.REQS.writeDataPoint = () => {
 			throw new Error('write failed');
 		};
-		assert.equal((await worker.fetch(new Request(`${ORIGIN}/robots.txt`), b.env, b.ctx)).status, 200);
+		assert.equal((await worker.fetch(new Request(`${ORIGIN}/llms.txt`), b.env, b.ctx)).status, 200);
 	});
 });

@@ -634,12 +634,14 @@ repository.
 phonometry.dev is the canonical site, served at the root from a Cloudflare
 Worker whose pages and files are Static Assets that run no code, so the daily
 request quota of Workers Free cannot stop them. Code runs only for the visitor
-beacon and the files agents read (Markdown copies, llms files, robots.txt,
-sitemaps), each request logged to Analytics Engine in the layout docs.jmrp.io's
-edge Worker writes, and a quota guard in the same account switches that code
-off at 95 % of the day. Everything about it lives in `site/worker/`, and its
-README says what is served from where, what is logged, how it is deployed and
-how it is rolled back. Five things touch the rest of the repository:
+beacon and the files agents read (Markdown copies, llms files, sitemaps), each
+request logged to Analytics Engine in the layout docs.jmrp.io's edge Worker
+writes, and a quota guard in the same account switches that code off at 95 %
+of the day. robots.txt stays a plain asset, so a spent quota can never answer
+it with the 429 that Google reads as a server error. Everything about it lives
+in `site/worker/`, and its README says what is served from where, what is
+logged, how it is deployed and how it is rolled back. Five things touch the
+rest of the repository:
 
 - `site/src/data/site-targets.json` names the one host the site is built for,
   phonometry.dev at the root, and the host it was published on before (its

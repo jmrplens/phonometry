@@ -732,6 +732,26 @@ jobs:
         # share one preview.
         run: pnpm run check:visual
         working-directory: site
+      - name: Check the software node states what jmrp.io states about it
+        id: software-drift
+        # jmrp.io's /projects/ publishes the same SoftwareApplication node as
+        # every page here, under the same @id, and its CI compares the two,
+        # but only on its own pushes: the conformance count in the
+        # description, then the licence, changed here and went out with this
+        # job green, left for jmrp.io's next unrelated commit to find. This
+        # runs jmrp.io's own decision on the built node against the record it
+        # publishes (public/identity/projects.json, read from
+        # raw.githubusercontent.com as the build reads the Person node), and
+        # fails when a property both sides state differs (compared as the
+        # sets JSON-LD makes them), when jmrp.io's decision is no longer the
+        # copy here, or on a feed or decision it cannot read. Such a change
+        # goes to jmrp.io first, then here: a pull request that changes the
+        # conformance counts is red here until jmrp.io states them
+        # (docs/contributing/docs-and-figures.md#f78). It runs after every
+        # other check of the build, so a red here still shows them all, which
+        # is what F78 asks of such a pull request before jmrp.io changes.
+        run: pnpm run check:software-drift
+        working-directory: site
       - name: Find the pages IndexNow was last sent
         # IndexNow is told that a page was added, changed or removed, and the
         # deploy used to send it every URL of the sitemap after every merge,

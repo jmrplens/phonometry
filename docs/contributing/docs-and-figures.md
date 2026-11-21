@@ -1964,3 +1964,30 @@ To install phonometry, start [here](/start/getting-started/).
 **Enforced by:** `site/scripts/check-link-text.mjs`, `CI: docs.yml:build/link-text`, `site/scripts/check-link-text.test.mjs`, `CI: docs.yml:build/script-tests`
 
 **Exceptions.** The check is Lighthouse's own audit, run on every page of the build in Chrome at the two form factors PageSpeed Insights reports, so what it leaves out is what Lighthouse leaves out: a link with no address, a `javascript:` or `mailto:` link, a `rel="nofollow"` link and a link to a place on its own page, and text the browser does not render, under the `hidden` attribute, hidden by a stylesheet at that width or in an SVG title. A link is held to the list of its own language, and to every list Lighthouse has when its language is not marked. The redirect stubs, which are no pages, are not read. A label is read whole, so "Start here" and "Inicio" pass.
+
+## The software node jmrp.io publishes too
+
+<a id="f78"></a>
+### F78. Change a property of the software node that jmrp.io also states on jmrp.io first, then here
+
+**Why.** jmrp.io's /projects/ publishes the same SoftwareApplication node as every page of this site, under the same `@id`, `https://github.com/jmrplens/phonometry#software`, and a search engine or an assistant that reads both merges them into one entity: where the two state different values, the entity states both. jmrp.io's CI compares the two, but only on jmrp.io's own pushes and pull requests, so a change made here went out with every check of this site green and was left for jmrp.io's next unrelated commit to turn red. It happened twice in four days: the conformance count in the description, then the licence, which this site states as MIT and the EASA ANP terms the package declares, while jmrp.io still stated MIT alone.
+
+**Do**
+
+```text
+1. jmrp.io, src/content/profile/projects.yaml: license MIT AND LicenseRef-EASA-ANP, both URLs
+2. here, the software node: the same two licence URLs; check:software-drift passes
+```
+
+**Don't**
+
+```text
+1. here, the software node: the EASA licence added; jmrp.io still states MIT alone
+2. check:software-drift: license: this site states ".../LicenseRef-EASA-ANP.txt" that jmrp.io does not
+```
+
+**Enforced by:** `site/scripts/check-software-drift.mjs`, `CI: docs.yml:build/software-drift`, `site/scripts/check-software-drift.test.mjs`, `CI: docs.yml:build/script-tests`
+
+**Exceptions.** The properties compared are the ones jmrp.io's check compares, its `CONTRADICTABLE` list: `name`, `description` and its Spanish literal, `license`, `programmingLanguage`, `applicationCategory`, `operatingSystem`, `codeRepository` and `url`; every other property of the node is this site's alone. A property only one side states is not compared, values are compared as the sets JSON-LD makes them (a list of systems and the same systems joined by commas agree), and a divergence jmrp.io lists in its `ACCEPTED_DIVERGENCES` is reported and passes. The decision is jmrp.io's `scripts/ci/software-drift-decision.mjs`, copied verbatim into `site/scripts/shared/software-drift-decision.mjs`; the check reads that file on jmrp.io's main branch too and fails when either copied block differs, so a change to the decision is made there first, and every docs run is red until its two blocks are copied here. The check reads the built home page, then the record jmrp.io publishes in `public/identity/projects.json` and that decision, both from jmrp.io's main branch on raw.githubusercontent.com, where the build reads the Person node; a file it cannot read fails the check, as a Person node the build cannot read stops the build.
+
+The description carries the conformance counts (`site/src/data/scope.mjs`, from `docs/conformance.json`), so a pull request that adds or removes a conformance row changes a value jmrp.io states, and this check is red on it until jmrp.io states the counts that pull request will merge with; two such pull requests go one after the other. A contributor who cannot change jmrp.io leaves the check red and says so in the pull request, and the maintainer merges the two changes back to back: the docs pull request green on every other check, then jmrp.io's `projects.yaml` with the new counts, whose own drift check reads the live site and is red until this site deploys, then the docs pull request at once. Between those two merges every docs run, the deploy of main included, is red on this step, so nothing else is merged here in between. Any other value jmrp.io changes first goes the same way.

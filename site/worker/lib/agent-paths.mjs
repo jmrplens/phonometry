@@ -9,15 +9,21 @@
 // 429; the quota guard (guard/) switches the Worker to its assets-only
 // version before that.
 //
-// Agents that read the Markdown copies, the llms files, robots.txt and the
-// sitemaps run no JavaScript, so the beacon never sees them; running the
-// Worker for exactly those files is how they are logged. The root names
-// (`/llms*.txt`, `/sitemap*.xml`) are there even under a base path, where the
-// build has no file at the root: crawlers probe both, and a probe is logged
-// too. The XML pattern names the sitemaps, the build's only XML files, rather
-// than `*.xml`: at the root that would run the Worker for every scanner probe
+// Agents that read the Markdown copies, the llms files and the sitemaps run
+// no JavaScript, so the beacon never sees them; running the Worker for
+// exactly those files is how they are logged. The root names (`/llms*.txt`,
+// `/sitemap*.xml`) are there even under a base path, where the build has no
+// file at the root: crawlers probe both, and a probe is logged too. The XML
+// pattern names the sitemaps, the build's only XML files, rather than
+// `*.xml`: at the root that would run the Worker for every scanner probe
 // that ends in `.xml` (a burst for `wlwmanifest.xml` was logged on
 // 2026-11-19).
+//
+// robots.txt is not here, though crawlers read it more than any other file:
+// a spent quota would answer it with a 429 until 00:00 UTC, and Google reads
+// a robots.txt that answers 429 as a server error, which holds the crawl of
+// the whole host while it lasts. Served as a plain asset it answers whatever
+// the day's count, and its reads stay counted in the zone's own analytics.
 
 import { basePath } from '../../src/data/site.mjs';
 
@@ -47,8 +53,6 @@ export function agentPaths(prefix) {
 		`${prefix}/*/index.md`,
 		'/llms*.txt',
 		`${prefix}/llms*.txt`,
-		'/robots.txt',
-		`${prefix}/robots.txt`,
 		'/sitemap*.xml',
 		`${prefix}/sitemap*.xml`,
 	];

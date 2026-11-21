@@ -4,11 +4,23 @@
 // (https://developers.cloudflare.com/rules/url-forwarding/, "Execution
 // order"), so they cost no Worker invocation and keep working whatever the
 // daily quota says. A Free zone takes ten Single Redirect rules with wildcard
-// matching and no regular expressions; these are four, or five at the root
+// matching and no regular expressions; these are five, or six at the root
 // once the site has an old base path to send home.
 //
-// scripts/apply-rules.mjs puts them in the two phase entrypoints, and with
-// --check fails when the live rules differ from these.
+// scripts/apply-rules.mjs puts them in the two phase entrypoints, with
+// --check fails when the live rules differ from these, and with --print
+// writes the JSON it would put, with no credential and no request.
+
+/** The path of the visitor beacon (lib/agent-paths.mjs). */
+const BEACON = '/_v';
+
+/**
+ * The page the site answers a missing address with, served flat as
+ * `404.html` and so at its address without a slash (`html_handling:
+ * "auto-trailing-slash"`): the one page the trailing-slash rule must leave
+ * alone, and the one flat page the staging check lets a build hold.
+ */
+export const NOT_FOUND_PAGE = '404';
 
 /** The Accept patterns of the Markdown rule, shared by the expression and its model below. */
 export const ACCEPT_WANTS_MARKDOWN = '*text/markdown*';
@@ -132,6 +144,20 @@ export function redirectRules({ host, prefix, exclusions, clipBase, legacyPrefix
 		enabled: true,
 	});
 	rules.push({
+		ref: 'trailing-slash',
+		description: 'a page address without its trailing slash answers a permanent redirect to the address with it, query kept',
+		expression: trailingSlashExpression({ host, prefix }),
+		action: 'redirect',
+		action_parameters: {
+			from_value: {
+				status_code: 301,
+				target_url: { expression: `concat(${literal(`https://${host}`, 'host')}, http.request.uri.path, "/")` },
+				preserve_query_string: true,
+			},
+		},
+		enabled: true,
+	});
+	rules.push({
 		ref: 'markdown-twin',
 		description: 'a request that asks for Markdown and names no HTML type before it gets the page Markdown copy',
 		expression: markdownExpression({ host, prefix, exclusions }),
@@ -146,6 +172,53 @@ export function redirectRules({ host, prefix, exclusions, clipBase, legacyPrefix
 		enabled: true,
 	});
 	return rules;
+}
+
+/**
+ * The expression of the trailing-slash rule.
+ *
+ * Static Assets answers a folder's address written without its slash with a
+ * 307 to the address with it (`html_handling: "auto-trailing-slash"` in
+ * wrangler.jsonc), a temporary redirect for a move that is permanent. This
+ * rule answers first, with a 301, for a GET or HEAD of a path that ends in no
+ * slash and holds no dot: the build has no file whose address holds no dot
+ * and no page under a folder whose name holds one (the staging check refuses
+ * both, so no file can hide behind the rule and no page can fall outside it),
+ * so such a path names a folder's page, one of the two aliases below, or
+ * nothing. An address that names nothing gets the 301 too, then the 404 at
+ * the address with the slash. The asset server also answers two dotless
+ * addresses with no slash itself, and the rule leaves both to it, since a
+ * 301 to the address with a slash would come straight back as its 307, a
+ * loop: a folder's page at `<folder>/index`, which it sends on to the folder,
+ * and the not-found page, `404.html`, which it serves at `/404` (the staging
+ * check refuses any other page served flat). Two more are left alone
+ * whatever the method: the beacon, `/_v`, which takes POSTs and is no
+ * folder, and every path under `/cdn-cgi/`, where Cloudflare answers its own
+ * requests, a challenge's among them: those paths hold no dot, and a redirect
+ * would break the challenge (Cloudflare's guide to troubleshooting rules asks
+ * for that folder to be excluded). A retired address written without its
+ * slash takes two hops where `_redirects` took one: this rule runs first and
+ * sends it to the address with its slash, which `_redirects` then sends to
+ * its page. Under a base path the rule covers that path and the bare base;
+ * the old base path and www keep their own rules, which run before it.
+ *
+ * @param {{host: string, prefix: string}} options
+ * @returns {string} The expression.
+ */
+export function trailingSlashExpression({ host, prefix }) {
+	const parts = [`http.host eq ${literal(host, 'host')}`, 'http.request.method in {"GET" "HEAD"}'];
+	if (prefix !== '') {
+		parts.push(`(http.request.uri.path eq ${literal(prefix, 'prefix')} or starts_with(http.request.uri.path, ${literal(`${prefix}/`, 'prefix')}))`);
+	}
+	parts.push(
+		'not ends_with(http.request.uri.path, "/")',
+		'not http.request.uri.path wildcard "*.*"',
+		'not ends_with(http.request.uri.path, "/index")',
+		`http.request.uri.path ne ${literal(`${prefix}/${NOT_FOUND_PAGE}`, 'path')}`,
+		`http.request.uri.path ne ${literal(BEACON, 'path')}`,
+		'not starts_with(http.request.uri.path, "/cdn-cgi/")',
+	);
+	return parts.join(' and ');
 }
 
 /**
@@ -294,9 +367,6 @@ export function markdownRuleMatches(request, zone) {
 		!zone.exclusions.pages.includes(path)
 	);
 }
-
-/** The path of the visitor beacon (lib/agent-paths.mjs). */
-const BEACON = '/_v';
 
 /**
  * The `http_request_firewall_custom` rules: they run before any Worker, so a

@@ -62,14 +62,6 @@ const ONCE_PER_BUILD = new Map([
 			why: 'reads the history of the docs tree once per site root, when routeData.ts loads, and every page reads that one result; scripts/content-dates.test.mjs counts the processes',
 		},
 	],
-	[
-		'src/lib/release-commit.mjs',
-		{
-			calls: 1,
-			exports: ['loadRelease'],
-			why: 'reads the latest release, with three git commands at most, once per site root and version, when routeData.ts loads, and every page reads that one result; scripts/release-commit.test.mjs holds the read to one',
-		},
-	],
 ]);
 
 /** A file a page can run: code in any spelling, a component, a page with imports. */

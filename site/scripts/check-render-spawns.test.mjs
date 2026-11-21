@@ -29,7 +29,6 @@ const LISTED = {
 	'astro.config.mjs': `${ONE_CALL}export default {};\n`,
 	'src/lib/page-dates.mjs': `${ONE_CALL}export function firstPublished() {}\nexport function firstPublishedAt() {}\n`,
 	'src/lib/content-dates.mjs': `import { spawn } from 'node:child_process';\nspawn('git', ['log']);\nexport function loadContentDates() {}\n`,
-	'src/lib/release-commit.mjs': `import { execFile } from 'node:child_process';\nexecFile('git', ['tag']);\nexport function loadRelease() {}\n`,
 };
 
 /**
@@ -54,7 +53,7 @@ test('a site where only the listed files start a process passes', (t) => {
 		'src/lib/quiet.mjs': `export const quiet = /a/.exec('a');\n`,
 	});
 	assert.equal(ran.status, 0, ran.err);
-	assert.match(ran.out, /read 6 files a page can run; 4 reach for a process/);
+	assert.match(ran.out, /read 5 files a page can run; 3 reach for a process/);
 	assert.match(ran.out, /\n0 failing check\(s\)\./);
 	assert.equal(ran.err, '');
 });
@@ -115,7 +114,7 @@ test('a test beside the source starts its processes in the test runner, never on
 		'src/lib/agent-md/test/fixtures.test.mjs': `import { spawnSync } from 'node:child_process';\nspawnSync('git');\n`,
 	});
 	assert.equal(ran.status, 0, ran.err);
-	assert.match(ran.out, /read 4 files a page can run; 4 reach for a process/);
+	assert.match(ran.out, /read 3 files a page can run; 3 reach for a process/);
 });
 
 test('a module outside the source that a page imports is read as well', (t) => {
@@ -172,7 +171,7 @@ test('a path from the root that leaves the site, or names no file, is read as no
 		'src/components/Head.astro': `---\nconst a = '/../outside/sp.mjs';\nconst b = '/no/such/page/';\n---\n`,
 	});
 	assert.equal(ran.status, 0, ran.err);
-	assert.match(ran.out, /read 5 files a page can run; 4 reach for a process/);
+	assert.match(ran.out, /read 4 files a page can run; 3 reach for a process/);
 });
 
 test('the helper of a listed file handed to every page fails, though the call it counts is still one', (t) => {
@@ -257,6 +256,6 @@ test('a listed file with no calls left fails, and so does one that is gone', (t)
 	assert.equal(ran.status, 1);
 	assert.match(
 		ran.err,
-		/FAIL 4 entries of ONCE_PER_BUILD that cover nothing:\s+astro\.config\.mjs\s+src\/lib\/page-dates\.mjs\s+src\/lib\/content-dates\.mjs\s+src\/lib\/release-commit\.mjs/,
+		/FAIL 3 entries of ONCE_PER_BUILD that cover nothing:\s+astro\.config\.mjs\s+src\/lib\/page-dates\.mjs\s+src\/lib\/content-dates\.mjs/,
 	);
 });

@@ -30,8 +30,8 @@ import {
   textProblems,
 } from '../../../../scripts/check-markdown-twins.mjs';
 import { preRelease, version } from '../../../data/repo-stats.mjs';
-import { PRE_RELEASE, UNRELEASED } from '../header.mjs';
-import { NEWER_THAN_RELEASE_ATTRIBUTE, VERIFIED_BY_ATTRIBUTE } from '../../page-markdown.mjs';
+import { PRE_RELEASE } from '../header.mjs';
+import { VERIFIED_BY_ATTRIBUTE } from '../../page-markdown.mjs';
 import { basePath as SITE_BASE, siteUrl as SITE_ORIGIN } from '../../../data/site.mjs';
 
 /** The site's address and base path as a regular expression matches them literally. */
@@ -94,14 +94,12 @@ function page(route, { lang = route.startsWith('/es/') || route === '/es/' ? 'es
  * left out.
  *
  * @param {string} route
- * @param {{ lang?: string, title?: string, other?: string, updated?: string, verified?: boolean, body?: string, published?: string | null, license?: boolean, summary?: string, release?: string | null, install?: string | null, author?: string | null, unreleased?: string | null }} [options]
- *   `unreleased` is the value of the `Unreleased:` line, which a copy of a
- *   page changed after the release carries.
+ * @param {{ lang?: string, title?: string, other?: string, updated?: string, verified?: boolean, body?: string, published?: string | null, license?: boolean, summary?: string, release?: string | null, install?: string | null, author?: string | null }} [options]
  */
 /** The `Pre-release:` value a copy of `lang` carries while VERSION is a pre-release. */
 const preReleaseLine = (lang) => (preRelease ? PRE_RELEASE[lang](version) : undefined);
 
-function copy(route, { lang = route.startsWith('/es/') || route === '/es/' ? 'es' : 'en', title = `Page ${route}`, other, updated = UPDATED_AT, verified = false, body = 'The body.', published = PUBLISHED, license = true, summary = 'A page & its copy.', release = `phonometry ${version}`, install = 'pip install "phonometry[full]"', pre = preReleaseLine(lang), unreleased = null, author = 'José Manuel Requena Plens (https://orcid.org/0000-0003-1250-6212)' } = {}) {
+function copy(route, { lang = route.startsWith('/es/') || route === '/es/' ? 'es' : 'en', title = `Page ${route}`, other, updated = UPDATED_AT, verified = false, body = 'The body.', published = PUBLISHED, license = true, summary = 'A page & its copy.', release = `phonometry ${version}`, install = 'pip install "phonometry[full]"', pre = preReleaseLine(lang), author = 'José Manuel Requena Plens (https://orcid.org/0000-0003-1250-6212)' } = {}) {
   return [
     `# ${title}`,
     '',
@@ -113,7 +111,6 @@ function copy(route, { lang = route.startsWith('/es/') || route === '/es/' ? 'es
     ...(release ? [`Version: ${release}`] : []),
     ...(install ? [`Install: ${install}`] : []),
     ...(pre ? [`Pre-release: ${pre}`] : []),
-    ...(unreleased ? [`Unreleased: ${unreleased}`] : []),
     ...(author ? [`Author: ${author}`] : []),
     ...(published ? [`Published: ${published}`] : []),
     `Updated: ${updated}`,
@@ -538,40 +535,6 @@ describe('the header and the page', () => {
     const both = check(t, (files) => {
       files['a/index.html'] = page('/a/', { other: '/es/a/', body: mark });
       files['a/index.md'] = copy('/a/', { other: '/es/a/', verified: true });
-    });
-    assert.deepEqual(both.found, []);
-  });
-
-  test('an Unreleased line exactly where the page shows the notice that it changed after the release, in its language', (t) => {
-    const notice = (release) => `<p ${NEWER_THAN_RELEASE_ATTRIBUTE}="${release}" data-pagefind-ignore>This page changed after phonometry ${release}</p>`;
-    const missing = check(t, (files) => {
-      files['a/index.html'] = page('/a/', { other: '/es/a/', body: notice(version) });
-    });
-    assert.deepEqual(missing.found, [
-      `header: /a/index.md has no "Unreleased:" line, and /a/ shows the notice that it changed after phonometry ${version}: "Unreleased: ${UNRELEASED.en(version)}"`,
-    ]);
-    const extra = check(t, (files) => {
-      files['a/index.md'] = copy('/a/', { other: '/es/a/', unreleased: UNRELEASED.en(version) });
-    });
-    assert.deepEqual(extra.found, [
-      `header: /a/index.md says "Unreleased: ${UNRELEASED.en(version)}", and /a/ shows no notice that it changed after the release`,
-    ]);
-    const wrongLanguage = check(t, (files) => {
-      files['es/a/index.html'] = page('/es/a/', { other: '/a/', body: notice(version) });
-      files['es/a/index.md'] = copy('/es/a/', { other: '/a/', unreleased: UNRELEASED.en(version) });
-    });
-    assert.equal(wrongLanguage.found.length, 1);
-    assert.match(wrongLanguage.found[0], /^header: \/es\/a\/index\.md says "Unreleased: this page changed/u);
-    const otherRelease = check(t, (files) => {
-      files['a/index.html'] = page('/a/', { other: '/es/a/', body: notice('0.0.1') });
-      files['a/index.md'] = copy('/a/', { other: '/es/a/', unreleased: UNRELEASED.en('0.0.1') });
-    });
-    assert.deepEqual(otherRelease.found, [`header: /a/ says it changed after phonometry 0.0.1, and the build is of phonometry ${version}`]);
-    const both = check(t, (files) => {
-      files['a/index.html'] = page('/a/', { other: '/es/a/', body: notice(version) });
-      files['a/index.md'] = copy('/a/', { other: '/es/a/', unreleased: UNRELEASED.en(version) });
-      files['es/a/index.html'] = page('/es/a/', { other: '/a/', body: notice(version) });
-      files['es/a/index.md'] = copy('/es/a/', { other: '/a/', unreleased: UNRELEASED.es(version) });
     });
     assert.deepEqual(both.found, []);
   });

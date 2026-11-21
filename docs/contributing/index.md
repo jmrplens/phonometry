@@ -2,7 +2,7 @@
 
 # Contributor style guide
 
-This guide states how phonometry is written: how it names things, shapes its public API, documents and comments its code, handles numbers and data, tests itself, documents and draws, and words its prose. It is for everyone who changes the library, people and AI coding agents alike, so that every contribution keeps one style and a review can point to a rule instead of explaining it again.
+This guide states how phonometry is written: how it names things, shapes its public API, documents and comments its code, handles numbers and data, tests itself, documents and draws, and words its prose. It is for everyone who changes the library, people and AI coding agents alike, so that every contribution keeps one style and a review can point to a rule instead of explaining it again. The page is written by hand.
 
 ## How to use it
 

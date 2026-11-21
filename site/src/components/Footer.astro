@@ -45,6 +45,8 @@ const changelog = {
 const base = (import.meta.env.BASE_URL ?? '/').replace(/\/$/, '');
 const aboutUrl = `${base}${lang === 'es' ? '/es' : ''}/start/about/`;
 const aboutText = lang === 'es' ? 'Acerca del mantenedor' : 'About the maintainer';
+const privacyUrl = `${base}${lang === 'es' ? '/es' : ''}/start/privacy/`;
+const privacyText = lang === 'es' ? 'Privacidad' : 'Privacy';
 
 // Icon links carry their name in `aria-label` and in `title`, since the mark
 // itself says nothing to a screen reader and nothing to a reader who does not
@@ -72,6 +74,7 @@ const marks = [
 		}
 		<a class="orcid" href="https://orcid.org/0000-0003-1250-6212" rel="me">ORCID</a>
 		<a class="about" href={aboutUrl}>{aboutText}</a>
+		<a class="about" href={privacyUrl}>{privacyText}</a>
 		<a class="release" href={releaseNotes.href}>{releaseNotes.text}</a>
 		<a class="release" href={changelog.href}>{changelog.text}</a>
 		<a class="projects" href={projectsUrl}>{projectsText}</a>

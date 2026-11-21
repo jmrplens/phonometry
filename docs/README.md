@@ -16,8 +16,10 @@ how a metric is checked against its standard,
 [Upgrading from 3.3 to 4.0](start/upgrading.md) is the map for code written
 against an earlier release,
 [Support the project](start/support.md) lists the ways to help, starting with
-the sources the library still lacks, and [About](start/about.md) says
-who maintains it, how to report an error and how to cite it.
+the sources the library still lacks, [About](start/about.md) says
+who maintains it, how to report an error and how to cite it, and
+[Privacy](start/privacy.md) lists what the documentation site records about
+its readers and for how long.
 [Environments](start/environments/index.md) then takes each place the library
 runs in turn: [pip and uv](start/environments/pip-and-uv.md),
 [conda and mamba](start/environments/conda.md),

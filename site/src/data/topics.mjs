@@ -116,6 +116,7 @@ export const topics = [
       { slug: 'start/upgrading', label: 'Upgrading from 3.3', translations: { es: 'Actualizar de la 3.3' } },
       'start/about',
       'start/support',
+      'start/privacy',
     ],
   },
   {

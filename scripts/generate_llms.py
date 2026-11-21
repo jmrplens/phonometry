@@ -223,6 +223,7 @@ START_ROUTES = (
     "start/upgrading",
     "start/about",
     "start/support",
+    "start/privacy",
 )
 
 #: The start page that travels in a shard of its own (see :func:`_shard_plan`).

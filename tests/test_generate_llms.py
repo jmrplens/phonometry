@@ -449,6 +449,21 @@ def test_the_rule_finds_what_a_crawler_misreads_and_passes_what_markdown_ends() 
 _NODE = shutil.which("node")
 
 
+def _titles_from_sources(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Read a page's title from its source, as the dump would give it.
+
+    The sentence names its example copy by the page's title, which
+    ``_page_title`` reads from the dump of ``agent-md.mjs``; a test run has no
+    dump (``make llms`` writes it), and the frontmatter is where the dump takes
+    the title from.
+    """
+    monkeypatch.setattr(
+        llms,
+        "_page_title",
+        lambda route: llms._frontmatter_field(llms._source_of(route), "title"),
+    )
+
+
 def test_the_copies_sentence_names_the_pages_the_site_does_not_translate(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
@@ -465,6 +480,7 @@ def test_the_copies_sentence_names_the_pages_the_site_does_not_translate(
         "reference/api/a",
         "reference/api/b",
     }
+    _titles_from_sources(monkeypatch)
     monkeypatch.setattr(llms, "_content_routes", lambda: english)
     monkeypatch.setattr(llms, "_spanish_routes", lambda: {""})
     guides = llms._frontmatter_field(llms._source_of("start/guides"), "title")
@@ -483,11 +499,16 @@ def test_the_copies_sentence_says_every_page_has_a_copy(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     """Every page publishes a copy written from its own source, so none is named as having none."""
+    _titles_from_sources(monkeypatch)
     monkeypatch.setattr(llms, "_content_routes", lambda: {"", "start/guides"})
     monkeypatch.setattr(llms, "_spanish_routes", lambda: {"", "start/guides"})
     sentence = llms._copies_sentence()
     assert sentence.startswith("Every page listed here has a Markdown copy beside it")
     assert "publish none" not in sentence
+    title = llms._frontmatter_field(llms._source_of("start/getting-started"), "title")
+    assert (
+        f"[copy of {title}]({llms.SITE_URL}/start/getting-started/index.md)"
+    ) in sentence
 
 
 def test_the_spanish_routes_are_named_without_their_prefix(

@@ -66,6 +66,51 @@ Esta guía cubre la fuente ferroviaria, el apartado 2.3 del Anexo II con la base
 de coeficientes del Apéndice G. La fuente viaria (2.2, Apéndice F) y el modelo
 de propagación CNOSSOS-EU (2.5) van por separado.
 
+## ¿Cómo calculo la emisión ferroviaria CNOSSOS-EU con Python?
+
+Describe el vehículo con `environment.RollingStock`, construido con los
+espectros del Apéndice G que selecciona su ficha técnica, y la vía con
+`environment.RailwayTrack`. Después pasa un `environment.RailwayVehicle`, el
+material rodante con su flujo y su velocidad, a
+`environment.railway_source_power(vehicle, track, phi=..., psi=...)`, donde
+`phi` y `psi` son los ángulos horizontal y vertical hacia el receptor. La
+función devuelve la potencia acústica direccional por metro de las dos líneas
+fuente en bandas de octava: la fila 0 de `result.line_power` es la fuente A a
+0,5 m, la fila 1 la fuente B a 4,0 m, y `result.total_line_power` es su suma,
+que un modelo de propagación lleva después hasta el receptor. Para la línea
+principal de abajo, cuyo espectro se dibuja más adelante, la fuente A alcanza
+su máximo en la banda de 1 kHz, `89.9` dB por metro, y el total con la
+ponderación A por octavas de 2.5.5 da `93.2` dB(A) por metro.
+
+```python
+import numpy as np
+from phonometry import environment
+
+# Una unidad eléctrica de cuatro ejes con freno de disco, 96 por hora a 160 km/h,
+# sobre vía de mantenimiento normal con traviesas monobloque y placas medias.
+stock = environment.RollingStock(
+    n_axles=4,
+    wheel_roughness=environment.wheel_roughness(environment.BrakeType.NON_TREAD),
+    contact_filter=environment.contact_filter(environment.ContactFilter.LOAD_50_DIAMETER_920),
+    wheel_transfer=environment.wheel_transfer(environment.WheelDiameter.MM_920),
+    traction=environment.traction_sound_power(environment.TractionVehicle.ELECTRIC_MULTIPLE_UNIT),
+    aerodynamic=environment.aerodynamic_sound_power(),
+)
+track = environment.RailwayTrack(
+    rail_roughness=environment.rail_roughness(environment.RailRoughnessClass.NORMAL),
+    track_transfer=environment.track_transfer(environment.TrackTransferClass.MONOBLOCK_MEDIUM),
+    impact_roughness=environment.impact_roughness_single(),
+)
+result = environment.railway_source_power(
+    environment.RailwayVehicle(stock=stock, flow_rate=96.0, speed_kmh=160.0), track, phi=90.0, psi=10.0,
+)
+weighted = result.total_line_power + np.asarray(environment.CNOSSOS_A_WEIGHTING)
+print(result.frequencies)             # [  63.  125.  250.  500. 1000. 2000. 4000. 8000.] Hz
+print(result.line_power[0].round(1))  # [80.7 81.5 85.2 86.4 89.9 87.4 79.5 72.6] dB por metro, fuente A
+print(result.line_power[1].round(1))  # [57.7 53.5 62.3 62.4 54.1 52.4 44.5 36.6] dB por metro, fuente B
+print(round(float(10.0 * np.log10(np.sum(10.0 ** (weighted / 10.0)))), 1))  # 93.2 dB(A) por metro
+```
+
 ## 1. Qué texto se implementa
 
 El Anexo II es un blanco móvil y, del lado ferroviario, la superposición de

@@ -15,6 +15,50 @@ This guide covers the railway source, section 2.3 of Annex II with the
 coefficient database of Appendix G. The road source (2.2, Appendix F) and the
 CNOSSOS-EU propagation model (2.5) are separate.
 
+## How do I compute CNOSSOS-EU railway noise emission in Python?
+
+Describe the vehicle with `environment.RollingStock`, built from the Appendix G
+spectra its data sheet selects, and the track with `environment.RailwayTrack`.
+Then pass an `environment.RailwayVehicle`, the stock with its flow and speed,
+to `environment.railway_source_power(vehicle, track, phi=..., psi=...)`, where
+`phi` and `psi` are the horizontal and vertical angles to the receiver. It
+returns the directional sound power per metre of the two source lines in octave
+bands: row 0 of `result.line_power` is source A at 0.5 m, row 1 source B at
+4.0 m, and `result.total_line_power` is their sum, which a propagation model
+then carries to the receiver. For the main line below, whose spectrum is drawn
+further down, source A peaks at `89.9` dB per metre in the 1 kHz band, and the
+total weighted with the octave A-weighting of 2.5.5 comes to `93.2` dB(A) per
+metre.
+
+```python
+import numpy as np
+from phonometry import environment
+
+# A four-axle electric multiple unit with disc brakes, 96 an hour at 160 km/h,
+# on normally maintained track with monoblock sleepers and medium rail pads.
+stock = environment.RollingStock(
+    n_axles=4,
+    wheel_roughness=environment.wheel_roughness(environment.BrakeType.NON_TREAD),
+    contact_filter=environment.contact_filter(environment.ContactFilter.LOAD_50_DIAMETER_920),
+    wheel_transfer=environment.wheel_transfer(environment.WheelDiameter.MM_920),
+    traction=environment.traction_sound_power(environment.TractionVehicle.ELECTRIC_MULTIPLE_UNIT),
+    aerodynamic=environment.aerodynamic_sound_power(),
+)
+track = environment.RailwayTrack(
+    rail_roughness=environment.rail_roughness(environment.RailRoughnessClass.NORMAL),
+    track_transfer=environment.track_transfer(environment.TrackTransferClass.MONOBLOCK_MEDIUM),
+    impact_roughness=environment.impact_roughness_single(),
+)
+result = environment.railway_source_power(
+    environment.RailwayVehicle(stock=stock, flow_rate=96.0, speed_kmh=160.0), track, phi=90.0, psi=10.0,
+)
+weighted = result.total_line_power + np.asarray(environment.CNOSSOS_A_WEIGHTING)
+print(result.frequencies)             # [  63.  125.  250.  500. 1000. 2000. 4000. 8000.] Hz
+print(result.line_power[0].round(1))  # [80.7 81.5 85.2 86.4 89.9 87.4 79.5 72.6] dB per metre, source A
+print(result.line_power[1].round(1))  # [57.7 53.5 62.3 62.4 54.1 52.4 44.5 36.6] dB per metre, source B
+print(round(float(10.0 * np.log10(np.sum(10.0 ** (weighted / 10.0)))), 1))  # 93.2 dB(A) per metre
+```
+
 ## 1. Which text is implemented
 
 Annex II is a moving target, and on the railway side the layering is worse than

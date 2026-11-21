@@ -254,9 +254,9 @@ def _phrases(language: str) -> list[str]:
             f"{n_elastic_guides} of the elastic solver's {n_elastic} are on guides too",
         ]
     return [
-        f"{total} de las animaciones de esta documentación son salida de estos"
-        f" dos esquemas, {n_acoustic} del acústico y {n_elastic} del elástico,"
-        f" y {n_guides} de ellas están archivadas en las guías cuya física zanjan",
+        f"{total} de las animaciones de esta documentación las producen estos"
+        f" dos esquemas, {n_acoustic} el acústico y {n_elastic} el elástico,"
+        f" y {n_guides} de ellas están en las guías cuya pregunta física responden",
         f"{n_acoustic_guides} de las {n_acoustic} del esquema acústico están en"
         " estas guías:",
         f"{n_elastic_guides} de las {n_elastic} del esquema elástico están también en guías",

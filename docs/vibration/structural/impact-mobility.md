@@ -23,6 +23,49 @@ answer is known, 2 kg on a spring tuned to 50 Hz with 0.5 % of critical
 damping, whose driving-point mobility peaks at $1/c = 0.159$ m/(N·s), and every
 number they print can be checked against that.
 
+## How do I compute a mobility from impact hammer measurements in Python?
+
+Put the force and response records in two arrays, one row per impact, and pass
+them to
+`vibration.impact_mobility(force_n, response, fs, force_window_s=..., exponential_decay_rate_per_s=...)`.
+It applies the force window of 8.5.1 and the exponential window of 8.5.2 to
+every impact and returns the averaged mobility of 8.6, with the coherence of
+9.1 beside it. The exponential window stops the leakage of a record that ends
+before the decay does, but it also lowers the resonance peaks, so
+`estimate.fit_mode(band_hz)` fits the mode and takes the window out again by
+Annex A. For the resonator below, the corrected mobility at the resonance is
+`0.1588` m/(N·s), against the exact 0.1592. Sections 1 to 4 take each step
+apart.
+
+```python
+import numpy as np
+from scipy import signal
+from phonometry import vibration
+
+fs, n = 4096.0, 4096                      # a 1 s record: 1 Hz between lines
+t = np.arange(n) / fs
+
+# A 2 kg resonator tuned to 50 Hz with 0.5 % damping, struck five times by a 0.5 ms pulse.
+m, fn, zeta = 2.0, 50.0, 0.005
+wn = 2.0 * np.pi * fn
+accelerance = signal.lti([1.0 / m, 0.0, 0.0], [1.0, 2.0 * zeta * wn, wn**2])
+force = 100.0 * np.exp(-((t - 0.005) ** 2) / (2.0 * 0.0005**2))
+_, accel, _ = signal.lsim(accelerance, force, t)
+gains = np.array([0.8, 1.0, 1.1, 0.9, 1.2])[:, np.newaxis]   # one row per impact
+
+# A force window against the noise after the pulse (8.5.1), and an exponential
+# window so the response ends inside the record (8.5.2).
+rate = vibration.exponential_decay_rate(n, fs, final_value=0.01)
+estimate = vibration.impact_mobility(force * gains, accel * gains, fs, force_window_s=0.015,
+                                     exponential_decay_rate_per_s=rate,
+                                     frequency_range_hz=(5.0, 800.0))
+fit = estimate.fit_mode((40.0, 60.0))     # Annex A takes the window out again
+f_d = fit.damped_natural_frequency_hz
+print(estimate.n_impacts, round(f_d, 2))                             # 5 50.0 Hz
+print(round(100 * float(fit.correction.exact_damping_ratio[0]), 3))  # 0.5 %
+print(round(abs(complex(fit.corrected_mobility(f_d))), 4))           # 0.1588 m/(N·s)
+```
+
 ## How the measurement goes
 
 The hammer carries a force transducer between its mass and an interchangeable

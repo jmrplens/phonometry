@@ -58,6 +58,50 @@ con un 0,5 % del amortiguamiento crítico, cuya movilidad en el punto de
 excitación alcanza $1/c = 0{,}159$ m/(N·s), y cada número que imprimen puede
 comprobarse contra eso.
 
+## ¿Cómo calculo una movilidad a partir de medidas con martillo de impacto en Python?
+
+Pon los registros de fuerza y de respuesta en dos arrays, una fila por impacto,
+y pásalos a
+`vibration.impact_mobility(force_n, response, fs, force_window_s=..., exponential_decay_rate_per_s=...)`.
+La función aplica a cada impacto la ventana de fuerza del 8.5.1 y la ventana
+exponencial del 8.5.2, y devuelve la movilidad promediada del 8.6 con la
+coherencia del 9.1 al lado. La ventana exponencial evita la fuga de un registro
+que termina antes que el decaimiento, pero también rebaja los picos de
+resonancia, así que `estimate.fit_mode(band_hz)` ajusta el modo y quita de
+nuevo la ventana con el anexo A. Para el resonador de abajo, la movilidad
+corregida en la resonancia es `0.1588` m/(N·s), frente a los 0,1592 exactos.
+Los apartados 1 a 4 desmontan cada paso.
+
+```python
+import numpy as np
+from scipy import signal
+from phonometry import vibration
+
+fs, n = 4096.0, 4096                      # un registro de 1 s: 1 Hz entre líneas
+t = np.arange(n) / fs
+
+# Un resonador de 2 kg sintonizado a 50 Hz con un 0,5 % de amortiguamiento,
+# golpeado cinco veces por un impulso de 0,5 ms.
+m, fn, zeta = 2.0, 50.0, 0.005
+wn = 2.0 * np.pi * fn
+accelerance = signal.lti([1.0 / m, 0.0, 0.0], [1.0, 2.0 * zeta * wn, wn**2])
+force = 100.0 * np.exp(-((t - 0.005) ** 2) / (2.0 * 0.0005**2))
+_, accel, _ = signal.lsim(accelerance, force, t)
+gains = np.array([0.8, 1.0, 1.1, 0.9, 1.2])[:, np.newaxis]   # una fila por impacto
+
+# Una ventana de fuerza contra el ruido tras el impulso (8.5.1) y una ventana
+# exponencial para que la respuesta termine dentro del registro (8.5.2).
+rate = vibration.exponential_decay_rate(n, fs, final_value=0.01)
+estimate = vibration.impact_mobility(force * gains, accel * gains, fs, force_window_s=0.015,
+                                     exponential_decay_rate_per_s=rate,
+                                     frequency_range_hz=(5.0, 800.0))
+fit = estimate.fit_mode((40.0, 60.0))     # el anexo A quita de nuevo la ventana
+f_d = fit.damped_natural_frequency_hz
+print(estimate.n_impacts, round(f_d, 2))                             # 5 50.0 Hz
+print(round(100 * float(fit.correction.exact_damping_ratio[0]), 3))  # 0.5 %
+print(round(abs(complex(fit.corrected_mobility(f_d))), 4))           # 0.1588 m/(N·s)
+```
+
 ## Cómo se hace la medida
 
 El martillo lleva un transductor de fuerza entre su masa y una punta

@@ -23,7 +23,7 @@ import { isOurMedia, mediaUrl, REMOTE_PREFIXES } from './src/lib/media.mjs';
 import { PAGEFIND_RANKING } from './src/lib/search-ranking.mjs';
 import { remarkBibliography } from './src/lib/remark-bibliography.mjs';
 import { rehypeWrappableMath } from './src/lib/wrappable-math.mjs';
-import { licenses, softwareRequirements, version } from './src/data/repo-stats.mjs';
+import { licenses, pythonFloor, softwareRequirements, version } from './src/data/repo-stats.mjs';
 import {
   featureList,
   inBothLanguages,
@@ -484,7 +484,10 @@ const jsonLd = JSON.stringify({
       name: 'phonometry source code',
       codeRepository: repositoryUrl,
       programmingLanguage: 'Python',
-      runtimePlatform: 'Windows, Linux, macOS',
+      // The interpreter the code runs on, which is what schema.org means by
+      // runtimePlatform; the operating systems are the application's
+      // operatingSystem above. Read from pyproject.toml like the rest.
+      runtimePlatform: `Python >= ${pythonFloor}`,
       license: softwareLicenses,
       dateCreated,
       // Software Heritage keeps every visit of the repository under this one

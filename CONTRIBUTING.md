@@ -191,8 +191,9 @@ no compiler, and split the last marker if it needs a newer one. Leave the
 floors of the older Pythons as they are: a newer Python's wheel says nothing
 about them. Nor does a newer Python take a lower floor than the one before
 it, which `tests/test_minimum_requirements.py` refuses: the last marker
-covers Pythons nobody has measured yet, and conda-forge's recipe, which has
-one constraint for every Python, takes the floor of the oldest. reportlab
+covers Pythons nobody has measured yet, and conda-forge's recipe
+([conda-forge/phonometry-feedstock](https://github.com/conda-forge/phonometry-feedstock)),
+which has one constraint for every Python, takes the floor of the oldest. reportlab
 4.2.5 renders a fiche on 3.14, where the deprecated name it reads is gone,
 and warns on 3.12 and 3.13, so `reportlab>=4.3.0` holds for all three.
 
@@ -937,6 +938,18 @@ Releases are fully automated from the repository-root `VERSION` file:
    (Actions, Docs, Run workflow) with **Send IndexNow every URL of the site
    once** ticked: that deploy sends every URL of the sitemap and keeps its
    record, so the deploys after it go back to sending what changed.
+5. After the upload, conda-forge's bot opens a pull request on
+   [conda-forge/phonometry-feedstock](https://github.com/conda-forge/phonometry-feedstock)
+   that moves `recipe/recipe.yaml` to the new version and the hash of its
+   source distribution on PyPI. Before merging it, compare the recipe's
+   `requirements` with `pyproject.toml`: NumPy and SciPy under `run` and every
+   extra's package under `run_constraints`, each at the floor `pyproject.toml`
+   gives for Python 3.12, under its conda-forge name (`matplotlib-base`,
+   `pysoundfile`, `pytorch`). A release that raises a floor or adds a
+   dependency changes that line in the same pull request. Merge it once its
+   build passes; the package then reaches the `conda-forge` channel, and
+   [conda and mamba](https://phonometry.dev/start/environments/conda/)
+   names the version it was last checked with.
 
 Never push tags manually; the workflow is idempotent (an existing tag is
 skipped). The trusted publisher is configured on pypi.org, in the project's

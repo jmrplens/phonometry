@@ -65,7 +65,8 @@ noviembre de 2026, rompe con la 3.x, y la
 nombre antiguo. Desde el 20 de noviembre de 2026 esta documentación se sirve
 en phonometry.dev; hasta entonces se publicaba en docs.jmrp.io/phonometry, y
 cada dirección de allí responde ahora con una redirección permanente a la
-misma página de aquí.
+misma página de aquí. Desde el 21 de noviembre de 2026 phonometry también
+está en conda-forge.
 
 ## Cómo construyo la biblioteca
 

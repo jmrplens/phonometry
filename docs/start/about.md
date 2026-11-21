@@ -63,7 +63,7 @@ pending. phonometry 4.0.0, released on 17 November 2026, is a hard break with
 new one. Since 20 November 2026 this documentation is served at
 phonometry.dev; until then it was published at docs.jmrp.io/phonometry, and
 every address there now answers with a permanent redirect to the same page
-here.
+here. Since 21 November 2026 phonometry is also on conda-forge.
 
 ## How I build the library
 

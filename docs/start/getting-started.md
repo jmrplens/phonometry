@@ -14,8 +14,11 @@ levels to a calibrator tone, which is what turns them into a measurement.
 
 ## Installation
 
-The commands below are pip's. [Environments](environments/index.md)
-takes uv, conda, Jupyter, JupyterLite, Docker and type checkers in turn.
+The commands below are pip's. phonometry is also on conda-forge, where
+`conda install -c conda-forge phonometry` installs it with NumPy and SciPy and
+[conda and mamba](environments/conda.md) names the extras.
+[Environments](environments/index.md) takes uv, conda, Jupyter, JupyterLite,
+Docker and type checkers in turn.
 
 ### From PyPI (recommended)
 

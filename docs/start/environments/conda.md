@@ -4,36 +4,43 @@
 
 # conda and mamba
 
-phonometry installs from PyPI. In a
-[conda](https://docs.conda.io/projects/conda/en/stable/) environment, take its
-dependencies from [conda-forge](https://conda-forge.org/) first, then install
-phonometry with the environment's own pip: pip finds every requirement already
-there and adds phonometry alone, so NumPy, SciPy and the rest stay conda-forge
-builds.
+phonometry is on [conda-forge](https://anaconda.org/conda-forge/phonometry).
+In a [conda](https://docs.conda.io/projects/conda/en/stable/) environment,
+install it from there together with the extras you want: NumPy, SciPy and the
+packages of every extra are conda-forge builds as well, so nothing in the
+environment comes from PyPI.
 
-Checked on 17 November 2026 with phonometry 4.0.0 from PyPI, in the
-`condaforge/miniforge3` image: conda 26.9.4 and mamba 2.9.0, Python 3.13.18
-with NumPy 2.5.5 from conda-forge, and Python 3.14.10 with pytorch 2.14.1.
+Checked on 21 November 2026 with phonometry 4.0.1 from conda-forge, in the
+`condaforge/miniforge3` image: conda 26.9.4 and mamba 2.9.0, Python 3.12.16,
+3.13.18 and 3.14.10 with NumPy 2.5.5 and SciPy 1.18.1, and Python 3.14.10 with
+pytorch 2.14.1.
 
 ## An environment with every extra
 
 ```bash
-conda create -n acoustics -c conda-forge python=3.13 numpy scipy matplotlib-base numba reportlab svglib pysoundfile
+conda create -n acoustics -c conda-forge python=3.13 phonometry matplotlib-base numba reportlab svglib pysoundfile pip
 conda activate acoustics
-python -m pip install "phonometry[full]"
 ```
 
-pip reports each requirement as already satisfied and installs phonometry
-only. `conda list` then shows phonometry with the channel `pypi` beside the
-conda-forge packages, and `python -m pip check` reports nothing broken.
-[mamba](https://mamba.readthedocs.io/en/latest/) takes the same arguments:
-`mamba create -n acoustics -c conda-forge ...` builds the same environment.
+`conda list` shows phonometry with the channel `conda-forge`, as every other
+package in the environment, and `python -m pip check` reports nothing broken.
+In that environment `.plot()` draws, `.report()` writes its fiche,
+`phonometry.io` writes and reads FLAC and the `impulse` time weighting runs on
+numba. [mamba](https://mamba.readthedocs.io/en/latest/) takes the same
+arguments: `mamba create -n acoustics -c conda-forge ...` builds the same
+environment. To add phonometry to an environment that already exists, run
+`conda install -c conda-forge phonometry` in it.
+
 Python 3.12, 3.13 and 3.14 all work. conda-forge publishes no Python 3.12 or
-newer for 32-bit Windows or 32-bit Linux, so phonometry installs there with
-pip alone, `[plot,report,audio]` in place of `[full]`, as [pip and
+newer for 32-bit Windows or 32-bit Linux, so phonometry installs there with pip
+alone, `[plot,report,audio]` in place of `[full]`, as [pip and
 uv](pip-and-uv.md) says.
 
 ## The extras under their conda-forge names
+
+The conda package depends on NumPy and SciPy only, as `pip install phonometry`
+does. Each extra is a conda-forge package of its own, and the recipe holds it
+to the floor the extra has on PyPI for Python 3.12:
 
 | Extra | conda-forge packages |
 |---|---|
@@ -46,10 +53,8 @@ uv](pip-and-uv.md) says.
 
 `matplotlib-base` is matplotlib without a GUI backend, which is what the
 library draws with; `pysoundfile` is the conda-forge name of the package PyPI
-calls `soundfile`. Install the conda-forge packages of the extras you want
-before pip runs. A dependency still missing when pip runs comes from PyPI
-instead, and `conda list` shows it with the channel `pypi` beside the
-conda-forge NumPy.
+calls `soundfile`. Install the ones you want with phonometry or at any time
+after it.
 
 A feature whose dependency is missing names both spellings:
 
@@ -65,10 +70,29 @@ On a machine without a GPU, conda-forge installs its CPU build of pytorch, so
 no index has to be named:
 
 ```bash
-conda create -n fdtd -c conda-forge python=3.14 numpy scipy pytorch array-api-compat
+conda create -n fdtd -c conda-forge python=3.14 phonometry pytorch array-api-compat
 conda activate fdtd
-python -m pip install "phonometry[torch]"
 ```
 
-pip again installs phonometry alone, and an FDTD run on
-`Compute(device="torch:cpu")` gives the same pressures as the NumPy run.
+An FDTD run on `Compute(device="torch:cpu")` then gives the same pressures as
+the NumPy run, to the last bit.
+
+## A release before it reaches conda-forge
+
+A new release reaches conda-forge once conda-forge's bot has opened the update
+on the [phonometry feedstock](https://github.com/conda-forge/phonometry-feedstock)
+and it has been merged. To take it from PyPI before then, install the
+dependencies from conda-forge first and phonometry with the environment's own
+pip:
+
+```bash
+conda create -n acoustics -c conda-forge python=3.13 numpy scipy matplotlib-base numba reportlab svglib pysoundfile pip
+conda activate acoustics
+python -m pip install "phonometry[full]"
+```
+
+When every requirement is already there at the version the release asks for,
+pip installs phonometry alone, so NumPy, SciPy and the extras stay conda-forge
+builds; `conda list` shows phonometry with the channel `pypi`. A dependency
+still missing, or older than the new release requires, comes from PyPI instead,
+and `conda list` then shows it with the channel `pypi` too.

@@ -13,11 +13,14 @@
       "torch": "2.15.0"
     },
     "conda": {
+      "date": "2026-11-21",
+      "phonometry": "4.0.1",
       "images": ["condaforge/miniforge3"],
       "conda": "26.9.4",
       "mamba": "2.9.0",
-      "Python": ["3.13.18", "3.14.10"],
+      "Python": ["3.12.16", "3.13.18", "3.14.10"],
       "NumPy": "2.5.5",
+      "SciPy": "1.18.1",
       "pytorch": "2.14.1"
     },
     "jupyter": {

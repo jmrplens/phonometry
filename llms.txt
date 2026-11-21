@@ -16,6 +16,7 @@ pip install "phonometry[report]"    # + reportlab and svglib, for .report() PDF 
 pip install "phonometry[audio]"     # + python-soundfile, for FLAC, AIFF, Ogg/Opus, MP3 and compressed WAV
 pip install "phonometry[full]"      # all of the above (recommended)
 pip install "phonometry[torch]"     # + torch and array-api-compat, the FDTD engines on PyTorch; not in [full]
+conda install -c conda-forge phonometry   # the same core from conda-forge; extras under their conda-forge names
 ```
 
 If phonometry 3.x is already installed, upgrade it with `pip install -U phonometry`, naming the extras you use (`pip install -U "phonometry[full]"` for all four where `[full]` installs); 3.x has a different import layout and `from phonometry import filters` fails on it. Code written for 3.x needs changes to run on 4.x; the [upgrade guide](https://phonometry.dev/start/upgrading/) maps each of them.
@@ -47,7 +48,7 @@ If you are an AI assistant setting this up for a user: install from PyPI (no sys
 - [Getting Started](https://phonometry.dev/start/getting-started/): Install phonometry, run your first one-third-octave analysis and calibrate it.
 - [Environments](https://phonometry.dev/start/environments/): Where phonometry runs and how to install it there: pip and uv, conda, Jupyter, JupyterLite, Docker and type checkers, with what each one supports.
 - [pip and uv](https://phonometry.dev/start/environments/pip-and-uv/): Install phonometry with pip or uv on Python 3.12 to 3.14: each extra and what it brings, torch without CUDA, a uv project and an install from a clone.
-- [conda and mamba](https://phonometry.dev/start/environments/conda/): Use phonometry in a conda or mamba environment: its dependencies from conda-forge under their names there, then phonometry itself with pip.
+- [conda and mamba](https://phonometry.dev/start/environments/conda/): Install phonometry from conda-forge with conda or mamba: the package, its extras under their conda-forge names, and pytorch without CUDA.
 - [Jupyter and JupyterLab](https://phonometry.dev/start/environments/jupyter/): Use phonometry in Jupyter and JupyterLab: the kernel and the extras, record tables, inline and SVG figures, videos, fiches and warnings in a cell.
 - [JupyterLite and Pyodide](https://phonometry.dev/start/environments/jupyterlite/): phonometry in a browser through JupyterLite or Pyodide: the extras micropip can install, what runs there, what cannot, and a JupyterLite site of your own.
 - [Docker and servers](https://phonometry.dev/start/environments/docker/): Run phonometry in a container or on a server: a slim image with a virtual environment, any user id, a read-only root and ffmpeg for videos.

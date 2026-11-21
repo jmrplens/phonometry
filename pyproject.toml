@@ -195,6 +195,7 @@ full = [
 "Author" = "https://jmrp.io/"
 "Documentation" = "https://phonometry.dev/"
 "Source" = "https://github.com/jmrplens/phonometry"
+"conda-forge" = "https://anaconda.org/conda-forge/phonometry"
 "Changelog" = "https://github.com/jmrplens/phonometry/blob/main/CHANGELOG.md"
 "Bug Tracker" = "https://github.com/jmrplens/phonometry/issues"
 "DOI" = "https://doi.org/10.5281/zenodo.21215280"

@@ -7,7 +7,9 @@ extras micropip installs, which wheels an image has, which strict mode a
 checker passes. ``environment_checks.json`` is the record of the last run of
 those commands, the day, the phonometry release and the version of every tool
 and image each page ran on, and each page, in English and in Spanish, carries
-one paragraph that says so, opening "Checked on" or "Comprobado el".
+one paragraph that says so, opening "Checked on" or "Comprobado el". A page
+whose commands were run again on their own, later than the rest, carries the
+day and the release of that run in its own entry.
 
 A new run that changes the record and leaves a page behind fails here, and so
 does a page edited to a version no record holds: the paragraph has to quote
@@ -63,18 +65,40 @@ _VERSION = re.compile(r"(?<![\w.])\d+(?:\.\d+)+(?![\w.]*\w)")
 _CODE = re.compile(r"`([^`]*)`")
 
 
-def _day(language: str) -> str:
-    day = date.fromisoformat(_RECORD["date"])
+#: The keys of a page's entry that say when it was checked, not on what.
+_WHEN = ("date", "phonometry")
+
+
+#: The page that sums the section up, and quotes every run of its pages.
+_OVERVIEW = "index"
+
+
+def _release(page: str) -> str:
+    """The phonometry release the page's commands were run with."""
+    return str(_RECORD["pages"][page].get("phonometry", _RECORD["phonometry"]))
+
+
+def _day(page: str, language: str) -> str:
+    day = date.fromisoformat(_RECORD["pages"][page].get("date", _RECORD["date"]))
     if language == "en":
         return f"{day.day} {day:%B} {day.year}"
     return f"{day.day} de {_MONTHS_ES[day.month - 1]} de {day.year}"
 
 
 def _values(page: str) -> list[str]:
-    """Every value of a page's record, lists flattened."""
+    """Every value of a page's record, lists flattened.
+
+    The overview (``index``) answers for the section, so it also names every
+    release a page of it was checked with on its own, beside its own.
+    """
     values: list[str] = []
-    for value in _RECORD["pages"][page].values():
+    for key, value in _RECORD["pages"][page].items():
+        if key in _WHEN:
+            continue
         values.extend(value if isinstance(value, list) else [value])
+    if page == _OVERVIEW:
+        others = {_release(name) for name in _RECORD["pages"]} - {_release(page)}
+        values.extend(sorted(others))
     return values
 
 
@@ -102,7 +126,7 @@ def _missing(page: str, paragraph: str) -> list[str]:
 
 def _stray(page: str, paragraph: str) -> list[str]:
     """The version numbers the paragraph quotes that its record does not hold."""
-    recorded = set(_values(page)) | {_RECORD["phonometry"]}
+    recorded = set(_values(page)) | {_release(page)}
     # A code span names an image or a digest the record holds whole; its
     # digits are no version of their own.
     prose = _CODE.sub(
@@ -127,8 +151,8 @@ def test_the_page_says_when_and_with_which_release_it_was_checked(
     page: str, language: str
 ) -> None:
     paragraph = _checked(page, language)
-    assert _day(language) in paragraph, paragraph
-    assert f"phonometry {_RECORD['phonometry']}" in paragraph, paragraph
+    assert _day(page, language) in paragraph, paragraph
+    assert f"phonometry {_release(page)}" in paragraph, paragraph
 
 
 @pytest.mark.parametrize(("page", "language"), _CASES)
@@ -159,3 +183,18 @@ def test_a_paragraph_that_drifts_from_its_record_is_caught() -> None:
     # An image the record does not hold is prose, and its tag a version.
     unrecorded = paragraph.replace("python:3.14", "python:3.11")
     assert _stray("type-checking", unrecorded) == ["3.11", "2.4.0"]
+
+
+def test_a_page_run_on_its_own_is_held_to_that_run() -> None:
+    # The conda page was run again, on its own, after the rest: its paragraph
+    # answers with that run's day and release, the record's release in its
+    # place is a version the page's entry does not hold, and neither key is a
+    # tool version the paragraph has to quote.
+    assert _day("conda", "en") == "21 November 2026"
+    assert _day("conda", "es") == "21 de noviembre de 2026"
+    assert _release("conda") == "4.0.1"
+    assert _day("type-checking", "en") == "17 November 2026"
+    assert _release("type-checking") == "4.0.0"
+    paragraph = _checked("conda", "en").replace("4.0.1", "4.0.0")
+    assert _stray("conda", paragraph) == ["4.0.0"]
+    assert not {"2026-11-21", "4.0.1"} & set(_values("conda"))

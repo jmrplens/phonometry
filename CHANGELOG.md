@@ -43,7 +43,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   now installs phonometry from conda-forge, checked with 4.0.1 on Python 3.12,
   3.13 and 3.14, and keeps the pip route for a release that has not reached
   conda-forge yet. The software node of every page lists the conda-forge
-  package beside PyPI. CONTRIBUTING says what to compare in the update
+  package beside PyPI, and so do the project links in `pyproject.toml`, which
+  PyPI shows from the next release on. CONTRIBUTING says what to compare in the update
   conda-forge's bot opens after each release, and SECURITY.md which files the
   attestations cover and that the conda package is not among them.
 

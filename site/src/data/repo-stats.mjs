@@ -35,10 +35,12 @@ import {
   installLine,
   platformOf,
   pythonFloor as floorOf,
+  readLicenses,
   readProject,
 } from '../lib/pyproject.mjs';
 import { isPreRelease } from '../lib/pep440.mjs';
 import { parseToml } from '../lib/toml.mjs';
+import { repositoryUrl } from './site.mjs';
 import { domainIds } from './topics.mjs';
 
 /**
@@ -117,14 +119,14 @@ export const version = (() => {
 export const preRelease = isPreRelease(version);
 
 /**
- * The `[project]` table of pyproject.toml, read once for everything below.
+ * pyproject.toml, read once for everything below.
  *
  * The software node of the structured data, the API pages and the landing
  * page all state some of it, and each used to type its own copy: the node
  * named two of the five optional extras a year after the other three were
- * added.
+ * added, and listed the licences from a literal of its own.
  */
-const project = (() => {
+const pyproject = (() => {
   const file = join(ROOT, 'pyproject.toml');
   let text;
   try {
@@ -136,8 +138,11 @@ const project = (() => {
       { cause },
     );
   }
-  return readProject(parseToml(text, file));
+  return parseToml(text, file);
 })();
+
+/** The `[project]` table, as far as the site states it. */
+const project = readProject(pyproject);
 
 /** The package's `requires-python`, e.g. ">=3.12". */
 export const requiresPython = project.requiresPython;
@@ -162,6 +167,13 @@ export const extras = project.extras;
  * requirement with its floor, and every optional extra by name.
  */
 export const softwareRequirements = describeRequirements(project);
+
+/**
+ * The licences the package declares (`license` and `license-files`), in the
+ * order of the expression, each with the address the software node gives it:
+ * MIT, and the EASA ANP tables the package bundles under EASA's terms.
+ */
+export const { expression: licenseExpression, licenses } = readLicenses(pyproject, repositoryUrl);
 
 //: The topics the guides live under: every topic that teaches, read from the
 //: navigation data rather than listed here, the way

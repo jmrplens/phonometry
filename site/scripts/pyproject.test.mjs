@@ -29,7 +29,9 @@ import {
 	parseRequirement,
 	platformOf,
 	pythonFloor,
+	readLicenses,
 	readProject,
+	SPDX_PAGES,
 } from '../src/lib/pyproject.mjs';
 import { ONE_FLOOR, PER_PYTHON } from './shared/pyproject-fixture.mjs';
 
@@ -244,4 +246,31 @@ test('a project table missing what the site states stops the build, naming the k
 	assert.throws(() => readProject(parseToml(without('requires-python'))), /requires-python/);
 	assert.throws(() => readProject(parseToml(without('name'))), /name/);
 	assert.throws(() => readProject(parseToml('[tool.x]\na = 1\n')), /\[project\]/);
+});
+
+test('the licences are the ones pyproject.toml declares, each linked to its page or to its text', () => {
+	const repository = 'https://github.com/example/package';
+	const { expression, licenses } = readLicenses(parseToml(readFileSync(PYPROJECT, 'utf8')), repository);
+	assert.equal(expression, 'MIT AND LicenseRef-EASA-ANP');
+	assert.deepEqual(licenses, [
+		{ id: 'MIT', file: 'LICENSE', url: SPDX_PAGES.MIT },
+		{
+			id: 'LicenseRef-EASA-ANP',
+			file: 'LICENSES/LicenseRef-EASA-ANP.txt',
+			url: `${repository}/blob/main/LICENSES/LicenseRef-EASA-ANP.txt`,
+		},
+	]);
+});
+
+test('a licence the site cannot state or link stops the build, naming it', () => {
+	const table = (license, files = ['LICENSE', 'LICENSES/LicenseRef-EASA-ANP.txt']) =>
+		parseToml(`[project]\nname = "x"\nlicense = "${license}"\nlicense-files = ${JSON.stringify(files)}\n`);
+	const read = (license, files) => () => readLicenses(table(license, files), 'https://github.com/example/package');
+	assert.throws(read('MIT OR Apache-2.0'), /more than licences joined by AND \("MIT OR Apache-2\.0"\)/);
+	assert.throws(read('(MIT AND LicenseRef-EASA-ANP)'), /more than licences joined by AND/);
+	assert.throws(read('MIT AND Apache-2.0', ['LICENSE', 'LICENSES/Apache-2.0.txt']), /Apache-2\.0, whose page the site does not know/);
+	assert.throws(read('MIT AND LicenseRef-Other'), /LicenseRef-Other, and license-files holds no text of it \(LICENSES\/LicenseRef-Other\.txt\)/);
+	assert.throws(read('MIT', ['LICENSE', 'LICENSES/LicenseRef-EASA-ANP.txt']), /license-files holds LICENSES\/LicenseRef-EASA-ANP\.txt, the text of no licence "MIT" names/);
+	assert.throws(() => readLicenses(parseToml('[project]\nname = "x"\n'), ''), /license is not an SPDX expression/);
+	assert.throws(() => readLicenses(parseToml('[project]\nname = "x"\nlicense = "MIT"\n'), ''), /license-files is not a list/);
 });

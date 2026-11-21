@@ -34,6 +34,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Fixed
 
+- **The software node and the landing page state the licences the package
+  declares.** The structured data of every page listed MIT and the EASA ANP
+  terms from a literal that nothing held to `pyproject.toml`, and the landing
+  page said "published under the MIT licence" alone, while PyPI declares
+  `MIT AND LicenseRef-EASA-ANP`. The node now reads the `license` expression
+  and the `license-files` of `pyproject.toml`, as it reads the requirements,
+  and links each licence to its page or to its text in the repository; the
+  structured-data check holds both software nodes to that list, and the
+  landing page, in English and Spanish, names MIT and the EASA ANP tables the
+  package bundles under EASA's terms, which a test holds to every licence
+  `pyproject.toml` declares.
 - **The run record the compute guide prints is the one the proof machine
   printed.** It named phonometry 4.0.0 while the CuPy proof of 9 November ran
   4.0.0rc1. `gpu-parity.lock` now records the phonometry version of the run

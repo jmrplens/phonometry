@@ -1324,6 +1324,9 @@ const READS = {
 		dependencies: ['pyproject.toml'],
 		extras: ['pyproject.toml'],
 		softwareRequirements: ['pyproject.toml'],
+		licenseExpression: ['pyproject.toml'],
+		// A LicenseRef's text is linked in the repository site.mjs names.
+		licenses: ['pyproject.toml', 'site/src/data/site.mjs'],
 	},
 	'site/src/data/conformance-stats.mjs': {
 		passingChecks: [BANNER, 'docs/conformance.json'],

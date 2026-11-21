@@ -55,7 +55,7 @@ import { test } from 'node:test';
 import { glossary } from '../src/data/glossary.mjs';
 import { en as homeEn } from '../src/data/home-en.ts';
 import { es as homeEs } from '../src/data/home-es.ts';
-import { dependencies, extras, softwareRequirements } from '../src/data/repo-stats.mjs';
+import { dependencies, extras, licenseExpression, licenses, softwareRequirements } from '../src/data/repo-stats.mjs';
 import { featureLists, siteDescriptions, softwareDescriptions } from '../src/data/scope.mjs';
 import { domainIds, topicForSlug, topics } from '../src/data/topics.mjs';
 import { catalogues } from '../src/generated/catalogues.mjs';
@@ -2047,7 +2047,7 @@ test('a build whose site-wide nodes speak both languages passes, and says what i
 		new RegExp(
 			'ok {3}the site-wide nodes on all 10 pages describe the site and the software in English and in Spanish, ' +
 				`list one feature for each of the ${domainIds.length} topics that teach in each language, ` +
-				'publish no placeholder as a standard or a keyword, and state every requirement and extra of pyproject.toml',
+				'publish no placeholder as a standard or a keyword, and state every requirement, extra and licence of pyproject.toml',
 		),
 	);
 	assert.equal(ran.err, '');
@@ -2252,6 +2252,61 @@ test('requirements typed by hand, as every page published them, fail and name wh
 	});
 	assert.equal(none.status, 1);
 	assert.match(none.err, /FAIL SoftwareApplication softwareRequirements is undefined, not a text naming what pyproject\.toml requires/);
+});
+
+test('software nodes that state fewer licences than pyproject.toml declares, or one it does not, fail and name it', (t) => {
+	// The node listed both licences from a literal while the landing page said
+	// MIT alone; the node now reads pyproject.toml, and the check holds both
+	// nodes to it.
+	assert.ok(licenses.length > 1, `pyproject.toml declares ${licenseExpression}; update this test`);
+	const [first, ...rest] = licenses.map((license) => license.url);
+	const fewer = history(t, {
+		nodes: changedAll({
+			SoftwareApplication: (node) => {
+				node.license = first;
+			},
+			SoftwareSourceCode: (node) => {
+				delete node.license;
+			},
+		}),
+	});
+	assert.equal(fewer.status, 1);
+	assert.match(
+		fewer.err,
+		new RegExp(
+			`FAIL SoftwareApplication license leaves out ${RegExp.escape(rest.join(', '))}, ` +
+				`which pyproject\\.toml declares \\(${RegExp.escape(licenseExpression)}\\) \\(on 10 pages\\)`,
+		),
+	);
+	assert.match(fewer.err, new RegExp(`FAIL SoftwareSourceCode license leaves out ${RegExp.escape(first)}`));
+	const other = history(t, {
+		nodes: changedAll({
+			SoftwareApplication: (node) => {
+				node.license = [...node.license, 'https://opensource.org/license/Apache-2.0'];
+			},
+		}),
+	});
+	assert.equal(other.status, 1);
+	assert.match(
+		other.err,
+		/FAIL SoftwareApplication license states "https:\/\/opensource\.org\/license\/Apache-2\.0", which pyproject\.toml does not declare/,
+	);
+});
+
+test('the landing page, in both languages, names every licence the package declares', () => {
+	// It said "published under the MIT licence on PyPI" while PyPI declares the
+	// EASA ANP tables' own terms beside MIT. A licence of LicenseRef- form is
+	// named by the words of its identifier (EASA and ANP).
+	for (const [lang, home] of [['en', homeEn], ['es', homeEs]]) {
+		const sentence = home.what.body.find((paragraph) => paragraph.includes('pypi.org/project/phonometry'));
+		assert.ok(sentence, `${lang}: no sentence of What this is links the package on PyPI`);
+		for (const { id } of licenses) {
+			const words = id.startsWith('LicenseRef-') ? id.slice('LicenseRef-'.length).split('-') : [id];
+			for (const word of words) {
+				assert.match(sentence, new RegExp(`\\b${RegExp.escape(word)}\\b`), `${lang}: the landing page does not name ${id} (${word})`);
+			}
+		}
+	}
 });
 
 test('a requirement stated with a version longer than the one pyproject.toml gives fails, naming it', (t) => {

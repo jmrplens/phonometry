@@ -1092,6 +1092,7 @@ def _summary(version: str) -> list[str]:
         'pip install "phonometry[audio]"     # + python-soundfile, for FLAC, AIFF, Ogg/Opus, MP3 and compressed WAV',
         'pip install "phonometry[full]"      # all of the above (recommended)',
         'pip install "phonometry[torch]"     # + torch and array-api-compat, the FDTD engines on PyTorch; not in [full]',
+        "conda install -c conda-forge phonometry   # the same core from conda-forge; extras under their conda-forge names",
         "```",
         "",
         (

@@ -19,7 +19,7 @@ ran that day.
 | Where | How phonometry arrives | What runs | What does not |
 |---|---|---|---|
 | [pip and uv](pip-and-uv.md) | `python -m pip install "phonometry[full]"` in a virtual environment, or `uv add "phonometry[full]"` | everything; `[torch]` adds the FDTD engines on PyTorch | `[perf]` and `[full]` on 32-bit Windows and 32-bit Linux, where `[plot,report,audio]` installs the other three extras |
-| [conda and mamba](conda.md) | the dependencies from conda-forge, then `python -m pip install "phonometry[full]"` | everything, pytorch from conda-forge included | nothing is left out |
+| [conda and mamba](conda.md) | `conda install -c conda-forge phonometry`, with the extras under their conda-forge names | everything, pytorch from conda-forge included | nothing is left out |
 | [Jupyter and JupyterLab](jupyter.md) | `python -m pip install jupyterlab "phonometry[full]"` | record tables, inline figures, fiches, videos once ffmpeg is installed | a kernel started with `PYTHONWARNINGS=error`; `[full]` on 32-bit Windows and 32-bit Linux, where `[plot,report,audio]` takes its place |
 | [JupyterLite and Pyodide](jupyterlite.md) | `%pip install "phonometry[plot,report,audio]"` in the first cell | metrics, record tables, figures, fiches, WAV and FLAC, FDTD on NumPy | `[perf]`, `[torch]` and `[full]`, video, every compute device but `"cpu"` |
 | [Docker and servers](docker.md) | a virtual environment inside a `python:3.13-slim` image | everything, under any user id and on a read-only root with a writable `/tmp`, from wheels on x86-64 and ARM64 | the wheels on the image's six other architectures, where pip builds NumPy, SciPy and most extras from source; `[perf]` and `[full]` on its three 32-bit ones, where `[plot,report,audio]` installs the other three extras; `[torch]` on all six |
@@ -66,7 +66,7 @@ run falls back to NumPy when its device is missing.
 ## The pages
 
 - [pip and uv](pip-and-uv.md): a virtual environment, each extra and what it brings, torch without CUDA, a uv project and an install from a clone.
-- [conda and mamba](conda.md): the dependencies under their conda-forge names, then phonometry with pip in the same environment.
+- [conda and mamba](conda.md): phonometry from conda-forge, the extras under their conda-forge names, pytorch without CUDA and a release taken from PyPI before it reaches conda-forge.
 - [Jupyter and JupyterLab](jupyter.md): the kernel, record tables, inline and SVG figures, videos, fiches and how warnings show in a cell.
 - [JupyterLite and Pyodide](jupyterlite.md): what installs with micropip, what runs in a browser and what cannot, and building a JupyterLite site.
 - [Docker and servers](docker.md): a slim image, any user id, a read-only root file system and ffmpeg for videos.

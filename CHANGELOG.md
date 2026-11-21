@@ -36,6 +36,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   difference as one it accepts. It compares them by jmrp.io's own rules,
   copied here and held to jmrp.io's on every run, so the two sites change
   such a value together, jmrp.io first.
+- **phonometry installs from conda-forge.** `conda install -c conda-forge
+  phonometry` installs it with NumPy and SciPy, and each extra installs as
+  its own conda-forge package. The README carries the conda-forge badge and
+  the command; [conda and mamba](https://phonometry.dev/start/environments/conda/)
+  now installs phonometry from conda-forge, checked with 4.0.1 on Python 3.12,
+  3.13 and 3.14, and keeps the pip route for a release that has not reached
+  conda-forge yet. The software node of every page lists the conda-forge
+  package beside PyPI. CONTRIBUTING says what to compare in the update
+  conda-forge's bot opens after each release, and SECURITY.md which files the
+  attestations cover and that the conda package is not among them.
 
 ### Changed
 

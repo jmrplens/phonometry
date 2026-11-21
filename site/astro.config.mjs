@@ -468,9 +468,11 @@ const jsonLd = JSON.stringify({
       creator: { '@id': authorId },
       maintainer: { '@id': authorId },
       // The package of the former name is listed too: it is where the
-      // project's first releases are, and it installs phonometry today.
+      // project's first releases are, and it installs phonometry today. The
+      // conda-forge package is built from the PyPI source distribution.
       sameAs: [
         'https://pypi.org/project/phonometry/',
+        'https://anaconda.org/conda-forge/phonometry',
         'https://pypi.org/project/PyOctaveBand/',
         doiUrl,
         `${fullUrl}/`,

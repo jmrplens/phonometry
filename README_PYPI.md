@@ -16,6 +16,7 @@
 [![PyPI version](https://img.shields.io/pypi/v/phonometry?logo=pypi&logoColor=white)](https://pypi.org/project/phonometry/)
 [![Python versions](https://img.shields.io/pypi/pyversions/phonometry?logo=python&logoColor=white)](https://pypi.org/project/phonometry/)
 [![PyPI downloads](https://img.shields.io/pypi/dm/phonometry?logo=pypi&logoColor=white)](https://pypistats.org/packages/phonometry)
+[![conda-forge](https://img.shields.io/conda/vn/conda-forge/phonometry?logo=condaforge&logoColor=white)](https://anaconda.org/conda-forge/phonometry)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://github.com/jmrplens/phonometry/blob/v4.0.1/LICENSE)
 
 <!-- Quality -->
@@ -59,6 +60,16 @@ figure in the documentation.*
 ```bash
 pip install phonometry
 ```
+
+or, from [conda-forge](https://anaconda.org/conda-forge/phonometry):
+
+```bash
+conda install -c conda-forge phonometry
+```
+
+The conda package brings NumPy and SciPy, as pip does; the extras below
+install under their conda-forge names, which
+[conda and mamba](https://phonometry.dev/start/environments/conda/) lists.
 
 If phonometry 3.x is already installed, upgrade it with
 `pip install -U phonometry`, naming the extras you use

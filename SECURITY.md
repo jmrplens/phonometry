@@ -236,6 +236,14 @@ The SBOM lists the runtime dependencies at the versions the release resolved
 (`numpy` and `scipy`); the optional extras are not in it, because a plain
 install does not bring them.
 
+The [conda-forge package](https://anaconda.org/conda-forge/phonometry) is
+built by conda-forge's own CI, from the
+[phonometry feedstock](https://github.com/conda-forge/phonometry-feedstock),
+out of the sdist on PyPI, which its recipe names by URL and SHA-256. It holds
+the same source as the sdist the checks above verify; the attestations above
+are for the files on PyPI and the GitHub Release, and none of them covers the
+conda package itself.
+
 Integrity of the numbers is gated too, which matters more here than in most
 libraries: `docs/CONFORMANCE.md` is regenerated in CI from the library's own
 computations against reference values and the build fails if the committed

@@ -19,7 +19,7 @@ ejecutaron ese día sus órdenes.
 | Dónde | Cómo llega phonometry | Qué funciona | Qué no |
 |---|---|---|---|
 | [pip y uv](/es/start/environments/pip-and-uv/) | `python -m pip install "phonometry[full]"` en un entorno virtual, o `uv add "phonometry[full]"` | todo; `[torch]` añade las simulaciones FDTD sobre PyTorch | `[perf]` y `[full]` en Windows y Linux de 32 bits, donde `[plot,report,audio]` instala los otros tres extras |
-| [conda y mamba](/es/start/environments/conda/) | las dependencias desde conda-forge y después `python -m pip install "phonometry[full]"` | todo, también pytorch de conda-forge | no se queda nada fuera |
+| [conda y mamba](/es/start/environments/conda/) | `conda install -c conda-forge phonometry`, con los extras con sus nombres de conda-forge | todo, también pytorch de conda-forge | no se queda nada fuera |
 | [Jupyter y JupyterLab](/es/start/environments/jupyter/) | `python -m pip install jupyterlab "phonometry[full]"` | tablas de los resultados, figuras en línea, fichas y vídeos en cuanto está ffmpeg | un kernel arrancado con `PYTHONWARNINGS=error`; `[full]` en Windows y Linux de 32 bits, donde `[plot,report,audio]` ocupa su lugar |
 | [JupyterLite y Pyodide](/es/start/environments/jupyterlite/) | `%pip install "phonometry[plot,report,audio]"` en la primera celda | métricas, tablas, figuras, fichas, WAV y FLAC, FDTD con NumPy | `[perf]`, `[torch]` y `[full]`, el vídeo y cualquier dispositivo de cálculo que no sea `"cpu"` |
 | [Docker y servidores](/es/start/environments/docker/) | un entorno virtual dentro de una imagen `python:3.13-slim` | todo, con cualquier usuario y sobre una raíz de solo lectura con un `/tmp` escribible, desde wheels en x86-64 y ARM64 | los wheels en las otras seis arquitecturas de la imagen, donde pip compila NumPy, SciPy y casi todos los extras desde el código fuente; `[perf]` y `[full]` en sus tres de 32 bits, donde `[plot,report,audio]` instala los otros tres extras; `[torch]` en las seis |
@@ -67,7 +67,7 @@ su dispositivo.
 ## Las páginas
 
 - [pip y uv](/es/start/environments/pip-and-uv/): un entorno virtual, cada extra y lo que trae, torch sin CUDA, un proyecto de uv y la instalación desde un clon.
-- [conda y mamba](/es/start/environments/conda/): las dependencias con sus nombres de conda-forge y después phonometry con pip en el mismo entorno.
+- [conda y mamba](/es/start/environments/conda/): phonometry desde conda-forge, los extras con sus nombres de conda-forge, pytorch sin CUDA y una versión tomada de PyPI antes de que llegue a conda-forge.
 - [Jupyter y JupyterLab](/es/start/environments/jupyter/): el kernel, las tablas de los resultados, las figuras en línea y en SVG, los vídeos, las fichas y cómo se ven los avisos en una celda.
 - [JupyterLite y Pyodide](/es/start/environments/jupyterlite/): qué se instala con micropip, qué funciona en el navegador y qué no, y cómo se construye un sitio de JupyterLite.
 - [Docker y servidores](/es/start/environments/docker/): una imagen ligera, cualquier identificador de usuario, una raíz de solo lectura y ffmpeg para los vídeos.

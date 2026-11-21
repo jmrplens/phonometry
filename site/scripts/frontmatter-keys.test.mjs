@@ -18,12 +18,14 @@ import { fileURLToPath } from 'node:url';
 import { docsSchema } from '@astrojs/starlight/schema';
 import { z } from 'astro/zod';
 import { topicSchema } from 'starlight-sidebar-topics/schema';
+import { parse as parseYaml } from 'yaml';
 
 import { CONTENT_DIR, DATELESS_KEYS } from '../src/lib/date-rules.mjs';
 import {
 	FRONTMATTER_KEYS,
 	KEY_CLASSES,
 	keysOfClass,
+	presentationalHeadEntries,
 	refuseUnclassifiedKeys,
 	topLevelKey,
 	unclassifiedKeys,
@@ -45,6 +47,45 @@ test('the dateless keys are the label and metadata classes, and nothing else', (
 	assert.deepEqual(keysOfClass('label'), ['title', 'description', 'sidebar', 'topic']);
 	assert.ok(keysOfClass('metadata').includes('corrects'), 'corrects is read by the structured data only');
 	assert.ok(keysOfClass('content').includes('references'), 'the References section is text of the page');
+});
+
+test('head is metadata, and holds only what machines read: a title, meta tags, structured data and links to the page elsewhere', () => {
+	// The date rule passes over a change to head; what keeps that true is
+	// that a head may hold nothing a reader sees laid out.
+	assert.equal(FRONTMATTER_KEYS.head, 'metadata');
+	assert.deepEqual(
+		presentationalHeadEntries([
+			{ tag: 'title', content: 'phonometry' },
+			{ tag: 'meta', attrs: { property: 'og:type', content: 'website' } },
+			{ tag: 'script', attrs: { type: 'application/ld+json' }, content: '{}' },
+			{ tag: 'link', attrs: { rel: 'canonical', href: 'https://phonometry.dev/' } },
+			{ tag: 'link', attrs: { rel: 'alternate', hreflang: 'es', href: 'https://phonometry.dev/es/' } },
+		]),
+		[],
+	);
+	assert.deepEqual(presentationalHeadEntries(undefined), []);
+	assert.deepEqual(
+		presentationalHeadEntries([
+			{ tag: 'link', attrs: { rel: 'stylesheet', href: '/a.css' } },
+			{ tag: 'script', attrs: { src: '/a.js' } },
+			{ tag: 'script', attrs: { type: 'module' }, content: 'run()' },
+			{ tag: 'style', content: 'h1 { color: red }' },
+			{ tag: 'base', attrs: { href: '/' } },
+		]).map((entry) => entry.replace(/,.*$/, '')),
+		['head entry 1', 'head entry 2', 'head entry 3', 'head entry 4', 'head entry 5'],
+	);
+	assert.deepEqual(presentationalHeadEntries({ tag: 'title' }), ['head is not a list of tags']);
+});
+
+test('no head of a page holds an entry that shapes what a reader sees', () => {
+	const found = [];
+	for (const file of sitePages()) {
+		const text = readFileSync(file, 'utf8').replace(/\r\n?/g, '\n');
+		const frontmatter = /^---[ \t]*\n(?:([\s\S]*?)\n)?---[ \t]*(?:\n|$)/.exec(text)?.[1] ?? '';
+		const head = parseYaml(frontmatter)?.head;
+		for (const entry of presentationalHeadEntries(head)) found.push(`${relative(SITE, file)}: ${entry}`);
+	}
+	assert.deepEqual(found, []);
 });
 
 test('a key in no class is named, every one of them', () => {

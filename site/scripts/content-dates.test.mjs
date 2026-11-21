@@ -36,6 +36,7 @@ import { basePath, siteUrl } from '../src/data/site.mjs';
 import { domainIds } from '../src/data/topics.mjs';
 import { catalogueSections } from '../src/lib/catalogue-datasets.mjs';
 import { loadContentDates } from '../src/lib/content-dates.mjs';
+import { installLine, pythonFloor as pythonFloorOf } from '../src/lib/pyproject.mjs';
 import {
 	CONTENT_DIR,
 	DATE_SOURCES,
@@ -153,8 +154,27 @@ const day = (dates, path) => isoDay(dates.dateOf(join('src', 'content', 'docs', 
 // --- What counts as a change to the content ------------------------------
 
 test('the dateless keys are the labels of a page and the keys only machines read', () => {
-	assert.deepEqual([...DATELESS_KEYS].sort(), ['corrects', 'description', 'pagefind', 'searchTitle', 'searchWeight', 'sidebar', 'title', 'topic']);
-	for (const key of ['references', 'template', 'hero', 'head']) assert.ok(!DATELESS_KEYS.includes(key), key);
+	assert.deepEqual([...DATELESS_KEYS].sort(), ['corrects', 'description', 'head', 'pagefind', 'searchTitle', 'searchWeight', 'sidebar', 'title', 'topic']);
+	for (const key of ['references', 'template', 'hero']) assert.ok(!DATELESS_KEYS.includes(key), key);
+});
+
+test('an edit to what the head writes for machines alone, its structured data or its title, is frontmatter-only', () => {
+	// /es/start/guides/ was dated by a commit that took one "inLanguage" out
+	// of the JSON-LD its head carries, which no reader sees.
+	const head = (inLanguage) => [
+		'head:',
+		'  - tag: script',
+		'    attrs:',
+		'      type: application/ld+json',
+		'    content: |',
+		`      { "@type": "ItemList",${inLanguage ? ' "inLanguage": "es",' : ''} "name": "Guías" }`,
+		'  - tag: meta',
+		'    attrs:',
+		'      property: og:type',
+		'      content: website',
+	];
+	assert.equal(frontmatterOnly(page({ extra: head(true) }), page({ extra: head(false) })), true);
+	assert.equal(frontmatterOnly(page({ extra: head(true) }), page({ extra: head(false), body: 'New text.\n' })), false);
 });
 
 test('a change inside the title, the description or the sidebar entry is frontmatter-only', () => {
@@ -1298,9 +1318,9 @@ const READS = {
 		catalogueRows: ['site/src/generated/catalogues.mjs'],
 		catalogueCount: ['site/src/generated/catalogues.mjs'],
 		requiresPython: ['pyproject.toml'],
-		pythonFloor: ['pyproject.toml'],
+		pythonFloor: 'text',
 		targetPlatform: ['pyproject.toml'],
-		installCommand: ['pyproject.toml'],
+		installCommand: 'text',
 		dependencies: ['pyproject.toml'],
 		extras: ['pyproject.toml'],
 		softwareRequirements: ['pyproject.toml'],
@@ -1926,8 +1946,9 @@ test('each count in date-sources.json is the number the page shows: files as rep
 	}
 });
 
-test('each text in date-sources.json is the one the page shows: the fiches reports.mjs reads off the guides, the tables catalogue-pages.ts reads off the catalogue pages, the works the bibliography lists', async (t) => {
+test('each text in date-sources.json is the one the page shows: the fiches reports.mjs reads off the guides, the tables catalogue-pages.ts reads off the catalogue pages, the works the bibliography lists, the lines of pyproject.toml the landing pages show', async (t) => {
 	const reports = await import(pathToFileURL(join(SITE, 'src', 'data', 'reports.mjs')).href);
+	const repoStats = await import(pathToFileURL(join(SITE, 'src', 'data', 'repo-stats.mjs')).href);
 	const entries = readDateSources(join(SITE, DATE_SOURCES));
 	const texts = entries.flatMap((entry) => Object.entries(entry.texts)).filter(([, set]) => set.pattern !== undefined);
 	assert.ok(texts.some(([name]) => Object.hasOwn(READS['site/src/data/reports.mjs'], name)), 'the index of fiches shows what the guides say of each fiche');
@@ -1992,6 +2013,23 @@ test('each text in date-sources.json is the one the page shows: the fiches repor
 				assert.deepEqual([...text.matchAll(pattern)].map(([match]) => catalogueKey(match)), read, `${name}: the tables ${file} renders`);
 			}
 			assert.ok(pages > 0, `${name}: ${set.files.join(' ')} holds no catalogue page`);
+			continue;
+		}
+		if (module === 'site/src/data/repo-stats.mjs') {
+			// What a page shows of pyproject.toml, written again from the lines
+			// the pattern matches alone: they hold every key the export reads.
+			const lines = atHead(set).flatMap(({ text }) => text.match(pattern) ?? []);
+			const project = { name: undefined, requiresPython: undefined, extras: [] };
+			for (const line of lines) {
+				const at = line.indexOf('=');
+				const [key, value] = [line.slice(0, at).trim(), line.slice(at + 1).trim()];
+				if (key === 'name') project.name = JSON.parse(value);
+				else if (key === 'requires-python') project.requiresPython = JSON.parse(value);
+				else project.extras.push({ name: key });
+			}
+			const shown = { pythonFloor: () => pythonFloorOf(project.requiresPython), installCommand: () => installLine(project) }[name];
+			assert.ok(shown, `${name}: the test does not say how repo-stats.mjs reads it`);
+			assert.equal(shown(), repoStats[name], `${name}: what ${set.pattern} finds in ${set.files.join(' ')}`);
 			continue;
 		}
 		assert.equal(module, 'site/src/data/reports.mjs', `${name}: the test does not say how ${module} reads it`);
@@ -2230,6 +2268,7 @@ test('the landing page moves with a commit that changes only how its numbers are
 		for (const set of Object.values(landing.counts)) {
 			for (const spec of set.filter((spec) => !spec.startsWith(':(exclude'))) repo.writeFile(instance(spec), 'one\n');
 		}
+		for (const set of Object.values(landing.texts ?? {})) for (const spec of set.files) repo.writeFile(spec, 'requires-python = ">=3.12"\n');
 		repo.writeFile(module, 'export const counted = 1;\n');
 		writeFileSync(join(repo.site, DATE_SOURCES), JSON.stringify({ entries: [landing] }));
 		repo.commit(1);
@@ -2237,6 +2276,105 @@ test('the landing page moves with a commit that changes only how its numbers are
 		repo.commit(2, `${module} counts another way`);
 		assert.equal(day(await repo.dates(), 'index.mdx'), '2026-01-02', `a commit to ${module} alone`);
 	}
+});
+
+test('a source moves its page only with a commit that changes what it renders, not a comment, the layout of its code or the old base path of its links', async (t) => {
+	// The landing pages were dated by a commit that changed one JSDoc line of
+	// home.ts, and the bibliography by one that took the old base path out of
+	// a note's link in bibliography.mjs and changed a doc comment of
+	// bibliography-entries.mjs: none of them changed a word either page shows.
+	const repo = repository(t);
+	for (const name of ['a', 'b', 'c', 'd', 'e']) repo.write(`${name}.mdx`, page());
+	repo.writeFile('site/src/data/shared.ts', "/** The DOI. */\nconst DOI = '10.1/a';\nexport { DOI };\n");
+	repo.writeFile('site/src/data/notes.mjs', "export const notes = { a: 'See [b](/phonometry/b/).' };\n");
+	repo.writeFile('site/src/data/shown.mjs', "// The words.\nexport const words = 'one';\n");
+	repo.writeFile('site/src/data/moved.mjs', "export const notes = { a: 'See [b](/b/).' };\n");
+	repo.writeFile('site/src/data/held.mjs', "// The note.\nexport const note = 'See [b](/phonometry/b/).';\n");
+	repo.commit(1);
+	repo.writeFile('site/src/data/shared.ts', "/**\n * The DOI, which both pages show.\n */\nconst DOI =  '10.1/a';\n\nexport { DOI };\n");
+	repo.writeFile('site/src/data/notes.mjs', "export const notes = { a: 'See [b](/b/).' };\n");
+	repo.writeFile('site/src/data/shown.mjs', "// The words.\nexport const words = 'two';\n");
+	repo.writeFile('site/src/data/moved.mjs', "export const notes = { a: 'See [b](/phonometry/b/).' };\n");
+	repo.writeFile('site/src/data/held.mjs', "// The note, which keeps its link.\nexport const note = 'See [b](/phonometry/b/).';\n");
+	repo.commit(2, 'a comment and the layout; a link through the old base path; a word; a link given the old base');
+	repo.sources(
+		{ pages: ['site/src/content/docs/a.mdx'], sources: ['site/src/data/shared.ts'] },
+		{ pages: ['site/src/content/docs/b.mdx'], sources: ['site/src/data/notes.mjs'] },
+		{ pages: ['site/src/content/docs/c.mdx'], sources: ['site/src/data/shown.mjs'] },
+		{ pages: ['site/src/content/docs/d.mdx'], sources: ['site/src/data/moved.mjs'] },
+		{ pages: ['site/src/content/docs/e.mdx'], sources: ['site/src/data/held.mjs'] },
+	);
+	repo.commit(3, 'the list');
+	const dates = await repo.dates();
+	assert.equal(day(dates, 'a.mdx'), '2026-01-01', 'a comment and the layout of the code');
+	assert.equal(day(dates, 'b.mdx'), '2026-01-01', 'the old base path taken out of a link');
+	assert.equal(day(dates, 'c.mdx'), '2026-01-02', 'a word the page shows');
+	assert.equal(day(dates, 'd.mdx'), '2026-01-02', 'a link sent through the old base path, which the rule does not pass over');
+	assert.equal(day(dates, 'e.mdx'), '2026-01-01', 'a comment of a module that still holds a link through the old base path');
+});
+
+test('the landing page moves with the Python floor and the install line, and not with another key of pyproject.toml', async (t) => {
+	const raw = JSON.parse(readFileSync(join(SITE, DATE_SOURCES), 'utf8'));
+	const landing = raw.entries.find((entry) => entry.pages.includes('site/src/content/docs/index.mdx'));
+	const pyproject = ({ python = '>=3.12', license = 'MIT', homepage = 'https://docs.jmrp.io/phonometry/' } = {}) =>
+		[
+			'[project]',
+			'name = "phonometry"',
+			`requires-python = "${python}"`,
+			`license = "${license}"`,
+			'',
+			'[project.urls]',
+			`Homepage = "${homepage}"`,
+			'',
+			'[project.optional-dependencies]',
+			'plot = ["matplotlib"]',
+			'full = ["phonometry[plot]"]',
+			'',
+		].join('\n');
+	const story = async (last) => {
+		const repo = repository(t);
+		repo.write('index.mdx', page());
+		for (const spec of landing.sources) repo.writeFile(spec.endsWith('/') ? `${spec}One.astro` : spec, 'one\n');
+		for (const set of Object.values(landing.counts)) {
+			for (const spec of set.filter((spec) => !spec.startsWith(':(exclude'))) {
+				repo.writeFile(spec.replace(/^:\([^)]*\)/, '').replaceAll('{topic}', domainIds[0]).replaceAll('**/', '').replaceAll('*', 'one').replace(/\/$/, '/one.mdx'), 'one\n');
+			}
+		}
+		repo.writeFile('pyproject.toml', pyproject());
+		writeFileSync(join(repo.site, DATE_SOURCES), JSON.stringify({ entries: [landing] }));
+		repo.commit(1);
+		repo.writeFile('pyproject.toml', pyproject({ license: 'MIT AND LicenseRef-EASA-ANP', homepage: 'https://phonometry.dev/' }));
+		repo.commit(2, 'the licence expression and the project links, which the page does not show');
+		if (last) {
+			repo.writeFile('pyproject.toml', last);
+			repo.commit(3, 'what the page shows');
+		}
+		return day(await repo.dates(), 'index.mdx');
+	};
+	assert.equal(await story(), '2026-01-01', 'metadata the landing page does not show');
+	const shown = pyproject({ license: 'MIT AND LicenseRef-EASA-ANP', homepage: 'https://phonometry.dev/' });
+	assert.equal(await story(shown.replace('>=3.12', '>=3.13')), '2026-01-03', 'the Python floor');
+	assert.equal(await story(shown.replace('full = ["phonometry[plot]"]\n', '')), '2026-01-03', 'the extra the install line installs');
+});
+
+test('the index of fiches does not move with a commit to the module that reads it, only with one to what it reads', async (t) => {
+	// 031ad9088 wrote the base path of reports.mjs through basePath while it
+	// was still /phonometry: the code changed, and no line the index shows did.
+	const raw = JSON.parse(readFileSync(join(SITE, DATE_SOURCES), 'utf8'));
+	const reports = raw.entries.find((entry) => entry.pages.includes('site/src/content/docs/reference/reports.mdx'));
+	const repo = repository(t);
+	for (const spec of reports.pages) repo.writeFile(spec, page());
+	for (const spec of reports.sources) repo.writeFile(spec, 'one\n');
+	repo.writeFile('site/src/data/reports.mjs', "export const base = '/phonometry';\n");
+	repo.write('signals/guide.mdx', guide('First title'));
+	repo.writeFile('.github/reports/one.pdf', 'pdf\n');
+	writeFileSync(join(repo.site, DATE_SOURCES), JSON.stringify({ entries: [reports] }));
+	repo.commit(1);
+	repo.writeFile('site/src/data/reports.mjs', "import { basePath } from './site.mjs';\nexport const base = basePath;\n");
+	repo.commit(2, 'the base path read from site.mjs');
+	const dates = await repo.dates();
+	assert.equal(day(dates, 'reference/reports.mdx'), '2026-01-01');
+	assert.equal(day(dates, 'es/reference/reports.mdx'), '2026-01-01');
 });
 
 // --- The sitemap, stamped the way the build does it ----------------------

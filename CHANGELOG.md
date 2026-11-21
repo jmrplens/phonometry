@@ -25,6 +25,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Fixed
 
+- **A page is dated by a change a reader can see.** Both landing pages, the
+  index of report fiches and the bibliography, in both languages, and the
+  Spanish guides index carried the date of a commit that changed nothing they
+  show: a doc comment of `home.ts`, a base path written another way in
+  `reports.mjs`, the old base path taken out of a link in `bibliography.mjs`,
+  one `inLanguage` taken out of the structured data a page's head carries. A
+  commit to a data source now dates its pages only when it changes what they
+  render: one that only takes the old base path or host out of its links, or
+  changes only the comments or the layout of a JavaScript or TypeScript
+  module, moves no date. The landing pages read the Python floor and the
+  install line from `pyproject.toml`, and no other key of it dates them; the
+  index of fiches is dated by what it reads off the guides, not by the module
+  that reads them. A page's `head` holds only what machines read (its title,
+  meta tags, structured data and links to the page elsewhere), so a change to
+  it moves no date either, and a test refuses an entry in it that a reader
+  would see.
 - **No address in the files written for agents runs into the punctuation
   after it.** A crawler that reads an address up to the next space took the
   full stop, comma or closing parenthesis after a bare address for part of

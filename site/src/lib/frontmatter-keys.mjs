@@ -42,7 +42,10 @@ export const FRONTMATTER_KEYS = Object.freeze({
   sidebar: 'label',
   slug: 'content',
   editUrl: 'content',
-  head: 'content',
+  // What the page writes into its <head> for machines: its <title>, the
+  // structured data and the meta tags (presentationalHeadEntries says which
+  // entries those are, and a test refuses any other).
+  head: 'metadata',
   tableOfContents: 'content',
   template: 'content',
   hero: 'content',
@@ -60,6 +63,39 @@ export const FRONTMATTER_KEYS = Object.freeze({
   searchWeight: 'metadata',
   corrects: 'metadata',
 });
+
+/**
+ * The tags a page's `head` may hold and stay metadata: what only browsers,
+ * search engines and agents read. A `link` is one when its `rel` points to
+ * another address of the page; a `script` only when it is structured data.
+ */
+const HEAD_TAGS = Object.freeze({
+  title: () => true,
+  meta: () => true,
+  script: (attrs) => attrs?.type === 'application/ld+json',
+  link: (attrs) => String(attrs?.rel ?? '').split(/\s+/).every((rel) => ['canonical', 'alternate'].includes(rel)),
+});
+
+/**
+ * The entries of a page's `head` that are no metadata, each described. A
+ * stylesheet, a script a browser runs or any other tag shapes what the page
+ * shows, and the date rule would pass over a change to it, since `head` is a
+ * `metadata` key: such an entry is refused, and the day one is wanted the key
+ * is classed again by a person rather than by default.
+ *
+ * @param {unknown} head The frontmatter's `head`, as YAML reads it.
+ * @returns {string[]}
+ */
+export function presentationalHeadEntries(head) {
+  if (head === undefined || head === null) return [];
+  if (!Array.isArray(head)) return ['head is not a list of tags'];
+  return head.flatMap((entry, index) => {
+    const tag = entry?.tag;
+    const allowed = typeof tag === 'string' && Object.hasOwn(HEAD_TAGS, tag) ? HEAD_TAGS[tag] : undefined;
+    if (allowed?.(entry.attrs)) return [];
+    return [`head entry ${index + 1}, <${tag ?? '?'}>${entry?.attrs ? ` ${JSON.stringify(entry.attrs)}` : ''}`];
+  });
+}
 
 /**
  * The keys of one class, in the order the list above gives them.

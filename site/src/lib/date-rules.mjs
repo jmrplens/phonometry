@@ -193,7 +193,8 @@ function linkMoves(legacy, target) {
   });
 }
 
-const MOVES = linkMoves(LEGACY_ORIGINS, { siteUrl, basePath });
+/** The rewrites of every link through a legacy origin of site-targets.json, for the current target. */
+export const MOVES = linkMoves(LEGACY_ORIGINS, { siteUrl, basePath });
 
 /**
  * Whether going from `before` to `after` changed nothing a reader sees but

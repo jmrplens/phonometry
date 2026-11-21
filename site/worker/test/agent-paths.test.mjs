@@ -23,8 +23,6 @@ describe('agentPaths', () => {
 			'/phonometry/*/index.md',
 			'/llms*.txt',
 			'/phonometry/llms*.txt',
-			'/robots.txt',
-			'/phonometry/robots.txt',
 			'/sitemap*.xml',
 			'/phonometry/sitemap*.xml',
 		]);
@@ -32,7 +30,16 @@ describe('agentPaths', () => {
 	});
 
 	test('at the root the duplicates fold away', () => {
-		assert.deepEqual(agentPaths(''), ['/_v', '/index.md', '/*/index.md', '/llms*.txt', '/robots.txt', '/sitemap*.xml']);
+		assert.deepEqual(agentPaths(''), ['/_v', '/index.md', '/*/index.md', '/llms*.txt', '/sitemap*.xml']);
+	});
+
+	test('robots.txt never runs the Worker, so a spent quota cannot answer it with a 429', () => {
+		// Google reads a 429 on robots.txt as a server error and stops
+		// crawling the host while it lasts; as a plain asset it is answered
+		// whatever the day's count, and the zone's analytics still count it.
+		for (const prefix of ['', '/phonometry']) {
+			for (const path of ['/robots.txt', `${prefix}/robots.txt`]) assert.equal(runsWorker(path, agentPaths(prefix)), false, `${prefix || 'root'}: ${path}`);
+		}
 	});
 
 	test('Static Assets takes at most 100 patterns, each starting with /', () => {
@@ -56,8 +63,8 @@ describe('the matcher reads a pattern as Static Assets does', () => {
 		['/phonometry/llms.txt', true],
 		['/phonometry/llms-full.txt', true],
 		['/phonometry/llms/llms-signals.txt', true],
-		['/robots.txt', true],
-		['/phonometry/robots.txt', true],
+		['/robots.txt', false],
+		['/phonometry/robots.txt', false],
 		['/sitemap.xml', true],
 		['/sitemap-index.xml', true],
 		['/phonometry/sitemap-index.xml', true],
@@ -83,6 +90,7 @@ describe('the matcher reads a pattern as Static Assets does', () => {
 		['/signals/index.md', true],
 		['/llms/llms-signals.txt', true],
 		['/sitemap-0.xml', true],
+		['/robots.txt', false],
 		['/wlwmanifest.xml', false],
 		['/feed.xml', false],
 		['/signals/', false],

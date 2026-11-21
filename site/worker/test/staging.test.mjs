@@ -294,7 +294,7 @@ describe('the beacon in the staged copy', () => {
 });
 
 describe('the paths that run the Worker', () => {
-	test('only Markdown copies, llms files, robots.txt and XML files match a pattern', () => {
+	test('only Markdown copies, llms files and XML files match a pattern', () => {
 		const files = listTree(tree({ ...good(), 'llms.txt': 'x', 'llms/llms-signals.txt': 'x', 'sitemap-index.xml': 'x', 'rss.xml': 'x' }));
 		assert.deepEqual(agentPathProblems(files, prefix, ['404.html', 'robots.txt', 'llms.txt']), []);
 	});

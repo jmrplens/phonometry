@@ -74,7 +74,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   `reports.mjs`, the old base path taken out of a link in `bibliography.mjs`,
   one `inLanguage` taken out of the structured data a page's head carries. A
   commit to a data source now dates its pages only when it changes what they
-  render: one that only takes the old base path or host out of its links, or
+  show: one that only takes the old base path or host out of its links, or
   changes only the comments or the layout of a JavaScript or TypeScript
   module, moves no date. The landing pages read the Python floor and the
   install line from `pyproject.toml`, and no other key of it dates them; the
@@ -96,6 +96,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   of the Spanish conformance copy to the English rows. The check of the
   build's copies and llms files fails on a bare address the punctuation after
   it would join.
+- **robots.txt answers whatever the day's Worker count.** phonometry.dev ran
+  its Worker for robots.txt, to log who read it, so on a day the free Workers
+  quota ran out it would have answered 429 until midnight UTC, which Google
+  reads as a server error and holds the crawl of the whole site for. It is
+  served as a plain file now, like the pages, and Cloudflare's analytics of
+  the zone still count every read of it.
 - **Every link of the documentation names where it goes.** The topic list
   above the sidebar linked the Start topic with the word "Start" on every
   English page, which Lighthouse's SEO audit "Links do not have descriptive

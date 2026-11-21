@@ -227,8 +227,8 @@ export function mediaPolicyProblems(root, files, origins) {
 	return problems;
 }
 
-/** The files the Worker may run for: Markdown copies, llms files, robots.txt and XML. */
-const AGENT_FILE = /(?:\/index\.md|\/llms[^/]*\.txt|\/robots\.txt|\.xml)$/;
+/** The files the Worker may run for: Markdown copies, llms files and XML. */
+const AGENT_FILE = /(?:\/index\.md|\/llms[^/]*\.txt|\.xml)$/;
 
 /**
  * The staged files the Worker would run for that are not agent files: a page,

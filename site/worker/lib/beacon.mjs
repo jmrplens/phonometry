@@ -11,7 +11,6 @@
 // visible and can be filtered. A prerendered page reports when it is shown;
 // a page restored from the back/forward cache does not run it again.
 
-import { BASE_PATH, agentPaths, patternsSource } from './agent-paths.mjs';
 import { logEdgeRequest } from './edge-log.mjs';
 
 /** The largest beacon body the Worker reads; a real one is about 300 bytes. */
@@ -19,22 +18,16 @@ export const BEACON_MAX_BYTES = 2048;
 
 /**
  * The inline script, minified by hand (it ships in every page of the
- * preview). `nf` is 1 in the 404 pages, written in at staging.
- *
- * A 404 page also answers a missing agent file (`/x/index.md`),
- * and that request ran the Worker, which logged it with its 404. So the 404
- * page carries the agent paths for its base path and sends nothing when it
- * stands at one of them: the same miss is not counted twice, and the second
- * invocation is not spent.
+ * preview). `nf` is 1 in the 404 pages, written in at staging. A 404 page
+ * reports wherever it stands, a missing Markdown copy or llms file included:
+ * no Worker runs for those, so the beacon is the only count of a browser
+ * that lands there.
  *
  * @param {boolean} notFound Whether the page is a 404 page.
- * @param {string} [prefix] The base path, for the agent paths a 404 page skips.
  * @returns {string} One `<script>` element.
  */
-export function beaconScript(notFound, prefix = BASE_PATH) {
+export function beaconScript(notFound) {
 	const nf = notFound ? 1 : 0;
-	const start = notFound ? `/${patternsSource(agentPaths(prefix))}/.test(l.pathname)||(` : '';
-	const end = notFound ? ')' : '';
 	return (
 		'<script>(()=>{const n=navigator,d=document,l=location,s=()=>{' +
 		'const t=performance.getEntriesByType("navigation")[0],a=t?.activationStart||0,' +
@@ -45,7 +38,7 @@ export function beaconScript(notFound, prefix = BASE_PATH) {
 		`wd:n.webdriver?1:0,nf:${nf}});` +
 		'n.sendBeacon?.("/_v",b)||fetch("/_v",{method:"POST",body:b,keepalive:!0}).catch(()=>{})},' +
 		'g=()=>d.readyState=="complete"?setTimeout(s):addEventListener("load",()=>setTimeout(s),{once:!0});' +
-		`${start}d.prerendering?d.addEventListener("prerenderingchange",g,{once:!0}):g()${end}})()</script>`
+		'd.prerendering?d.addEventListener("prerenderingchange",g,{once:!0}):g()})()</script>'
 	);
 }
 

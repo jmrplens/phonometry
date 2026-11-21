@@ -2,12 +2,11 @@
 // every path that runs code, and after 00:00 UTC it switches them back.
 //
 // Workers Free gives the account 100 000 requests a day, reset at 00:00 UTC.
-// Pages never run code and never count; the beacon and the agent files do
-// (lib/agent-paths.mjs). Off means two things, in this order:
-// phonometry-docs is rolled to the assets-only version uploaded beside its
-// full one in the same deploy (tagged `assets-<k>` and `full-<k>`), so the
-// agent files are served as plain assets again and /_v, which no asset
-// answers, costs nothing; then the zone's WAF rule `quota-guard-beacon`
+// Files never run code and never count; the beacon does (lib/worker-paths.mjs).
+// Off means two things, in this order: phonometry-docs is rolled to the
+// assets-only version uploaded beside its full one in the same deploy
+// (tagged `assets-<k>` and `full-<k>`), so /_v, which no asset answers,
+// costs nothing; then the zone's WAF rule `quota-guard-beacon`
 // blocks /_v before any Worker runs, and its last update records the day.
 // The deploy comes first so that a run that fails halfway leaves a state the
 // next run finishes: a marked assets-only deploy without the rule is

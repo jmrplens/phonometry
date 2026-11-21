@@ -1,0 +1,6 @@
+[
+  {
+    "user_agent": "prefetch-proxy",
+    "disallow": false
+  }
+]

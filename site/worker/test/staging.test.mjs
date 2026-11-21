@@ -9,7 +9,7 @@ import { afterEach, describe, test } from 'node:test';
 import { twinExclusions } from '../lib/twins.mjs';
 import { beaconScript } from '../lib/beacon.mjs';
 import { DEFAULT_SITE, SITE_TARGETS, mediaOrigins } from '../../src/data/site.mjs';
-import { CANONICAL_ORIGIN, MAX_FILE_BYTES, MAX_FILES, SERVED_ORIGIN, agentPathProblems, beaconProblems, slashRuleProblems, buildOrigin, indexableBuild, withBeacon, exclusionProblems, listTree, mediaPolicyProblems, noTwinPages, servedPages, stage, treeProblems } from '../lib/staging.mjs';
+import { CANONICAL_ORIGIN, MAX_FILE_BYTES, MAX_FILES, SERVED_ORIGIN, workerPathProblems, beaconProblems, slashRuleProblems, buildOrigin, indexableBuild, withBeacon, exclusionProblems, listTree, mediaPolicyProblems, noTwinPages, servedPages, stage, treeProblems } from '../lib/staging.mjs';
 
 // The site as it is served: at the root of phonometry.dev, its clips on the
 // clip host of site-targets.json.
@@ -184,7 +184,7 @@ describe('stage', () => {
 		assert.equal(report.files, Object.keys(good()).length);
 		assert.match(readFileSync(join(out, '_headers'), 'utf8'), /^\/\*\n {2}X-Robots-Tag: noindex/);
 		assert.equal(readFileSync(join(out, '_redirects'), 'utf8'), '/about/ /signals/ 301\n/about /signals/ 301\n/about/index.md /signals/index.md 301\n');
-		assert.equal(readFileSync(join(out, '.assetsignore'), 'utf8'), '.*\n');
+		assert.equal(readFileSync(join(out, '.assetsignore'), 'utf8'), '.*\n!/.well-known/\n');
 		assert.equal(report.redirects, 3);
 	});
 
@@ -285,7 +285,7 @@ describe('the beacon in the staged copy', () => {
 				assert.equal(staged, built, path);
 				continue;
 			}
-			const script = beaconScript(path === '404.html', prefix);
+			const script = beaconScript(path === '404.html');
 			assert.equal(staged.replace(script, ''), built, path);
 			assert.equal(staged.split(script).length, 2, path);
 		}
@@ -294,17 +294,13 @@ describe('the beacon in the staged copy', () => {
 });
 
 describe('the paths that run the Worker', () => {
-	test('only Markdown copies, llms files and XML files match a pattern', () => {
-		const files = listTree(tree({ ...good(), 'llms.txt': 'x', 'llms/llms-signals.txt': 'x', 'sitemap-index.xml': 'x', 'rss.xml': 'x' }));
-		assert.deepEqual(agentPathProblems(files, prefix, ['404.html', 'robots.txt', 'llms.txt']), []);
+	test('no file of a build stands at the beacon, the Markdown copies, llms files and sitemaps included', () => {
+		const files = listTree(tree({ ...good(), 'llms.txt': 'x', 'llms/llms-signals.txt': 'x', 'sitemap-index.xml': 'x', 'rss.xml': 'x', 'signals/index.md': 'x' }));
+		assert.deepEqual(workerPathProblems(files, prefix, ['404.html', 'robots.txt', 'llms.txt']), []);
 	});
 
-	test('a file a pattern catches that is no agent file is refused', () => {
-		// `*` crosses `/`, so /llms*.txt also catches a text file inside a
-		// folder whose name starts with llms.
-		assert.deepEqual(agentPathProblems([{ path: 'llms-notes/readme.txt' }, { path: 'guides/index.md.html' }], prefix), [
-			'/llms-notes/readme.txt would run the Worker, and it is no agent file (lib/agent-paths.mjs)',
-		]);
+	test('a file at the beacon path is refused: the Worker would answer there instead of it', () => {
+		assert.deepEqual(workerPathProblems([{ path: '_v' }, { path: '_v/x.txt' }, { path: 'llms-notes/readme.txt' }], ''), ['/_v would run the Worker instead of being served as a file (lib/worker-paths.mjs)']);
 	});
 });
 

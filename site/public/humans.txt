@@ -1,0 +1,22 @@
+/* TEAM */
+
+    Maintainer: José Manuel Requena Plens
+    ORCID: https://orcid.org/0000-0003-1250-6212
+    GitHub: @jmrplens
+    Site: https://jmrp.io
+
+/* SITE */
+
+    Project: phonometry, a Python library of acoustics
+    Source: https://github.com/jmrplens/phonometry
+    Language: English / Español
+    Standards: HTML5, CSS3
+    Components: Astro, Starlight, Pagefind, KaTeX
+    Hosting: Cloudflare Workers Static Assets
+
+/* NOTE */
+
+    Every page is generated ahead of time and served as a file. No cookies,
+    no third-party scripts, no ads. Page views are counted by a small report
+    each page sends to this same site; /start/privacy/ lists every field
+    that is kept and for how long.

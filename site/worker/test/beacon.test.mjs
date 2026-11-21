@@ -4,7 +4,6 @@ import assert from 'node:assert/strict';
 import { test, describe } from 'node:test';
 
 import { BEACON_MAX_BYTES, beaconPoint, beaconScript, ipLimitKey, pageFetchSite, parseBeacon } from '../lib/beacon.mjs';
-import { agentPaths, runsWorker } from '../lib/agent-paths.mjs';
 
 describe('beaconScript', () => {
 	test('one inline script under 1 KB, the 404 flag written in', () => {
@@ -15,7 +14,7 @@ describe('beaconScript', () => {
 		assert.ok(Buffer.byteLength(missing) < 1024, `${Buffer.byteLength(missing)} bytes`);
 		assert.match(page, /nf:0\b/);
 		assert.match(missing, /nf:1\b/);
-		assert.doesNotMatch(page, /\.test\(l\.pathname\)/, 'a page never stands at an agent path');
+		for (const script of [page, missing]) assert.doesNotMatch(script, /\.test\(l\.pathname\)/, 'no path is skipped');
 		assert.equal(missing.indexOf('</'), missing.length - '</script>'.length, 'nothing in it closes the script early');
 	});
 
@@ -42,16 +41,18 @@ describe('beaconScript', () => {
 		return sent;
 	};
 
-	test('the 404 page sends nothing where the Worker already logged the miss: exactly the agent paths', () => {
-		const patterns = agentPaths('/phonometry');
-		const missing = beaconScript(true, '/phonometry');
-		const paths = ['/phonometry/no-such/index.md', '/phonometry/index.md', '/phonometry/llms-nope.txt', '/llms-x.txt', '/phonometry/no-such.xml', '/sitemap-nope.xml', '/robots.txt', '/phonometry/robots.txt', '/phonometry/no-such-page/', '/no-such-page', '/phonometry/a.md', '/other/x.xml', '/phonometry/INDEX.MD'];
+	test('the 404 page reports wherever it stands, a missing copy or llms file included', () => {
+		// No Worker runs for a Markdown copy, an llms file or a sitemap, so
+		// a browser that lands on the 404 page there is counted by the
+		// beacon or not at all.
+		const missing = beaconScript(true);
+		const paths = ['/no-such/index.md', '/index.md', '/llms-nope.txt', '/no-such.xml', '/sitemap-nope.xml', '/robots.txt', '/no-such-page/', '/no-such-page', '/a.md', '/INDEX.MD'];
 		for (const path of paths) {
 			const sent = run(missing, path);
-			assert.equal(sent.length, runsWorker(path, patterns) ? 0 : 1, path);
-			if (sent.length) assert.equal(sent[0][1].nf, 1, path);
+			assert.equal(sent.length, 1, path);
+			assert.equal(sent[0][1].nf, 1, path);
 		}
-		assert.equal(run(beaconScript(false), '/phonometry/signals/').length, 1, 'a page always sends');
+		assert.equal(run(beaconScript(false), '/signals/').length, 1, 'a page always sends');
 	});
 
 	test('it posts to the beacon path of its own origin, after load, with every field', () => {

@@ -1,5 +1,5 @@
 # phonometry documentation: robots.txt
-# All crawlers are welcome, including AI / generative-engine crawlers.
+# All crawlers are welcome, including AI and generative-engine crawlers.
 #
 # Served at https://phonometry.dev/robots.txt, the root of the host: it is the
 # file crawlers read, and it speaks for every path of the site.
@@ -11,56 +11,153 @@
 # pages included:
 #   https://phonometry.dev/signals/levels/levels/index.md
 #   https://phonometry.dev/index.md
+#
+# The same AI policy, in the dialects other crawlers read:
+#   https://phonometry.dev/ai.txt                  Spawning's ai.txt
+#   https://phonometry.dev/.well-known/tdmrep.json  W3C TDM Reservation Protocol,
+#                                                   "tdm-reservation": 0
+# The three say one thing and change together: site/scripts/public-files.test.mjs
+# fails when they disagree.
+#
+# Content Signals (https://contentsignals.org/, IETF draft-romm-aipref-
+# contentsignals) define exactly three keys: search, ai-input and ai-train.
+# A key outside that list is ignored, so none is added here.
+#
+# The signal is repeated in every named group. Under RFC 9309 a crawler obeys
+# exactly one group, the most specific one that matches it, and ignores the
+# rest, `*` included: declared only under `*`, the opt-in would be invisible to
+# the very crawlers named below. A new group copies the line.
 
 User-agent: *
+Content-Signal: search=yes, ai-input=yes, ai-train=yes
 Allow: /
-# Explicit machine-readable intent (IETF draft-romm-aipref-contentsignals).
-# `ai-input` and `ai-retrieval` name the same grounding/RAG use: the IETF draft
-# uses one token and contentsignals.org publishes the other, so both are
-# declared rather than betting on which vocabulary a given parser implements.
-Content-Signal: search=yes, ai-train=yes, ai-input=yes, ai-retrieval=yes
 
-# AI / generative-engine crawlers (explicitly welcomed for GEO).
+# Search engines.
+
+User-agent: Googlebot
+Content-Signal: search=yes, ai-input=yes, ai-train=yes
+Allow: /
+
+User-agent: Bingbot
+Content-Signal: search=yes, ai-input=yes, ai-train=yes
+Allow: /
+
+User-agent: Applebot
+Content-Signal: search=yes, ai-input=yes, ai-train=yes
+Allow: /
+
+User-agent: DuckDuckBot
+Content-Signal: search=yes, ai-input=yes, ai-train=yes
+Allow: /
+
+User-agent: YandexBot
+Content-Signal: search=yes, ai-input=yes, ai-train=yes
+Allow: /
+
+User-agent: Baiduspider
+Content-Signal: search=yes, ai-input=yes, ai-train=yes
+Allow: /
+
+# AI and generative-engine crawlers, welcomed by name.
+
 User-agent: GPTBot
+Content-Signal: search=yes, ai-input=yes, ai-train=yes
 Allow: /
 
 User-agent: OAI-SearchBot
+Content-Signal: search=yes, ai-input=yes, ai-train=yes
 Allow: /
 
 User-agent: ChatGPT-User
+Content-Signal: search=yes, ai-input=yes, ai-train=yes
 Allow: /
 
 User-agent: ClaudeBot
+Content-Signal: search=yes, ai-input=yes, ai-train=yes
+Allow: /
+
+User-agent: Claude-User
+Content-Signal: search=yes, ai-input=yes, ai-train=yes
+Allow: /
+
+User-agent: Claude-SearchBot
+Content-Signal: search=yes, ai-input=yes, ai-train=yes
 Allow: /
 
 User-agent: Claude-Web
+Content-Signal: search=yes, ai-input=yes, ai-train=yes
 Allow: /
 
 User-agent: anthropic-ai
+Content-Signal: search=yes, ai-input=yes, ai-train=yes
 Allow: /
 
 User-agent: PerplexityBot
+Content-Signal: search=yes, ai-input=yes, ai-train=yes
 Allow: /
 
 User-agent: Perplexity-User
+Content-Signal: search=yes, ai-input=yes, ai-train=yes
 Allow: /
 
 User-agent: Google-Extended
+Content-Signal: search=yes, ai-input=yes, ai-train=yes
 Allow: /
 
 User-agent: Applebot-Extended
+Content-Signal: search=yes, ai-input=yes, ai-train=yes
 Allow: /
 
 User-agent: CCBot
+Content-Signal: search=yes, ai-input=yes, ai-train=yes
 Allow: /
 
 User-agent: cohere-ai
+Content-Signal: search=yes, ai-input=yes, ai-train=yes
 Allow: /
 
 User-agent: Meta-ExternalAgent
+Content-Signal: search=yes, ai-input=yes, ai-train=yes
+Allow: /
+
+User-agent: FacebookBot
+Content-Signal: search=yes, ai-input=yes, ai-train=yes
 Allow: /
 
 User-agent: Amazonbot
+Content-Signal: search=yes, ai-input=yes, ai-train=yes
+Allow: /
+
+User-agent: Bytespider
+Content-Signal: search=yes, ai-input=yes, ai-train=yes
+Allow: /
+
+User-agent: YouBot
+Content-Signal: search=yes, ai-input=yes, ai-train=yes
+Allow: /
+
+User-agent: AI2Bot
+Content-Signal: search=yes, ai-input=yes, ai-train=yes
+Allow: /
+
+User-agent: Diffbot
+Content-Signal: search=yes, ai-input=yes, ai-train=yes
+Allow: /
+
+User-agent: Omgilibot
+Content-Signal: search=yes, ai-input=yes, ai-train=yes
+Allow: /
+
+User-agent: ImagesiftBot
+Content-Signal: search=yes, ai-input=yes, ai-train=yes
+Allow: /
+
+User-agent: PetalBot
+Content-Signal: search=yes, ai-input=yes, ai-train=yes
+Allow: /
+
+User-agent: Timpibot
+Content-Signal: search=yes, ai-input=yes, ai-train=yes
 Allow: /
 
 Sitemap: https://phonometry.dev/sitemap-index.xml

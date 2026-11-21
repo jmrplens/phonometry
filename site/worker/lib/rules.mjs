@@ -11,7 +11,7 @@
 // --check fails when the live rules differ from these, and with --print
 // writes the JSON it would put, with no credential and no request.
 
-/** The path of the visitor beacon (lib/agent-paths.mjs). */
+/** The path of the visitor beacon (lib/worker-paths.mjs). */
 const BEACON = '/_v';
 
 /**

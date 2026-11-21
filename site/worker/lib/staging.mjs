@@ -15,7 +15,7 @@ import { cpSync, existsSync, mkdirSync, readFileSync, readdirSync, statSync, wri
 import { join, relative, sep } from 'node:path';
 
 import { DEFAULT_SITE, SITE_TARGETS, mediaOrigins } from '../../src/data/site.mjs';
-import { agentPaths, runsWorker } from './agent-paths.mjs';
+import { runsWorker } from './worker-paths.mjs';
 import { beaconScript } from './beacon.mjs';
 import { headersFile, parseHeaders, HEADER_LINE_LIMIT, HEADER_RULE_LIMIT } from './headers.mjs';
 import { redirectProblems, redirectsFile } from './redirects.mjs';
@@ -35,6 +35,16 @@ export const ROOT_COPIES = Object.freeze(['robots.txt', 'llms.txt']);
 
 /** The files Static Assets reads beside the assets and never serves. */
 const CONTROL_FILES = new Set(['_headers', '_redirects', '.assetsignore']);
+
+/**
+ * The `.assetsignore` the stage writes: no file whose name starts with a dot is
+ * uploaded, except the `.well-known/` folder at the root, which holds the
+ * files a client looks for at a fixed address (security.txt, tdmrep.json,
+ * gpc.json, traffic-advice). Gitignore syntax, read by wrangler with the
+ * `ignore` package: the folder itself is what `.*` matches, so naming it again
+ * with `!` brings it and everything under it back.
+ */
+export const ASSETS_IGNORE = '.*\n!/.well-known/\n';
 
 /**
  * Every file under a directory.
@@ -228,24 +238,21 @@ export function mediaPolicyProblems(root, files, origins) {
 	return problems;
 }
 
-/** The files the Worker may run for: Markdown copies, llms files and XML. */
-const AGENT_FILE = /(?:\/index\.md|\/llms[^/]*\.txt|\.xml)$/;
-
 /**
- * The staged files the Worker would run for that are not agent files: a page,
- * an image or a script there would become an invocation on every request
- * and a 429 once the quota is spent. Root copies are checked at their root
- * address too.
+ * The staged files a run_worker_first pattern would catch: the Worker would
+ * answer there instead of the file, and once the quota is spent the answer
+ * would be a 429. Only the beacon runs code (lib/worker-paths.mjs), so no
+ * file may stand at its path. Root copies are checked at their root address
+ * too.
  *
  * @param {{path: string}[]} files The build's files.
  * @param {string} prefix The base path.
  * @param {string[]} rootCopies The files also served at the root.
  * @returns {string[]} One line per file.
  */
-export function agentPathProblems(files, prefix, rootCopies = []) {
-	const patterns = agentPaths(prefix);
+export function workerPathProblems(files, prefix, rootCopies = []) {
 	const served = [...files.map(({ path }) => `${prefix}/${path}`), ...rootCopies.map((name) => `/${name}`)];
-	return served.filter((path) => runsWorker(path, patterns) && !AGENT_FILE.test(path)).map((path) => `${path} would run the Worker, and it is no agent file (lib/agent-paths.mjs)`);
+	return served.filter((path) => runsWorker(path)).map((path) => `${path} would run the Worker instead of being served as a file (lib/worker-paths.mjs)`);
 }
 
 /**
@@ -295,16 +302,14 @@ const BODY_END = /<\/body>/gi;
  * A page with the beacon script put right before its one closing body tag.
  *
  * @param {string} html The page.
- * @param {boolean} notFound Whether it is a 404 page (the beacon reports status 404,
- *   and sends nothing at an agent path, which the Worker logged already).
- * @param {string} [prefix] The base path the build was made for.
+ * @param {boolean} notFound Whether it is a 404 page (the beacon reports status 404).
  * @returns {string} The page with the script.
  * @throws {Error} When the page has no closing body tag, or more than one.
  */
-export function withBeacon(html, notFound, prefix) {
+export function withBeacon(html, notFound) {
 	const ends = html.match(BODY_END)?.length ?? 0;
 	if (ends !== 1) throw new Error(`${ends} closing body tags, the beacon needs exactly one`);
-	return html.replace(BODY_END, (tag) => `${beaconScript(notFound, prefix)}${tag}`);
+	return html.replace(BODY_END, (tag) => `${beaconScript(notFound)}${tag}`);
 }
 
 /**
@@ -365,7 +370,7 @@ export function stage({ from, out, prefix, origin, pairs, exclusions, indexable,
 	if (beacon) problems.push(...beaconProblems(from, files));
 	const rootCopies = prefix === '' ? [] : ['404.html', ...ROOT_COPIES].filter((name) => have.has(`${prefix}/${name}`));
 	const extra = rootCopies.length;
-	problems.push(...agentPathProblems(files, prefix, rootCopies));
+	problems.push(...workerPathProblems(files, prefix, rootCopies));
 	problems.push(...slashRuleProblems(files, prefix));
 	if (files.length + extra > MAX_FILES) problems.push(`${files.length + extra} files once staged, over the ${MAX_FILES}`);
 	const pages = beacon ? files.filter(({ path }) => path.endsWith('.html')) : [];
@@ -380,7 +385,7 @@ export function stage({ from, out, prefix, origin, pairs, exclusions, indexable,
 	// below are taken from the staged pages.
 	for (const { path } of pages) {
 		const file = join(site, path);
-		writeFileSync(file, withBeacon(readFileSync(file, 'utf8'), path.split('/').at(-1) === '404.html', prefix));
+		writeFileSync(file, withBeacon(readFileSync(file, 'utf8'), path.split('/').at(-1) === '404.html'));
 	}
 	// Outside the base path the nearest 404.html is the root's, so the site's
 	// own page answers there too (not_found_handling: "404-page"); robots.txt
@@ -388,6 +393,6 @@ export function stage({ from, out, prefix, origin, pairs, exclusions, indexable,
 	for (const name of rootCopies) cpSync(join(site, name), join(out, name));
 	writeFileSync(join(out, '_headers'), headers);
 	writeFileSync(join(out, '_redirects'), redirectsFile(pairs));
-	writeFileSync(join(out, '.assetsignore'), '.*\n');
+	writeFileSync(join(out, '.assetsignore'), ASSETS_IGNORE);
 	return report;
 }

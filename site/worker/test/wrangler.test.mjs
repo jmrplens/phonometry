@@ -2,8 +2,8 @@
 //
 // Pages, _astro, media and every other file are plain assets: they run no
 // script, so the daily quota of Workers Free cannot stop them. The Worker runs
-// only for the beacon and the files agents read (lib/agent-paths.mjs), and
-// writes one data point for each; everything else a Worker could bind
+// only for the beacon (lib/worker-paths.mjs), and writes one data point for
+// each; everything else a Worker could bind
 // (storage, queues, services, triggers) fails here until it is added on
 // purpose. wrangler.assets-only.jsonc is the same Worker with the code taken
 // out, which the quota guard rolls to at 95 % of the day; it is derived from
@@ -13,7 +13,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { test } from 'node:test';
 
-import { BASE_PATH, agentPaths } from '../lib/agent-paths.mjs';
+import { WORKER_PATHS } from '../lib/worker-paths.mjs';
 import { ACCOUNT_ID } from '../lib/cloudflare.mjs';
 
 /** A wrangler config without its comments and trailing commas. */
@@ -60,8 +60,8 @@ test('the full Worker: one script, the assets, one dataset, one limiter, nothing
 	assert.equal(config.assets.binding, 'ASSETS');
 });
 
-test('the Worker runs only for the beacon and the agent files', () => {
-	assert.deepEqual(readConfig('wrangler.jsonc').assets.run_worker_first, agentPaths(BASE_PATH));
+test('the Worker runs only for the beacon', () => {
+	assert.deepEqual(readConfig('wrangler.jsonc').assets.run_worker_first, [...WORKER_PATHS]);
 });
 
 test('the assets are the staged build, served as a static site, on phonometry.dev only', () => {
@@ -100,12 +100,4 @@ test('the guard: a cron every 15 minutes, no route, no binding, dry run until to
 	assert.equal(guard.preview_urls, false);
 	assert.deepEqual(guard.vars, { THRESHOLD: '95000', MODE: 'dry-run' });
 	for (const key of [...CODE_KEYS.filter((key) => key !== 'triggers' && key !== 'vars'), 'assets', 'analytics_engine_datasets', 'ratelimits']) assert.equal(key in guard, false, `guard sets ${key}`);
-});
-
-test('the base path the Worker and its patterns assume is the one the deploy stages', async () => {
-	// The Worker refuses a 404-page beacon at agentPaths(BASE_PATH), and the
-	// staged 404 page skips the same list built from site.basePath. The deploy
-	// stages the build made with nothing set, whose target the Worker reads.
-	const site = await import('../../src/data/site.mjs');
-	assert.equal(BASE_PATH, site.SITE_TARGETS[site.DEFAULT_SITE].basePath);
 });

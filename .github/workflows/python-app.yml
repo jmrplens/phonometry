@@ -46,6 +46,57 @@ env:
 # after it. tests/ci_lanes.json lists the lanes and the durations they are
 # balanced on, each lane well inside the test matrix.
 jobs:
+  # Scope. Each job that can skip runs only when the pull request changes a
+  # file it reads: scripts/ci_scope.py names, job by job, the paths and the
+  # scripts (with every module they import) that reach it, and writes the
+  # jobs no changed file reaches. One leg of the tests, lint, the guard
+  # groups, the release builds, SonarCloud and the comment run on every pull
+  # request. The library, its pins, VERSION, the Makefile, this workflow and
+  # its scripts reach every job, and so does a file the map does not know. A
+  # push, a dispatch and any doubt run everything: a job skips only when the
+  # answer names it, so a failed or empty answer runs it.
+  scope:
+    name: Scope / jobs to run
+    runs-on: ubuntu-26.04
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      pull-requests: read
+    outputs:
+      skip: ${{ steps.scope.outputs.skip }}
+      tests-exclude: ${{ steps.scope.outputs.tests-exclude }}
+    steps:
+    # The scope reads the imports of the modules under scripts/ and tests/,
+    # and nothing else of the checkout.
+    - uses: actions/checkout@v7
+      with:
+        persist-credentials: false
+        sparse-checkout: |
+          scripts/**/*.py
+          tests/**/*.py
+        sparse-checkout-cone-mode: false
+    # The newest Python the package supports parses every module it reads.
+    - name: Set up Python 3.14
+      uses: actions/setup-python@v7
+      with:
+        python-version: "3.14"
+    # A renamed file counts by both its names, so a file moved out of the code
+    # into docs/ is still a change to the code.
+    - name: Name the jobs no changed file reaches
+      id: scope
+      env:
+        GH_TOKEN: ${{ github.token }}
+        EVENT: ${{ github.event_name }}
+        REPOSITORY: ${{ github.repository }}
+        PULL: ${{ github.event.pull_request.number }}
+      run: |
+        : > changed.txt
+        if [ "$EVENT" = pull_request ]; then
+          gh api --paginate "repos/$REPOSITORY/pulls/$PULL/files" \
+            --jq '.[] | .filename, (.previous_filename // empty)' > changed.txt || : > changed.txt
+        fi
+        python scripts/ci_scope.py < changed.txt | tee -a "$GITHUB_OUTPUT"
+
   # Tests. The library's suite on every Python the package supports and on
   # the three systems, the numba-jitted kernel on the newest Python, and the
   # library at its dependency floors. They hold most of a run's runner time
@@ -53,6 +104,9 @@ jobs:
 
   tests:
     name: Tests / ${{ matrix.python-version }} ${{ startsWith(matrix.os, 'ubuntu') && 'Linux' || startsWith(matrix.os, 'macos') && 'macOS' || 'Windows' }}
+    needs: scope
+    # The scope only narrows the matrix: a failed scope leaves every cell.
+    if: ${{ !cancelled() }}
     runs-on: ${{ matrix.os }}
     # Longest cell measured: 65 min, macOS on 3.12 in run 44041238523.
     timeout-minutes: 95
@@ -66,6 +120,9 @@ jobs:
         os: [ubuntu-26.04, macos-latest, windows-latest]
         # tests/test_minimum_requirements.py holds this list to pyproject.toml.
         python-version: ["3.12", "3.13", "3.14"]
+        # Every cell but Linux on 3.13 (the one SonarCloud and the comment
+        # read) on a documentation change; none on any other.
+        exclude: ${{ fromJSON(needs.scope.outputs.tests-exclude || '[]') }}
     steps:
     - uses: actions/checkout@v7
       with:
@@ -118,6 +175,8 @@ jobs:
   # since numba pins numpy; minimum-versions builds it at the floor.
   tests-perf:
     name: Tests / numba JIT 3.14
+    needs: scope
+    if: ${{ !cancelled() && (!contains(needs.scope.outputs.skip, ',tests-perf,')) }}
     runs-on: ubuntu-26.04
     # 14 to 40 min in its passing runs on main, nearly all in the tests.
     timeout-minutes: 50
@@ -166,6 +225,8 @@ jobs:
   # the jitted kernels and the library's tests at them.
   minimum-versions:
     name: Tests / floors
+    needs: scope
+    if: ${{ !cancelled() && (!contains(needs.scope.outputs.skip, ',minimum-versions,')) }}
     runs-on: ubuntu-26.04
     # 14 to 40 min in its passing runs, nearly all in the tests.
     timeout-minutes: 50
@@ -235,6 +296,8 @@ jobs:
   # (requirements-figures.txt), which also fixes the plates' glyph outlines.
   figures:
     name: Generated / figures
+    needs: scope
+    if: ${{ !cancelled() && (!contains(needs.scope.outputs.skip, ',figures,')) }}
     runs-on: ubuntu-26.04
     # 32 min at the longest in the measured runs, nearly all of it make graphs.
     timeout-minutes: 65
@@ -332,8 +395,8 @@ jobs:
   # pin between them: every link of the chain fixes the page the check compares.
   reports:
     name: Generated / fiches
-    needs: built-package
-    if: ${{ !cancelled() }}
+    needs: [built-package, scope]
+    if: ${{ !cancelled() && (!contains(needs.scope.outputs.skip, ',reports,')) }}
     runs-on: ubuntu-26.04
     # 4.2 min at the longest in the measured runs.
     timeout-minutes: 15
@@ -369,6 +432,8 @@ jobs:
   doc-snippets:
     name: Docs / snippets run
     runs-on: ubuntu-26.04
+    needs: scope
+    if: ${{ !cancelled() && (!contains(needs.scope.outputs.skip, ',doc-snippets,')) }}
     # 12 min at the longest in the measured runs, and installing
     # ffmpeg from Ubuntu's mirror took 15 and 17 min in two runs of the video
     # job.
@@ -1005,8 +1070,8 @@ jobs:
   # one build of the wheel, and the wheel's checks only when it was built.
   built-package:
     name: Package / stub and wheel
-    needs: quality
-    if: ${{ !cancelled() }}
+    needs: [quality, scope]
+    if: ${{ !cancelled() && (!contains(needs.scope.outputs.skip, ',built-package,')) }}
     runs-on: ubuntu-26.04
     # The type check took most of it; about 1.5 min in all.
     timeout-minutes: 20
@@ -1117,8 +1182,8 @@ jobs:
   # routines without FMA, on one runner, each whatever the other said.
   baseline-glibc:
     name: Platform / glibc 2.39
-    needs: video
-    if: ${{ !cancelled() }}
+    needs: [video, scope]
+    if: ${{ !cancelled() && (!contains(needs.scope.outputs.skip, ',baseline-glibc,')) }}
     runs-on: ubuntu-24.04
     # Its checks take seconds and the install a few minutes.
     timeout-minutes: 25
@@ -1197,8 +1262,8 @@ jobs:
   # standard, and on torch on CPU, held to the tolerance the guide publishes.
   array-api:
     name: FDTD / array-api, torch
-    needs: baseline-glibc
-    if: ${{ !cancelled() }}
+    needs: [baseline-glibc, scope]
+    if: ${{ !cancelled() && (!contains(needs.scope.outputs.skip, ',array-api,')) }}
     runs-on: ubuntu-26.04
     # Under 5 min in its last 18 passing runs.
     timeout-minutes: 25
@@ -1242,6 +1307,8 @@ jobs:
   # float32 tolerance the guide gives torch:mps and the compensated contour.
   mps:
     name: FDTD / torch MPS
+    needs: scope
+    if: ${{ !cancelled() && (!contains(needs.scope.outputs.skip, ',mps,')) }}
     runs-on: macos-15
     # Under 2 min in its last 18 passing runs.
     timeout-minutes: 25
@@ -1280,6 +1347,8 @@ jobs:
   # served through sshd on localhost, runs the simulations and a video.
   remote-node:
     name: FDTD / remote node
+    needs: scope
+    if: ${{ !cancelled() && (!contains(needs.scope.outputs.skip, ',remote-node,')) }}
     # The release the image's cpu stage starts from, for the same libm.
     runs-on: ubuntu-24.04
     permissions:
@@ -1374,8 +1443,8 @@ jobs:
   # and the summary says which before the tests run.
   video:
     name: Runtime / ffmpeg video
-    needs: reports
-    if: ${{ !cancelled() }}
+    needs: [reports, scope]
+    if: ${{ !cancelled() && (!contains(needs.scope.outputs.skip, ',video,')) }}
     runs-on: ubuntu-26.04
     # Tests under a minute; Ubuntu's ffmpeg has taken up to 17 min to install.
     timeout-minutes: 45
@@ -1425,8 +1494,8 @@ jobs:
   # cannot see (scripts/check_notebook.py).
   notebook:
     name: Runtime / notebook
-    needs: guards-source
-    if: ${{ !cancelled() }}
+    needs: [guards-source, scope]
+    if: ${{ !cancelled() && (!contains(needs.scope.outputs.skip, ',notebook,')) }}
     runs-on: ubuntu-26.04
     # 1.4 min at the longest in the measured runs.
     timeout-minutes: 15

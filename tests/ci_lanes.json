@@ -16,6 +16,8 @@
     "pr-comment": "reads the test results that tests uploads"
   },
   "after_about": "A job waits on another only to read an artifact that a job it waits on uploads.",
+  "scope_job": "scope",
+  "scope_about": "The job every job that can skip waits on, for the jobs no changed file reaches (scripts/ci_scope.py). It waits on nothing and takes seconds; a wait on it is no place in the lanes.",
   "lanes": [
     [
       "quality",

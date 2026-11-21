@@ -1,6 +1,6 @@
 ---
 title: "Privacidad"
-description: "Qué registra phonometry.dev cuando lo lees: ninguna cookie, un aviso de visita propio, las peticiones que anota Cloudflare, cada campo que guarda cada uno y cuánto tiempo se conserva."
+description: "Qué registra phonometry.dev de sus lectores: ninguna cookie, un aviso de visita propio y las peticiones que anota Cloudflare, cada campo y cuánto se guarda."
 ---
 
 Este sitio no pone cookies, no muestra publicidad, no carga nada desde

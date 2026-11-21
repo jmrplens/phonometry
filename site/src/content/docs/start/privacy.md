@@ -1,6 +1,6 @@
 ---
 title: "Privacy"
-description: "What phonometry.dev records when you read it: no cookies, one first-party page-view report, the requests Cloudflare logs, every field each one holds and how long it is kept."
+description: "What phonometry.dev records about its readers: no cookies, a first-party page-view report and the requests Cloudflare logs, each field and how long it is kept."
 ---
 
 This site sets no cookies, shows no ads, loads nothing from another company's

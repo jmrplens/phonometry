@@ -21,9 +21,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   `/.well-known/gpc.json`, `/.well-known/traffic-advice` (served with the type
   Chrome's prefetch proxy reads), `/ai.txt`, `/humans.txt`, `/ads.txt` and
   `/apple-touch-icon-precomposed.png`, each of which crawlers, browsers or
-  security scanners had asked for and got a 404. The upload kept no file
-  under a folder whose name starts with a dot, so it now keeps
-  `/.well-known/`, and the deploy checks four of them live. A test holds
+  security scanners had asked for and got a 404. Neither the pages the build
+  hands to the deploy nor the upload kept a name that starts with a dot, so
+  both now keep `/.well-known/`; the deploy refuses a build that lacks a file
+  of `site/public/`, and checks four of them live. A test holds
   robots.txt, ai.txt and tdmrep.json to one AI policy, and fails 30 days
   before security.txt expires.
 - **The documentation build holds its software node to what jmrp.io states

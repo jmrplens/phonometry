@@ -47,6 +47,24 @@ const CONTROL_FILES = new Set(['_headers', '_redirects', '.assetsignore']);
 export const ASSETS_IGNORE = '.*\n!/.well-known/\n';
 
 /**
+ * The files of `site/public/` the build lacks. Astro copies the folder into
+ * the build as it is, so each of its files is a file of the build, and one
+ * missing was dropped on the way: the pages artifact leaves out every name
+ * that starts with a dot unless told to keep it, which took `/.well-known/`
+ * off phonometry.dev.
+ *
+ * @param {{path: string}[]} files The files of the build.
+ * @param {{path: string}[]} publicFiles The files of `site/public/`.
+ * @returns {string[]} One problem per file of `site/public/` the build lacks.
+ */
+export function publicProblems(files, publicFiles) {
+	const built = new Set(files.map(({ path }) => path));
+	return publicFiles
+		.filter(({ path }) => !built.has(path))
+		.map(({ path }) => `${path} is in site/public but not in the build`);
+}
+
+/**
  * Every file under a directory.
  *
  * @param {string} root The directory.
@@ -344,12 +362,26 @@ export function beaconProblems(root, files) {
  * @param {boolean} [options.beacon] Put the beacon script into every staged page (the
  *   staged copy only: the build is read, never written).
  * @param {boolean} [options.checkOnly] Check, and write nothing.
+ * @param {{path: string}[]} [options.publicFiles] The files of `site/public/`, each of
+ *   which the build must hold.
  * @returns {{problems: string[], files: number, redirects: number, headerRules: number, beaconPages: number}} What was found.
  */
-export function stage({ from, out, prefix, origin, pairs, exclusions, indexable, beacon = false, checkOnly = false }) {
+export function stage({
+	from,
+	out,
+	prefix,
+	origin,
+	pairs,
+	exclusions,
+	indexable,
+	beacon = false,
+	checkOnly = false,
+	publicFiles = [],
+}) {
 	if (!checkOnly && existsSync(out)) throw new Error(`${out} already exists; staging writes a fresh directory`);
 	const files = listTree(from);
 	const problems = treeProblems(files);
+	problems.push(...publicProblems(files, publicFiles));
 	let built = null;
 	try {
 		built = buildOrigin(from, prefix);

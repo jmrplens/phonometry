@@ -12,9 +12,10 @@ llegan sus dependencias y cuáles de los extras opcionales pueden seguirlas.
 Cada página de esta sección trata un sitio, con órdenes que se han ejecutado
 allí.
 
-Comprobado el 17 de noviembre de 2026 con phonometry 4.0.0 de PyPI: cada
-página de esta sección dice, bajo su párrafo de entrada, en qué versiones se
-ejecutaron ese día sus órdenes.
+Comprobado el 17 de noviembre de 2026 con phonometry 4.0.0 de PyPI, y la página
+de conda de nuevo el 21 de noviembre desde conda-forge: cada página de esta
+sección dice, bajo su párrafo de entrada, cuándo y en qué versiones se
+ejecutaron sus órdenes.
 
 | Dónde | Cómo llega phonometry | Qué funciona | Qué no |
 |---|---|---|---|

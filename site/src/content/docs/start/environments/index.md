@@ -11,9 +11,9 @@ from one place to the next is how its dependencies arrive and which of the
 optional extras can follow them. The pages of this section take one place
 each, with commands that were run there.
 
-Checked on 17 November 2026 with phonometry 4.0.0 from PyPI: every page of
-this section says, under its opening paragraph, on which versions its commands
-ran that day.
+Checked on 17 November 2026 with phonometry 4.0.0 from PyPI, and the conda page
+again on 21 November from conda-forge: every page of this section says, under
+its opening paragraph, when and on which versions its commands ran.
 
 | Where | How phonometry arrives | What runs | What does not |
 |---|---|---|---|

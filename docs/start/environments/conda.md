@@ -18,7 +18,7 @@ pytorch 2.14.1.
 ## An environment with every extra
 
 ```bash
-conda create -n acoustics -c conda-forge python=3.13 phonometry matplotlib-base numba reportlab svglib pysoundfile
+conda create -n acoustics -c conda-forge python=3.13 phonometry matplotlib-base numba reportlab svglib pysoundfile pip
 conda activate acoustics
 ```
 
@@ -86,12 +86,13 @@ dependencies from conda-forge first and phonometry with the environment's own
 pip:
 
 ```bash
-conda create -n acoustics -c conda-forge python=3.13 numpy scipy matplotlib-base numba reportlab svglib pysoundfile
+conda create -n acoustics -c conda-forge python=3.13 numpy scipy matplotlib-base numba reportlab svglib pysoundfile pip
 conda activate acoustics
 python -m pip install "phonometry[full]"
 ```
 
-pip finds every requirement already there and installs phonometry alone, so
-NumPy, SciPy and the extras stay conda-forge builds; `conda list` shows
-phonometry with the channel `pypi`. A dependency still missing when pip runs
-comes from PyPI instead.
+When every requirement is already there at the version the release asks for,
+pip installs phonometry alone, so NumPy, SciPy and the extras stay conda-forge
+builds; `conda list` shows phonometry with the channel `pypi`. A dependency
+still missing, or older than the new release requires, comes from PyPI instead,
+and `conda list` then shows it with the channel `pypi` too.

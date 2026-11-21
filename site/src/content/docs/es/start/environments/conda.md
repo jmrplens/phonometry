@@ -17,7 +17,7 @@ la imagen `condaforge/miniforge3`: conda 26.9.4 y mamba 2.9.0, Python 3.12.16,
 ## Un entorno con todos los extras
 
 ```bash
-conda create -n acoustics -c conda-forge python=3.13 phonometry matplotlib-base numba reportlab svglib pysoundfile
+conda create -n acoustics -c conda-forge python=3.13 phonometry matplotlib-base numba reportlab svglib pysoundfile pip
 conda activate acoustics
 ```
 
@@ -86,12 +86,14 @@ dependencias desde conda-forge y después phonometry con el pip del propio
 entorno:
 
 ```bash
-conda create -n acoustics -c conda-forge python=3.13 numpy scipy matplotlib-base numba reportlab svglib pysoundfile
+conda create -n acoustics -c conda-forge python=3.13 numpy scipy matplotlib-base numba reportlab svglib pysoundfile pip
 conda activate acoustics
 python -m pip install "phonometry[full]"
 ```
 
-pip encuentra ya instalado cada requisito e instala solo phonometry, de modo
-que NumPy, SciPy y los extras siguen siendo compilaciones de conda-forge;
-`conda list` muestra phonometry con el canal `pypi`. Una dependencia que
-todavía falte cuando pip se ejecuta llega de PyPI.
+Cuando cada requisito ya está instalado en la versión que pide la publicación,
+pip instala solo phonometry, de modo que NumPy, SciPy y los extras siguen siendo
+compilaciones de conda-forge; `conda list` muestra phonometry con el canal
+`pypi`. Una dependencia que todavía falte, o más antigua de lo que pide la
+versión nueva, llega de PyPI, y `conda list` la muestra también con el canal
+`pypi`.

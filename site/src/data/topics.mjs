@@ -81,7 +81,7 @@ export const catalogueSlugs = [
 export const topics = [
   {
     id: 'start',
-    label: { en: 'Start', es: 'Inicio' },
+    label: { en: 'Start here', es: 'Inicio' },
     link: '/start/',
     items: [
       { slug: 'start', label: 'Overview', translations: { es: 'Resumen' } },

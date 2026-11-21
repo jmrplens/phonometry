@@ -321,6 +321,7 @@ Each rule on a page has the same parts:
 | [F74](docs-and-figures.md#f74) | Leave a file of the GitHub edition to its generator: a check that walks `docs/` tells it by its opening comment | `tests/test_github_edition.py::test_every_script_that_walks_docs_knows_the_edition`, `tests/test_github_edition.py::test_every_module_of_the_site_that_walks_docs_knows_the_edition` |
 | [F75](docs-and-figures.md#f75) | Print on every page that reads a folder of `tests/data/audio` the attribution its README gives that folder | `tests/test_data_attribution.py::test_every_page_that_reads_a_data_folder_prints_its_attribution`, `tests/test_data_attribution.py::test_every_folder_of_measured_data_is_attributed_in_the_readme` |
 | [F76](docs-and-figures.md#f76) | Write a site link root-relative, with no base path and no old host | `site/scripts/base-path.mjs`, `CI: docs.yml:build/base-path-guard`, `site/scripts/base-path.test.mjs`, `CI: docs.yml:build/script-tests` |
+| [F77](docs-and-figures.md#f77) | Give every link a text that names where it goes, never a bare "here", "more" or "start" | `site/scripts/check-link-text.mjs`, `CI: docs.yml:build/link-text`, `site/scripts/check-link-text.test.mjs`, `CI: docs.yml:build/script-tests` |
 
 ### Prose, commits and pull requests
 

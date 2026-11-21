@@ -1937,3 +1937,26 @@ See [sound levels](/phonometry/signals/levels/levels/) and the
 **Enforced by:** `site/scripts/base-path.mjs`, `CI: docs.yml:build/base-path-guard`, `site/scripts/base-path.test.mjs`, `CI: docs.yml:build/script-tests`
 
 **Exceptions.** The check reads every text file of the site's source: everything under `site/src` (the pages, the data files, the components, the library modules, the routes, the utilities and the styles) and `site/astro.config.mjs`, and it fails when one of those paths is not there. Two lines of `site/src/data/site-targets.json` may write the old host and base path, each allowance naming its line and its reason: the legacy origin, which the redirect list for the old host is written from, and which fails the check once it is gone; and the clip host to fall back on, `"clipBase": "https://docs.jmrp.io/phonometry/media/"`, which the file holds only while the clips are served from the old host, so the check lets it through when it is there and does not ask for it when it is not. A name that only contains the word is no link and passes: `github.com/jmrplens/phonometry`, `src/phonometry/...`, `phonometry-assets`. The redirect generator and its tests, which have to name the old addresses, live in `site/scripts/`, outside what the check reads; so do the Worker's tests, which pass a base path to the code as a fixture. The repository files outside `site/` that name the site by its address are read too, for the old host only: README.md and its PyPI copy, SECURITY.md, pyproject.toml, .zenodo.json, the paper, the two hand-written pages of the GitHub edition (`docs/README.md` and `docs/reference/api/index.md`) and the `.github` issue and discussion templates. Outside the site `/phonometry` is a package name or a repository path, never a site link, so the base path is not looked for there.
+
+## Link text
+
+<a id="f77"></a>
+### F77. Give every link a text that names where it goes, never a bare "here", "more" or "start"
+
+**Why.** Lighthouse's SEO audit "Links do not have descriptive text" fails a page that carries a link whose whole text is a word that names no destination, and a search engine and a screen reader both read a link by its text alone. The topic list above the sidebar linked the Start topic with the word "Start" on every English page, and PageSpeed Insights flagged the home page, with every check of the build green.
+
+**Do**
+
+```markdown
+See [how to install phonometry](/start/getting-started/) first.
+```
+
+**Don't**
+
+```markdown
+To install phonometry, start [here](/start/getting-started/).
+```
+
+**Enforced by:** `site/scripts/check-link-text.mjs`, `CI: docs.yml:build/link-text`, `site/scripts/check-link-text.test.mjs`, `CI: docs.yml:build/script-tests`
+
+**Exceptions.** The check is Lighthouse's own audit, run on every page of the build in Chrome at the two form factors PageSpeed Insights reports, so what it leaves out is what Lighthouse leaves out: a link with no address, a `javascript:` or `mailto:` link, a `rel="nofollow"` link and a link to a place on its own page, and text the browser does not render, under the `hidden` attribute, hidden by a stylesheet at that width or in an SVG title. A link is held to the list of its own language, and to every list Lighthouse has when its language is not marked. The redirect stubs, which are no pages, are not read. A label is read whole, so "Start here" and "Inicio" pass.

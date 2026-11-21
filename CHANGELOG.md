@@ -81,6 +81,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   paragraph. The filter-bank guide opens on its answer to "How do I compute
   octave or one-third-octave band levels in Python?", with the filter types
   and the map of the page after it.
+- **The railway-emission and impact-mobility guides answer first.** The
+  CNOSSOS-EU railway source guide and the ISO 7626-5 impact guide, in English
+  and Spanish, open with their answer to "How do I compute CNOSSOS-EU railway
+  noise emission in Python?" and "How do I compute a mobility from impact
+  hammer measurements in Python?": the calls in order and one run whose
+  printed values the snippet gate checks, 93.2 dB(A) per metre for the main
+  line and 0.1588 m/(N·s) at the resonance once Annex A has taken the
+  exponential window out, against an exact 0.1592. The source-code node of the
+  site's structured data gives as its runtime platform the Python it needs
+  (`Python >= 3.12`, read from `pyproject.toml`), where it listed operating
+  systems, which the application node already states. The Spanish simulation
+  overview says plainly how many of the documentation's animations the two
+  schemes produce and where they are.
 - **The PyOctaveBand transition package moves to 2.2.2 and links the
   documentation at <https://phonometry.dev/>.** Its PyPI page, its project
   links and the `FutureWarning` that `import pyoctaveband` raises send

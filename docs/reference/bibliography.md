@@ -238,7 +238,7 @@ hearing.
   Cited by [Prominent Discrete Tones (ECMA-418-1)](../perception/psychoacoustics/tone-prominence.md).
 - **Ecma International. (2025).** [*Psychoacoustic metrics for ITT equipment — Part 2 (methods for describing human perception based on the Sottek Hearing Model)*](https://ecma-international.org/publications-and-standards/standards/ecma-418/) (ECMA-418-2:2025).
   Cited by [Advanced Loudness (ISO 532-2/-3, ECMA-418-2)](../perception/psychoacoustics/advanced-loudness.md), [Sound Quality Metrics](../perception/psychoacoustics/sound-quality.md) and [Theory: Perception and Hearing](theory/perception.md).
-- **European Parliament and Council. (2003).** [*Directive 2003/10/EC on the minimum health and safety requirements regarding the exposure of workers to the risks arising from physical agents (noise)*](https://eur-lex.europa.eu/eli/dir/2003/10/oj/eng) (Directive 2003/10/EC). Official Journal of the European Union.
+- **European Union. (2003).** [*Directive 2003/10/EC of the European Parliament and of the Council on the minimum health and safety requirements regarding the exposure of workers to the risks arising from physical agents (noise)*](https://eur-lex.europa.eu/eli/dir/2003/10/oj/eng) (Directive 2003/10/EC).
   The EU exposure action and limit values for occupational noise.
   Cited by [Occupational Noise Exposure (ISO 9612)](../perception/hearing/occupational-exposure.md).
 - **Fastl, H., & Zwicker, E. (2007).** *Psychoacoustics: Facts and models* (3rd ed.). Springer. https://doi.org/10.1007/978-3-540-68888-4
@@ -683,7 +683,7 @@ the transmission physics above them.
   Cited by [Railway vibration by category of train (E DIN 4150-2)](../vibration/immission/railway-categories.md) and [Predicting railway vibration (E DIN 45672-3)](../vibration/immission/railway-prediction.md).
 - **Deutsches Institut für Normung. (2023).** *Schwingungsmessung an Schienenverkehrswegen — Teil 3: Prognoseverfahren auf Basis von Terzspektren* (E DIN 45672-3:2023-02).
   Cited by [Predicting railway vibration (E DIN 45672-3)](../vibration/immission/railway-prediction.md).
-- **European Parliament and Council. (2002).** [*Directive 2002/44/EC on the minimum health and safety requirements regarding the exposure of workers to the risks arising from physical agents (vibration)*](https://eur-lex.europa.eu/eli/dir/2002/44/oj/eng) (Directive 2002/44/EC). Official Journal of the European Union.
+- **European Union. (2002).** [*Directive 2002/44/EC of the European Parliament and of the Council on the minimum health and safety requirements regarding the exposure of workers to the risks arising from physical agents (vibration)*](https://eur-lex.europa.eu/eli/dir/2002/44/oj/eng) (Directive 2002/44/EC).
   Cited by [Whole-body and hand-arm vibration](../vibration/human/human-vibration.md).
 - **Griffin, M. J. (1996).** [*Handbook of human vibration*](https://shop.elsevier.com/books/handbook-of-human-vibration/griffin/978-0-12-303041-2). Academic Press.
   ISBN 978-0-12-303041-2. The standard monograph on whole-body and hand-transmitted vibration: the biodynamics, discomfort and health-effect evidence behind the weightings, dose measures and exposure-response guidance of the vibration guides.

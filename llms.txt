@@ -4,7 +4,7 @@
 
 phonometry v4.0.1 is a pure-Python library built on NumPy/SciPy (Python >= 3.12). Each result is a typed, frozen dataclass that carries the inputs it was computed from, draws its own figure with a one-line `.plot()` in English or Spanish, and, where a standard defines a reporting format, renders that format as a PDF with `.report()`. The conformance report pins each of the 1899 checks to a standard, a clause or table, the normative expected value and the value the library computes, across 111 domains.
 
-The project was published as **PyOctaveBand** until version 3.0.0. Third-party references and dependency pins still using that name refer to this library.
+Until 20 November 2026 this documentation was published at docs.jmrp.io/phonometry, and every address there now redirects to the same page on phonometry.dev. The project was published as **PyOctaveBand** until version 3.0.0. Third-party references and dependency pins still using that name refer to this library.
 
 Install:
 

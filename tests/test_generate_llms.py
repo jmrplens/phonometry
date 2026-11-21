@@ -382,6 +382,25 @@ def test_the_index_ends_no_sentence_on_a_bare_address() -> None:
     )
 
 
+def test_the_index_names_the_former_address_once_in_plain_text() -> None:
+    """The address the documentation had until 20 November 2026, beside the former name.
+
+    An assistant that still holds docs.jmrp.io/phonometry learns from the
+    index that it is this site, as it learns that PyOctaveBand is this
+    library: once, in the paragraph that names the former package, and never
+    as a link, which would send a crawler to the old host.
+    """
+    index = (ROOT / "llms.txt").read_text(encoding="utf-8")
+    assert index.count("docs.jmrp.io") == 1, "the former address, once"
+    (paragraph,) = (block for block in index.split("\n\n") if "docs.jmrp.io" in block)
+    assert "**PyOctaveBand**" in paragraph, "beside the former package name"
+    assert re.search(r"(?<![/<(\[\w.])docs\.jmrp\.io/phonometry(?![\w/])", paragraph), (
+        "in plain text: no scheme, link or autolink around it"
+    )
+    assert "](" not in paragraph
+    assert "://docs.jmrp.io" not in paragraph
+
+
 def test_a_shard_head_and_a_part_head_link_every_address_they_name() -> None:
     head = llms._part_head(
         slug="signals",

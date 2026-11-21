@@ -26,8 +26,11 @@ address and the first 128 characters of its query string, the referrer (up to
 prerender), how long the page took to load, your screen size, window size and
 pixel ratio, your browser's language and time zone, whether the browser says it
 is driven by automation, and whether the page was the "not found" page. It sets
-no cookie, assigns no identifier and keeps nothing between pages, so there is
-nothing that could link one visit to the next or follow you elsewhere.
+no cookie, assigns no identifier and keeps nothing between pages, so nothing in
+the report links one visit to the next or follows you to another site. The row
+it becomes does hold your IP address and User-Agent (next paragraph), which stay
+the same while your connection and browser do, so two rows can be matched by
+them; no profile is built from them, as the end of this section says.
 
 That report reaches a small Worker of mine at Cloudflare, which stores it as one
 row together with what the request itself carries: your IP address, your full
@@ -35,9 +38,11 @@ User-Agent, the languages your browser accepts, the Sec-Fetch headers it sends,
 and what Cloudflare associates with your address (country, region, city, postal
 code, time zone, continent, approximate coordinates, network operator), plus
 the Cloudflare data centre that answered, the round-trip time of your
-connection, and the HTTP and TLS versions used. To stop a flood, Cloudflare also
-counts reports per address for one minute and drops more than 30; that counter
-is not stored anywhere.
+connection, and the HTTP and TLS versions used. To stop a flood, a Cloudflare
+rule turns away more than ten reports from one address in ten seconds before
+they reach the Worker, and the Worker marks as over the limit, while still
+storing it, every report beyond 30 in a minute from one address; neither counter
+is stored anywhere.
 
 The rows live in a Cloudflare Analytics Engine dataset that Cloudflare keeps
 for about ninety days. Every five minutes they are copied into my own

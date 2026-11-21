@@ -28,8 +28,11 @@ cargar, el tamaño de tu pantalla, el de la ventana y la densidad de píxeles, e
 idioma y la zona horaria del navegador, si el navegador declara que lo maneja
 un programa automático y si la página era la de «no encontrada». No pone ninguna
 cookie, no asigna ningún identificador y no guarda nada entre páginas, así que
-no hay nada que pueda enlazar una visita con la siguiente ni seguirte a otro
-sitio.
+nada en el aviso enlaza una visita con la siguiente ni te sigue a otro sitio. La
+fila en que se convierte sí guarda tu dirección IP y tu User-Agent (párrafo
+siguiente), que no cambian mientras no cambien tu conexión y tu navegador, así
+que dos filas pueden coincidir en ellos; con ellos no se construye ningún
+perfil, como dice el final de esta sección.
 
 Ese aviso llega a un pequeño Worker mío en Cloudflare, que lo guarda como una
 fila junto con lo que trae la propia petición: tu dirección IP, tu User-Agent
@@ -37,9 +40,12 @@ completo, los idiomas que acepta tu navegador, las cabeceras Sec-Fetch que enví
 y lo que Cloudflare asocia a tu dirección (país, región, ciudad, código postal,
 zona horaria, continente, coordenadas aproximadas y operador de red), además del
 centro de datos de Cloudflare que respondió, el tiempo de ida y vuelta de tu
-conexión y las versiones de HTTP y TLS usadas. Para frenar una avalancha,
-Cloudflare cuenta además los avisos por dirección durante un minuto y descarta
-los que pasan de 30; ese contador no se guarda en ningún sitio.
+conexión y las versiones de HTTP y TLS usadas. Para frenar una avalancha, una
+regla de Cloudflare rechaza, antes de que lleguen al Worker, los avisos que
+pasan de diez en diez segundos desde una misma dirección, y el Worker marca como
+fuera de límite, aunque lo guarda, cada aviso que una misma dirección envía por
+encima de 30 en un minuto; ninguno de los dos contadores se guarda en ningún
+sitio.
 
 Las filas viven en un conjunto de datos de Cloudflare Analytics Engine que
 Cloudflare conserva unos noventa días. Cada cinco minutos se copian a mi propia

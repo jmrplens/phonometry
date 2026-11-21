@@ -57,7 +57,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   changed. A new scope job reads the files a pull request changes and skips
   each job none of them reaches: a page runs one leg of the tests and the
   snippets and fiches beside the jobs that always run; a test runs every leg
-  and the engines but not the figures; a guard runs the suite alone; the
+  and the engines but not the figures; a guard runs the suite, and the
+  figures or fiches too when they run it; the
   site's code and the other workflows reach no job that can skip. Each job's
   reach names the paths it reads and the scripts it runs, with every module
   they import. One leg of the tests, lint, the guard groups, the release

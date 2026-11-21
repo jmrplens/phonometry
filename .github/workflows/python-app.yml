@@ -89,7 +89,10 @@ jobs:
         EVENT: ${{ github.event_name }}
         REPOSITORY: ${{ github.repository }}
         PULL: ${{ github.event.pull_request.number }}
+      # pipefail: a scope that fails shows red, and its empty answer runs
+      # every job.
       run: |
+        set -o pipefail
         : > changed.txt
         if [ "$EVENT" = pull_request ]; then
           gh api --paginate "repos/$REPOSITORY/pulls/$PULL/files" \

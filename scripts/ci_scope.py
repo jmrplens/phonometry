@@ -94,6 +94,9 @@ PACKAGE = (
     "stub/",
 )
 
+#: The records the engine tests compare their runs against.
+ENGINE_RECORDS = ("engine-digests.json", "gpu-parity.lock")
+
 #: The scripts the figures job runs, directly or through ``make graphs``.
 FIGURE_SCRIPTS = (
     "generate_graphs",
@@ -121,10 +124,13 @@ class Reach:
     :param paths: files and directories (ending in ``/``) the job reads.
     :param modules: the modules of ``scripts/`` the job runs; each reaches it
         with every module of :data:`MODULE_ROOTS` it imports.
+    :param tests: the test files and directories the job runs; every module of
+        :data:`MODULE_ROOTS` they import reaches it, however deep.
     """
 
     paths: tuple[str, ...] = ()
     modules: tuple[str, ...] = ()
+    tests: tuple[str, ...] = ()
 
 
 #: The jobs that can skip, keyed as python-app.yml keys them; ``tests-legs``
@@ -161,15 +167,27 @@ JOBS: dict[str, Reach] = {
         paths=(*PACKAGE, "tests/pyodide/"),
         modules=("build_release", "check_stub_metadata"),
     ),
-    # The jobs below run a part of the suite that imports helpers from all
-    # over tests/; any change to the tests reaches them, and they take minutes.
+    # The jobs below run a part of the suite: any change to the tests reaches
+    # them (they import helpers from all over tests/, and take minutes), and
+    # so do the modules of scripts/ their tests import (the engine scenarios)
+    # and the digests and locks those tests compare against.
     "baseline-glibc": Reach(
-        paths=("tests/", "engine-digests.json"), modules=("engine_digests",)
+        paths=("tests/", *ENGINE_RECORDS),
+        modules=("engine_digests",),
+        tests=(
+            "tests/simulation/test_engine_golden_digests.py",
+            "tests/test_libm_identity.py",
+            "tests/filters/test_weighting_design.py",
+        ),
     ),
-    "array-api": Reach(paths=("tests/",)),
-    "mps": Reach(paths=("tests/",)),
-    "remote-node": Reach(paths=("tests/", "docker/")),
-    "video": Reach(paths=("tests/",)),
+    "array-api": Reach(paths=("tests/", *ENGINE_RECORDS), tests=("tests/simulation/",)),
+    "mps": Reach(paths=("tests/", *ENGINE_RECORDS), tests=("tests/simulation/",)),
+    "remote-node": Reach(
+        paths=("tests/", "docker/", *ENGINE_RECORDS), tests=("tests/simulation/",)
+    ),
+    "video": Reach(
+        paths=("tests/", *ENGINE_RECORDS), tests=("tests/io/", "tests/simulation/")
+    ),
     "notebook": Reach(paths=("tests/notebooks/",), modules=("check_notebook",)),
 }
 
@@ -268,12 +286,12 @@ def _imported(path: pathlib.Path) -> set[str]:
 def module_closure(entries: Iterable[str]) -> list[pathlib.Path]:
     """The files of *entries* and of every module they import, however deep."""
     modules = _modules()
-    missing = sorted(set(entries) - set(modules))
+    todo = list(entries)
+    missing = sorted(set(todo) - set(modules))
     if missing:
         msg = f"no such module in {' or '.join(MODULE_ROOTS)}: {', '.join(missing)}"
         raise ValueError(msg)
     seen: set[str] = set()
-    todo = list(entries)
     while todo:
         name = todo.pop()
         if name in seen:
@@ -284,11 +302,32 @@ def module_closure(entries: Iterable[str]) -> list[pathlib.Path]:
     return sorted({path for name in seen for path in modules[name]})
 
 
+def test_files(tests: Iterable[str]) -> list[pathlib.Path]:
+    """The Python files of *tests*, each a test file or a directory of them."""
+    files: list[pathlib.Path] = []
+    for name in tests:
+        path = ROOT / name
+        if name.endswith("/"):
+            files.extend(sorted(path.rglob("*.py")))
+        elif path.is_file():
+            files.append(path)
+        else:
+            msg = f"no such test file: {name}"
+            raise ValueError(msg)
+    return files
+
+
 def reach_patterns(reach: Reach) -> tuple[str, ...]:
-    """Every pattern that reaches a job: its paths and its modules' files."""
-    files = (
-        path.relative_to(ROOT).as_posix() for path in module_closure(reach.modules)
-    )
+    """Every pattern that reaches a job: its paths and its modules' files.
+
+    The modules are the job's own and those its tests import.
+    """
+    names = set(_modules())
+    imported = {
+        name for path in test_files(reach.tests) for name in _imported(path) & names
+    }
+    closure = module_closure((*reach.modules, *sorted(imported)))
+    files = (path.relative_to(ROOT).as_posix() for path in closure)
     return (*reach.paths, *files)
 
 
@@ -307,23 +346,39 @@ def _gone_module(path: str) -> bool:
     )
 
 
+def every_job_because(paths: Sequence[str]) -> str | None:
+    """Why every job runs for *paths*, or ``None`` when the map decides job by job.
+
+    No path at all is no evidence of anything (the list could not be
+    fetched), and neither is a list as long as the API's limit; a path that
+    reaches every job, a removed module and a path the map does not know each
+    run everything.
+    """
+    if not paths:
+        return "no changed file was read"
+    if len(paths) >= API_FILE_LIMIT:
+        return f"the list of {len(paths)} changed files may have been cut"
+    for path in paths:
+        if any(matches(path, pattern) for pattern in EVERY_JOB):
+            return f"{path} reaches every job"
+    for path in paths:
+        if _gone_module(path):
+            return f"{path} is a module the change removes"
+    known = [*NO_JOB, *itertools.chain.from_iterable(job_patterns().values())]
+    for path in paths:
+        if not any(matches(path, pattern) for pattern in known):
+            return f"{path} is a file the map does not know"
+    return None
+
+
 def reached(paths: Sequence[str]) -> dict[str, list[str]] | None:
     """The changed files that reach each job of :data:`JOBS`.
 
-    ``None`` when every job runs: no path at all (the list could not be
-    fetched), a list as long as the API's limit, a path that reaches every
-    job, a path the map does not know, or a removed module.
+    ``None`` when every job runs (:func:`every_job_because` says why).
     """
-    if not paths or len(paths) >= API_FILE_LIMIT:
-        return None
-    if any(matches(path, pattern) for path in paths for pattern in EVERY_JOB):
-        return None
-    if any(_gone_module(path) for path in paths):
+    if every_job_because(paths) is not None:
         return None
     patterns = job_patterns()
-    known = [*NO_JOB, *itertools.chain.from_iterable(patterns.values())]
-    if not all(any(matches(path, pattern) for pattern in known) for path in paths):
-        return None
     return {
         job: [path for path in paths if any(matches(path, p) for p in own)]
         for job, own in patterns.items()
@@ -351,9 +406,10 @@ def tests_exclude(skip: Iterable[str]) -> list[dict[str, str]]:
 
 def explain(paths: Sequence[str]) -> str:
     """One line per job: whether it runs, and the first changed file reaching it."""
+    because = every_job_because(paths)
     reach = reached(paths)
-    if reach is None:
-        return "every job runs\n"
+    if because is not None or reach is None:
+        return f"every job runs: {because}\n"
     lines = []
     for job, files in reach.items():
         if not files:

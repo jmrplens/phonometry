@@ -996,28 +996,29 @@ longer than a quarter of the lane bound, and waits on another only to read an
 artifact it uploads. The lanes and the durations they are balanced on are in
 [`tests/ci_lanes.json`](tests/ci_lanes.json).
 
-A pull request runs the jobs its files reach, not every job. Each job that
-can skip has a reach in [`scripts/ci_scope.py`](scripts/ci_scope.py): the
-paths it reads and the scripts it runs, each script with every module of
-`scripts/` and of `tests/` it imports, however deep (the figure and fiche
-generators import the shared test fixtures, so a fixture reaches them). The
-other test legs and the numba and floors suites read the tests, the scripts,
-the stub and the digests and locks the tests compare against; the figures
-read the committed figures, the test data and the clips' manifest; the fiches
-read the committed fiches and the pages that embed them; the snippets read
-the pages, `docs/`, the READMEs, `llms.txt` and the test data some guides
-load; the jobs that run a part of the suite read all of `tests/`. One leg of
-the test suite (Linux on Python 3.13, the leg SonarCloud and the pull request
-comment read), lint, the three guard groups, the release build and its macOS
-rebuild, SonarCloud and the comment run on every pull request. The library,
+A pull request runs the jobs its files reach, not every job. Each job that can
+skip has a reach in [`scripts/ci_scope.py`](scripts/ci_scope.py): the paths it
+reads and the scripts it runs, each script with every module of `scripts/` and
+of `tests/` it imports, however deep (the figure and fiche generators import
+the shared test fixtures, so a fixture reaches them). The other test legs and
+the numba and floors suites read the tests, the scripts, the stub and the
+digests and locks the tests compare against; the figures read the committed
+figures, the test data and the clips' manifest; the fiches read the committed
+fiches and the pages that embed them; the snippets read the pages, `docs/`, the
+READMEs, `llms.txt` and the test data some guides load; the jobs that run a
+part of the suite read all of `tests/`, every module their tests import (the
+engine scenarios of `scripts/`) and the engine records. One leg of the test
+suite (Linux on Python 3.13, the leg SonarCloud and the pull request comment
+read), lint, the three guard groups, the release build and its macOS rebuild,
+SonarCloud and the comment run on every pull request. The library,
 `pyproject.toml`, the requirement files, `VERSION`, the Makefile,
 `python-app.yml` and its scripts reach every job, and so does a file the map
-does not know, a module of `scripts/` or `tests/` the change removes, a push,
-a run dispatched by hand and any doubt. The scope job writes, job by job,
-which changed file reaches it. A new job, or a new kind of file, takes a side
-in the map: `tests/test_ci_scope.py` fails on a job that neither runs always
-nor skips on its own name, on a tracked file the map does not know, and on a
-pattern that matches no file.
+does not know, a module of `scripts/` or `tests/` the change removes, a push, a
+run dispatched by hand and any doubt. The scope job writes, job by job, which
+changed file reaches it, or why every job runs. A new job, or a new kind of
+file, takes a side in the map: `tests/test_ci_scope.py` fails on a job that
+neither runs always nor skips on its own name, on a tracked file the map does
+not know, and on a pattern that matches no file.
 
 ### Manufacturers' data
 

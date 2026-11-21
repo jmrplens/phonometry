@@ -13,10 +13,10 @@ a job added to the workflow takes a side on purpose.
 
 from __future__ import annotations
 
+import ast
 import io
 import json
 import pathlib
-import subprocess
 import sys
 from contextlib import redirect_stdout
 from typing import TYPE_CHECKING
@@ -26,6 +26,7 @@ _SCRIPTS = str(_ROOT / "scripts")
 if _SCRIPTS not in sys.path:
     sys.path.insert(0, _SCRIPTS)
 
+import child_process
 import ci_scope
 import guard_caches
 import pytest
@@ -52,6 +53,21 @@ _ALWAYS = {
     "guards-source": "the rules that read the code and the pages together",
     "sonar": "reads the leg every pull request runs",
     "pr-comment": "reads the legs that ran",
+}
+
+#: The one condition each job of _ALWAYS may carry: none, the lane link that
+#: waits out a red job before it, or its own rule for the event it reports
+#: on. Anything else could leave a pull request without the job.
+_ALWAYS_CONDITIONS = {
+    "tests": "${{ !cancelled() }}",
+    "guards-package": "${{ !cancelled() }}",
+    "guards-prose": "${{ !cancelled() }}",
+    "guards-source": "${{ !cancelled() }}",
+    "sonar": (
+        "github.actor != 'dependabot[bot]' && (github.event_name == 'pull_request' "
+        "|| github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main')"
+    ),
+    "pr-comment": "${{ !cancelled() && github.event_name == 'pull_request' }}",
 }
 
 _EVERY_JOB = ci_scope.jobs_to_skip([])
@@ -91,13 +107,13 @@ def _runs(paths: list[str]) -> set[str]:
 
 
 def _tracked() -> list[str]:
-    listing = subprocess.run(
+    listing = child_process.run(
         ["git", "-C", str(_ROOT), "ls-files", "-z"],
-        capture_output=True,
+        timeout=60,
         check=True,
+        capture_output=True,
         text=True,
         encoding="utf-8",
-        timeout=60,
     ).stdout
     return [name for name in listing.split("\0") if name]
 
@@ -194,12 +210,12 @@ def test_a_generator_reaches_its_job_and_the_test_fixtures_it_imports() -> None:
     assert "tests/reference_data/__init__.py" in figures
     assert "figures" in _runs(["tests/iso12354_building.py"])
     assert "reports" in _runs(["tests/reference_data/building.py"])
-    assert _runs(["scripts/figures/room.py"]) == {
-        "tests-legs",
-        "tests-perf",
-        "minimum-versions",
-        "figures",
-    }
+    # A figure module reaches the figures and the suite, and the engine jobs
+    # whose tests import the clip modules that import it; never the fiches or
+    # the examples.
+    room = _runs(["scripts/figures/room.py"])
+    assert {"tests-legs", "tests-perf", "minimum-versions", "figures"} <= room
+    assert not room & {"reports", "doc-snippets", "built-package", "notebook"}
     # The guides load the test data in their examples.
     assert "doc-snippets" in _runs(["tests/data/cnossos/README.md"])
 
@@ -246,7 +262,17 @@ def test_the_reasons_name_the_file_that_reaches_each_job() -> None:
     reasons = ci_scope.explain(["docker/node/Dockerfile", "docker/node/provision.sh"])
     assert "remote-node: runs (docker/node/Dockerfile and 1 more)" in reasons
     assert "figures: skips" in reasons
-    assert ci_scope.explain([]) == "every job runs\n"
+    # An answer that runs everything says why.
+    assert ci_scope.explain([]) == "every job runs: no changed file was read\n"
+    assert (
+        ci_scope.explain(["VERSION"]) == "every job runs: VERSION reaches every job\n"
+    )
+    assert ci_scope.explain(["benchmarks/run.py"]) == (
+        "every job runs: benchmarks/run.py is a file the map does not know\n"
+    )
+    assert ci_scope.explain(["scripts/no_such_module.py"]) == (
+        "every job runs: scripts/no_such_module.py is a module the change removes\n"
+    )
 
 
 @pytest.mark.git_checkout
@@ -281,6 +307,46 @@ def test_every_module_a_job_runs_is_a_module_of_scripts() -> None:
     for reach in ci_scope.JOBS.values():
         for module in reach.modules:
             assert (_ROOT / "scripts" / f"{module}.py").is_file(), module
+
+
+def test_a_job_that_runs_tests_is_reached_by_what_they_import_and_read() -> None:
+    # The simulation tests import the engine scenarios from scripts/ and
+    # compare against the engine records at the root: each reaches the jobs
+    # that run those tests, beside the suite.
+    engines = {"array-api", "mps", "remote-node", "video", "baseline-glibc"}
+    suite = {"tests-legs", "tests-perf", "minimum-versions"}
+    assert _runs(["scripts/engine_scenarios.py"]) >= engines | suite
+    for record in ci_scope.ENGINE_RECORDS:
+        assert _runs([record]) >= engines - {"video"}
+    assert ci_scope.module_closure(iter(["engine_scenarios"]))
+
+
+@pytest.mark.git_checkout
+def test_every_root_file_a_job_names_reaches_it() -> None:
+    # A file at the root that a job's scripts or tests name by a string is one
+    # the job reads; a change to it alone must not skip the job, unless the map
+    # sends it to no job that can skip (the changelog, whose numbers the
+    # published-numbers tests hold on the leg every pull request runs).
+    tracked = {path for path in _tracked() if "/" not in path}
+    patterns = ci_scope.job_patterns()
+    missing = []
+    for job, reach in ci_scope.JOBS.items():
+        if not reach.modules and not reach.tests:
+            continue
+        files = ci_scope.module_closure(reach.modules) + ci_scope.test_files(
+            reach.tests
+        )
+        named = {
+            node.value
+            for path in files
+            for node in ast.walk(ast.parse(path.read_text(encoding="utf-8")))
+            if isinstance(node, ast.Constant) and node.value in tracked
+        }
+        for name in sorted(named):
+            reached_by = [*ci_scope.EVERY_JOB, *ci_scope.NO_JOB, *patterns[job]]
+            if not any(ci_scope.matches(name, pattern) for pattern in reached_by):
+                missing.append(f"{job}: {name}")
+    assert missing == []
 
 
 def test_the_matrix_the_script_narrows_is_the_workflow_matrix() -> None:
@@ -321,8 +387,11 @@ def test_every_job_runs_always_or_skips_on_its_own_name() -> None:
     for name, job in jobs.items():
         condition = str(job.get("if", ""))
         if name in _ALWAYS:
-            if "outputs.skip" in condition:
-                problems.append(f"{name}: listed as running always, but skips")
+            allowed = _ALWAYS_CONDITIONS.get(name, "")
+            if condition != allowed:
+                problems.append(
+                    f"{name}: runs always under {allowed!r}, not {condition!r}"
+                )
             continue
         if name not in ci_scope.JOBS:
             problems.append(f"{name}: neither listed as running always nor in the map")
@@ -347,6 +416,9 @@ def test_the_scope_job_reads_both_names_of_a_renamed_file() -> None:
     assert "pulls/$PULL/files" in runs
     assert ".previous_filename // empty" in runs
     assert "python scripts/ci_scope.py < changed.txt" in runs
+    # A scope that fails before it writes shows red instead of a green step
+    # with an empty answer (which still runs every job).
+    assert runs.lstrip().startswith("set -o pipefail")
     # The checkout holds every module the map reads, so a module missing from
     # it is one the change removed.
     checkout = steps[0]["with"]

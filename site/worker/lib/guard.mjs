@@ -178,7 +178,10 @@ async function readState(api, env, fetchImpl, now) {
  *
  * The token (CF_GUARD_TOKEN, a secret of the guard Worker) needs Account
  * Analytics Read and Workers Scripts Write on the account and Zone WAF Write
- * on phonometry.dev. Without it the run is dry and makes no call.
+ * on phonometry.dev. Without it the run is dry and makes no call: a run of
+ * the Worker reads that secret and nothing else, so any other credential its
+ * environment happened to hold could not make a run without the token act.
+ * Only a run by hand (quota-switch.mjs) uses the account's own credentials.
  *
  * @param {object} options
  * @param {Record<string, string | undefined>} options.env CF_GUARD_TOKEN, THRESHOLD, MODE (or, by hand, CLOUDFLARE_EMAIL and CLOUDFLARE_API_KEY).
@@ -192,7 +195,8 @@ export async function reconcile({ env, fetchImpl = fetch, now = new Date(), byHa
 	const lines = [];
 	const mode = MODES.has(env.MODE) ? env.MODE : 'dry-run';
 	const threshold = Number(env.THRESHOLD) > 0 ? Number(env.THRESHOLD) : DEFAULT_THRESHOLD;
-	const auth = env.CF_GUARD_TOKEN ? { CLOUDFLARE_API_TOKEN: env.CF_GUARD_TOKEN } : env.CLOUDFLARE_API_TOKEN || (env.CLOUDFLARE_EMAIL && env.CLOUDFLARE_API_KEY) ? env : null;
+	const handCredentials = byHand && (env.CLOUDFLARE_API_TOKEN || (env.CLOUDFLARE_EMAIL && env.CLOUDFLARE_API_KEY));
+	const auth = env.CF_GUARD_TOKEN ? { CLOUDFLARE_API_TOKEN: env.CF_GUARD_TOKEN } : handCredentials ? env : null;
 	if (auth === null) {
 		lines.push('dry: no CF_GUARD_TOKEN secret; nothing read, nothing changed (the token needs Account Analytics Read, Workers Scripts Write, Zone WAF Write on phonometry.dev)');
 		return { dry: true, lines };

@@ -413,9 +413,10 @@ Only the beacon spends Worker requests, one per page view, plus the guard's
   finds it (unless `MODE` pins off): that version runs no code, and a rule
   turned on beside it would have no one to turn it off after 00:00 UTC.
   It has no route, so no visitor request can reach the one Worker holding a
-  token able to redeploy the site. Its variable `MODE` is `dry-run` (log the
-  decision, change nothing) until the maintainer sets `auto`; without the
-  secret `CF_GUARD_TOKEN` every run is dry. The token is an account token with
+  token able to redeploy the site. Its variable `MODE` is `auto`; from 18 to 21
+  November 2026 it ran as `dry-run` (log the decision, change nothing), 96
+  runs a day without an error, before it was set to act. Without the secret
+  `CF_GUARD_TOKEN` every run is dry. The token is an account token with
   Account Analytics Read and Workers Scripts Write on the account and Zone WAF
   Edit on phonometry.dev, stored only with
   `pnpm exec wrangler secret put CF_GUARD_TOKEN --config guard/wrangler.jsonc`.

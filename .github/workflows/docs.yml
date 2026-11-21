@@ -864,11 +864,17 @@ jobs:
       # attempt, so a build re-run in a later one would leave the run two
       # artifacts of one name, and the deploy refuses a run that holds two of
       # the name it deploys.
+      # The pages go whole: the action leaves out every name that starts with a
+      # dot unless told to keep it, and /.well-known/ holds the files a client
+      # looks for at a fixed address (security.txt, tdmrep.json, gpc.json,
+      # traffic-advice). The stage refuses a build that lacks a file of
+      # site/public/ (site/worker/lib/staging.mjs).
       - uses: actions/upload-pages-artifact@v5
         if: github.event_name != 'pull_request'
         with:
           name: github-pages-${{ github.run_attempt }}
           path: site/dist
+          include-hidden-files: true
 
   # The pages of this run, deployed to phonometry.dev, the canonical site, by
   # site-deploy.yml. Nothing deploys GitHub Pages any more: it served the site

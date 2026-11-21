@@ -1478,6 +1478,32 @@ def _input_of(step: dict[str, object], name: str, default: str) -> str:
     return str((inputs if isinstance(inputs, dict) else {}).get(name, default))
 
 
+def test_the_pages_the_build_hands_on_keep_the_names_that_start_with_a_dot() -> None:
+    """The pages artifact holds ``/.well-known/`` as the build wrote it.
+
+    ``actions/upload-pages-artifact`` leaves out every name that starts with
+    a dot unless told to keep it, and ``site/public/.well-known/`` holds the
+    files a client looks for at a fixed address (RFC 9116's security.txt,
+    tdmrep.json, gpc.json, traffic-advice). Without the input they went
+    missing from the pages the deploy read, and phonometry.dev answered 404
+    at each of those addresses.
+    """
+    workflow = yaml.safe_load(_DOCS_WORKFLOW.read_text(encoding="utf-8"))
+    build: list[dict[str, object]] = workflow["jobs"]["build"]["steps"]
+    _, upload = _the_one(
+        [
+            (index, step)
+            for index, step in enumerate(build)
+            if str(step.get("uses", "")).startswith("actions/upload-pages-artifact@")
+        ],
+        "hand the pages to the deploy",
+    )
+    assert (_ROOT / "site" / "public" / ".well-known").is_dir()
+    assert _input_of(upload, "include-hidden-files", "false").lower() == "true", (
+        "the pages artifact leaves /.well-known/ out of the pages it hands on"
+    )
+
+
 def test_the_deploy_takes_the_pages_of_the_build_it_needs() -> None:
     """A build re-run hands the deploy its own pages, under a name of its attempt.
 

@@ -9,7 +9,7 @@ import { afterEach, describe, test } from 'node:test';
 import { twinExclusions } from '../lib/twins.mjs';
 import { beaconScript } from '../lib/beacon.mjs';
 import { DEFAULT_SITE, SITE_TARGETS, mediaOrigins } from '../../src/data/site.mjs';
-import { CANONICAL_ORIGIN, MAX_FILE_BYTES, MAX_FILES, SERVED_ORIGIN, workerPathProblems, beaconProblems, slashRuleProblems, buildOrigin, indexableBuild, withBeacon, exclusionProblems, listTree, mediaPolicyProblems, noTwinPages, servedPages, stage, treeProblems } from '../lib/staging.mjs';
+import { CANONICAL_ORIGIN, MAX_FILE_BYTES, MAX_FILES, SERVED_ORIGIN, workerPathProblems, beaconProblems, slashRuleProblems, buildOrigin, indexableBuild, withBeacon, exclusionProblems, listTree, mediaPolicyProblems, noTwinPages, publicProblems, servedPages, stage, treeProblems } from '../lib/staging.mjs';
 
 // The site as it is served: at the root of phonometry.dev, its clips on the
 // clip host of site-targets.json.
@@ -232,6 +232,17 @@ describe('stage', () => {
 			checkOnly: true,
 		});
 		assert.match(report.problems.join('\n'), /no page at \/gone\//);
+	});
+
+	test('a build that lacks a file of site/public is refused, the folder of fixed addresses above all', () => {
+		// The pages artifact left /.well-known/ out of the build the deploy
+		// read, and phonometry.dev answered 404 at its RFC 9116 address.
+		const publicFiles = listTree(tree({ '.well-known/security.txt': 'Contact: x\n', 'robots.txt': 'x' }));
+		const from = tree(good());
+		const report = stage({ from, out: join(tree({}), 'stage'), prefix, origin: ORIGIN, pairs, exclusions, indexable: false, publicFiles, checkOnly: true });
+		assert.deepEqual(report.problems, ['.well-known/security.txt is in site/public but not in the build']);
+		const whole = tree({ ...good(), '.well-known/security.txt': 'Contact: x\n' });
+		assert.deepEqual(publicProblems(listTree(whole), publicFiles), []);
 	});
 
 	test('an existing output directory is refused rather than mixed into', () => {

@@ -54,7 +54,7 @@ try {
 	process.exit(2);
 }
 const { redirectPairs } = await import('../scripts/cloudflare-redirects.mjs');
-const { CANONICAL_ORIGIN, buildOrigin, indexableBuild, stage } = await import('./lib/staging.mjs');
+const { CANONICAL_ORIGIN, buildOrigin, indexableBuild, listTree, stage } = await import('./lib/staging.mjs');
 const { twinExclusions } = await import('./lib/twins.mjs');
 
 const from = resolve(args.from);
@@ -82,6 +82,7 @@ const report = stage({
 	indexable,
 	beacon: Boolean(args.beacon),
 	checkOnly: Boolean(args.check),
+	publicFiles: listTree(fileURLToPath(new URL('../public', import.meta.url))),
 });
 for (const problem of report.problems) console.error(`FAIL ${problem}`);
 if (report.problems.length > 0) process.exit(1);

@@ -166,15 +166,17 @@ jobs:
         with:
           persist-credentials: false
           # The staging step reads the redirect map and the site's address from
-          # site/src/data, site/src/lib and site/scripts; the rest of the
+          # site/src/data, site/src/lib and site/scripts, and walks site/public
+          # to refuse a build that lost one of its files; the rest of the
           # repository is not needed. site/worker/test/workflow.test.mjs fails
-          # when a script run here loads a module outside these directories.
-          # Called, the checkout is the commit docs.yml built.
+          # when a script run here loads a module or reads a directory outside
+          # these directories. Called, the checkout is the commit docs.yml built.
           sparse-checkout: |
             site/worker
             site/src/data
             site/src/lib
             site/scripts
+            site/public
       - uses: actions/setup-node@v7
         with:
           node-version: 24

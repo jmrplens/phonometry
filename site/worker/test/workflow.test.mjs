@@ -9,7 +9,7 @@
 // holds the code paths off, in bash with the commands they call stubbed.
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
-import { existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdtempSync, readFileSync, rmSync, statSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join, relative, resolve } from 'node:path';
 import { describe, test } from 'node:test';
@@ -60,13 +60,22 @@ function importClosure(entries, root = ROOT) {
 /**
  * Whether cone-mode sparse checkout brings a path: anything under a listed
  * directory, and the files directly inside the root or any ancestor of one.
+ * A directory is brought whole only from under a listed directory: an
+ * ancestor brings its own files, never its other subdirectories, so a script
+ * that walks `site/public` finds nothing there when only `site/worker` is
+ * listed.
  */
-function checkedOut(path, directories) {
+function checkedOut(path, directories, { directory = false } = {}) {
+	const under = directories.some((listed) => path === listed || path.startsWith(`${listed}/`));
+	if (under || directory) return under;
 	const parent = path.includes('/') ? path.slice(0, path.lastIndexOf('/')) : '';
 	if (parent === '') return true;
-	return directories.some(
-		(directory) => path === directory || path.startsWith(`${directory}/`) || directory.startsWith(`${parent}/`),
-	);
+	return directories.some((listed) => listed.startsWith(`${parent}/`));
+}
+
+/** Whether a repository path is a directory on disk. */
+function isDirectory(path) {
+	return existsSync(join(ROOT, path)) && statSync(join(ROOT, path)).isDirectory();
 }
 
 test('the workflow runs the five scripts it is meant to', () => {
@@ -82,7 +91,7 @@ test('the sparse checkout holds every module those scripts load', () => {
 	const closure = importClosure(nodeScripts(text));
 	// The staging directory is written by the run, not checked out.
 	const needed = closure.filter((path) => path !== 'site/worker/stage' && !path.startsWith('site/worker/stage/'));
-	const missing = needed.filter((path) => !checkedOut(path, directories));
+	const missing = needed.filter((path) => !checkedOut(path, directories, { directory: isDirectory(path) }));
 	assert.deepEqual(missing, [], `sparse-checkout (${directories.join(', ')}) leaves out ${missing.join(', ')}`);
 	for (const path of needed) assert.ok(existsSync(join(ROOT, path)), `${path} is loaded but does not exist`);
 });
@@ -95,6 +104,11 @@ test('a module outside the listed directories is caught', () => {
 	assert.equal(checkedOut('site/package.json', ['site/worker']), true);
 	assert.equal(checkedOut('site/src/env.d.ts', ['site/src/data']), true);
 	assert.equal(checkedOut('site/public/robots.txt', ['site/worker']), false);
+	// A directory beside a listed one is not a file of their ancestor: the stage walks
+	// site/public, which a checkout of site/worker alone does not bring.
+	assert.equal(checkedOut('site/public', ['site/worker'], { directory: true }), false);
+	assert.equal(checkedOut('site/public', ['site/worker', 'site/public'], { directory: true }), true);
+	assert.equal(checkedOut('site/worker/lib', ['site/worker'], { directory: true }), true);
 });
 
 /** The steps of the workflow, each as its text, by name. */

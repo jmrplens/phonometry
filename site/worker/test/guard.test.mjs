@@ -220,6 +220,25 @@ describe('reconcile', () => {
 		assert.match(report.lines.join('\n'), /no CF_GUARD_TOKEN/);
 	});
 
+	test('a scheduled run without the token stays dry whatever other credentials the Worker holds', async () => {
+		const { calls, fetchImpl } = recorded(answers(97000));
+		for (const extra of [{ CLOUDFLARE_API_TOKEN: 'x' }, { CLOUDFLARE_EMAIL: 'e', CLOUDFLARE_API_KEY: 'k' }]) {
+			const report = await reconcile({ env: { ...extra, THRESHOLD: '95000', MODE: 'auto' }, fetchImpl, now: NOW });
+			assert.equal(report.dry, true);
+			assert.match(report.lines.join('\n'), /no CF_GUARD_TOKEN/);
+		}
+		assert.equal(calls.length, 0);
+	});
+
+	test('a run by hand acts on the account credentials it is given', async () => {
+		const { calls, fetchImpl } = recorded(answers(97000));
+		const report = await reconcile({ env: { CLOUDFLARE_API_TOKEN: 'x', THRESHOLD: '95000', MODE: 'dry-run' }, fetchImpl, now: NOW, byHand: true });
+		assert.doesNotMatch(report.lines.join('\n'), /no CF_GUARD_TOKEN/);
+		assert.match(report.lines.join('\n'), /dry-run: would turn the rule on/);
+		assert.ok(calls.length > 0);
+		assert.ok(calls.every((c) => c.auth === 'Bearer x'));
+	});
+
 	test('dry-run reads everything and writes nothing', async () => {
 		const { calls, fetchImpl } = recorded(answers(97000));
 		const report = await reconcile({ env: { CF_GUARD_TOKEN: 't', THRESHOLD: '95000', MODE: 'dry-run' }, fetchImpl, now: NOW });

@@ -60,7 +60,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   it stands, since no Worker logs a missing copy any more.
 - **phonometry.dev switches its own beacon off before the day's Workers quota
   runs out.** The quota guard, which had only logged what it would do since
-  18 November, now acts: at 95 000 of the day's 100 000 Workers requests it
+  18 November, now acts: at 95 000 of the day's 100 000 Workers requests it
   blocks the beacon and rolls the site to its version without code, and
   after 00:00 UTC it switches both back. The pages, their Markdown copies
   and the llms files are plain files and stay up either way.

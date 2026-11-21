@@ -134,12 +134,15 @@ export function conformanceMarkdown(text, report = () => {}) {
     .trim();
 }
 
-/** What the Spanish copy says instead of the rows. */
+/**
+ * What the Spanish copy says instead of the rows: a sentence that links the
+ * English copy by its words, so that its full stop is no part of an address.
+ */
 const POINTER = {
-  es:
+  es: (url) =>
     'Las filas del informe, con sus designaciones de norma, apartados, magnitudes y unidades tal como las ' +
-    'ejecuta el registro de comprobaciones, están en texto plano en la copia en Markdown de la página en ' +
-    'inglés: ',
+    `ejecuta el registro de comprobaciones, están en texto plano en la [copia en Markdown de la página en ` +
+    `inglés](${url}).`,
 };
 
 export default markdownFor({
@@ -149,7 +152,7 @@ export default markdownFor({
     const lang = ctx.attr(node, 'lang') === 'es' ? 'es' : 'en';
     if (lang !== ctx.lang) ctx.issue(node, `Conformance lang="${lang}" on a page in ${ctx.lang}`);
     if (lang === 'es') {
-      return `${POINTER.es}${ctx.site.url('/reference/conformance/index.md')}.`;
+      return POINTER.es(ctx.site.url('/reference/conformance/index.md'));
     }
     const text = readCommittedText(join(REPO_DIR, 'docs', 'CONFORMANCE.md'));
     return conformanceMarkdown(text, (message) => ctx.issue(node, message));

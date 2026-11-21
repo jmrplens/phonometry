@@ -315,7 +315,7 @@ and smearing them.
 
 ## References
 
-- **Bendat, J. S., & Piersol, A. G. (2010).** *Random data: Analysis and measurement procedures* (4th ed.). Wiley. https://doi.org/10.1002/9781118032428
+- **Bendat, J. S., & Piersol, A. G. (2010).** *Random data: Analysis and measurement procedures* (4th ed.). Wiley. <https://doi.org/10.1002/9781118032428>
   Section 10.2 (data preparation: sampling, aliasing and the anti-alias filtering requirement the resampler states explicitly). ISBN 978-0-470-24877-5.
 - **International Electrotechnical Commission. (1985).** [*Sound system equipment — Part 1: General*](https://webstore.iec.ch/en/publication/1204) (IEC 60268-1:1985).
   Appendix A, Clause A2: tone bursts starting at the zero crossing of the tone with an integral number of full periods (A2.1), repetitive burst trains at a stated repetition rate (A2.2), and the Table AII burst durations the sample counts are hand-checked against.

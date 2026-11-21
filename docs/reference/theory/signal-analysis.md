@@ -582,7 +582,7 @@ See the [GUM Uncertainty guide](../../signals/metrology/gum-uncertainty.md) for 
 
 ## References
 
-- **Fahy, F. J. (1995).** *Sound intensity* (2nd ed.). E&FN Spon. https://doi.org/10.4324/9780203475386
+- **Fahy, F. J. (1995).** *Sound intensity* (2nd ed.). E&FN Spon. <https://doi.org/10.4324/9780203475386>
   ISBN 978-0-419-19810-9. The physics of the p-p estimator: active intensity, the finite-difference bias and the phase-mismatch error budget.
 - **International Electrotechnical Commission. (1993).** [*Electroacoustics — Instruments for the measurement of sound intensity — Measurements with pairs of pressure sensing microphones*](https://webstore.iec.ch/en/publication/4353) (IEC 61043:1993).
   The p-p instrument standard, adopted in Europe as EN 61043:1994: the cross-spectral estimator and the pressure-residual intensity index behind the dynamic capability.
@@ -592,9 +592,9 @@ See the [GUM Uncertainty guide](../../signals/metrology/gum-uncertainty.md) for 
   The base-10 mid-band and band-edge definitions of the octave-band section and the class masks the banks are verified against.
 - **International Organization for Standardization. (1993).** [*Acoustics — Determination of sound power levels of noise sources using sound intensity — Part 1: Measurement at discrete points*](https://www.iso.org/standard/17427.html) (ISO 9614-1:1993).
   The surface indicators F2–F4 that generalize the pressure-intensity index over a measurement surface.
-- **Joint Committee for Guides in Metrology. (2008).** [*Evaluation of measurement data — Guide to the expression of uncertainty in measurement*](https://www.bipm.org/documents/20126/2071204/JCGM_100_2008_E.pdf) (JCGM 100:2008, the GUM). BIPM. https://doi.org/10.59161/JCGM100-2008E
+- **Joint Committee for Guides in Metrology. (2008).** [*Evaluation of measurement data — Guide to the expression of uncertainty in measurement*](https://www.bipm.org/documents/20126/2071204/JCGM_100_2008_E.pdf) (JCGM 100:2008, the GUM). BIPM. <https://doi.org/10.59161/JCGM100-2008E>
   The law of propagation of uncertainty and the Welch–Satterthwaite expanded uncertainty of the GUM section. The linked PDF is the free download.
-- **Joint Committee for Guides in Metrology. (2008).** [*Evaluation of measurement data — Supplement 1 to the "Guide to the expression of uncertainty in measurement" — Propagation of distributions using a Monte Carlo method*](https://www.bipm.org/documents/20126/2071204/JCGM_101_2008_E.pdf) (JCGM 101:2008). BIPM. https://doi.org/10.59161/JCGM101-2008
+- **Joint Committee for Guides in Metrology. (2008).** [*Evaluation of measurement data — Supplement 1 to the "Guide to the expression of uncertainty in measurement" — Propagation of distributions using a Monte Carlo method*](https://www.bipm.org/documents/20126/2071204/JCGM_101_2008_E.pdf) (JCGM 101:2008). BIPM. <https://doi.org/10.59161/JCGM101-2008>
   The Monte Carlo propagation of distributions and its coverage-interval construction. The linked PDF is the free download.
 - **Oppenheim, A. V., & Schafer, R. W. (2010).** [*Discrete-time signal processing*](https://openlibrary.org/isbn/9780131988422) (3rd ed.). Pearson.
   ISBN 978-0-13-198842-2. The digital-filter theory behind the SOS cascades, the bilinear transform and the multirate decimation of the filter-bank design section.

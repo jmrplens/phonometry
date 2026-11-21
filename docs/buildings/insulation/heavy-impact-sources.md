@@ -447,7 +447,7 @@ where the A-weighting has already discarded the energy.
 
 ## References
 
-- **Hopkins, C. (2007).** *Sound insulation*. Butterworth-Heinemann. https://doi.org/10.4324/9780080550473
+- **Hopkins, C. (2007).** *Sound insulation*. Butterworth-Heinemann. <https://doi.org/10.4324/9780080550473>
   Section 3.6.4 describes the heavy impact sources and explains why no simple prediction counterpart exists. ISBN 978-0-7506-6526-1.
 - **International Organization for Standardization. (2010).** [*Acoustics — Laboratory measurement of sound insulation of building elements — Part 3: Measurement of impact sound insulation*](https://www.iso.org/standard/42089.html) (ISO 10140-3:2010).
   Annex A (informative), the laboratory measurement with heavy and soft impact sources.
@@ -459,5 +459,5 @@ where the A-weighting has already discarded the energy.
   Annex F (normative) prints the same rubber-ball spectrum as Table F.1 and specifies the modified tapping machine.
 - **Japanese Standards Association. (2019).** [*Acoustics — Measurement of floor impact sound insulation of buildings — Part 2: Method using standard heavy impact sources*](https://www.jisc.go.jp/) (JIS A 1418-2:2019).
   The only primary source for the bang machine: Annex A Tables A.1 and A.2 with tolerances, the 20 ms single-peak requirement, and the Annex B construction examples.
-- **Kim, K. W., Park, S. H., Shin, H. K., & Kim, K. C. (2023).** Changes of floor impact sound regulations and future improvement directions in Korea. *Proceedings of Forum Acusticum 2023 (10th Convention of the European Acoustics Association)*. https://doi.org/10.61782/fa.2023.0364
+- **Kim, K. W., Park, S. H., Shin, H. K., & Kim, K. C. (2023).** Changes of floor impact sound regulations and future improvement directions in Korea. *Proceedings of Forum Acusticum 2023 (10th Convention of the European Acoustics Association)*. <https://doi.org/10.61782/fa.2023.0364>
   Table 1 records the August 2022 revision: the heavyweight source became the rubber ball, the index L'iA,Fmax through KS F ISO 10140-5 and KS F ISO 717-2, the mandatory standard 49 dB (from 50 dB) and the four grades at 4 dB intervals. The only published regulatory scale for the quantity this page computes.

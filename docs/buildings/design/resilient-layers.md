@@ -519,7 +519,7 @@ example.
 
 ## References
 
-- **Hopkins, C. (2007).** *Sound insulation*. Butterworth-Heinemann. https://doi.org/10.4324/9780080550473
+- **Hopkins, C. (2007).** *Sound insulation*. Butterworth-Heinemann. <https://doi.org/10.4324/9780080550473>
   Section 3.6.3 (the tapping-machine force pulse and its cut-off frequency), 4.3.8 (surface finishes and linings), 4.4.3.1 (soft floor coverings) and 4.4.4 (floating floors), the source of the models on this page. ISBN 978-0-7506-6526-1.
 - **International Organization for Standardization. (1989).** [*Acoustics — Determination of dynamic stiffness — Part 1: Materials used under floating floors in dwellings*](https://www.iso.org/standard/16620.html) (EN 29052-1:1992 (ISO 9052-1:1989)).
   The measurement of the dynamic stiffness per unit area s' that every formula on this page starts from.
@@ -527,5 +527,5 @@ example.
   Annex D, the resonance frequency of an additional layer (Formulae D.1/D.2) and the weighted sound reduction index improvement it implies (Table D.1, Formulae D.3 to D.8).
 - **International Organization for Standardization. (2017).** [*Building acoustics — Estimation of acoustic performance of buildings from the performance of elements — Part 2: Impact sound insulation between rooms*](https://www.iso.org/standard/70243.html) (ISO 12354-2:2017).
   Annex C, the floating-floor improvement laws (Formulae C.1 to C.3), the weighted improvement fits (C.4/C.5) and the series combination of resilient layers (C.6); Annex G Table G.4, the printed per-band improvement reproduced here.
-- **Vigran, T. E. (2008).** *Building acoustics*. CRC Press. https://doi.org/10.1201/9781482266016
+- **Vigran, T. E. (2008).** *Building acoustics*. CRC Press. <https://doi.org/10.1201/9781482266016>
   Section 8.4, the independent statement of the same floating-floor and floor-covering models (Eqs. 8.40, 8.45 to 8.48, 8.51) used here as a cross-source check. ISBN 978-0-415-42853-8.

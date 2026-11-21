@@ -805,7 +805,7 @@ and `plot_sound_reinforcement_geometry` draws the loop above.
 
 ## References
 
-- **Beranek, L. L., & Mellow, T. J. (2012).** *Acoustics: Sound fields and transducers*. Academic Press. https://doi.org/10.1016/C2011-0-05897-0
+- **Beranek, L. L., & Mellow, T. J. (2012).** *Acoustics: Sound fields and transducers*. Academic Press. <https://doi.org/10.1016/C2011-0-05897-0>
   ISBN 978-0-12-391421-7. The transducer physics behind sections 1 and 2: loudspeaker radiation, the baffled-piston impedance and directivity (§4.19, §13.7), and the near-field to far-field transition.
 - **Beranek, L. L., & Mellow, T. J. (2019).** [*Acoustics: Sound fields, transducers and vibration*](https://shop.elsevier.com/books/acoustics-sound-fields-transducers-and-vibration/beranek/978-0-12-815227-0) (2nd ed.). Academic Press.
   ISBN 978-0-12-815227-0. The edition the conformance report holds the piston functions of section 2 to: the radiation resistance and reactance (Eqs. 13.117, 13.118), the radiation mass (Eq. 4.151) and the directivity (Eq. 13.102), numbered as in the first edition.
@@ -813,5 +813,5 @@ and `plot_sound_reinforcement_geometry` draws the loop above.
   The scale proportions of the characteristic graphs: one frequency decade equal to 25 dB on the ordinate (clause 2), and the polar diagram plotted on a 25 dB reference-circle radius (clause 3).
 - **International Electrotechnical Commission. (2003).** [*Sound system equipment – Part 5: Loudspeakers*](https://webstore.iec.ch/en/publication/1224) (IEC 60268-5:2003+A1:2007).
   The rated loudspeaker characteristics of section 3: the rated impedance (16), the rated frequency range (19.1), the characteristic sensitivity and its level referred to 1 W at 1 m (20.3/20.4), the effective frequency range against the -10 dB band (21.2), the directivity index (23.3) and the total harmonic distortion against frequency (24.1).
-- **Long, M. (2014).** *Architectural acoustics* (2nd ed.). Academic Press. https://doi.org/10.1016/C2012-0-03257-5
+- **Long, M. (2014).** *Architectural acoustics* (2nd ed.). Academic Press. <https://doi.org/10.1016/C2012-0-03257-5>
   The gain-before-feedback criterion of section 4: the open-loop and feedback-loop gains, the stability margin and the number-of-open-microphones correction (Chapter 18, Equations (18.13) to (18.24)).

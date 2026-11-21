@@ -376,7 +376,7 @@ ISO 3382-1 asks for, is in
 
 - **Barron, M. (2009).** *Auditorium acoustics and architectural design* (2nd ed.). Spon Press.
   Where the sound strength came from as a design quantity, and how it behaves with distance in a real hall.
-- **Barron, M., & Lee, L.-J. (1988).** Energy relations in concert auditoriums. I. *The Journal of the Acoustical Society of America*, *84*(2), 618-628. https://doi.org/10.1121/1.396840
+- **Barron, M., & Lee, L.-J. (1988).** Energy relations in concert auditoriums. I. *The Journal of the Acoustical Society of America*, *84*(2), 618-628. <https://doi.org/10.1121/1.396840>
   The measured departure from classical theory that explains why G keeps falling past the critical distance in a real hall.
 - **International Organization for Standardization. (2009).** [*Acoustics — Measurement of room acoustic parameters — Part 1: Performance spaces*](https://www.iso.org/standard/40979.html) (ISO 3382-1:2009).
   Annex A.2.1 and Equations (A.1) to (A.9): the definition of the sound strength and every printed route to its free-field reference.

@@ -1072,6 +1072,9 @@ def _summary(version: str) -> list[str]:
         ),
         "",
         (
+            "Until 20 November 2026 this documentation was published at "
+            "docs.jmrp.io/phonometry, and every address there now redirects to the "
+            "same page on phonometry.dev. "
             "The project was published as **PyOctaveBand** until version 3.0.0. "
             "Third-party references and dependency pins still using that name refer "
             "to this library."
@@ -1096,8 +1099,8 @@ def _summary(version: str) -> list[str]:
             '(`pip install -U "phonometry[full]"` for all four where `[full]` '
             "installs); 3.x has a different import layout and "
             "`from phonometry import filters` fails on it. Code written for 3.x "
-            "needs changes to run on 4.x; the upgrade guide "
-            f"({SITE_URL}/start/upgrading/) maps each of them."
+            "needs changes to run on 4.x; the "
+            f"[upgrade guide]({SITE_URL}/start/upgrading/) maps each of them."
         ),
         "",
         (
@@ -1220,9 +1223,31 @@ def _full_text_links(files: tuple[str, ...]) -> str:
     )
 
 
-def _shard_urls(shard_files: Mapping[str, tuple[str, ...]], slug: str) -> str:
-    """Every URL of one shard, comma separated, for a sentence of the index."""
-    return ", ".join(_shard_url(name) for name in shard_files.get(slug, (slug,)))
+def _listed(items: Sequence[str]) -> str:
+    """``a``, ``a and b``, ``a, b and c``."""
+    if len(items) < 2:
+        return "".join(items)
+    return ", ".join(items[:-1]) + " and " + items[-1]
+
+
+def _shard_links(
+    shard_files: Mapping[str, tuple[str, ...]], slug: str, label: str
+) -> str:
+    """Every file of one shard as a link named *label*, for a sentence of the index.
+
+    A link, not the bare address: a reader of plain text takes an address up
+    to the next space, so one the sentence's comma or full stop follows is
+    fetched with it, and answers 404.
+    """
+    files = shard_files.get(slug, (slug,))
+    if len(files) == 1:
+        return f"[{label}]({_shard_url(files[0])})"
+    return _listed(
+        [
+            f"[{_part_label(label, number, len(files))}]({_shard_url(name)})"
+            for number, name in enumerate(files, start=1)
+        ]
+    )
 
 
 def _site_entry(label: str, route: str) -> str:
@@ -1330,10 +1355,11 @@ def _reference_section(shard_files: Mapping[str, tuple[str, ...]]) -> list[str]:
         "## Theory and reference",
         "",
         (
-            "The theory pages travel in their own shard "
-            f"({_shard_urls(shard_files, 'theory')}), the glossary in another "
-            f"({_shard_urls(shard_files, 'glossary')}), and the rest of the "
-            f"reference in {_shard_urls(shard_files, 'reference')}. The "
+            "The theory pages travel in a shard of their own, "
+            f"{_shard_links(shard_files, 'theory', 'theory')}; the glossary in "
+            f"another, {_shard_links(shard_files, 'glossary', 'glossary')}; and "
+            "the rest of the reference in "
+            f"{_shard_links(shard_files, 'reference', 'reference')}. The "
             "conformance report, the errata register and every published "
             "catalogue have shards of their own, which the Full text section "
             "below lists."
@@ -1424,7 +1450,8 @@ def _errata_section() -> list[str]:
         (
             "The errata register has one page per document family, each with "
             "the defects found in that family's printed text, the evidence and "
-            f"what the library does about each (index: {SITE_URL}/{ERRATA_ROUTE}/)."
+            "what the library does about each; the "
+            f"[register's index]({SITE_URL}/{ERRATA_ROUTE}/) lists them all."
         ),
         "",
     ]
@@ -1481,7 +1508,7 @@ def _catalogue_section() -> list[str]:
         "",
         (
             f"{_description(index)} One page per catalogue, each listed here with "
-            f"the rows it tables (index: {SITE_URL}/{index}/)."
+            f"the rows it tables; the [overview]({SITE_URL}/{index}/) lists them all."
         ),
         "",
     ]
@@ -1540,8 +1567,10 @@ def _copies_sentence() -> str:
     """
     sentence = (
         "Every page listed here has a Markdown copy beside it at "
-        f"`<page>/index.md`, for example {SITE_URL}/start/getting-started/index.md, "
-        "and its Spanish twin under `/es/` has one too where the page is translated."
+        "`<page>/index.md`, for example the "
+        f"[copy of {_page_title('start/getting-started')}]"
+        f"({SITE_URL}/start/getting-started/index.md), and its Spanish twin "
+        "under `/es/` has one too where the page is translated."
     )
     english_only = sorted(_content_routes() - _spanish_routes())
     api = [r for r in english_only if r == API_ROUTE or r.startswith(f"{API_ROUTE}/")]
@@ -1624,7 +1653,8 @@ def _closing_sections() -> list[str]:
         "",
         (
             "Every page above also exists in Spanish under the `/es/` prefix, for "
-            f"example {SITE_URL}/es/start/getting-started/. The two trees are kept at "
+            f"example [{_page_title('start/getting-started')} in Spanish]"
+            f"({SITE_URL}/es/start/getting-started/). The two trees are kept at "
             "parity by a build check."
         ),
         "",
@@ -1911,7 +1941,7 @@ def _section_text(copy: Copy, units: Sequence[_Unit]) -> str:
 
 def _shard_head(title: str, note: str) -> str:
     """The lines every shard file opens with."""
-    return f"# phonometry: {title}\n\nPart of {SITE_URL}/llms.txt. {note}\n\n---\n"
+    return f"# phonometry: {title}\n\nPart of [llms.txt]({SITE_URL}/llms.txt). {note}\n\n---\n"
 
 
 def _shard_file(head: str, sections: Iterable[str]) -> str:
@@ -1952,11 +1982,16 @@ def _part_head(
     cuts: Iterable[str],
 ) -> str:
     """The head of one part of a shard cut into *count*."""
-    urls = ", ".join(_shard_url(name) for name in _part_names(slug, count))
+    links = _listed(
+        [
+            f"[part {part}]({_shard_url(name)})"
+            for part, name in enumerate(_part_names(slug, count), start=1)
+        ]
+    )
     what = "One page" if single_page else "The pages of this area"
     note = (
         f"{what} in {count} parts, cut {_cut_note(single_page=single_page, cuts=cuts)} so that "
-        f"each fits one fetch: {urls}."
+        f"each fits one fetch: {links}."
     )
     return _shard_head(_part_label(title, number, count), note)
 

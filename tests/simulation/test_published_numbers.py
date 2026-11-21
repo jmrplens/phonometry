@@ -145,8 +145,11 @@ _SPANISH_MATRIX = (
 )
 #: How a docstring and the changelog entry bound the matrix.
 _TEXT_MATRIX = "grids of up to {high} cells, up to {most} steps"
-#: What every page's provenance example prints, in any language.
+#: What every page's provenance example prints, in any language: the record
+#: the proof machine's run printed, the phonometry and NumPy it ran included.
 _PROVENANCE_EXAMPLE = (
+    "phonometry_version='{phonometry}'",
+    "numpy_version='{numpy}'",
     "array_library='cupy {cupy}'",
     "cuda_runtime='{cupy_cuda_runtime}'",
     "cuda_driver_api='{cuda_driver_api}'",

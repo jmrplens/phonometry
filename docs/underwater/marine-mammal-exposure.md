@@ -579,7 +579,7 @@ regulatory guidance, not a whole campaign.
 
 ## References
 
-- **Ainslie, M. A. (2010).** *Principles of sonar performance modelling*. Springer. https://doi.org/10.1007/978-3-540-87662-5
+- **Ainslie, M. A. (2010).** *Principles of sonar performance modelling*. Springer. <https://doi.org/10.1007/978-3-540-87662-5>
   The orca audiogram (Equation 11.159, after Wensveen & Van Roij 2007) and the orca-versus-salmon worked example.
 - **Finneran, J. J. (2016).** [*Auditory weighting functions and TTS/PTS exposure functions for marine mammals exposed to underwater noise*](https://apps.dtic.mil/sti/citations/AD1026445) (Technical Report 3026). SSC Pacific.
   The band-pass filter form and the audiogram equation that both criteria sets adopt.
@@ -591,5 +591,5 @@ regulatory guidance, not a whole campaign.
   The Table 3 weighting parameters, the Table ES3 PTS onset thresholds and the Appendix D worked example (W at 1 kHz for the five hearing groups) used as the numeric oracle of the weighting section.
 - **National Marine Fisheries Service. (2024).** [*2024 Update to: Technical Guidance for Assessing the Effects of Anthropogenic Sound on Marine Mammal Hearing (Version 3.0)*](https://www.fisheries.noaa.gov/s3/2024-11/Tech_Memo-Guidance_-3.0-_OCT-2024-508_OPR1.pdf) (NOAA Technical Memorandum NMFS-OPR-71). National Oceanic and Atmospheric Administration.
   The current guidance and the library default: Table 5 weighting parameters, Table ES3 AUD INJ criteria and the Navy Phase 4 Table A.E-2 impulsive TTS thresholds.
-- **Southall, B. L., Finneran, J. J., Reichmuth, C., Nachtigall, P. E., Ketten, D. R., Bowles, A. E., Ellison, W. T., Nowacek, D. P., & Tyack, P. L. (2019).** Marine mammal noise exposure criteria: Updated scientific recommendations for residual hearing effects. *Aquatic Mammals*, *45*(2), 125-232. https://doi.org/10.1578/AM.45.2.2019.125
+- **Southall, B. L., Finneran, J. J., Reichmuth, C., Nachtigall, P. E., Ketten, D. R., Bowles, A. E., Ellison, W. T., Nowacek, D. P., & Tyack, P. L. (2019).** Marine mammal noise exposure criteria: Updated scientific recommendations for residual hearing effects. *Aquatic Mammals*, *45*(2), 125-232. <https://doi.org/10.1578/AM.45.2.2019.125>
   The group audiograms (Equation 1 with Tables 2 to 4) and the weighting and threshold tables (Tables 5 to 7); its errata in 45(5), 569-572 corrects four peak-SPL values of Table 7.

@@ -465,5 +465,5 @@ took out.
   The whole of this page: Clause 5 with its Tables 1, 3, 4, 5, 6 and 7, and the seven worked examples of Annex A.
 - **International Electrotechnical Commission. (2014).** [*Electroacoustics — Octave-band and fractional-octave-band filters — Part 1: Specifications*](https://webstore.iec.ch/en/publication/5063) (IEC 61260-1:2014).
   The 33 one-third-octave bands from 12.5 Hz to 20 kHz that Table 5 indexes and every spectrum on this page is carried on.
-- **Reethof, G., & Ward, W. C. (1986).** A theoretically based valve noise prediction method for compressible fluids. *Journal of Vibration, Acoustics, Stress, and Reliability in Design*, *108*(3), 329-338. https://doi.org/10.1115/1.3269349
+- **Reethof, G., & Ward, W. C. (1986).** A theoretically based valve noise prediction method for compressible fluids. *Journal of Vibration, Acoustics, Stress, and Reliability in Design*, *108*(3), 329-338. <https://doi.org/10.1115/1.3269349>
   Where the five regimes and the acoustical efficiency of each of them come from.

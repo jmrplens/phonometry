@@ -461,7 +461,7 @@ Age-plus-noise threshold fiche (HTLANResult.report), the HTLAN averaged over the
 
 - **International Organization for Standardization. (2013).** [*Acoustics — Estimation of noise-induced hearing loss*](https://www.iso.org/standard/45103.html) (ISO 1999:2013).
   The implemented model: the HTLAN combination (clause 6.1, Formula 1), the median NIPTS (clause 6.3.1, Formulae 2-3, Table 1) and its statistical distribution (clause 6.3.2, Formulae 4-7, Tables 2-3), validated against the worked examples of Annex D. The age component (database A) is ISO 7029:2017.
-- **National Institute for Occupational Safety and Health. (1998).** [*Criteria for a recommended standard: Occupational noise exposure — Revised criteria 1998*](https://www.cdc.gov/niosh/docs/98-126/pdfs/98-126.pdf) (DHHS/NIOSH Publication No. 98-126). https://doi.org/10.26616/NIOSHPUB98126
+- **National Institute for Occupational Safety and Health. (1998).** [*Criteria for a recommended standard: Occupational noise exposure — Revised criteria 1998*](https://www.cdc.gov/niosh/docs/98-126/pdfs/98-126.pdf) (DHHS/NIOSH Publication No. 98-126). <https://doi.org/10.26616/NIOSHPUB98126>
   A freely available criteria document (the linked PDF is the free download) reviewing the same exposure-response evidence and the fence and hearing-conservation issues discussed on this page.
-- **Passchier-Vermeer, W. (1974).** Hearing loss due to continuous exposure to steady-state broad-band noise. *The Journal of the Acoustical Society of America*, *56*(5), 1585-1593. https://doi.org/10.1121/1.1903482
+- **Passchier-Vermeer, W. (1974).** Hearing loss due to continuous exposure to steady-state broad-band noise. *The Journal of the Acoustical Society of America*, *56*(5), 1585-1593. <https://doi.org/10.1121/1.1903482>
   One of the field studies whose exposure-response data underpin the NIPTS relations later codified in ISO 1999.

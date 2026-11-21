@@ -10,14 +10,22 @@
 //
 // Usage: node --test 'scripts/**/*.test.mjs'
 import assert from 'node:assert/strict';
+import { readdirSync, readFileSync } from 'node:fs';
+import { join } from 'node:path';
 import { test } from 'node:test';
+import { fileURLToPath } from 'node:url';
+
+import { parse as parseYaml } from 'yaml';
 
 import {
   citationsFor,
   citedWorks,
   correctedWorks,
   englishStandardIds,
+  NOT_THE_BODY,
+  bodyNamedIn,
   isBodyName,
+  publisherName as publisherOf,
   publisherName,
   referenceId,
   referenceNode,
@@ -466,4 +474,36 @@ test('an errata page that corrects a work the bibliography does not define stops
   // Each language's bibliography is a set of works of its own: a work only
   // English pages cite is not on the Spanish one.
   assert.throws(() => correctedWorks(['std-iso-1-2000'], citedWorks([], ES), ES), /does not define: std-iso-1-2000/);
+});
+
+test('a body written out inside a longer publisher name is found, and an organization of its own is not', () => {
+  assert.equal(bodyNamedIn('Official Journal of the European Union'), 'eu');
+  assert.equal(bodyNamedIn('Diario Oficial de la Unión Europea'), 'eu');
+  assert.equal(bodyNamedIn('Internet Engineering Task Force (IETF)'), 'ietf');
+  assert.equal(bodyNamedIn('European Union'), undefined, 'the body itself has its identity');
+  assert.equal(bodyNamedIn('UNESCO'), undefined, 'UNE inside a word is no body');
+  for (const name of Object.keys(NOT_THE_BODY)) assert.equal(bodyNamedIn(name), undefined, name);
+});
+
+test('no page cites a work from a body written out under a longer name, in either language', () => {
+  // Two EU directives were cited from "Official Journal of the European
+  // Union" (and, on one Spanish page, "Diario Oficial de la Unión Europea")
+  // while four named the EU's identity.
+  const found = [];
+  const walk = (dir) => {
+    for (const entry of readdirSync(dir, { withFileTypes: true })) {
+      const path = join(dir, entry.name);
+      if (entry.isDirectory()) walk(path);
+      else if (/\.mdx?$/.test(entry.name)) {
+        const frontmatter = /^---\r?\n([\s\S]*?)\r?\n---/.exec(readFileSync(path, 'utf8'))?.[1];
+        const references = frontmatter ? (parseYaml(frontmatter)?.references ?? []) : [];
+        for (const ref of references) {
+          const body = bodyNamedIn(publisherOf(ref));
+          if (body) found.push(`${path.slice(path.indexOf('src/content'))}: ${JSON.stringify(publisherOf(ref))} writes out the body ${body}`);
+        }
+      }
+    }
+  };
+  walk(fileURLToPath(new URL('../src/content/docs', import.meta.url)));
+  assert.deepEqual(found, []);
 });

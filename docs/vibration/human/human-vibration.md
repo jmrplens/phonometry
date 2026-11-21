@@ -947,7 +947,7 @@ print(vibration.WBV_EAV_VDV, vibration.WBV_ELV_VDV)          # 9.1 21.0 m/s^1.75
 
 ## References
 
-- **European Parliament and Council. (2002).** [*Directive 2002/44/EC on the minimum health and safety requirements regarding the exposure of workers to the risks arising from physical agents (vibration)*](https://eur-lex.europa.eu/eli/dir/2002/44/oj/eng) (Directive 2002/44/EC). Official Journal of the European Union.
+- **European Union. (2002).** [*Directive 2002/44/EC of the European Parliament and of the Council on the minimum health and safety requirements regarding the exposure of workers to the risks arising from physical agents (vibration)*](https://eur-lex.europa.eu/eli/dir/2002/44/oj/eng) (Directive 2002/44/EC).
   The exposure action and limit values the daily exposure A(8) is assessed against.
 - **Griffin, M. J. (1996).** [*Handbook of human vibration*](https://shop.elsevier.com/books/handbook-of-human-vibration/griffin/978-0-12-303041-2). Academic Press.
   ISBN 978-0-12-303041-2. The standard monograph on whole-body and hand-transmitted vibration: the biodynamics, discomfort and health-effect evidence behind the weightings, dose measures and exposure-response guidance on this page.

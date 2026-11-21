@@ -469,9 +469,9 @@ Occupational noise-exposure fiche (ExposureResult.report), the ISO 9612 Annex D 
 
 ## References
 
-- **European Parliament and Council. (2003).** [*Directive 2003/10/EC on the minimum health and safety requirements regarding the exposure of workers to the risks arising from physical agents (noise)*](https://eur-lex.europa.eu/eli/dir/2003/10/oj/eng) (Directive 2003/10/EC). Official Journal of the European Union.
+- **European Union. (2003).** [*Directive 2003/10/EC of the European Parliament and of the Council on the minimum health and safety requirements regarding the exposure of workers to the risks arising from physical agents (noise)*](https://eur-lex.europa.eu/eli/dir/2003/10/oj/eng) (Directive 2003/10/EC).
   The EU exposure action values (80/85 dB) and limit value (87 dB) that the LEX,8h and its upper limit are assessed against.
 - **International Organization for Standardization. (2009).** [*Acoustics — Determination of occupational noise exposure — Engineering method*](https://www.iso.org/standard/41718.html) (ISO 9612:2009).
   The implemented method: the task-based (Clause 9), job-based (Clause 10) and full-day (Clause 11) strategies, the microphone placement of Clause 12.3, the Annex C uncertainty budget (Formulae C.6, C.9 and C.12, Tables C.4/C.5) and the one-sided coverage factor k = 1.65 (Clause 14), validated against the worked examples of Annexes D, E and F; the Clause 15 measurement report is written by ExposureResult.report().
-- **National Institute for Occupational Safety and Health. (1998).** [*Criteria for a recommended standard: Occupational noise exposure — Revised criteria 1998*](https://www.cdc.gov/niosh/docs/98-126/pdfs/98-126.pdf) (DHHS/NIOSH Publication No. 98-126). https://doi.org/10.26616/NIOSHPUB98126
+- **National Institute for Occupational Safety and Health. (1998).** [*Criteria for a recommended standard: Occupational noise exposure — Revised criteria 1998*](https://www.cdc.gov/niosh/docs/98-126/pdfs/98-126.pdf) (DHHS/NIOSH Publication No. 98-126). <https://doi.org/10.26616/NIOSHPUB98126>
   The freely available criteria document (the linked PDF is the free download) behind the 85 dB(A) recommended exposure limit and the hearing-conservation rationale for measuring the daily dose.

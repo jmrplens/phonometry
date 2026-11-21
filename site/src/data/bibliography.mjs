@@ -433,7 +433,7 @@ export const BIBLIOGRAPHY_WORKS = Object.freeze({
       es: "Las tres estrategias de medición y el balance de incertidumbre del anexo C.",
     }),
   }),
-  "report-european-parliament-and-council-2003-directive-2003-10-ec-on-the-minimum-health-and-safety-requirements-regarding-the-exposure-of-workers-to-the-risks-arising-from-physical-agents-noise": Object.freeze({
+  "std-directive-2003-10-ec": Object.freeze({
     section: "hearing-and-perception",
     note: Object.freeze({
       en: "The EU exposure action and limit values for occupational noise.",

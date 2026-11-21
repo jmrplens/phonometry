@@ -50,12 +50,19 @@ I published the code on GitHub in June 2020 as PyOctave, an octave-band and
 fractional-octave-band filter for signals in the time domain, and renamed it
 PyOctaveBand that July. Its first release on PyPI, PyOctaveBand 1.0.1, came
 in January 2026. In July 2026, with release 3.0.0, the library took the name
-phonometry. PyOctaveBand stays on PyPI as a shim over phonometry, and
-acoustic-toolbox, the community successor to python-acoustics, depends on
-it. Every release of the library since 2.0.0, published that same July, is
-archived on Zenodo under one concept DOI, the one given below under Cite
-this software. A paper describing the library has been submitted to the
-Journal of Open Source Software, where it is still pending.
+phonometry. PyOctaveBand stays on PyPI as a shim pinned to phonometry 3.x
+(`phonometry>=3.0.0,<4`), and acoustic-toolbox, the community successor to
+python-acoustics, depends on it; a project that installs the shim gets 3.x
+and cannot install 4.x beside it. Every release of the library since 2.0.0,
+published that same July, is archived on Zenodo under one concept DOI, the
+one given below under Cite this software. A paper describing the library has
+been submitted to the Journal of Open Source Software, where it is still
+pending. phonometry 4.0.0, released on 17 November 2026, is a hard break with
+3.x, and the [upgrading guide](/start/upgrading/) maps every old name to its
+new one. Since 20 November 2026 this documentation is served at
+phonometry.dev; until then it was published at docs.jmrp.io/phonometry, and
+every address there now answers with a permanent redirect to the same page
+here.
 
 ## How I build the library
 

@@ -633,5 +633,5 @@ print(psychoacoustics.PROMINENT_FLUCTUATION_STRENGTH_VACIL_HMS)  # 0.2 vacil_HMS
   Sharpness in acum: the clause 6 weighting, the Annex B von Bismarck and Aures variants and the Table A.2 targets.
 - **Ecma International. (2025).** [*Psychoacoustic metrics for ITT equipment — Part 2 (methods for describing human perception based on the Sottek Hearing Model)*](https://ecma-international.org/publications-and-standards/standards/ecma-418/) (ECMA-418-2:2025).
   The Sottek Hearing Model tonality (tu_HMS, clause 6), roughness (asper, clause 7) and fluctuation strength (vacil_HMS, clause 9, the HSA-based envelope analysis).
-- **Fastl, H., & Zwicker, E. (2007).** *Psychoacoustics: Facts and models* (3rd ed.). Springer. https://doi.org/10.1007/978-3-540-68888-4
+- **Fastl, H., & Zwicker, E. (2007).** *Psychoacoustics: Facts and models* (3rd ed.). Springer. <https://doi.org/10.1007/978-3-540-68888-4>
   The psychoacoustics of the sensations quantified on this page: the high-frequency emphasis behind sharpness and the fast-modulation percept behind roughness.

@@ -1012,41 +1012,41 @@ and these closed forms, have their own guide:
 
 ## References
 
-- **Ainslie, M. A. (2010).** *Principles of sonar performance modelling*. Springer. https://doi.org/10.1007/978-3-540-87662-5
+- **Ainslie, M. A. (2010).** *Principles of sonar performance modelling*. Springer. <https://doi.org/10.1007/978-3-540-87662-5>
   The Weston shallow-water propagation regimes (section 9.1.1.2, Equations 9.42 to 9.61 and Table 9.1), the Medwin sound-speed formula (Equation 1.2) and the seven numeric sonar worked examples of chapters 3 and 11 that pin the sonar-equation section.
-- **Ainslie, M. A., & McColm, J. G. (1998).** A simplified formula for viscous and chemical absorption in sea water. *The Journal of the Acoustical Society of America*, *103*(3), 1671-1672. https://doi.org/10.1121/1.421258
+- **Ainslie, M. A., & McColm, J. G. (1998).** A simplified formula for viscous and chemical absorption in sea water. *The Journal of the Acoustical Society of America*, *103*(3), 1671-1672. <https://doi.org/10.1121/1.421258>
   The legible simplified absorption model ("ainslie-mccolm").
 - **Breeding, J. E., Jr., Pflug, L. A., Bradley, M., Walrod, M. H., & McBride, W. (1996).** *Research Ambient Noise Directionality (RANDI) 3.1 physics description* (`NRL/FR/7176--95-9628`). Naval Research Laboratory.
   The RANDI 3.1 ship source model behind model="randi", which the page computes as MacGillivray & de Jong (2021) reproduce it. Two cells of its Table 2 do not follow from its own Eqs. (2) to (5), which the errata registry records.
-- **Carey, W. M., & Evans, R. B. (2011).** *Ocean ambient noise: Measurement and theory*. Springer. https://doi.org/10.1007/978-1-4419-7832-5
+- **Carey, W. M., & Evans, R. B. (2011).** *Ocean ambient noise: Measurement and theory*. Springer. <https://doi.org/10.1007/978-1-4419-7832-5>
   The wind "rule of fives" anchor and the Mellen thermal-noise derivation.
-- **Chen, C.-T., & Millero, F. J. (1977).** Speed of sound in seawater at high pressures. *The Journal of the Acoustical Society of America*, *62*(5), 1129-1135. https://doi.org/10.1121/1.381646
+- **Chen, C.-T., & Millero, F. J. (1977).** Speed of sound in seawater at high pressures. *The Journal of the Acoustical Society of America*, *62*(5), 1129-1135. <https://doi.org/10.1121/1.381646>
   The UNESCO international-standard sound-speed equation.
-- **Del Grosso, V. A. (1974).** New equation for the speed of sound in natural waters (with comparisons to other equations). *The Journal of the Acoustical Society of America*, *56*(4), 1084-1091. https://doi.org/10.1121/1.1903388
+- **Del Grosso, V. A. (1974).** New equation for the speed of sound in natural waters (with comparisons to other equations). *The Journal of the Acoustical Society of America*, *56*(4), 1084-1091. <https://doi.org/10.1121/1.1903388>
   The alternative pressure-based sound-speed equation ("del_grosso").
-- **Francois, R. E., & Garrison, G. R. (1982).** Sound absorption based on ocean measurements: Part I: Pure water and magnesium sulfate contributions. *The Journal of the Acoustical Society of America*, *72*(3), 896-907. https://doi.org/10.1121/1.388170
+- **Francois, R. E., & Garrison, G. R. (1982).** Sound absorption based on ocean measurements: Part I: Pure water and magnesium sulfate contributions. *The Journal of the Acoustical Society of America*, *72*(3), 896-907. <https://doi.org/10.1121/1.388170>
   The pure-water and magnesium-sulfate halves of the default absorption model of the propagation-loss section.
-- **Francois, R. E., & Garrison, G. R. (1982).** Sound absorption based on ocean measurements. Part II: Boric acid contribution and equation for total absorption. *The Journal of the Acoustical Society of America*, *72*(6), 1879-1890. https://doi.org/10.1121/1.388673
+- **Francois, R. E., & Garrison, G. R. (1982).** Sound absorption based on ocean measurements. Part II: Boric acid contribution and equation for total absorption. *The Journal of the Acoustical Society of America*, *72*(6), 1879-1890. <https://doi.org/10.1121/1.388673>
   The boric-acid term and the complete Francois-Garrison total-absorption equation, the implemented default.
 - **International Organization for Standardization. (2017).** [*Underwater acoustics — Terminology*](https://www.iso.org/standard/62406.html) (ISO 18405:2017).
   The standardized definitions (propagation loss, source level, sound pressure level re 1 µPa) behind the quantities of this page.
-- **Leroy, C. C., & Parthiot, F. (1998).** Depth-pressure relationships in the oceans and seas. *The Journal of the Acoustical Society of America*, *103*(3), 1346-1352. https://doi.org/10.1121/1.421275
+- **Leroy, C. C., & Parthiot, F. (1998).** Depth-pressure relationships in the oceans and seas. *The Journal of the Acoustical Society of America*, *103*(3), 1346-1352. <https://doi.org/10.1121/1.421275>
   The depth-to-pressure conversion feeding the UNESCO and Del Grosso equations.
-- **MacGillivray, A., & de Jong, C. (2021).** A reference spectrum model for estimating source levels of marine shipping based on automated identification system data. *Journal of Marine Science and Engineering*, *9*(4), 369. https://doi.org/10.3390/jmse9040369
+- **MacGillivray, A., & de Jong, C. (2021).** A reference spectrum model for estimating source levels of marine shipping based on automated identification system data. *Journal of Marine Science and Engineering*, *9*(4), 369. <https://doi.org/10.3390/jmse9040369>
   The JOMOPANS-ECHO ship source-level model (open access); its File S1 calculator is the validation oracle.
-- **Mackenzie, K. V. (1981).** Nine-term equation for sound speed in the oceans. *The Journal of the Acoustical Society of America*, *70*(3), 807-812. https://doi.org/10.1121/1.386920
+- **Mackenzie, K. V. (1981).** Nine-term equation for sound speed in the oceans. *The Journal of the Acoustical Society of America*, *70*(3), 807-812. <https://doi.org/10.1121/1.386920>
   The depth-based nine-term equation and its 1550.744 m/s check value.
-- **Medwin, H. (1975).** Speed of sound in water: A simple equation for realistic parameters. *The Journal of the Acoustical Society of America*, *58*(6), 1318-1319. https://doi.org/10.1121/1.380790
+- **Medwin, H. (1975).** Speed of sound in water: A simple equation for realistic parameters. *The Journal of the Acoustical Society of America*, *58*(6), 1318-1319. <https://doi.org/10.1121/1.380790>
   The six-term sound-speed equation ("medwin") behind the rules of thumb of the speed-of-sound section, evaluated as Ainslie (2010) Equation 1.2 prints it.
 - **Medwin, H., & Clay, C. S. (1998).** [*Fundamentals of acoustical oceanography*](https://shop.elsevier.com/books/fundamentals-of-acoustical-oceanography/medwin/978-0-12-487570-8). Academic Press.
   ISBN 978-0-12-487570-8. The fluid-fluid Rayleigh reflection coefficient and critical grazing angle of the seabed-reflection section.
-- **Thorp, W. H. (1967).** Analytic description of the low-frequency attenuation coefficient. *The Journal of the Acoustical Society of America*, *42*(1), 270. https://doi.org/10.1121/1.1910566
+- **Thorp, W. H. (1967).** Analytic description of the low-frequency attenuation coefficient. *The Journal of the Acoustical Society of America*, *42*(1), 270. <https://doi.org/10.1121/1.1910566>
   The frequency-only low-frequency absorption formula ("thorp").
 - **Urick, R. J. (1983).** [*Principles of underwater sound*](https://openlibrary.org/books/OL9317725M) (3rd ed.). McGraw-Hill.
   Reprinted 1996 by Peninsula Publishing. ISBN 978-0-932146-62-5. The sonar-equation framework (signal excess, figure of merit).
-- **Wales, S. C., & Heitmeyer, R. M. (2002).** An ensemble source spectra model for merchant ship-radiated noise. *The Journal of the Acoustical Society of America*, *111*(3), 1211-1231. https://doi.org/10.1121/1.1427355
+- **Wales, S. C., & Heitmeyer, R. M. (2002).** An ensemble source spectra model for merchant ship-radiated noise. *The Journal of the Acoustical Society of America*, *111*(3), 1211-1231. <https://doi.org/10.1121/1.1427355>
   The ensemble merchant-ship spectrum model of the ship-traffic section.
-- **Wenz, G. M. (1962).** Acoustic ambient noise in the ocean: Spectra and sources. *The Journal of the Acoustical Society of America*, *34*(12), 1936-1956. https://doi.org/10.1121/1.1909155
+- **Wenz, G. M. (1962).** Acoustic ambient noise in the ocean: Spectra and sources. *The Journal of the Acoustical Society of America*, *34*(12), 1936-1956. <https://doi.org/10.1121/1.1909155>
   The ambient-noise survey behind the wind and thermal components of the ocean ambient-noise section.
-- **Wong, G. S. K., & Zhu, S. (1995).** Speed of sound in seawater as a function of salinity, temperature, and pressure. *The Journal of the Acoustical Society of America*, *97*(3), 1732-1736. https://doi.org/10.1121/1.413048
+- **Wong, G. S. K., & Zhu, S. (1995).** Speed of sound in seawater as a function of salinity, temperature, and pressure. *The Journal of the Acoustical Society of America*, *97*(3), 1732-1736. <https://doi.org/10.1121/1.413048>
   The ITS-90 recast of the UNESCO coefficients, the implemented form.

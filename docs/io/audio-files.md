@@ -553,7 +553,7 @@ libsndfile under the LGPL, which the base install deliberately avoids.
   The grammar of the CodingHistory line every written chunk carries, and of the line a conversion appends to it.
 - **European Broadcasting Union. (2011).** [*Specification of the Broadcast Wave Format (BWF) — A format for audio data files in broadcasting, Version 2.0*](https://tech.ebu.ch/publications/tech3285) (EBU Tech 3285).
   The bext chunk this page reads and writes field by field: originator, the sample-accurate since-midnight time reference, CodingHistory, and the five EBU R 128 loudness values of version 2.
-- **Grangeiro de Barros, A., & Vuye, C. (2023).** [*Psychoacoustic indicators of pass-by road traffic noise*](https://zenodo.org/records/7904680) \[Data set\]. Zenodo. https://doi.org/10.5281/zenodo.7904680
+- **Grangeiro de Barros, A., & Vuye, C. (2023).** [*Psychoacoustic indicators of pass-by road traffic noise*](https://zenodo.org/records/7904680) \[Data set\]. Zenodo. <https://doi.org/10.5281/zenodo.7904680>
   The campaign whose calibration take the real-meter section reads: the deposit's own file of the 113.7 dB calibrator tone, renamed.
 - **International Telecommunication Union. (2023).** [*Algorithms to measure audio programme loudness and true-peak audio level*](https://www.itu.int/rec/R-REC-BS.1770/en) (Recommendation ITU-R BS.1770-5).
   The loudness algorithm behind bext="loudness": the five version-2 fields are measured by the library's own implementation on the samples being written.

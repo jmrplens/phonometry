@@ -260,11 +260,11 @@ that was lost was.
 
 ## References
 
-- **Barron, M., & Marshall, A. H. (1981).** Spatial impression due to early lateral reflections in concert halls: The derivation of a physical measure. *Journal of Sound and Vibration*, *77*(2), 211-232. https://doi.org/10.1016/S0022-460X(81)80020-X
+- **Barron, M., & Marshall, A. H. (1981).** Spatial impression due to early lateral reflections in concert halls: The derivation of a physical measure. *Journal of Sound and Vibration*, *77*(2), 211-232. <https://doi.org/10.1016/S0022-460X(81)80020-X>
   Where the early lateral energy fraction comes from, and the subjective experiments that fixed its 80 ms window.
-- **Bradley, J. S., & Soulodre, G. A. (1995).** Objective measures of listener envelopment. *The Journal of the Acoustical Society of America*, *98*(5), 2590-2597. https://doi.org/10.1121/1.413225
+- **Bradley, J. S., & Soulodre, G. A. (1995).** Objective measures of listener envelopment. *The Journal of the Acoustical Society of America*, *98*(5), 2590-2597. <https://doi.org/10.1121/1.413225>
   The experiments behind the late lateral sound level and its 80 ms boundary.
-- **Hidaka, T., Beranek, L. L., & Okano, T. (1995).** Interaural cross-correlation, lateral fraction, and low- and high-frequency sound levels as measures of acoustical quality in concert halls. *The Journal of the Acoustical Society of America*, *98*(2), 988-1007. https://doi.org/10.1121/1.414451
+- **Hidaka, T., Beranek, L. L., & Okano, T. (1995).** Interaural cross-correlation, lateral fraction, and low- and high-frequency sound levels as measures of acoustical quality in concert halls. *The Journal of the Acoustical Society of America*, *98*(2), 988-1007. <https://doi.org/10.1121/1.414451>
   The comparison of the interaural coefficient with the lateral fraction that Annex B's time windows follow.
 - **International Organization for Standardization. (2009).** [*Acoustics — Measurement of room acoustic parameters — Part 1: Performance spaces*](https://www.iso.org/standard/40979.html) (ISO 3382-1:2009).
   A.2.4, A.2.5 and Annex B: the lateral energy measures, the late lateral sound level and the interaural cross correlation coefficient.

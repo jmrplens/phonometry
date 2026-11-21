@@ -9,8 +9,8 @@ Parametric equalizer biquads per the RBJ Audio EQ Cookbook.
 
 Second-order (biquad) IIR sections designed from the closed-form recipes of
 Robert Bristow-Johnson's *Audio EQ Cookbook*, the de-facto reference for
-parametric equalization (published as a W3C Working Group Note:
-https://www.w3.org/TR/audio-eq-cookbook/). Every filter type of the cookbook
+parametric equalization, republished as a W3C Working Group Note (the
+reference at the end gives its address). Every filter type of the cookbook
 is available:
 
 * `peaking`: the bell of a parametric EQ, with gain `G` dB exactly at

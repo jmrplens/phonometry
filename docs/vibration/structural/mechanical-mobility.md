@@ -704,7 +704,7 @@ Mechanical-mobility fiche (MobilityResult.report): the FRF characteristic points
 
 ## References
 
-- **Cremer, L., Heckl, M., & Petersson, B. A. T. (2005).** *Structure-borne sound: Structural vibrations and sound radiation at audio frequencies* (3rd ed.). Springer. https://doi.org/10.1007/b137728
+- **Cremer, L., Heckl, M., & Petersson, B. A. T. (2005).** *Structure-borne sound: Structural vibrations and sound radiation at audio frequencies* (3rd ed.). Springer. <https://doi.org/10.1007/b137728>
   The standard monograph on structural vibration: point and transfer mobilities of beams and plates, and the power flow P = ½·Re{Y}·\|F\|² that makes mobility the working quantity of this page. ISBN 978-3-540-22696-3.
 - **International Organization for Standardization. (2011).** [*Mechanical vibration and shock — Experimental determination of mechanical mobility — Part 1: Basic terms and definitions, and transducer specifications*](https://www.iso.org/standard/50426.html) (ISO 7626-1:2011).
   The FRF family and its reciprocals (Table 1, the 3.1.2 mobility and 3.1.4 free-quantity definitions), the free/blocked distinctions and the driving-point / transfer distinction implemented here. Conformance is anchored on the closed-form SDOF identities consistent with those definitions: the driving-point mobility peak \|Y(ω0)\| = 1/c, the static receptance H(0) = 1/k and the exact Table-1 reciprocity impedance·mobility = 1.

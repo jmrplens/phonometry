@@ -507,10 +507,10 @@ Sound power from vibration fiche (VibrationSoundPowerResult.report), an ISO/TS 7
 
 ## References
 
-- **Cremer, L., Heckl, M., & Petersson, B. A. T. (2005).** *Structure-borne sound: Structural vibrations and sound radiation at audio frequencies* (3rd ed.). Springer. https://doi.org/10.1007/b137728
+- **Cremer, L., Heckl, M., & Petersson, B. A. T. (2005).** *Structure-borne sound: Structural vibrations and sound radiation at audio frequencies* (3rd ed.). Springer. <https://doi.org/10.1007/b137728>
   The radiation-efficiency treatment behind section 3: coincidence, the cancellation below the critical frequency and the radiation of finite plates. ISBN 978-3-540-22696-3.
 - **International Organization for Standardization. (1998).** *Mechanical vibration and shock — Mechanical mounting of accelerometers* (ISO 5348:1998).
-  The mounting the page asks for: the characteristic responses of Figures 5 to 10, and the maximum of 40 °C Figure 10 gives a thin layer of beeswax. The edition read is its unchanged German adoption DIN ISO 5348:1999-07; since revised as ISO 5348:2021 (https://www.iso.org/standard/78160.html).
+  The mounting the page asks for: the characteristic responses of Figures 5 to 10, and the maximum of 40 °C Figure 10 gives a thin layer of beeswax. The edition read is its unchanged German adoption DIN ISO 5348:1999-07; since revised as ISO 5348:2021 (<https://www.iso.org/standard/78160.html>).
 - **International Organization for Standardization. (2009).** [*Acoustics — Determination of airborne sound power levels emitted by machinery using vibration measurement — Part 1: Survey method using a fixed radiation factor*](https://www.iso.org/standard/40537.html) (ISO/TS 7849-1:2009).
   The upper-limit method with ε = 1: the radiated power P = Z_c⟨v²⟩Sε (Formula 6), the velocity level and its calibration (Formulae 3, 8), the mean over the surface (Formulae 10/11), the extraneous correction (Table 2) and the sound power level with the fixed impedance term (Formula 12). Conformance is anchored on the standard's own worked calibration example.
 - **International Organization for Standardization. (2009).** [*Acoustics — Determination of airborne sound power levels emitted by machinery using vibration measurement — Part 2: Engineering method including determination of the adequate radiation factor*](https://www.iso.org/standard/40538.html) (ISO/TS 7849-2:2009).

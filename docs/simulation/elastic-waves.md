@@ -886,13 +886,13 @@ waves probe the sediment shear stiffness.
 
 ## References
 
-- **Brekhovskikh, L. M., & Godin, O. A. (1990).** *Acoustics of layered media I: Plane and quasi-plane waves*. Springer. https://doi.org/10.1007/978-3-642-52369-4
+- **Brekhovskikh, L. M., & Godin, O. A. (1990).** *Acoustics of layered media I: Plane and quasi-plane waves*. Springer. <https://doi.org/10.1007/978-3-642-52369-4>
   The fluid-solid oracles of sections 4-7: the oblique reflection coefficient with mode conversion (Eqs. 4.2.22-4.2.26) and its critical-angle limits (Eqs. 4.2.27-4.2.31), the exact Scholte characteristic equation (Eqs. 4.4.18-4.4.20) with the light-fluid asymptotics (Eqs. 4.4.21-4.4.24), and the three-media layer transmission (Eqs. 2.4.10-2.4.19).
-- **Cremer, L., Heckl, M., & Petersson, B. A. T. (2005).** *Structure-borne sound: Structural vibrations and sound radiation at audio frequencies* (3rd ed.). Springer. https://doi.org/10.1007/b137728
+- **Cremer, L., Heckl, M., & Petersson, B. A. T. (2005).** *Structure-borne sound: Structural vibrations and sound radiation at audio frequencies* (3rd ed.). Springer. <https://doi.org/10.1007/b137728>
   The analytic oracles of the elastic solver: the exact Rayleigh characteristic equation (Eq. 3.149) and the Kirchhoff flexural dispersion with its thickness correction (Eqs. 3.83-3.89, 3.196b).
-- **Moczo, P., Kristek, J., Galis, M., Pazak, P., & Balazovjech, M. (2007).** The finite-difference and finite-element modeling of seismic wave propagation and earthquake motion. *Acta Physica Slovaca*, *57*(2), 177-406. https://doi.org/10.2478/v10155-010-0084-x
+- **Moczo, P., Kristek, J., Galis, M., Pazak, P., & Balazovjech, M. (2007).** The finite-difference and finite-element modeling of seismic wave propagation and earthquake motion. *Acta Physica Slovaca*, *57*(2), 177-406. <https://doi.org/10.2478/v10155-010-0084-x>
   The heterogeneous effective grid parameters of section 2 (harmonic shear modulus, arithmetic density; Eqs. 7.37-7.39) and the stress-imaging free surface of section 3 (Eq. 9.9).
-- **van Vossen, R., Robertsson, J. O. A., & Chapman, C. H. (2002).** Finite-difference modeling of wave propagation in a fluid-solid configuration. *Geophysics*, *67*(2), 618-624. https://doi.org/10.1190/1.1468623
+- **van Vossen, R., Robertsson, J. O. A., & Chapman, C. H. (2002).** Finite-difference modeling of wave propagation in a fluid-solid configuration. *Geophysics*, *67*(2), 618-624. <https://doi.org/10.1190/1.1468623>
   The fluid-solid benchmark of the same staggered scheme: the harmonic shear modulus and arithmetic density averages (Eqs. 9-10) that satisfy the interface conditions implicitly, the water over a 3500/2000/2500 seabed of the Scholte case of section 6 and the >= 15 points-per-wavelength rule for the O(2,2) scheme with an interface wave.
-- **Virieux, J. (1986).** P-SV wave propagation in heterogeneous media: velocity-stress finite-difference method. *Geophysics*, *51*(4), 889-901. https://doi.org/10.1190/1.1442147
+- **Virieux, J. (1986).** P-SV wave propagation in heterogeneous media: velocity-stress finite-difference method. *Geophysics*, *51*(4), 889-901. <https://doi.org/10.1190/1.1442147>
   The elastic solver of section 1: the velocity-stress system (Eq. 2), the fully staggered cell and update (Fig. 1, Eq. 5), the P-only Courant bound (Eqs. 6-7), the dispersion relations (Eqs. 13-14) and the liquid as the shear-free limit.

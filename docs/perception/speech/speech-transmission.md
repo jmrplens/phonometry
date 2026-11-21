@@ -778,7 +778,7 @@ one. Neither of those is visible in the index.
 
 ## References
 
-- **Houtgast, T., & Steeneken, H. J. M. (1985).** A review of the MTF concept in room acoustics and its use for estimating speech intelligibility in auditoria. *The Journal of the Acoustical Society of America*, *77*(3), 1069-1077. https://doi.org/10.1121/1.392224
+- **Houtgast, T., & Steeneken, H. J. M. (1985).** A review of the MTF concept in room acoustics and its use for estimating speech intelligibility in auditoria. *The Journal of the Acoustical Society of America*, *77*(3), 1069-1077. <https://doi.org/10.1121/1.392224>
   The modulation-transfer framework of section 1 and the m ↔ STI mapping the index is built on.
 - **International Electrotechnical Commission. (2011).** *Sound system equipment — Part 16: Objective rating of speech intelligibility by speech transmission index* (IEC 60268-16:2011).
   The fourth edition, whose normative text the implementation is built on beside the fifth. The errata registry records three defects of its Annex M worked example, Table M.1.

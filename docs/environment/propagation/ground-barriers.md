@@ -668,9 +668,9 @@ meteorological schemes of Nord2000 and CNOSSOS.
 
 ## References
 
-- **Attenborough, K., & Van Renterghem, T. (2021).** *Predicting outdoor sound* (2nd ed.). CRC Press. https://doi.org/10.1201/9780429470806
+- **Attenborough, K., & Van Renterghem, T. (2021).** *Predicting outdoor sound* (2nd ed.). CRC Press. <https://doi.org/10.1201/9780429470806>
   Chapter 2 (spherical-wave reflection over an impedance ground, the Weyl-Van der Pol equation and the boundary-loss factor) and Chapter 9 (outdoor noise barriers, the MacDonald and Hadden & Pierce diffraction solutions). ISBN 978-1-4987-4007-4.
-- **Bies, D. A., Hansen, C. H., & Howard, C. Q. (2017).** *Engineering noise control* (5th ed.). CRC Press. https://doi.org/10.1201/9781351228152
+- **Bies, D. A., Hansen, C. H., & Howard, C. Q. (2017).** *Engineering noise control* (5th ed.). CRC Press. <https://doi.org/10.1201/9781351228152>
   Sections 5.2.3 (spherical-wave ground reflection) and 5.3.5-5.3.7 (Fresnel number, Kurze-Anderson, thin- and thick-barrier diffraction). ISBN 978-1-4987-2405-0.
 - **European Committee for Standardization. (1997).** *Road traffic noise reducing devices — Test method for determining the acoustic performance — Part 3: Normalized traffic noise spectrum* (EN 1793-3:1997).
   Table 1, the eighteen relative A-weighted one-third octave band levels both single-number ratings are weighted by. Read from the BS EN 1793-3:1998 edition.
@@ -680,9 +680,9 @@ meteorological schemes of Nord2000 and CNOSSOS.
   Clause 5, the single-number rating DLalpha and its 0.99 ratio limit; Clause 6.1, reporting to the nearest integer; Annex A, the A1 to A5 categories. Read from the BS EN 1793-1:2012 edition.
 - **European Committee for Standardization. (2012).** *Road traffic noise reducing devices — Test method for determining the acoustic performance — Part 2: Intrinsic characteristics of airborne sound insulation under diffuse sound field conditions* (EN 1793-2:2012).
   Clause 5.2, the single-number rating DLR; Clause 7.1, reporting to the nearest integer; Annex A, the B1 to B4 categories. Read from the BS EN 1793-2:2012 edition.
-- **Hadden, W. J., & Pierce, A. D. (1981).** Sound diffraction around screens and wedges for arbitrary point source locations. *The Journal of the Acoustical Society of America*, *69*(5), 1266-1276. https://doi.org/10.1121/1.385809
+- **Hadden, W. J., & Pierce, A. D. (1981).** Sound diffraction around screens and wedges for arbitrary point source locations. *The Journal of the Acoustical Society of America*, *69*(5), 1266-1276. <https://doi.org/10.1121/1.385809>
   The exact wedge-diffraction solution whose flat-wedge (thin-screen) limit the barrier insertion loss uses.
-- **Kurze, U. J., & Anderson, G. S. (1971).** Sound attenuation by barriers. *Applied Acoustics*, *4*(1), 35-53. https://doi.org/10.1016/0003-682X(71)90024-7
+- **Kurze, U. J., & Anderson, G. S. (1971).** Sound attenuation by barriers. *Applied Acoustics*, *4*(1), 35-53. <https://doi.org/10.1016/0003-682X(71)90024-7>
   The closed-form fit to Maekawa's chart in the Fresnel number.
-- **Salomons, E. M. (2001).** *Computational atmospheric acoustics*. Kluwer Academic Publishers. https://doi.org/10.1007/978-94-010-0660-6
+- **Salomons, E. M. (2001).** *Computational atmospheric acoustics*. Kluwer Academic Publishers. <https://doi.org/10.1007/978-94-010-0660-6>
   Chapter 3 and Appendix D: the two-ray field, the plane- and spherical-wave reflection coefficients, and the numerical distance (Eqs. D.57-D.60). ISBN 978-1-4020-0390-5.

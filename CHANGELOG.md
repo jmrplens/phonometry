@@ -9,6 +9,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Changed
 
+- **About says when 4.0.0 came out and where the documentation was before
+  phonometry.dev.** The History of About, in English and Spanish, now dates
+  4.0.0 (17 November 2026) and the move of the documentation to phonometry.dev
+  (20 November 2026), naming the address it was published at until then in
+  plain text, and says that the PyOctaveBand transition package is pinned to
+  phonometry 3.x (`phonometry>=3.0.0,<4`). `llms.txt` names the former address
+  beside the former package name. The base-path check allows the old address
+  on those two lines only, so any other mention, and any link to the old host,
+  still fails it.
+- **Four hub pages say in their first sentences what they hold, and the
+  filter-bank guide answers first.** Reference, the published catalogues,
+  Support the project and Start, in English and Spanish, open with a
+  paragraph that names what the page is for and what it gathers, where they
+  opened on a remark that left the page's purpose to the second or third
+  paragraph. The filter-bank guide opens on its answer to "How do I compute
+  octave or one-third-octave band levels in Python?", with the filter types
+  and the map of the page after it.
 - **The PyOctaveBand transition package moves to 2.2.2 and links the
   documentation at <https://phonometry.dev/>.** Its PyPI page, its project
   links and the `FutureWarning` that `import pyoctaveband` raises send
@@ -25,6 +42,60 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Fixed
 
+- **The software node and the landing page state the licences the package
+  declares.** The structured data of every page listed MIT and the EASA ANP
+  terms from a literal that nothing held to `pyproject.toml`, and the landing
+  page said "published under the MIT licence" alone, while PyPI declares
+  `MIT AND LicenseRef-EASA-ANP`. The node now reads the `license` expression
+  and the `license-files` of `pyproject.toml`, as it reads the requirements,
+  and links each licence to its page or to its text in the repository; the
+  structured-data check holds both software nodes to that list, and the
+  landing page, in English and Spanish, names MIT and the EASA ANP tables the
+  package bundles under EASA's terms, which a test holds to every licence
+  `pyproject.toml` declares.
+- **The run record the compute guide prints is the one the proof machine
+  printed.** It named phonometry 4.0.0 while the CuPy proof of 9 November ran
+  4.0.0rc1. `gpu-parity.lock` now records the phonometry version of the run
+  (`scripts/gpu_parity.py` writes it from the run's own record), and a test
+  holds the `phonometry_version` and `numpy_version` both languages print to
+  the lock, beside the CuPy, CUDA and GPU it already held.
+- **Every EU directive the documentation cites names the European Union as
+  its publisher.** Directives 2003/10/EC and 2002/44/EC were cited as reports
+  from an anonymous "Official Journal of the European Union", one Spanish page
+  spelling it "Diario Oficial de la Unión Europea", while the four CNOSSOS-EU
+  directives named the EU's identity in the structured data. A test and the
+  structured-data check now refuse a publisher that writes a known body out
+  inside a longer name, and list with their reason the organizations whose
+  names hold a body's and are not it.
+- **A page is dated by a change a reader can see.** Both landing pages, the
+  index of report fiches and the bibliography, in both languages, and the
+  Spanish guides index carried the date of a commit that changed nothing they
+  show: a doc comment of `home.ts`, a base path written another way in
+  `reports.mjs`, the old base path taken out of a link in `bibliography.mjs`,
+  one `inLanguage` taken out of the structured data a page's head carries. A
+  commit to a data source now dates its pages only when it changes what they
+  render: one that only takes the old base path or host out of its links, or
+  changes only the comments or the layout of a JavaScript or TypeScript
+  module, moves no date. The landing pages read the Python floor and the
+  install line from `pyproject.toml`, and no other key of it dates them; the
+  index of fiches is dated by what it reads off the guides, not by the module
+  that reads them. A page's `head` holds only what machines read (its title,
+  meta tags, structured data and links to the page elsewhere), so a change to
+  it moves no date either, and a test refuses an entry in it that a reader
+  would see.
+- **No address in the files written for agents runs into the punctuation
+  after it.** A crawler that reads an address up to the next space took the
+  full stop, comma or closing parenthesis after a bare address for part of
+  it: two asked phonometry.dev for 24 agent files with the full stop of a
+  sentence on their names, every one a 404. The llms files and the Markdown
+  copies now write each address as a link or an autolink (`<https://...>`):
+  the head of every shard and of every part, the sentences of `llms.txt`
+  that named shard files, the upgrade guide, the errata and catalogue
+  indexes and a copy, the author's ORCID and the licence in the header of
+  every copy, the addresses in the notes of the references, and the pointer
+  of the Spanish conformance copy to the English rows. The check of the
+  build's copies and llms files fails on a bare address the punctuation after
+  it would join.
 - **Every link of the documentation names where it goes.** The topic list
   above the sidebar linked the Start topic with the word "Start" on every
   English page, which Lighthouse's SEO audit "Links do not have descriptive

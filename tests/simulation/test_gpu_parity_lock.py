@@ -79,6 +79,7 @@ def test_the_lock_names_where_it_was_measured() -> None:
         "cupy_cuda_runtime",
         "nvrtc",
         "numpy",
+        "phonometry",
         "python",
         "measured_on",
     ):

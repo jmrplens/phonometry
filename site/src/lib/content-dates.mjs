@@ -63,11 +63,13 @@ import {
   DATE_SOURCES,
   FULL_SHA,
   IGNORE_REVS,
+  MOVES,
   linksMovedOnly,
   readDateSources,
   readIgnoreRevs,
 } from './date-rules.mjs';
 import { citationReader, readPageReferences } from './page-references.mjs';
+import { renderedAlike } from './source-changes.mjs';
 import { basePath, siteUrl } from '../data/site.mjs';
 
 /**
@@ -865,6 +867,41 @@ async function verifiedLineDates({ repo, contentDir, file, drawnBy, pages, dates
 /** Whether a path from site/date-sources.json names `path`: the file, or a directory holding it. */
 const names = (spec, path) => (spec.endsWith('/') ? path.startsWith(spec) : path === spec);
 
+/**
+ * A step of the walk that follows one data source back: on to the first
+ * parent whose version of every file the source names renders as the
+ * commit's (src/lib/source-changes.mjs, `renderedAlike`), or a stop at a
+ * commit no parent's version renders as; the versions it compares are read
+ * first. A file a parent did not hold, or one the commit deleted, reads as
+ * no text.
+ *
+ * @param {History} history
+ * @param {string} spec The source, a file or a directory ending in `/`.
+ * @param {(oid: string) => string | undefined} textOf `undefined` for a blob not read yet.
+ * @returns {(commit: Commit) => ReturnType<Parameters<typeof followLine>[1]>}
+ */
+function sourceStep(history, spec, textOf) {
+  const changesOf = (diff) => [...diff].filter(([path]) => names(spec, path));
+  return (commit) => {
+    for (const [index, diff] of commit.diffs.entries()) {
+      const changes = changesOf(diff);
+      const unread = changes.flatMap(([, change]) => [change.from, change.to]).filter((oid) => textOf(oid) === undefined);
+      if (unread.length > 0) {
+        // The parents are read in order, so this one has to be told first.
+        for (const later of commit.diffs.slice(index + 1)) {
+          for (const [, change] of changesOf(later)) for (const oid of [change.from, change.to]) if (textOf(oid) === undefined) unread.push(oid);
+        }
+        const parent = commit.parents[index];
+        return { wants: [...new Set(unread)], guess: parent === undefined ? null : history.commits.get(parent) };
+      }
+      if (changes.every(([path, change]) => renderedAlike(path, textOf(change.from), textOf(change.to), MOVES))) {
+        return commit.parents.length === 0 ? { stop: null } : { next: history.commits.get(commit.parents[index]) };
+      }
+    }
+    return { stop: commit };
+  };
+}
+
 /** The later of two dates, either of which may be missing. */
 const later = (a, b) => (a === undefined || (b !== undefined && b > a) ? b : a);
 
@@ -903,16 +940,19 @@ async function applySources({ repo, pathspec, contentDir, pages, dates, entries 
     newest.set(spec, under.map((page) => walked.get(page)).reduce(later, undefined));
   }
 
-  // Any other source is data: every commit that changed it counts, and its
-  // history is read from trees alone. Each source is followed back along the
-  // versions HEAD holds to the commit that made HEAD's version: the first
-  // that changed it from every parent's, a file or anything under a
-  // directory. That commit dates the pages it is a source of, and is kept
-  // with its date: the conformance report names it as the commit of the rows
-  // it renders, and the Dataset hands out its files there. Past a merge that
-  // kept one side's version, the other side's commits are not followed,
-  // however much newer, since the page shows none of their rows, so the page
-  // is dated by the commit its Dataset names.
+  // Any other source is data: every commit that changed what it renders
+  // counts. Each source is followed back along the versions HEAD holds to
+  // the commit that made HEAD's version: the first that changed it from
+  // every parent's, a file or anything under a directory, passing over a
+  // change that renders nothing (src/lib/source-changes.mjs: a comment or the
+  // layout of a module's code, a link through the old base path or host
+  // rewritten for the current one), whose versions are read to tell. That
+  // commit dates the pages it is a source of, and is kept with its date: the
+  // conformance report names it as the commit of the rows it renders, and the
+  // Dataset hands out its files there. Past a merge that kept one side's
+  // version, the other side's commits are not followed, however much newer,
+  // since the page shows none of their rows, so the page is dated by the
+  // commit its Dataset names.
   const files = sources.filter((spec) => !spec.startsWith(content));
   const commits = new Map();
   if (files.length > 0) {
@@ -920,15 +960,16 @@ async function applySources({ repo, pathspec, contentDir, pages, dates, entries 
     const missing = files.find((spec) => !tracked.some((path) => names(spec, path)));
     if (missing !== undefined) throw stale(`the source ${missing}`);
     const history = await readHistory(repo, files);
+    const texts = new Map();
+    const textOf = (oid) => (NO_BLOB.test(oid) ? '' : texts.get(oid));
+    const read = async (oids) => {
+      for (const [oid, text] of await readBlobs(repo, oids)) texts.set(oid, text);
+    };
+    const budget = { size: 1 };
     for (const spec of files) {
-      const step = (commit) => {
-        const index = commit.diffs.findIndex((diff) => ![...diff.keys()].some((path) => names(spec, path)));
-        if (index === -1) return { stop: commit };
-        return commit.parents.length === 0 ? { stop: null } : { next: history.commits.get(commit.parents[index]) };
-      };
       // A history in which no commit made HEAD's version is one this clone
       // does not have whole; the source is named, and asking for its commit fails.
-      const made = history.head === null ? null : await followLine(history.head, step, async () => {}, { size: 1 });
+      const made = history.head === null ? null : await followLine(history.head, sourceStep(history, spec, textOf), read, budget);
       if (made !== null) newest.set(spec, made.date);
       commits.set(spec, made === null ? null : { sha: made.sha, date: made.date });
     }

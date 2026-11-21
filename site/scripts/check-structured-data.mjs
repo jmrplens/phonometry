@@ -63,8 +63,10 @@
 // are held to pyproject.toml, as src/data/repo-stats.mjs reads it: the Python
 // it requires, every requirement as one phrase with its versions and the
 // Python its marker limits it to, and every extra by name
-// (scripts/shared/requirement-defects.mjs). Every API page has to name the
-// release in VERSION and the Python pyproject.toml requires.
+// (scripts/shared/requirement-defects.mjs). The licences of the software node
+// and of its source code are the ones pyproject.toml declares, each once: the
+// node listed both from a literal nothing held to the file. Every API page has
+// to name the release in VERSION and the Python pyproject.toml requires.
 //
 // The About page is held to the Person node it carries: every span of years
 // the page writes, "(2011-2018)", "from 2019 to 2023", "de 2019 a 2023" or any
@@ -91,7 +93,7 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 import { glossary } from '../src/data/glossary.mjs';
 import { en as homeEn } from '../src/data/home-en.ts';
 import { es as homeEs } from '../src/data/home-es.ts';
-import { dependencies, extras, requiresPython } from '../src/data/repo-stats.mjs';
+import { dependencies, extras, licenseExpression, licenses, requiresPython } from '../src/data/repo-stats.mjs';
 import { featureLists, siteDescriptions, softwareDescriptions } from '../src/data/scope.mjs';
 import { basePath, siteUrl } from '../src/data/site.mjs';
 import { catalogueSlugs, domainIds, topicForSlug, topics, topicSections } from '../src/data/topics.mjs';
@@ -100,7 +102,7 @@ import { knownSlugs } from '../src/lib/breadcrumbs.mjs';
 import { isoDay } from '../src/lib/date-rules.mjs';
 import { englishTwin, isApiRoute, isFallbackRoute } from '../src/lib/fallback-routes.mjs';
 import { readCommittedText } from '../src/lib/line-ends.mjs';
-import { isBodyName, referenceId } from '../src/lib/citations.mjs';
+import { bodyNamedIn, isBodyName, referenceId } from '../src/lib/citations.mjs';
 import { SAME_WORKS, conformanceEvidence, governingDocuments } from '../src/lib/conformance-evidence.mjs';
 import { DATA_COMPONENTS } from '../src/lib/page-markdown.mjs';
 import { readPageReferences } from '../src/lib/page-references.mjs';
@@ -602,6 +604,32 @@ function keywordDefects(keywords) {
 }
 
 /**
+ * What a software node's `license` gets wrong: the licences pyproject.toml
+ * declares (`license` and `license-files`, read by src/data/repo-stats.mjs),
+ * each once and nothing else. The node listed both from a literal in
+ * astro.config.mjs that nothing held to the file.
+ *
+ * @param {string} type The node's type, for the defect.
+ * @param {unknown} license The node's `license`.
+ * @returns {string[]} The defects.
+ */
+function licenseDefects(type, license) {
+	const declared = licenses.map((one) => one.url);
+	const given = license === undefined ? [] : [license].flat();
+	const defects = [];
+	const missing = declared.filter((url) => !given.includes(url));
+	if (missing.length > 0) {
+		defects.push(`${type} license leaves out ${missing.join(', ')}, which pyproject.toml declares (${licenseExpression})`);
+	}
+	const extra = given.filter((url) => !declared.includes(url));
+	if (extra.length > 0) {
+		defects.push(`${type} license states ${extra.map(shown).join(', ')}, which pyproject.toml does not declare (${licenseExpression})`);
+	}
+	if (new Set(given).size < given.length) defects.push(`${type} license states one licence more than once`);
+	return defects;
+}
+
+/**
  * What the site-wide nodes get wrong about the two languages and the package,
  * one sentence per defect, so the same defect on every page is reported once.
  *
@@ -620,6 +648,8 @@ function languageDefects(nodes) {
 		...featureDefects(app.featureList),
 		...keywordDefects(app.keywords),
 		...requirementDefects(app.softwareRequirements, { requiresPython, dependencies, extras }),
+		...licenseDefects('SoftwareApplication', app.license),
+		...licenseDefects('SoftwareSourceCode', nodeOfType(nodes, 'SoftwareSourceCode')?.license),
 	];
 }
 
@@ -2280,7 +2310,10 @@ for (const file of files) {
 		const unnamedBodies = new Map();
 		for (const work of otherWorks) {
 			const publisher = work.publisher;
-			if (publisher && typeof publisher === 'object' && !publisher['@id'] && isBodyName(publisher.name)) {
+			// A body's name inside a longer one is the body too ("Official Journal
+			// of the European Union"), unless citations.mjs says it is another
+			// organization (NOT_THE_BODY).
+			if (publisher && typeof publisher === 'object' && !publisher['@id'] && (isBodyName(publisher.name) || bodyNamedIn(publisher.name))) {
 				unnamedBodies.set(publisher.name, (unnamedBodies.get(publisher.name) ?? 0) + 1);
 			}
 		}
@@ -2866,7 +2899,7 @@ if (languageNodeDefects.size === 0 && seen.languages === seen.pages) {
 	ok(
 		`the site-wide nodes on all ${seen.pages} pages describe the site and the software in English and in Spanish, ` +
 			`list one feature for each of the ${domainIds.length} topics that teach in each language, ` +
-			'publish no placeholder as a standard or a keyword, and state every requirement and extra of pyproject.toml',
+			'publish no placeholder as a standard or a keyword, and state every requirement, extra and licence of pyproject.toml',
 	);
 }
 

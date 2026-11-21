@@ -594,11 +594,11 @@ Microphone characteristics fiche (MicrophoneCharacteristics.report), the IEC 602
 
 ## References
 
-- **Beranek, L. L., & Mellow, T. J. (2012).** *Acoustics: Sound fields and transducers*. Academic Press. https://doi.org/10.1016/C2011-0-05897-0
+- **Beranek, L. L., & Mellow, T. J. (2012).** *Acoustics: Sound fields and transducers*. Academic Press. <https://doi.org/10.1016/C2011-0-05897-0>
   ISBN 978-0-12-391421-7. The transducer physics behind sections 1 and 2: condenser and moving-coil transduction and first-order directional patterns.
 - **International Electrotechnical Commission. (1982).** [*Scales and sizes for plotting frequency characteristics and polar diagrams*](https://webstore.iec.ch/en/publication/1176) (IEC 60263:1982).
   The scale proportions of the characteristic graphs: one frequency decade equal to 25 dB on the ordinate (clause 2), and the polar diagram plotted on a 25 dB reference-circle radius (clause 3).
 - **International Electrotechnical Commission. (2014).** [*Sound system equipment – Part 4: Microphones*](https://webstore.iec.ch/en/publication/1221) (IEC 60268-4:2014).
-  The rated microphone characteristics of this guide: the free-field sensitivity and its level re 1 V/Pa (11.1/11.3), the frequency response and effective frequency range (12.1/12.2), the directional pattern (13.1) and the directivity index (13.2.2) through the 11.2.2 a) diffuse-field integral, the overload sound pressure level (15.2), the equivalent sound pressure level due to inherent noise (17) and the rated impedances and power supply (9/10). Since revised as IEC 60268-4:2018 (https://webstore.iec.ch/en/publication/32039); the 2014 edition is the implemented one.
+  The rated microphone characteristics of this guide: the free-field sensitivity and its level re 1 V/Pa (11.1/11.3), the frequency response and effective frequency range (12.1/12.2), the directional pattern (13.1) and the directivity index (13.2.2) through the 11.2.2 a) diffuse-field integral, the overload sound pressure level (15.2), the equivalent sound pressure level due to inherent noise (17) and the rated impedances and power supply (9/10). Since revised as IEC 60268-4:2018 (<https://webstore.iec.ch/en/publication/32039>); the 2014 edition is the implemented one.
 - **International Telecommunication Union. (1986).** [*Measurement of audio-frequency noise voltage level in sound broadcasting*](https://www.itu.int/rec/R-REC-BS.468/en) (Recommendation ITU-R BS.468-4).
   The weighting network and quasi-peak detection behind the dB(468) inherent-noise figure of section 3.

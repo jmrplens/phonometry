@@ -323,5 +323,5 @@ length are consistent bin by bin.
 
 ## References
 
-- **Bendat, J. S., & Piersol, A. G. (2010).** *Random data: Analysis and measurement procedures* (4th ed.). Wiley. https://doi.org/10.1002/9781118032428
+- **Bendat, J. S., & Piersol, A. G. (2010).** *Random data: Analysis and measurement procedures* (4th ed.). Wiley. <https://doi.org/10.1002/9781118032428>
   Chapter 7 (multiple-input/output relationships: ordinary coherence Eq. 7.109, multiple coherence Eq. 7.35, partial coherence Eq. 7.87, the conditioned-spectrum Gaussian-elimination recursion Eq. 7.94, the coherent output decomposition Eqs. 7.86/7.116/7.121) and Section 9.3 (statistical errors of the multiple and conditioned estimates, Eqs. 9.98-9.101). ISBN 978-0-470-24877-5.

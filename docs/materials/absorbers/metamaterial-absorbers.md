@@ -620,15 +620,15 @@ incidence above.
 
 ## References
 
-- **Cox, T. J., & D'Antonio, P. (2017).** *Acoustic absorbers and diffusers: Theory, design and application* (3rd ed.). CRC Press. https://doi.org/10.1201/9781315369211
+- **Cox, T. J., & D'Antonio, P. (2017).** *Acoustic absorbers and diffusers: Theory, design and application* (3rd ed.). CRC Press. <https://doi.org/10.1201/9781315369211>
   ISBN 978-1-4987-4099-9. The classical resonant-absorber designs the metamaterial family extends.
-- **Jiménez, N., Groby, J.-P., Pagneux, V., & Romero-García, V. (2017).** Iridescent perfect absorption in critically-coupled acoustic metamaterials using the transfer matrix method. *Applied Sciences*, *7*(6), 618. https://doi.org/10.3390/app7060618
+- **Jiménez, N., Groby, J.-P., Pagneux, V., & Romero-García, V. (2017).** Iridescent perfect absorption in critically-coupled acoustic metamaterials using the transfer matrix method. *Applied Sciences*, *7*(6), 618. <https://doi.org/10.3390/app7060618>
   The slit + Helmholtz-resonator transfer-matrix model and the critical-coupling (perfect-absorption) condition implemented in slit_helmholtz_absorber, plus the graded (iridescent) broadband chains of section 4.
-- **Jiménez, N., Huang, W., Romero-García, V., Pagneux, V., & Groby, J.-P. (2016).** Ultra-thin metamaterial for perfect and quasi-omnidirectional sound absorption. *Applied Physics Letters*, *109*(12), 121902. https://doi.org/10.1063/1.4962328
+- **Jiménez, N., Huang, W., Romero-García, V., Pagneux, V., & Groby, J.-P. (2016).** Ultra-thin metamaterial for perfect and quasi-omnidirectional sound absorption. *Applied Physics Letters*, *109*(12), 121902. <https://doi.org/10.1063/1.4962328>
   The resonator impedance (Eq. A23), its radiation end corrections (Eqs. A24-A27), the worked slow-sound examples and the published lambda/88 perfect absorber cited in the introduction.
-- **Jiménez, N., Umnova, O., & Groby, J.-P. (Eds.). (2021).** *Acoustic waves in periodic structures, metamaterials, and porous media*. Springer. https://doi.org/10.1007/978-3-030-84300-7
+- **Jiménez, N., Umnova, O., & Groby, J.-P. (Eds.). (2021).** *Acoustic waves in periodic structures, metamaterials, and porous media*. Springer. <https://doi.org/10.1007/978-3-030-84300-7>
   Topics in Applied Physics, Vol. 143. The book-length treatment of critical coupling, slow sound and resonant metamaterial absorbers.
-- **Maa, D.-Y. (1998).** Potential of microperforated panel absorber. *The Journal of the Acoustical Society of America*, *104*(5), 2861-2866. https://doi.org/10.1121/1.423870
+- **Maa, D.-Y. (1998).** Potential of microperforated panel absorber. *The Journal of the Acoustical Society of America*, *104*(5), 2861-2866. <https://doi.org/10.1121/1.423870>
   The MPP impedance and design formulas whose r = 1 peak condition section 4 identifies with critical coupling.
-- **Stinson, M. R. (1991).** The propagation of plane sound waves in narrow and wide circular tubes, and generalization to uniform tubes of arbitrary cross-sectional shape. *The Journal of the Acoustical Society of America*, *89*(2), 550-558. https://doi.org/10.1121/1.400379
+- **Stinson, M. R. (1991).** The propagation of plane sound waves in narrow and wide circular tubes, and generalization to uniform tubes of arbitrary cross-sectional shape. *The Journal of the Acoustical Society of America*, *89*(2), 550-558. <https://doi.org/10.1121/1.400379>
   The visco-thermal effective density and bulk modulus of the slit and of the square necks and cavities.

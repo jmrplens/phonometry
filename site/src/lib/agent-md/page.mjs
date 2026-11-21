@@ -70,14 +70,17 @@ export const REFERENCES_HEADING = Object.freeze(
 const destination = (url) => (/[\s()<>]/u.test(url) ? `<${url.replaceAll('<', '%3C').replaceAll('>', '%3E')}>` : url);
 
 /**
- * One fragment of a citation as Markdown: a bare URL stays bare (GFM links
- * it), a title in italics, a link around whatever it carries.
+ * One fragment of a citation as Markdown: an address shown as itself an
+ * autolink, `<https://...>`, which every Markdown reader links and which ends
+ * where its bracket does (left bare, the full stop, comma or parenthesis of a
+ * note's sentence after it was read as part of it by a reader of plain text),
+ * a title in italics, a link around whatever it carries.
  *
  * @param {Part} part
  * @returns {string}
  */
 function partMarkdown(part) {
-  if (part.href && part.text === part.href) return part.href;
+  if (part.href && part.text === part.href) return `<${part.href}>`;
   const text = fragmentText(part.text);
   const marked = part.italic && text.trim() ? `*${text}*` : text;
   return part.href ? `[${marked}](${destination(part.href)})` : marked;

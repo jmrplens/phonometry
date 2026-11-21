@@ -89,6 +89,77 @@ export function readProject(document) {
 	};
 }
 
+/**
+ * The page the software node links for each SPDX licence the package may
+ * declare. A licence of LicenseRef- form is linked to its text in the
+ * repository instead, the file `license-files` gives it.
+ */
+export const SPDX_PAGES = Object.freeze({ MIT: 'https://opensource.org/license/MIT' });
+
+/**
+ * The licences the package declares, as PEP 639 writes them in `[project]`:
+ * the `license` expression, identifiers joined by AND, and the
+ * `license-files` that hold their texts.
+ *
+ * The software node of every page listed both licences from a literal while
+ * the landing page said MIT alone; read here, the node states what PyPI
+ * states. An expression the site cannot state as a list (OR, WITH,
+ * parentheses), an identifier whose page it does not know, a LicenseRef
+ * without its file under LICENSES/ and a file that is the text of no
+ * licence the expression names each stop the build, naming it.
+ *
+ * @param {Record<string, any>} document pyproject.toml, as `parseToml` reads it.
+ * @param {string} repositoryUrl The repository a LicenseRef's file is linked in.
+ * @returns {{expression: string, licenses: {id: string, file: string, url: string}[]}}
+ *   The expression and, in its order, each licence with the file of its text
+ *   and the address the software node gives it.
+ */
+export function readLicenses(document, repositoryUrl) {
+	const project = document.project;
+	if (!project || typeof project !== 'object') throw new Error('pyproject.toml has no [project] table');
+	const expression = project.license;
+	if (typeof expression !== 'string' || !expression.trim()) {
+		throw new Error('pyproject.toml: [project] license is not an SPDX expression');
+	}
+	const files = project['license-files'];
+	if (!Array.isArray(files) || !files.every((file) => typeof file === 'string')) {
+		throw new Error('pyproject.toml: [project] license-files is not a list of strings');
+	}
+	const ids = expression.trim().split(/\s+AND\s+/);
+	for (const id of ids) {
+		if (!/^[A-Za-z0-9][A-Za-z0-9.+-]*$/.test(id) || /^(?:OR|WITH|AND)$/.test(id)) {
+			throw new Error(
+				`pyproject.toml: license ${JSON.stringify(expression)} is more than licences joined by AND ` +
+					`(${JSON.stringify(id)}), which the site cannot state as a list`,
+			);
+		}
+	}
+	const plain = ids.filter((id) => !id.startsWith('LicenseRef-'));
+	const textOf = (id) => {
+		const own = `LICENSES/${id}.txt`;
+		if (files.includes(own)) return own;
+		if (!id.startsWith('LicenseRef-') && plain.length === 1 && files.includes('LICENSE')) return 'LICENSE';
+		throw new Error(`pyproject.toml: license names ${id}, and license-files holds no text of it (${own})`);
+	};
+	const unknown = plain.find((id) => !Object.hasOwn(SPDX_PAGES, id));
+	if (unknown !== undefined) {
+		throw new Error(`pyproject.toml: license names ${unknown}, whose page the site does not know (SPDX_PAGES in src/lib/pyproject.mjs)`);
+	}
+	const licenses = ids.map((id) => {
+		const file = textOf(id);
+		return { id, file, url: id.startsWith('LicenseRef-') ? `${repositoryUrl}/blob/main/${file}` : SPDX_PAGES[id] };
+	});
+	const texts = new Set(licenses.map((license) => license.file));
+	for (const file of files) {
+		if (!texts.has(file)) {
+			throw new Error(
+				`pyproject.toml: license-files holds ${file}, the text of no licence ${JSON.stringify(expression)} names`,
+			);
+		}
+	}
+	return { expression, licenses };
+}
+
 /** A version clause as the site writes it: `>= 3.12`. */
 const clauseText = ({ operator, version }) => `${operator} ${version}`;
 

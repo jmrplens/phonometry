@@ -651,15 +651,15 @@ See the [Room Acoustics](../../buildings/rooms/room-acoustics.md) and
 
 - **Acoustical Society of America. (2019).** [*Criteria for evaluating room noise*](https://webstore.ansi.org/standards/asa/ansiasas122019) (ANSI/ASA S12.2-2019).
   The normative NC tangency method and the Annex D RC Mark II rating with its spectral tag.
-- **Allen, J. B., & Berkley, D. A. (1979).** Image method for efficiently simulating small-room acoustics. *The Journal of the Acoustical Society of America*, *65*(4), 943-950. https://doi.org/10.1121/1.382599
+- **Allen, J. B., & Berkley, D. A. (1979).** Image method for efficiently simulating small-room acoustics. *The Journal of the Acoustical Society of America*, *65*(4), 943-950. <https://doi.org/10.1121/1.382599>
   The reflection-count decomposition of the rectangular-room image lattice.
-- **Beranek, L. L. (1957).** Revised criteria for noise in buildings. *Noise Control*, *3*(1), 19-27. https://doi.org/10.1121/1.2369239
+- **Beranek, L. L. (1957).** Revised criteria for noise in buildings. *Noise Control*, *3*(1), 19-27. <https://doi.org/10.1121/1.2369239>
   The original NC curves rated by the tangency method of the room-noise section.
-- **Bies, D. A., Hansen, C. H., & Howard, C. Q. (2017).** *Engineering noise control* (5th ed.). CRC Press. https://doi.org/10.1201/9781351228152
+- **Bies, D. A., Hansen, C. H., & Howard, C. Q. (2017).** *Engineering noise control* (5th ed.). CRC Press. <https://doi.org/10.1201/9781351228152>
   ISBN 978-1-138-30690-5. The steady-state room field and the room constant (Section 6.4, Eqs. 6.43 and 6.44), and the mass law, coincidence, double-wall and composite-partition equations (7.3, 7.40, 7.44, 7.62, 7.64) of the panel-prediction subsection.
-- **Blazier, W. E. (1997).** RC Mark II: A refined procedure for rating the noise of heating, ventilating, and air-conditioning (HVAC) systems in buildings. *Noise Control Engineering Journal*, *45*(6), 243-250. https://doi.org/10.3397/1.2828446
+- **Blazier, W. E. (1997).** RC Mark II: A refined procedure for rating the noise of heating, ventilating, and air-conditioning (HVAC) systems in buildings. *Noise Control Engineering Journal*, *45*(6), 243-250. <https://doi.org/10.3397/1.2828446>
   The RC Mark II contour and spectral-quality tag codified by ANSI/ASA S12.2 Annex D.
-- **Cremer, L., Heckl, M., & Petersson, B. A. T. (2005).** *Structure-borne sound: Structural vibrations and sound radiation at audio frequencies* (3rd ed.). Springer. https://doi.org/10.1007/b137728
+- **Cremer, L., Heckl, M., & Petersson, B. A. T. (2005).** *Structure-borne sound: Structural vibrations and sound radiation at audio frequencies* (3rd ed.). Springer. <https://doi.org/10.1007/b137728>
   ISBN 978-3-540-22696-3. The structure-borne transmission and radiation theory the panel-prediction subsection draws on, shared with the vibration theory page.
 - **European Committee for Standardization. (2000).** [*Building acoustics — Estimation of acoustic performance of buildings from the performance of elements — Part 1: Airborne sound insulation between rooms*](https://knowledge.bsigroup.com/products/building-acoustics-estimation-of-acoustic-performance-in-buildings-from-the-performance-of-elements-airborne-sound-insulation-between-rooms) (EN 12354-1:2000).
   The simplified single-number flanking model (Formulae 26-31), the Annex E junction regressions and the Annex H.3 worked example of the flanking subsection.
@@ -667,9 +667,9 @@ See the [Room Acoustics](../../buildings/rooms/room-acoustics.md) and
   The impact counterpart of the same subsection: Formula 21, the Annex B bare-floor equivalent level and the Annex E.3 worked example.
 - **European Committee for Standardization. (2003).** [*Building acoustics — Estimation of acoustic performance of buildings from the performance of elements — Part 6: Sound absorption in enclosed spaces*](https://knowledge.bsigroup.com/products/building-acoustics-estimation-of-acoustic-performance-of-buildings-from-the-performance-of-elements-sound-absorption-in-enclosed-spaces) (EN 12354-6:2003).
   The Clause 4 absorption model and Annex E worked cases of the enclosed-space section. The linked catalogue record is the BSI Knowledge page for BS EN 12354-6:2003.
-- **Hak, C. C. J. M., Wenmaekers, R. H. C., & van Luxemburg, L. C. J. (2012).** Measuring room impulse responses: Impact of the decay range on derived room acoustic parameters. *Acta Acustica united with Acustica*, *98*(6), 907-915. https://doi.org/10.3813/aaa.918574
+- **Hak, C. C. J. M., Wenmaekers, R. H. C., & van Luxemburg, L. C. J. (2012).** Measuring room impulse responses: Impact of the decay range on derived room acoustic parameters. *Acta Acustica united with Acustica*, *98*(6), 907-915. <https://doi.org/10.3813/aaa.918574>
   The INR decay-range analysis behind the tightened T20/T30 validity thresholds.
-- **Hopkins, C. (2007).** *Sound insulation*. Butterworth-Heinemann. https://doi.org/10.4324/9780080550473
+- **Hopkins, C. (2007).** *Sound insulation*. Butterworth-Heinemann. <https://doi.org/10.4324/9780080550473>
   ISBN 978-0-7506-6526-1. The measurement chains, flanking transmission and EN 12354 prediction framework of the insulation sections.
 - **International Organization for Standardization. (2003).** [*Acoustics — Measurement of sound absorption in a reverberation room*](https://www.iso.org/standard/34545.html) (ISO 354:2003).
   The reverberation-room absorption measurement and its air-absorption term.
@@ -680,7 +680,7 @@ See the [Room Acoustics](../../buildings/rooms/room-acoustics.md) and
 - **International Organization for Standardization. (2009).** [*Acoustics — Measurement of room acoustic parameters — Part 1: Performance spaces*](https://www.iso.org/standard/40979.html) (ISO 3382-1:2009).
   Backward integration, the parameter definitions and the Annex A clarity family.
 - **International Organization for Standardization. (2012).** [*Acoustics — Measurement of room acoustic parameters — Part 3: Open plan offices*](https://www.iso.org/standard/46520.html) (ISO 3382-3:2012).
-  The open-plan spatial decay and the distraction and privacy distances. Since revised as ISO 3382-3:2022 (https://www.iso.org/standard/77437.html); the 2012 edition is the implemented one.
+  The open-plan spatial decay and the distraction and privacy distances. Since revised as ISO 3382-3:2022 (<https://www.iso.org/standard/77437.html>); the 2012 edition is the implemented one.
 - **International Organization for Standardization. (2014).** [*Acoustics — Field measurement of sound insulation in buildings and of building elements — Part 1: Airborne sound insulation*](https://www.iso.org/standard/55997.html) (ISO 16283-1:2014).
   The field level differences and normalizations of the insulation sections.
 - **International Organization for Standardization. (2016).** [*Acoustics — Field measurement of sound insulation in buildings and of building elements — Part 3: Façade sound insulation*](https://www.iso.org/standard/59748.html) (ISO 16283-3:2016).
@@ -701,11 +701,11 @@ See the [Room Acoustics](../../buildings/rooms/room-acoustics.md) and
   Clause 4.3, the background-noise correction and its 6/15 dB margins and 1.3 dB cap, quoted in the laboratory-versus-field subsection.
 - **International Organization for Standardization. (2021).** [*Acoustics — Laboratory measurement of sound insulation of building elements — Part 5: Requirements for test facilities and equipment*](https://www.iso.org/standard/79482.html) (ISO 10140-5:2021).
   The qualified transmission suite drawn in the laboratory-versus-field subsection, and the flanking limit that lets a laboratory index drop its prime.
-- **Kuttruff, H. (2016).** *Room acoustics* (6th ed.). CRC Press. https://doi.org/10.1201/9781315372150
+- **Kuttruff, H. (2016).** *Room acoustics* (6th ed.). CRC Press. <https://doi.org/10.1201/9781315372150>
   The statistical decay theory behind backward integration and the Sabine relations used throughout this page, the image-source construction (Section 4.1) and the impulse response it sums (Section 4.2), the Eyring reverberation (Section 5.4), the reverberation distance (Section 5.6) and the Schroeder frequency (Section 3.6).
-- **Schroeder, M. R. (1965).** New method of measuring reverberation time. *The Journal of the Acoustical Society of America*, *37*(3), 409-412. https://doi.org/10.1121/1.1909343
+- **Schroeder, M. R. (1965).** New method of measuring reverberation time. *The Journal of the Acoustical Society of America*, *37*(3), 409-412. <https://doi.org/10.1121/1.1909343>
   The backward-integration method of the decay-curve section.
-- **Vigran, T. E. (2008).** *Building acoustics*. CRC Press. https://doi.org/10.1201/9781482266016
+- **Vigran, T. E. (2008).** *Building acoustics*. CRC Press. <https://doi.org/10.1201/9781482266016>
   ISBN 978-0-415-42853-8. Sound transmission in buildings, from single and double constructions to floating floors.
-- **Vorländer, M. (2020).** *Auralization: Fundamentals of acoustics, modelling, simulation, algorithms and acoustic virtual reality* (2nd ed.). Springer. https://doi.org/10.1007/978-3-030-51202-6
+- **Vorländer, M. (2020).** *Auralization: Fundamentals of acoustics, modelling, simulation, algorithms and acoustic virtual reality* (2nd ed.). Springer. <https://doi.org/10.1007/978-3-030-51202-6>
   The mirror-source model of the image-source subsection (Chapter 11), with its mirroring and reflection-factor expressions (Eqs. 11.36 and 11.39).

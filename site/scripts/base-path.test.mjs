@@ -96,6 +96,20 @@ test('a path the check is meant to read and cannot find fails it, rather than pa
 	assert.throws(() => basePathReport(site, []), /astro\.config\.mjs/);
 });
 
+/** The allowances of site-targets.json, for a tree that holds no other file of the site. */
+const TARGETS = ALLOWED.filter((entry) => entry.file === 'src/data/site-targets.json');
+
+test('About names the old address in plain text on the two lines allowed, and a link to it or any other mention still fails', () => {
+	const about = ALLOWED.filter((entry) => entry.file.endsWith('start/about.md'));
+	assert.deepEqual(about.map((entry) => entry.file), ['src/content/docs/start/about.md', 'src/content/docs/es/start/about.md']);
+	for (const { file, line } of about) {
+		assert.ok(!/\]\(|https?:/.test(line), `${file}: the old address in plain text, never a link`);
+		assert.deepEqual(basePathFindings(`${line}\n`, file), [], file);
+		assert.equal(basePathFindings(`${line}\n`, 'src/content/docs/start/support.mdx').length, 1, 'only in its own file');
+		assert.equal(basePathFindings('See [the old site](https://docs.jmrp.io/phonometry/).\n', file).length, 1, 'a link to the old host, even on About');
+	}
+});
+
 test('an optional allowance is let through where its line is, and not asked for where it is not', () => {
 	const optional = ALLOWED.filter((entry) => entry.optional);
 	assert.deepEqual(optional.map(({ file, line }) => `${file}: ${line}`), ['src/data/site-targets.json: "clipBase": "https://docs.jmrp.io/phonometry/media/"']);
@@ -106,7 +120,7 @@ test('an optional allowance is let through where its line is, and not asked for 
 	for (const text of [targets, switched]) {
 		const site = emptySite();
 		plant(site, entry.file, text);
-		assert.deepEqual(basePathReport(site), { files: 2, findings: [], stale: [] });
+		assert.deepEqual(basePathReport(site, TARGETS), { files: 2, findings: [], stale: [] });
 	}
 	assert.equal(basePathFindings(`  ${entry.line}\n`, 'src/data/home-en.ts').length, 1, 'only in its file');
 });
@@ -137,7 +151,7 @@ test('either clip host the Worker README names is one edit of site-targets.json,
 		assert.deepEqual(basePathFindings(switched, 'src/data/site-targets.json'), [], host.clipBase);
 		const site = emptySite();
 		plant(site, 'src/data/site-targets.json', switched);
-		assert.deepEqual(basePathReport(site), { files: 2, findings: [], stale: [] }, `${host.clipBase}: no finding, and no allowance stale`);
+		assert.deepEqual(basePathReport(site, TARGETS), { files: 2, findings: [], stale: [] }, `${host.clipBase}: no finding, and no allowance stale`);
 	}
 	const optional = ALLOWED.filter((entry) => entry.optional);
 	assert.equal(optional.length, 1);

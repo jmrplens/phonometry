@@ -585,5 +585,5 @@ The Zwicker method (ISO 532-1:2017) is the reference: stationary and time-varyin
   Stationary loudness from roex excitation patterns on the ERB-number scale, with explicit binaural summation.
 - **International Organization for Standardization. (2023).** [*Acoustics — Methods for calculating loudness — Part 3: Moore-Glasberg-Schlittenlacher method*](https://www.iso.org/standard/69856.html) (ISO 532-3:2023).
   Time-varying short-term and long-term loudness and the peak N_max.
-- **Moore, B. C. J. (2013).** *An introduction to the psychology of hearing* (6th ed.). Brill. https://doi.org/10.1163/9789004252424
+- **Moore, B. C. J. (2013).** *An introduction to the psychology of hearing* (6th ed.). Brill. <https://doi.org/10.1163/9789004252424>
   The ERB_N auditory-filter bandwidth and the Cam (ERB_N number) scale of Glasberg and Moore (1990), pp. 76-77.

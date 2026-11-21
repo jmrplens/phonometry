@@ -700,7 +700,7 @@ Precision sound power by intensity fiche (PrecisionIntensityResult.report), an I
 
 ## References
 
-- **Fahy, F. J. (1995).** *Sound intensity* (2nd ed.). E&FN Spon. https://doi.org/10.4324/9780203475386
+- **Fahy, F. J. (1995).** *Sound intensity* (2nd ed.). E&FN Spon. <https://doi.org/10.4324/9780203475386>
   ISBN 978-0-419-19810-9. The monograph on sound energy flux: why intensity separates the energy leaving the source from steady energy passing through, behind both scanning methods.
 - **International Organization for Standardization. (1996).** [*Acoustics — Determination of sound power levels of noise sources using sound intensity — Part 2: Measurement by scanning*](https://www.iso.org/standard/21247.html) (ISO 9614-2:1996).
   The scanning method of section 1: the partial powers, the FpI and F+/- field indicators and the grade criteria.

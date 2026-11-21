@@ -1122,11 +1122,11 @@ survive past cut-on.
   The industry row structure of the duct-borne calculation sheet (Table 8) that DuctPathResult.table() and .report() follow.
 - **American Society of Heating, Refrigerating and Air-Conditioning Engineers. (2019).** *ASHRAE handbook: HVAC applications (SI edition), Chapter 49, Noise and vibration control*. ASHRAE.
   The air terminal velocity limits (Table 9), the volume-damper corrections (Table 10) and the guidance that fan sound power is best taken from manufacturer test data.
-- **Bies, D. A., Hansen, C. H., & Howard, C. Q. (2017).** *Engineering noise control* (5th ed.). CRC Press. https://doi.org/10.1201/9781351228152
+- **Bies, D. A., Hansen, C. H., & Howard, C. Q. (2017).** *Engineering noise control* (5th ed.). CRC Press. <https://doi.org/10.1201/9781351228152>
   The end-reflection table (§8.13), the elbow insertion loss (§8.11), the reduction of a splitter muffler to lined ducts (§8.10.5, Eq. 8.241), the plenum chamber (§8.17) and the flow-generated noise of ducts and bends (§8.15).
-- **Long, M. (2014).** *Architectural acoustics* (2nd ed.). Academic Press. https://doi.org/10.1016/C2012-0-03257-5
+- **Long, M. (2014).** *Architectural acoustics* (2nd ed.). Academic Press. <https://doi.org/10.1016/C2012-0-03257-5>
   The fan sound-power model (Ch. 13, Eq. 13.1 with Tables 13.5-13.8) and the diffuser self-noise model (Ch. 13, Eqs. 13.27-13.33), the duct attenuation, flexible duct, split loss, end reflection, silencer self-noise and room effect of Ch. 14, and the worked duct-borne sheet of Table 14.9 this guide is built around.
-- **Norton, M. P., & Karczub, D. G. (2003).** *Fundamentals of noise and vibration analysis for engineers* (2nd ed.). Cambridge University Press. https://doi.org/10.1017/CBO9781139163927
+- **Norton, M. P., & Karczub, D. G. (2003).** *Fundamentals of noise and vibration analysis for engineers* (2nd ed.). Cambridge University Press. <https://doi.org/10.1017/CBO9781139163927>
   The higher-order acoustic modes of ducts, the cut-on frequencies of circular and rectangular cross sections and the mean-flow correction (§7.3, Eqs. 7.6-7.10).
 - **Verein Deutscher Ingenieure. (2001).** *Geräuscherzeugung und Lärmminderung in Raumlufttechnischen Anlagen* (VDI 2081 Blatt 1:2001-07).
   Section 6.7.3: the level an air outlet produces in a room (Equation (36)), the equivalent absorption area a reverberation time implies (Equation (37)) and the reverberation radius rH = 0.2 sqrt(A). Element 20 of the worked example in its Part 2:2005-05 is the case checked here.

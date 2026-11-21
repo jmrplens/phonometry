@@ -770,7 +770,7 @@ Dynamic-transfer-stiffness fiche (TransferStiffnessResult.report): the FRF chara
 
 ## References
 
-- **Cremer, L., Heckl, M., & Petersson, B. A. T. (2005).** *Structure-borne sound: Structural vibrations and sound radiation at audio frequencies* (3rd ed.). Springer. https://doi.org/10.1007/b137728
+- **Cremer, L., Heckl, M., & Petersson, B. A. T. (2005).** *Structure-borne sound: Structural vibrations and sound radiation at audio frequencies* (3rd ed.). Springer. <https://doi.org/10.1007/b137728>
   Vibration isolation theory: why an isolator's performance depends on the source and receiver mobilities, the physics behind the blocked-force characterisation. ISBN 978-3-540-22696-3.
 - **International Organization for Standardization. (2002).** [*Acoustics and vibration — Laboratory measurement of vibro-acoustic transfer properties of resilient elements — Part 3: Indirect method for determination of the dynamic stiffness of resilient supports for translatory motion*](https://www.iso.org/standard/34560.html) (ISO 10846-3:2002).
   The indirect method k₂₁ = −(2πf)²(m₂+m_f)T (Formula 1) with its validity conditions (clause 6: Inequalities 2 and 3; clause 7.6 linearity). Conformance is anchored on the indirect inertia relation, the \|T\| = 0.1 ↔ ΔL₁,₂ = 20 dB validity limit and its 1 dB (12 %) accuracy bound, and the 7.6 linearity criterion.

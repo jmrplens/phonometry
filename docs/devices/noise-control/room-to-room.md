@@ -649,9 +649,9 @@ that distance.
   The NC curves of Table 1 and the RC Mark II family of Annex D that the chain is rated against.
 - **Barron, R. F. (2003).** *Industrial noise control and acoustics*. Marcel Dekker.
   The direct field of the partition in the receiving room (section 7.5, Eqs. 7-71 and 7-72) and Example 7-6, an operator 1.5 m from the wall, which receiver_distance_m reproduces.
-- **Bies, D. A., Hansen, C. H., & Howard, C. Q. (2017).** *Engineering noise control* (5th ed.). CRC Press. https://doi.org/10.1201/9781351228152
+- **Bies, D. A., Hansen, C. H., & Howard, C. Q. (2017).** *Engineering noise control* (5th ed.). CRC Press. <https://doi.org/10.1201/9781351228152>
   The steady-state room relations (section 6.4, Eqs. 6.43-6.44) behind steady_state_spl and room_constant, and the enclosure insertion loss of section 7.4.2 (Eqs. 7.103, 7.111) that is the library default enclosure model.
-- **Kuttruff, H. (2016).** *Room acoustics* (6th ed.). CRC Press. https://doi.org/10.1201/9781315372150
+- **Kuttruff, H. (2016).** *Room acoustics* (6th ed.). CRC Press. <https://doi.org/10.1201/9781315372150>
   The Schroeder frequency (Eq. 3.44) that bounds the diffuse-field assumption from below.
-- **Norton, M. P., & Karczub, D. G. (2003).** *Fundamentals of noise and vibration analysis for engineers* (2nd ed.). Cambridge University Press. https://doi.org/10.1017/CBO9781139163927
+- **Norton, M. P., & Karczub, D. G. (2003).** *Fundamentals of noise and vibration analysis for engineers* (2nd ed.). Cambridge University Press. <https://doi.org/10.1017/CBO9781139163927>
   The sound power models of section 4.6 (Table 4.5, Eqs. 4.53-4.56), the room-to-room power balance of section 4.9 (Eqs. 4.92-4.101), the enclosure design equation of section 4.10 (Eqs. 4.102-4.115) and the worked problems 4.16, 4.18 and 4.21 with their printed octave-band answers, which this guide is built around.

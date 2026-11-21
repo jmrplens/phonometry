@@ -978,7 +978,7 @@ Sabine absorption area $A = 0.16\ V/T$.
 
 ## References
 
-- **Hopkins, C. (2007).** *Sound insulation*. Butterworth-Heinemann. https://doi.org/10.4324/9780080550473
+- **Hopkins, C. (2007).** *Sound insulation*. Butterworth-Heinemann. <https://doi.org/10.4324/9780080550473>
   The comprehensive treatment of airborne and impact sound insulation: the measurement chains, the statistics of rooms behind the field quantities and the interpretation of the single-number ratings. ISBN 978-0-7506-6526-1.
 - **International Organization for Standardization. (2014).** [*Acoustics — Field measurement of sound insulation in buildings and of building elements — Part 1: Airborne sound insulation*](https://www.iso.org/standard/55997.html) (ISO 16283-1:2014).
   The field airborne method this page implements: the level differences and normalisations.
@@ -990,5 +990,5 @@ Sabine absorption area $A = 0.16\ V/T$.
   The reference-curve rating and the spectrum adaptation terms C and Ctr interpreted above; also the single-number engine for the façade quantity (Annex F).
 - **International Organization for Standardization. (2020).** [*Acoustics — Rating of sound insulation in buildings and of building elements — Part 2: Impact sound insulation*](https://www.iso.org/standard/69867.html) (ISO 717-2:2020).
   The impact reference-curve rating and the spectrum adaptation term CI, with the enlarged-range CI,50-2500 term.
-- **Vigran, T. E. (2008).** *Building acoustics*. CRC Press. https://doi.org/10.1201/9781482266016
+- **Vigran, T. E. (2008).** *Building acoustics*. CRC Press. <https://doi.org/10.1201/9781482266016>
   A compact textbook companion for the sound-transmission physics behind these measurements. ISBN 978-0-415-42853-8.

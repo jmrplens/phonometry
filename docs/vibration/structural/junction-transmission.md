@@ -596,9 +596,9 @@ assumption the inversion rests on holds at all.
 
 - **Craik, R. J. M. (1996).** [*Sound transmission through buildings using statistical energy analysis*](https://openlibrary.org/isbn/9780566075728). Gower.
   The SEA treatment of building sound transmission with the tabulated bending-wave transmission coefficients for X, T, L and in-line junctions used here (Eqs 5.12/5.13). ISBN 978-0-566-07572-8.
-- **Cremer, L., Heckl, M., & Ungar, E. E. (1973).** *Structure-borne sound: Structural vibrations and sound radiation at audio frequencies* (1st ed.). Springer. https://doi.org/10.1007/978-3-662-10118-6
+- **Cremer, L., Heckl, M., & Ungar, E. E. (1973).** *Structure-borne sound: Structural vibrations and sound radiation at audio frequencies* (1st ed.). Springer. <https://doi.org/10.1007/978-3-662-10118-6>
   The original derivation of the wave parameters chi and psi (Eqs 5.10/5.11 in Hopkins) and the in-line normal-incidence transmission coefficient. ISBN 978-3-540-06002-4.
-- **Hopkins, C. (2007).** *Sound insulation*. Butterworth-Heinemann. https://doi.org/10.4324/9780080550473
+- **Hopkins, C. (2007).** *Sound insulation*. Butterworth-Heinemann. <https://doi.org/10.4324/9780080550473>
   Section 5.2.1.3 collects the rigid X, T, L and in-line junction coefficients, the angular average (Eq. 5.6), the SEA consistency relationship (Eq. 5.7), the coupling loss factor (Eq. 2.154) and the wave-approach Kij (Eq. 5.116) implemented on this page. ISBN 978-0-7506-6526-1.
-- **Norton, M. P., & Karczub, D. G. (2003).** *Fundamentals of noise and vibration analysis for engineers* (2nd ed.). Cambridge University Press. https://doi.org/10.1017/CBO9781139163927
+- **Norton, M. P., & Karczub, D. G. (2003).** *Fundamentals of noise and vibration analysis for engineers* (2nd ed.). Cambridge University Press. <https://doi.org/10.1017/CBO9781139163927>
   Chapter 6 gives the two-subsystem SEA power balance (Eqs. 6.10, 6.11), the consistency relationship (Eq. 6.8), the in-situ inversion of the coupling loss factors from measured energies (Eq. 6.15), the modal densities of bars, beams, flat plates and thin-walled cylindrical shells (Eqs. 6.23-6.29) and the closed-form right-angle and point-connection coupling loss factors (Eqs. 6.52-6.56) implemented on this page. ISBN 978-0-521-49913-2.

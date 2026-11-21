@@ -84,6 +84,16 @@ export const ALLOWED = Object.freeze([
 		optional: true,
 		why: 'the clip host to fall back on while media.phonometry.dev does not hold every clip: switching to it is this value and mediaOrigins, and nothing else, and the old host answers its clips with 206 under that path',
 	}),
+	Object.freeze({
+		file: 'src/content/docs/start/about.md',
+		line: 'phonometry.dev; until then it was published at docs.jmrp.io/phonometry, and',
+		why: 'the dated History of About names the address the documentation was published at until 20 November 2026, in plain text and never as a link, so that a reader or an assistant that still holds it learns it is this site',
+	}),
+	Object.freeze({
+		file: 'src/content/docs/es/start/about.md',
+		line: 'en phonometry.dev; hasta entonces se publicaba en docs.jmrp.io/phonometry, y',
+		why: 'the same sentence of the Spanish History, for the same reason',
+	}),
 ]);
 
 /**

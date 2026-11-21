@@ -778,7 +778,7 @@ mechanisms are in play, compute both.
 
 - **American National Standards Institute. (1997).** [*Methods for calculation of the speech intelligibility index*](https://webstore.ansi.org/standards/asa/ansiasas31997r2017) (ANSI S3.5-1997 (R2017)). Acoustical Society of America.
   The four band procedures: critical band (21 bands, Table 1), equally-contributing critical band (17 bands, Table 2), one-third octave (18 bands, Table 3) and octave (6 bands, Table 4), each with its band-importance function, standard speech spectrum level and reference internal noise; the masking, disturbance and band-audibility procedure (clause 5) and the index (clause 6).
-- **French, N. R., & Steinberg, J. C. (1947).** Factors governing the intelligibility of speech sounds. *The Journal of the Acoustical Society of America*, *19*(1), 90-119. https://doi.org/10.1121/1.1916407
+- **French, N. R., & Steinberg, J. C. (1947).** Factors governing the intelligibility of speech sounds. *The Journal of the Acoustical Society of America*, *19*(1), 90-119. <https://doi.org/10.1121/1.1916407>
   The articulation-band experiments that the band-importance function of section 1 descends from.
 - **Pavlovic, C. (n.d.).** [*C program developer's kit for the Speech Intelligibility Index (SII.C)*](https://www.sii.to/html/programs.html). Support site for the Speech Intelligibility Index.
   The working group's reference implementation of ANSI S3.5-1997 and its test cases: the equivalent masking spectrum of clause 5.4 and the SII with a hearing loss of clause 6 are checked against it.

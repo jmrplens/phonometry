@@ -312,6 +312,7 @@
  "phasors_max_relative": {
   "contour": 0.0
  },
+ "phonometry": "4.0.0rc1",
  "python": "3.13.18",
  "reductions_max_relative": {
   "contour": 1.630534100567117e-16,

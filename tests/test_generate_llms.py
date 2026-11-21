@@ -338,7 +338,131 @@ def test_the_index_is_held_to_its_budget() -> None:
     assert len(committed) <= llms.LLMS_TXT_LIMIT_BYTES
 
 
+#: An address as a reader of plain text takes it: from the scheme to the
+#: first character no address holds unescaped, or a single quote
+#: (site/scripts/check-markdown-twins.mjs, ``ADDRESS``).
+_ADDRESS = re.compile(r"https?://[^\s<>\"'`\[\]{}|\\^]+")
+
+
+def _bare_addresses_read_with_punctuation(text: str) -> list[str]:
+    """Every bare address of *text* that runs into the punctuation after it.
+
+    The rule of site/scripts/check-markdown-twins.mjs (``bareAddressProblems``),
+    which holds the built llms files to it: a link's destination and an
+    autolink end where Markdown ends them, and any other address that ends on
+    a full stop, a comma, a semicolon, a colon, ``!``, ``?``, ``*``, ``_``,
+    ``~`` or a closing parenthesis it did not open is fetched with it.
+    """
+    found = []
+    for line in text.splitlines():
+        for match in _ADDRESS.finditer(line):
+            before = line[max(0, match.start() - 2) : match.start()]
+            address = match.group()
+            if before.endswith("<") or before == "](":
+                continue
+            if address[-1] in ".,;:!?*_~" or (
+                address.endswith(")") and address.count(")") > address.count("(")
+            ):
+                found.append(address)
+    return found
+
+
+def test_the_index_ends_no_sentence_on_a_bare_address() -> None:
+    """A crawler that reads an address up to the next space fetches its full stop too.
+
+    Two did, on the day the site moved to its own host: 24 requests for agent
+    files with the full stop of the sentence that named them on the end, every
+    one a 404. The index names each address as a link.
+    """
+    assert (
+        _bare_addresses_read_with_punctuation(
+            (ROOT / "llms.txt").read_text(encoding="utf-8")
+        )
+        == []
+    )
+
+
+def test_the_index_names_the_former_address_once_in_plain_text() -> None:
+    """The address the documentation had until 20 November 2026, beside the former name.
+
+    An assistant that still holds docs.jmrp.io/phonometry learns from the
+    index that it is this site, as it learns that PyOctaveBand is this
+    library: once, in the paragraph that names the former package, and never
+    as a link, which would send a crawler to the old host.
+    """
+    index = (ROOT / "llms.txt").read_text(encoding="utf-8")
+    former = re.compile(r"docs\.jmrp\.io")
+    assert len(former.findall(index)) == 1, "the former address, once"
+    (paragraph,) = (block for block in index.split("\n\n") if former.search(block))
+    assert "**PyOctaveBand**" in paragraph, "beside the former package name"
+    assert re.search(r"(?<![/<(\[\w.])docs\.jmrp\.io/phonometry(?![\w/])", paragraph), (
+        "in plain text: no scheme, link or autolink around it"
+    )
+    assert "](" not in paragraph
+    assert not re.search(r"://docs\.jmrp\.io", paragraph)
+
+
+def test_a_shard_head_and_a_part_head_link_every_address_they_name() -> None:
+    head = llms._part_head(
+        slug="signals",
+        title="Signal analysis",
+        number=2,
+        count=3,
+        single_page=False,
+        cuts=["page", "section"],
+    )
+    assert _bare_addresses_read_with_punctuation(head) == []
+    assert f"Part of [llms.txt]({llms.SITE_URL}/llms.txt). " in head
+    assert (
+        f"[part 1]({llms.SITE_URL}/llms/llms-signals-1.txt), "
+        f"[part 2]({llms.SITE_URL}/llms/llms-signals-2.txt) and "
+        f"[part 3]({llms.SITE_URL}/llms/llms-signals-3.txt)."
+    ) in head
+    shards = {"theory": ("theory-1", "theory-2"), "glossary": ("glossary",)}
+    assert llms._shard_links(shards, "theory", "theory") == (
+        f"[theory, part 1 of 2]({llms.SITE_URL}/llms/llms-theory-1.txt) and "
+        f"[theory, part 2 of 2]({llms.SITE_URL}/llms/llms-theory-2.txt)"
+    )
+    assert llms._shard_links(shards, "glossary", "glossary") == (
+        f"[glossary]({llms.SITE_URL}/llms/llms-glossary.txt)"
+    )
+
+
+def test_the_rule_finds_what_a_crawler_misreads_and_passes_what_markdown_ends() -> None:
+    misread = (
+        "Part of https://x.dev/llms.txt. Then https://x.dev/a, https://x.dev/b; "
+        "https://x.dev/c: and (index: https://x.dev/d/)."
+    )
+    assert _bare_addresses_read_with_punctuation(misread) == [
+        "https://x.dev/llms.txt.",
+        "https://x.dev/a,",
+        "https://x.dev/b;",
+        "https://x.dev/c:",
+        "https://x.dev/d/).",
+    ]
+    ended = (
+        "Part of [llms.txt](https://x.dev/llms.txt). An autolink <https://x.dev/a>. "
+        "On https://en.wikipedia.org/wiki/Decibel_(unit) and at the end https://x.dev/b"
+    )
+    assert _bare_addresses_read_with_punctuation(ended) == []
+
+
 _NODE = shutil.which("node")
+
+
+def _titles_from_sources(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Read a page's title from its source, as the dump would give it.
+
+    The sentence names its example copy by the page's title, which
+    ``_page_title`` reads from the dump of ``agent-md.mjs``; a test run has no
+    dump (``make llms`` writes it), and the frontmatter is where the dump takes
+    the title from.
+    """
+    monkeypatch.setattr(
+        llms,
+        "_page_title",
+        lambda route: llms._frontmatter_field(llms._source_of(route), "title"),
+    )
 
 
 def test_the_copies_sentence_names_the_pages_the_site_does_not_translate(
@@ -357,6 +481,7 @@ def test_the_copies_sentence_names_the_pages_the_site_does_not_translate(
         "reference/api/a",
         "reference/api/b",
     }
+    _titles_from_sources(monkeypatch)
     monkeypatch.setattr(llms, "_content_routes", lambda: english)
     monkeypatch.setattr(llms, "_spanish_routes", lambda: {""})
     guides = llms._frontmatter_field(llms._source_of("start/guides"), "title")
@@ -375,11 +500,16 @@ def test_the_copies_sentence_says_every_page_has_a_copy(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     """Every page publishes a copy written from its own source, so none is named as having none."""
+    _titles_from_sources(monkeypatch)
     monkeypatch.setattr(llms, "_content_routes", lambda: {"", "start/guides"})
     monkeypatch.setattr(llms, "_spanish_routes", lambda: {"", "start/guides"})
     sentence = llms._copies_sentence()
     assert sentence.startswith("Every page listed here has a Markdown copy beside it")
     assert "publish none" not in sentence
+    title = llms._frontmatter_field(llms._source_of("start/getting-started"), "title")
+    assert (
+        f"[copy of {title}]({llms.SITE_URL}/start/getting-started/index.md)"
+    ) in sentence
 
 
 def test_the_spanish_routes_are_named_without_their_prefix(

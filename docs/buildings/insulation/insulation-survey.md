@@ -437,5 +437,5 @@ Survey façade fiche (SurveyFacadeResult.report), D2m,nT,w (C; Ctr).
   The impact single number of the survey, rated in octave bands; implemented in the insulation ratings guide.
 - **International Organization for Standardization. (2021).** [*Acoustics — Field measurements of airborne and impact sound insulation and of service equipment sound — Survey method*](https://www.iso.org/standard/76560.html) (ISO 10052:2021).
   The field survey method: the reverberation-index correction, the standardized/normalized airborne, impact and façade quantities, and service-equipment noise. The formulas and reverberation-index table are identical in the harmonized EN ISO 10052:2004+A1:2010.
-- **Vigran, T. E. (2008).** *Building acoustics*. CRC Press. https://doi.org/10.1201/9781482266016
+- **Vigran, T. E. (2008).** *Building acoustics*. CRC Press. <https://doi.org/10.1201/9781482266016>
   The building-acoustics context of the field quantities the survey method approximates. ISBN 978-0-415-42853-8.

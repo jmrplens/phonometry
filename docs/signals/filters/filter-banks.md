@@ -4,6 +4,15 @@
 
 # Octave and Fractional-Octave Filter Banks
 
+## How do I compute octave or one-third-octave band levels in Python?
+
+`result = filters.octave_filter(x, fs, fraction=3)` filters a signal `x`
+sampled at `fs` hertz into one-third-octave bands (`fraction=1` gives octaves):
+`result.levels` holds the level of each band in decibels and
+`result.frequencies` the exact mid-band frequency of each.
+[Section 2](#2-what-a-call-gives-back) calls it on a 1 kHz tone over noise
+and draws the spectrum the result holds.
+
 phonometry supports several filter types, each with its own transfer function
 characteristic. Butterworth, Chebyshev II and Bessel place their **−3 dB points
 on the ANSI S1.11 band edges**, so their band levels are directly comparable.
@@ -20,15 +29,6 @@ five architectures differ is
 [Filter Architecture Gallery](filter-gallery.md), and
 what "class 1" means for the result is
 [Filter Class Verification](filter-compliance.md).
-
-## How do I compute octave or one-third-octave band levels in Python?
-
-`result = filters.octave_filter(x, fs, fraction=3)` filters a signal `x`
-sampled at `fs` hertz into one-third-octave bands (`fraction=1` gives octaves):
-`result.levels` holds the level of each band in decibels and
-`result.frequencies` the exact mid-band frequency of each.
-[Section 2](#2-what-a-call-gives-back) calls it on a 1 kHz tone over noise
-and draws the spectrum the result holds.
 
 ## 1. Fractional octave bands: the math
 

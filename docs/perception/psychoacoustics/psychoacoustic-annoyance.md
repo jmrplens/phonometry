@@ -440,9 +440,9 @@ print(round(steady_noise.fluctuation_strength, 2))  # 0.15 vacil
 
 ## References
 
-- **Fastl, H., & Zwicker, E. (2007).** *Psychoacoustics: Facts and models* (3rd ed.). Springer. https://doi.org/10.1007/978-3-540-68888-4
+- **Fastl, H., & Zwicker, E. (2007).** *Psychoacoustics: Facts and models* (3rd ed.). Springer. <https://doi.org/10.1007/978-3-540-68888-4>
   The source of the psychoacoustic-annoyance model of section 2 (Eqs 16.2-16.4, chapter 16; origin Widmann 1992) and of the closed-form fluctuation strength for AM broadband noise of section 3.1 (Eq. 10.2, chapter 10).
-- **Felix Greco, G., Merino-Martínez, R., Osses, A., & Lotinga, M. J. B. (2025).** [*SQAT: A sound quality analysis toolbox for MATLAB*](https://github.com/ggrecow/SQAT). GitHub. https://doi.org/10.5281/zenodo.7934709
+- **Felix Greco, G., Merino-Martínez, R., Osses, A., & Lotinga, M. J. B. (2025).** [*SQAT: A sound quality analysis toolbox for MATLAB*](https://github.com/ggrecow/SQAT). GitHub. <https://doi.org/10.5281/zenodo.7934709>
   The open MATLAB reference (open-source software) used as the numeric oracle for the fluctuation-strength cross-checks on this page.
-- **Osses Vecchi, A., García León, R., & Kohlrausch, A. (2016).** Modelling the sensation of fluctuation strength. *Proceedings of Meetings on Acoustics*, *28*, 050005. https://doi.org/10.1121/2.0000410
+- **Osses Vecchi, A., García León, R., & Kohlrausch, A. (2016).** Modelling the sensation of fluctuation strength. *Proceedings of Meetings on Acoustics*, *28*, 050005. <https://doi.org/10.1121/2.0000410>
   The fluctuation-strength signal model implemented in section 3.2 (presented at ICA 2016; clean-room, with no numeric standard, calibrated to 1 vacil at the reference AM tone), including the Table 1 literature values used as its cross-check.

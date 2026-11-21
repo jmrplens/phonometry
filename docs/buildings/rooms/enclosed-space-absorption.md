@@ -568,5 +568,5 @@ Enclosed-space fiche (ReverberationResult.report), the per-band A/T table and th
   Only the six climate-condition power attenuation coefficients of EN 12354-6 Table 1, derived from this standard for the 125 Hz-8 kHz octave bands; the full atmospheric-absorption model for arbitrary conditions and frequencies lives in the Outdoor Sound Propagation guide.
 - **International Organization for Standardization. (2003).** [*Acoustics — Measurement of sound absorption in a reverberation room*](https://www.iso.org/standard/34545.html) (ISO 354:2003).
   The laboratory measurement the surface and array coefficients come from.
-- **Kuttruff, H. (2016).** *Room acoustics* (6th ed.). CRC Press. https://doi.org/10.1201/9781315372150
+- **Kuttruff, H. (2016).** *Room acoustics* (6th ed.). CRC Press. <https://doi.org/10.1201/9781315372150>
   The statistical reverberation theory the standard's formulae specialise.

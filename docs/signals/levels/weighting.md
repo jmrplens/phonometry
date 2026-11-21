@@ -590,7 +590,7 @@ Not with a plain bilinear design: at $f_\mathrm{s} = 48$ kHz the A-curve error r
 
 ## References
 
-- **Fletcher, H., & Munson, W. A. (1933).** Loudness, its definition, measurement and calculation. *The Journal of the Acoustical Society of America*, *5*(2), 82-108. https://doi.org/10.1121/1.1915637
+- **Fletcher, H., & Munson, W. A. (1933).** Loudness, its definition, measurement and calculation. *The Journal of the Acoustical Society of America*, *5*(2), 82-108. <https://doi.org/10.1121/1.1915637>
   The original equal-loudness measurements whose 40-phon contour the A-curve inverts (section 1).
 - **International Electrotechnical Commission. (1979).** *Sound level meters* (IEC 651:1979).
   The superseded edition whose Table V publishes the laboratory-grade Type 0 tolerance mask that verify_weighting_class offers as edition='1979' in section 6, read from the identical British adoption BS 5969:1981.

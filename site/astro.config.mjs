@@ -23,7 +23,7 @@ import { isOurMedia, mediaUrl, REMOTE_PREFIXES } from './src/lib/media.mjs';
 import { PAGEFIND_RANKING } from './src/lib/search-ranking.mjs';
 import { remarkBibliography } from './src/lib/remark-bibliography.mjs';
 import { rehypeWrappableMath } from './src/lib/wrappable-math.mjs';
-import { softwareRequirements, version } from './src/data/repo-stats.mjs';
+import { licenses, softwareRequirements, version } from './src/data/repo-stats.mjs';
 import {
   featureList,
   inBothLanguages,
@@ -184,13 +184,11 @@ const authorId = `${authorUrl}/#person`;
 const websiteId = `${fullUrl}/#website`;
 const softwareId = `${repositoryUrl}#software`;
 const sourceCodeId = `${repositoryUrl}#source-code`;
-// MIT for the code; the EASA ANP tables the package bundles keep EASA's terms,
-// whose text is the LicenseRef file pyproject.toml declares beside LICENSE
-// (`MIT AND LicenseRef-EASA-ANP`).
-const softwareLicenses = [
-  'https://opensource.org/license/MIT',
-  `${repositoryUrl}/blob/main/LICENSES/LicenseRef-EASA-ANP.txt`,
-];
+// The licences pyproject.toml declares (`license` and `license-files`), read
+// by src/data/repo-stats.mjs as softwareRequirements is: MIT for the code, and
+// the EASA ANP tables the package bundles under EASA's terms, linked to the
+// LicenseRef file that holds them.
+const softwareLicenses = licenses.map((license) => license.url);
 const socialImage = {
   '@type': 'ImageObject',
   url: socialImageUrl,

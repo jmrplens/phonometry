@@ -689,11 +689,11 @@ Detailed impact prediction fiche (DetailedImpactResult.report), the same buildin
 
 ## References
 
-- **Hopkins, C. (2007).** *Sound insulation*. Butterworth-Heinemann. https://doi.org/10.4324/9780080550473
+- **Hopkins, C. (2007).** *Sound insulation*. Butterworth-Heinemann. <https://doi.org/10.4324/9780080550473>
   The physical background of every term of the detailed model: radiation efficiency, structural reverberation time, the equivalent absorption length and the statistical-energy-analysis footing of the path summation. ISBN 978-0-7506-6526-1.
 - **International Organization for Standardization. (2017).** [*Building acoustics — Estimation of acoustic performance of buildings from the performance of elements — Part 1: Airborne sound insulation between rooms*](https://www.iso.org/standard/70242.html) (ISO 12354-1:2017).
   Clause 4.2 defines the detailed per-band airborne model; Annex B the calculated element performance and radiation factors, Annex C the structural reverberation time, Annex E the junction indices and Annex L the worked examples.
 - **International Organization for Standardization. (2017).** [*Building acoustics — Estimation of acoustic performance of buildings from the performance of elements — Part 2: Impact sound insulation between rooms*](https://www.iso.org/standard/70243.html) (ISO 12354-2:2017).
   Clause 4.2 defines the detailed per-band impact model; Annex B the calculated impact level of a bare floor, Annex C the floating-floor improvement and Annex G the worked examples sharing ISO 12354-1 Annex L's building.
-- **Vigran, T. E. (2008).** *Building acoustics*. CRC Press. https://doi.org/10.1201/9781482266016
+- **Vigran, T. E. (2008).** *Building acoustics*. CRC Press. <https://doi.org/10.1201/9781482266016>
   The homogeneous-element transmission model and the impact-level closed form behind Annex B of both parts. ISBN 978-0-415-42853-8.

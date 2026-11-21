@@ -493,7 +493,7 @@ plt.show()
 
 ## References
 
-- **Attenborough, K., & Van Renterghem, T. (2021).** *Predicting outdoor sound* (2nd ed.). CRC Press. https://doi.org/10.1201/9780429470806
+- **Attenborough, K., & Van Renterghem, T. (2021).** *Predicting outdoor sound* (2nd ed.). CRC Press. <https://doi.org/10.1201/9780429470806>
   Chapter 11 (refraction by wind and temperature gradients, ray models and shadow zones). ISBN 978-1-4987-4007-4.
-- **Salomons, E. M. (2001).** *Computational atmospheric acoustics*. Kluwer Academic Publishers. https://doi.org/10.1007/978-94-010-0660-6
+- **Salomons, E. M. (2001).** *Computational atmospheric acoustics*. Kluwer Academic Publishers. <https://doi.org/10.1007/978-94-010-0660-6>
   Chapter 4 (effective sound speed, the ray model and PE examples), Appendix G (the Crank-Nicholson PE and the Gaussian starter, Eqs. G.64, G.76) and Appendix H (the Green's Function PE, the impedance reflection Eq. H.28 and the refraction factor Eq. H.58). ISBN 978-1-4020-0390-5.

@@ -55,7 +55,7 @@ describe('the header', () => {
         `Alternate: ${SITE}/es/signals/filters/filter-banks/index.md`,
         'Version: phonometry 4.0.0',
         'Install: pip install "phonometry[full]"',
-        'Author: José Manuel Requena Plens (https://orcid.org/0000-0003-1250-6212)',
+        'Author: José Manuel Requena Plens <https://orcid.org/0000-0003-1250-6212>',
         'Published: 2026-01-06',
         'Updated: 2026-10-20T10:00:00Z',
         'Standards: IEC 61260-1:2014; ANSI S1.11-2004',
@@ -163,9 +163,9 @@ describe('the references section', () => {
       [
         '## References',
         '',
-        '- **Fastl, H., & Zwicker, E. (2007).** *Psychoacoustics: Facts and \\*models\\** (3rd ed.). Springer. https://doi.org/10.1007/978-3-540-68888-4',
+        '- **Fastl, H., & Zwicker, E. (2007).** *Psychoacoustics: Facts and \\*models\\** (3rd ed.). Springer. <https://doi.org/10.1007/978-3-540-68888-4>',
         '- **International Electrotechnical Commission. (2014).** [*Electroacoustics: Octave-band filters*](https://webstore.iec.ch/en/publication/5063) (IEC 61260-1:2014).',
-        '  The band edges of section 1. Index: https://example.org/iec.',
+        '  The band edges of section 1. Index: <https://example.org/iec>.',
         '- **Smith, J. O. (n.d.).** A \\[bracketed\\] title. *J. Acoust. Soc. Am.*, *12*(3), 1-9.',
       ].join('\n'),
     );
@@ -212,7 +212,7 @@ describe('the references section', () => {
       [
         '## References',
         '',
-        '- **Grangeiro de Barros, A., & Vuye, C. (2023).** *Psychoacoustic indicators of pass-by road traffic noise* \\[Data set\\]. Zenodo. https://doi.org/10.5281/zenodo.7904680',
+        '- **Grangeiro de Barros, A., & Vuye, C. (2023).** *Psychoacoustic indicators of pass-by road traffic noise* \\[Data set\\]. Zenodo. <https://doi.org/10.5281/zenodo.7904680>',
       ].join('\n'),
     );
     assert.equal(
@@ -220,7 +220,7 @@ describe('the references section', () => {
       [
         '## Referencias',
         '',
-        '- **Grangeiro de Barros, A. y Vuye, C. (2023).** *Psychoacoustic indicators of pass-by road traffic noise* \\[Conjunto de datos\\]. Zenodo. https://doi.org/10.5281/zenodo.7904680',
+        '- **Grangeiro de Barros, A. y Vuye, C. (2023).** *Psychoacoustic indicators of pass-by road traffic noise* \\[Conjunto de datos\\]. Zenodo. <https://doi.org/10.5281/zenodo.7904680>',
       ].join('\n'),
     );
   });

@@ -854,7 +854,7 @@ You can, but the tolerances chain: a class 1 measurement requires a class 1 (or 
 
 - **Audio Engineering Society. (2020).** [*AES standard method for digital audio engineering — Measurement of digital audio equipment*](https://www.aes.org/publications/standards/search.cfm?docID=21) (AES17-2020).
   The full-scale-sine dBFS convention, which differs from this page's RMS-referenced convention by 3.01 dB.
-- **Bies, D. A., Hansen, C. H., & Howard, C. Q. (2017).** *Engineering noise control* (5th ed.). CRC Press. https://doi.org/10.1201/9781351228152
+- **Bies, D. A., Hansen, C. H., & Howard, C. Q. (2017).** *Engineering noise control* (5th ed.). CRC Press. <https://doi.org/10.1201/9781351228152>
   Sections 3.1.5 and 3.4 (microphone field effects and sound level meter calibration: the electrical and acoustic calibration practice this page's workflow follows). ISBN 978-1-4987-2405-0.
 - **International Electrotechnical Commission. (2013).** [*Electroacoustics — Sound level meters — Part 3: Periodic tests*](https://webstore.iec.ch/en/publication/5710) (IEC 61672-3:2013).
   The laboratory verification procedure behind the recommended periodic checks.

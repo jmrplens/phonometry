@@ -75,6 +75,15 @@
 // what the build published. llms.txt links exactly the shard files the build
 // wrote.
 //
+// AN ADDRESS ENDS WHERE A CRAWLER ENDS IT. A reader of plain text takes an
+// address from `https://` to the next space, and a full stop, a comma, a
+// semicolon, a colon or a closing parenthesis written right after one goes
+// with it: two crawlers asked the site for 24 agent files with the full stop
+// of the sentence on their names, every one a 404. In every copy and every
+// llms file, an address is a Markdown link's destination, an autolink
+// (`<https://...>`) or a bare address that nothing but a space or the end of
+// its line follows.
+//
 // Usage: node scripts/check-markdown-twins.mjs [dist]   (default: dist/)
 // Exit codes: 0 every rule holds; 1 a rule failed (each finding listed, with
 // its remedy); 2 the check could not run (no build, no sitemap).
@@ -215,6 +224,11 @@ export const REMEDIES = Object.freeze({
     'with no writer or rule (src/lib/agent-md/render.mjs), an MDX expression, an aside, a link ' +
     'that only resolves on the site, or one written relative to the file the text came from. ' +
     '`pnpm run check:markdown-writers` names the source.',
+  address:
+    'A reader that takes an address up to the next space reads the punctuation after it as part of it. Write the ' +
+    'address as a link, `[label](https://...)`, or an autolink, `<https://...>`, or end the sentence on a word: ' +
+    'the llms files are written by scripts/generate_llms.py, a copy\'s header by src/lib/agent-md/header.mjs, its ' +
+    'references by src/lib/agent-md/page.mjs and the rest of its body by the writer beside each component.',
   llms:
     'The llms files are written before the build by `python3 ../scripts/generate_llms.py ' +
     '--pages ../build/agent-md --build` from the copies `node scripts/agent-md.mjs --public ' +
@@ -369,6 +383,90 @@ export function textProblems(text) {
     visit(tree);
   }
   return problems;
+}
+
+/**
+ * An address as a reader of plain text takes it, a crawler that fetches every
+ * `https://` it finds in a file among them: from the scheme to the first
+ * character no address holds unescaped (RFC 3986), a space, a quote, a
+ * backtick, an angle, square or curly bracket, `|`, `\\` or `^`, or to a
+ * single quote, which closes a string in code.
+ */
+const ADDRESS = /https?:\/\/[^\s<>"'`[\]{}|\\^]+/gu;
+
+/** What ends a sentence or a clause, and is read as part of an address it touches. */
+const CLOSING_PUNCTUATION = /[.,;:!?*_~]$/u;
+
+/**
+ * The bare addresses of a copy or an llms file that run into the punctuation
+ * after them. An address is the destination of a Markdown link, `](...)`, an
+ * autolink, `<...>`, or bare; a bare one that ends on a full stop, a comma, a
+ * semicolon, a colon, `!`, `?`, `*`, `_`, `~` or on a closing parenthesis it
+ * did not open is read with that character by a crawler, and asks for a file
+ * that is not there. Code is read too: a crawler does not know where it is.
+ *
+ * @param {string} text
+ * @returns {string[]}  `line N: what`, in reading order.
+ */
+export function bareAddressProblems(text) {
+  /** @type {string[]} */
+  const problems = [];
+  text.split('\n').forEach((line, index) => {
+    for (const found of line.matchAll(ADDRESS)) {
+      const before = line.slice(Math.max(0, found.index - 2), found.index);
+      if (before.endsWith('<') || before === '](') continue;
+      const address = found[0];
+      const opened = address.split('(').length - 1;
+      const closed = address.split(')').length - 1;
+      if (CLOSING_PUNCTUATION.test(address) || (address.endsWith(')') && closed > opened)) {
+        problems.push(`line ${index + 1}: a bare address read with the ${JSON.stringify(address.at(-1))} after it, ${JSON.stringify(address)}`);
+      }
+    }
+  });
+  return problems;
+}
+
+/**
+ * Holds every copy and every llms file of a build to {@link bareAddressProblems}.
+ * A page an llms file carries is its copy byte for byte (the llms rule holds
+ * it there), so it is read once, as the copy, and of llms-full.txt and the
+ * shards only what they add to the copies is read: their heads, the index
+ * llms-full.txt opens with, and the parts' heads.
+ *
+ * @param {string} dist
+ * @param {Iterable<string>} copies  The routes of the build's copies.
+ * @param {(kind: keyof typeof REMEDIES, message: string) => void} add
+ */
+export function checkAddresses(dist, copies, add) {
+  const read = (file) => readFileSync(join(dist, file), 'utf8');
+  for (const file of [...copies].sort()) {
+    for (const problem of bareAddressProblems(read(file))) add('address', `${file} ${problem}`);
+  }
+  if (existsSync(join(dist, 'llms.txt'))) {
+    for (const problem of bareAddressProblems(read('/llms.txt'))) add('address', `/llms.txt ${problem}`);
+  }
+  const llms = join(dist, 'llms');
+  const carriers = [
+    ...(existsSync(join(dist, 'llms-full.txt')) ? ['/llms-full.txt'] : []),
+    ...(existsSync(llms)
+      ? readdirSync(llms)
+          .filter((name) => name.endsWith('.txt'))
+          .sort()
+          .map((name) => `/llms/${name}`)
+      : []),
+  ];
+  for (const file of carriers) {
+    // Each page blanked out line for line, so the numbers stay the file's.
+    let text = read(file);
+    let from = 0;
+    for (const { text: page } of llmsPages(text).pages) {
+      const at = text.indexOf(page, from);
+      if (at === -1) continue;
+      text = text.slice(0, at) + page.replace(/[^\n]/gu, ' ') + text.slice(at + page.length);
+      from = at + page.length;
+    }
+    for (const problem of bareAddressProblems(text)) add('address', `${file} ${problem}`);
+  }
 }
 
 /**
@@ -799,6 +897,7 @@ export function checkMarkdownTwins(dist, { contentDir = CONTENT_DIR, classes = P
     if (count === 0) add('class', `the page class "${id}" matches no page of the build: remove it`);
   }
   const llms = checkLlmsFiles(dist, pages, add);
+  checkAddresses(dist, copies, add);
   return { findings, stats: { pages: pages.size, copies: copies.size, classes: counted, llms } };
 }
 
@@ -1046,6 +1145,7 @@ async function main() {
     body: 'copy(ies) that carry less than their page',
     text: 'place(s) in the copies a Markdown reader cannot use',
     llms: 'place(s) where the llms files do not carry the copies as they read',
+    address: 'address(es) of the copies and the llms files a crawler reads with the punctuation after them',
   };
   let failed = 0;
   for (const [kind, list] of findings) {

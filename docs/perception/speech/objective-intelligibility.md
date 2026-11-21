@@ -425,9 +425,9 @@ other: a processor can raise STOI while the room keeps the STI poor.
 
 ## References
 
-- **Jensen, J., & Taal, C. H. (2016).** An algorithm for predicting the intelligibility of speech masked by modulated noise maskers. *IEEE/ACM Transactions on Audio, Speech, and Language Processing*, *24*(11), 2009-2022. https://doi.org/10.1109/TASLP.2016.2585878
+- **Jensen, J., & Taal, C. H. (2016).** An algorithm for predicting the intelligibility of speech masked by modulated noise maskers. *IEEE/ACM Transactions on Audio, Speech, and Language Processing*, *24*(11), 2009-2022. <https://doi.org/10.1109/TASLP.2016.2585878>
   ESTOI: the row- and column mean- and variance-normalisation of the short-time spectrogram (Eqs. 4-7) and the spectral-correlation intermediate index (Eq. 8).
-- **Taal, C. H., Hendriks, R. C., Heusdens, R., & Jensen, J. (2010).** A short-time objective intelligibility measure for time-frequency weighted noisy speech. *2010 IEEE International Conference on Acoustics, Speech and Signal Processing (ICASSP)*, 4214-4217. https://doi.org/10.1109/ICASSP.2010.5495701
+- **Taal, C. H., Hendriks, R. C., Heusdens, R., & Jensen, J. (2010).** A short-time objective intelligibility measure for time-frequency weighted noisy speech. *2010 IEEE International Conference on Acoustics, Speech and Signal Processing (ICASSP)*, 4214-4217. <https://doi.org/10.1109/ICASSP.2010.5495701>
   The short conference version of STOI.
-- **Taal, C. H., Hendriks, R. C., Heusdens, R., & Jensen, J. (2011).** An algorithm for intelligibility prediction of time-frequency weighted noisy speech. *IEEE Transactions on Audio, Speech, and Language Processing*, *19*(7), 2125-2136. https://doi.org/10.1109/TASL.2011.2114881
+- **Taal, C. H., Hendriks, R. C., Heusdens, R., & Jensen, J. (2011).** An algorithm for intelligibility prediction of time-frequency weighted noisy speech. *IEEE Transactions on Audio, Speech, and Language Processing*, *19*(7), 2125-2136. <https://doi.org/10.1109/TASL.2011.2114881>
   STOI: the shared front end (10 kHz, 256-sample Hann frames, 15 one-third-octave bands, 384 ms segments), the normalisation and signal-to-distortion clipping (Eqs. 1-4), the per-band envelope correlation (Eq. 5) and the averaged index (Eq. 6).

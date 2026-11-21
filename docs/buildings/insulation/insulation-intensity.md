@@ -772,7 +772,7 @@ cannot feed ISO 717-1.
 
 ## References
 
-- **Hopkins, C. (2007).** *Sound insulation*. Butterworth-Heinemann. https://doi.org/10.4324/9780080550473
+- **Hopkins, C. (2007).** *Sound insulation*. Butterworth-Heinemann. <https://doi.org/10.4324/9780080550473>
   The reference monograph for laboratory sound-insulation measurement, including the intensity route and its relation to the pressure methods. ISBN 978-0-7506-6526-1.
 - **International Organization for Standardization. (2000).** [*Acoustics — Measurement of sound insulation in buildings and of building elements using sound intensity — Part 1: Laboratory measurements*](https://www.iso.org/standard/26097.html) (ISO 15186-1:2000).
   The sound-intensity sound reduction index R_I, its Kc-modified form and the element normalized level difference (laboratory); the tool of choice when flanking is high (Clause 1).

@@ -543,7 +543,7 @@ junction data the EN 12354 prediction consumes is measured per
 
 ## References
 
-- **Hopkins, C. (2007).** *Sound insulation*. Butterworth-Heinemann. https://doi.org/10.4324/9780080550473
+- **Hopkins, C. (2007).** *Sound insulation*. Butterworth-Heinemann. <https://doi.org/10.4324/9780080550473>
   The reference monograph for laboratory sound-insulation measurement and the interpretation of the laboratory indices. ISBN 978-0-7506-6526-1.
 - **International Organization for Standardization. (2010).** *Acoustics — Laboratory measurement of sound insulation of building elements — Part 1: Application rules for specific products* (ISO 10140-1:2010).
   The mounting rules this page documents: a mounting is described rather than picked from a list. Nothing here checks them.
@@ -555,5 +555,5 @@ junction data the EN 12354 prediction consumes is measured per
   The measurement procedures and the background-noise correction shared by the airborne R and impact Ln.
 - **International Organization for Standardization. (2010).** *Acoustics — Laboratory measurement of sound insulation of building elements — Part 5: Requirements for test facilities and equipment* (ISO 10140-5:2010).
   The test facility and equipment requirements this page documents. Nothing here checks them.
-- **Vigran, T. E. (2008).** *Building acoustics*. CRC Press. https://doi.org/10.1201/9781482266016
+- **Vigran, T. E. (2008).** *Building acoustics*. CRC Press. <https://doi.org/10.1201/9781482266016>
   The transmission theory of single and double constructions that laboratory indices quantify. ISBN 978-0-415-42853-8.

@@ -974,19 +974,19 @@ the frequency rises and $0.3\lambda$ shrinks towards $w$.
 
 ## References
 
-- **Bies, D. A., Hansen, C. H., & Howard, C. Q. (2017).** *Engineering noise control* (5th ed.). CRC Press. https://doi.org/10.1201/9781351228152
+- **Bies, D. A., Hansen, C. H., & Howard, C. Q. (2017).** *Engineering noise control* (5th ed.). CRC Press. <https://doi.org/10.1201/9781351228152>
   Section 7.2: the mass law (Eq. 7.40/7.42), coincidence frequency (Eq. 7.3), Sharp's single-panel method (7.2.4.1) and the double-wall model (7.2.6, Eq. 7.62-7.64). ISBN 978-1-4987-2405-0.
-- **Craik, R. J. M., & Wilson, R. (1995).** Sound transmission through masonry cavity walls. *Journal of Sound and Vibration 179(1), 79-96*. https://doi.org/10.1006/jsvi.1995.0006
+- **Craik, R. J. M., & Wilson, R. (1995).** Sound transmission through masonry cavity walls. *Journal of Sound and Vibration 179(1), 79-96*. <https://doi.org/10.1006/jsvi.1995.0006>
   Table 1: the same tie types measured at an 85 mm cavity (butterfly 1.1 MN/m, double-triangle 4.3 MN/m), which corroborate the ordering of Table A4 but not its values, since the dynamic stiffness is defined at a given cavity width.
-- **Cremer, L., Heckl, M., & Petersson, B. A. T. (2005).** *Structure-borne sound: Structural vibrations and sound radiation at audio frequencies* (3rd ed.). Springer. https://doi.org/10.1007/b137728
+- **Cremer, L., Heckl, M., & Petersson, B. A. T. (2005).** *Structure-borne sound: Structural vibrations and sound radiation at audio frequencies* (3rd ed.). Springer. <https://doi.org/10.1007/b137728>
   Chapter 5, Table 5.1: the compilation of point impedances and mobilities of infinite structures (plate Z = 8 sqrt(B' m''), beam, rod) and the injected-power relation W = 0.5 \|F\|^2 Re{Y} (Eq. 5.23). ISBN 978-3-540-22696-3.
 - **Hall, R., & Hopkins, C. (2001).** The measurement of dynamic stiffness of wall ties used in masonry cavity walls. *Proceedings of the Institute of Acoustics 23(8), 259-266*.
   The 100 mm cavity row of Hopkins' Table A4: the proprietary vertical-twist tie at 43.4 MN/m.
-- **Hopkins, C. (2007).** *Sound insulation*. Butterworth-Heinemann. https://doi.org/10.4324/9780080550473
+- **Hopkins, C. (2007).** *Sound insulation*. Butterworth-Heinemann. <https://doi.org/10.4324/9780080550473>
   Section 2.9 (plate radiation efficiency, Leppington/Maidanik Eqs 2.227-2.230) and Section 4.3.10 (slits, holes and apertures, Gomperts Eq. 4.99, Wilson & Soroka Eq. 4.102, composite Eq. 4.92). ISBN 978-0-7506-6526-1.
-- **Hopkins, C., Wilson, R., & Craik, R. J. M. (1999).** Dynamic stiffness as an acoustic specification parameter for wall ties used in masonry cavity walls. *Applied Acoustics 58, 51-68*. https://doi.org/10.1016/S0003-682X(98)00068-1
+- **Hopkins, C., Wilson, R., & Craik, R. J. M. (1999).** Dynamic stiffness as an acoustic specification parameter for wall ties used in masonry cavity walls. *Applied Acoustics 58, 51-68*. <https://doi.org/10.1016/S0003-682X(98)00068-1>
   The measurement behind the 50 mm rows of Hopkins' Table A4: butterfly 1.7 MN/m, double-triangle 16.1 MN/m and vertical-twist 94.0 MN/m.
-- **Norton, M. P., & Karczub, D. G. (2003).** *Fundamentals of noise and vibration analysis for engineers* (2nd ed.). Cambridge University Press. https://doi.org/10.1017/CBO9781139163927
+- **Norton, M. P., & Karczub, D. G. (2003).** *Fundamentals of noise and vibration analysis for engineers* (2nd ed.). Cambridge University Press. <https://doi.org/10.1017/CBO9781139163927>
   Section 3.9.1: the plateau method after Watters, with Table 3.1 (surface density per millimetre, plateau height and the B/A frequency ratio) behind PLATEAU_MATERIALS; Eqs. 3.104/3.106 (field-incidence mass law), Eq. 3.110 (the above-coincidence branch of the coincidence_model='cremer' variant) and problem 3.11, the worked brick wall reproduced here. ISBN 978-0-521-49913-2.
-- **Vigran, T. E. (2008).** *Building acoustics*. CRC Press. https://doi.org/10.1201/9781482266016
+- **Vigran, T. E. (2008).** *Building acoustics*. CRC Press. <https://doi.org/10.1201/9781482266016>
   Sections 3.7.3.3 (orthotropic plate eigenfrequencies, Eqs 3.113-3.115 after Timoshenko & Woinowsky-Krieger) and 6.5.3 (orthotropic panel transmission, Eqs 6.107-6.113 after Heckl 1960 and Hansen 1993). ISBN 978-0-415-42853-8.

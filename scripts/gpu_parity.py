@@ -369,6 +369,7 @@ def _platform_record() -> dict[str, object]:
         "cupy_cuda_runtime": provenance.cuda_runtime,
         "nvrtc": f"{major}.{minor}",
         "numpy": np.__version__,
+        "phonometry": provenance.phonometry_version,
         "python": platform.python_version(),
         "base_image": base,
     }

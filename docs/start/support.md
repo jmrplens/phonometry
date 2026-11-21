@@ -4,12 +4,17 @@
 
 # Support the project
 
+This page lists the ways to support phonometry, from free to concrete:
+reporting a number that does not match your reference, sponsoring the work
+through GitHub Sponsors or Ko-fi, and helping obtain the standards the library
+still lacks, by funding one, sending a copy, checking the implementation
+against your own licensed copy or pointing to a channel I missed.
+
 phonometry is maintained by one person, and its real cost is not hosting or
 tooling: it is the primary sources. Every metric in the library is implemented
 from the governing standard's own text, and standards are paid documents that
 go out of print, get superseded and occasionally resist every legitimate
-acquisition route there is. This page lists the ways to help, from free to
-concrete.
+acquisition route there is.
 
 ## Use it, and tell me when a number looks wrong
 

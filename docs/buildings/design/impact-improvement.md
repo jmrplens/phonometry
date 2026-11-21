@@ -407,5 +407,5 @@ this page, or the full ISO 10140-3 floor, is the reference, and the
   The informative Annex C floating-floor estimate reproduced on this page (Formulae C.1 to C.4, the 160 sqrt(s'/m') resonance) and the worked floor of its Annex G.
 - **International Organization for Standardization. (2020).** [*Acoustics — Rating of sound insulation in buildings and of building elements — Part 2: Impact sound insulation*](https://www.iso.org/standard/69867.html) (ISO 717-2:2020).
   The impact single-number rating engine reused here and the reference floor L_n,r,0 (Table 4) behind ΔL_w, with the Formula (A.4) spectrum adaptation term CI,delta.
-- **Vigran, T. E. (2008).** *Building acoustics*. CRC Press. https://doi.org/10.1201/9781482266016
+- **Vigran, T. E. (2008).** *Building acoustics*. CRC Press. <https://doi.org/10.1201/9781482266016>
   The transmission theory of floors and floating floors that the improvement quantifies. ISBN 978-0-415-42853-8.

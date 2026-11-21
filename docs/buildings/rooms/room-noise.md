@@ -533,9 +533,9 @@ Room Criteria fiche (RCResult.report), the RC rating and its spectral tag.
 
 - **Acoustical Society of America. (2019).** [*Criteria for evaluating room noise*](https://webstore.ansi.org/standards/asa/ansiasas122019) (ANSI/ASA S12.2-2019).
   The normative NC curves and tangency method (Table 1), plus, from the informative Annex D, the RC Mark II curves (Table D.1), the mid-frequency-average rating (clause D.4) and the neutral/rumble/hiss spectral tag (clause D.3), that this module implements.
-- **Beranek, L. L. (1957).** Revised criteria for noise in buildings. *Noise Control*, *3*(1), 19-27. https://doi.org/10.1121/1.2369239
+- **Beranek, L. L. (1957).** Revised criteria for noise in buildings. *Noise Control*, *3*(1), 19-27. <https://doi.org/10.1121/1.2369239>
   The paper that introduced the NC curves and the speech-interference reasoning behind them.
-- **Blazier, W. E. (1997).** RC Mark II: A refined procedure for rating the noise of heating, ventilating, and air-conditioning (HVAC) systems in buildings. *Noise Control Engineering Journal*, *45*(6), 243-250. https://doi.org/10.3397/1.2828446
+- **Blazier, W. E. (1997).** RC Mark II: A refined procedure for rating the noise of heating, ventilating, and air-conditioning (HVAC) systems in buildings. *Noise Control Engineering Journal*, *45*(6), 243-250. <https://doi.org/10.3397/1.2828446>
   The refined RC procedure, with its neutral-spectrum rationale and the rumble/hiss regions, that ANSI/ASA S12.2 Annex D codifies.
 - **Kosten, C. W., & van Os, G. J. (1962).** [Community reaction criteria for external noises](https://openlibrary.org/books/OL58781133M). *The Control of Noise (National Physical Laboratory Symposium No. 12)*, 373-387.
   The paper that introduced the NR curve family the text contrasts with NC. Published by Her Majesty's Stationery Office; the linked record is the Open Library page.

@@ -29,7 +29,7 @@ import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import { softwareRequirements, targetPlatform } from '../../src/data/repo-stats.mjs';
+import { licenses, softwareRequirements, targetPlatform } from '../../src/data/repo-stats.mjs';
 import {
 	featureList,
 	inBothLanguages,
@@ -188,6 +188,7 @@ export function siteNodes(operatingSystem = PLATFORMS) {
 			featureList: structuredClone(featureList),
 			keywords: structuredClone(keywords),
 			softwareRequirements,
+			license: licenses.map((license) => license.url),
 		},
 		{
 			'@type': 'SoftwareSourceCode',
@@ -196,6 +197,7 @@ export function siteNodes(operatingSystem = PLATFORMS) {
 			codeRepository: REPOSITORY,
 			dateCreated: FIRST_COMMIT,
 			targetProduct: { '@id': SITE.software },
+			license: licenses.map((license) => license.url),
 			archivedAt: `https://archive.softwareheritage.org/browse/origin/?origin_url=${REPOSITORY}`,
 		},
 	];

@@ -3,14 +3,18 @@ title: "Start"
 description: "Where to begin with phonometry: the first analysis end to end, the task index, the map of all the guides, why the library exists and who maintains it."
 ---
 
-phonometry computes acoustic quantities from the text of the standards that
-define them: ISO, IEC, ANSI and ASTM, the CNOSSOS-EU annex to Directive
-2002/49/EC, and the ICAO and ECAC aircraft documents. Every metric names the
-clause it implements. What that buys you, and how it is checked, is
-[Why phonometry](/start/why-phonometry/).
+Start is where to begin with phonometry, the Python library that computes
+acoustic quantities from the text of the standards that define them: ISO, IEC,
+ANSI and ASTM, the CNOSSOS-EU annex to Directive 2002/49/EC, and the ICAO and
+ECAC aircraft documents. Every metric names the clause it implements. The
+seven short pages of this section take a new user from installing the library
+and getting a first calibrated number to the guide for their task, and say how
+to upgrade code written for 3.3, why the library can be trusted, who maintains
+it and how to support it. What the standards buy you, and how each is checked,
+is [Why phonometry](/start/why-phonometry/).
 
-Seven short pages, meant to be read once before anything else. Each answers one
-question, and they are in the order the questions arrive.
+The seven pages are meant to be read once before anything else. Each answers
+one question, and they are in the order the questions arrive.
 
 **Can I install it and get a number out?**
 [Getting Started](/start/getting-started/) installs the library,

@@ -3,13 +3,18 @@ title: "Inicio"
 description: "Por dónde empezar con phonometry: el primer análisis completo, el índice por tareas, el mapa de guías, por qué existe la biblioteca y quién la mantiene."
 ---
 
-phonometry calcula magnitudes acústicas a partir del texto de las normas que
-las definen: ISO, IEC, ANSI y ASTM, el anexo CNOSSOS-EU de la Directiva
-2002/49/CE y los documentos de aeronaves de OACI y ECAC. Cada métrica cita
-el apartado que implementa. Qué te aporta eso, y cómo se comprueba, está en
+Inicio es por donde empezar con phonometry, la biblioteca de Python que
+calcula magnitudes acústicas a partir del texto de las normas que las definen:
+ISO, IEC, ANSI y ASTM, el anexo CNOSSOS-EU de la Directiva 2002/49/CE y los
+documentos de aeronaves de OACI y ECAC. Cada métrica cita el apartado que
+implementa. Las siete páginas breves de esta sección llevan a quien empieza
+desde instalar la biblioteca y obtener un primer número calibrado hasta la
+guía de su tarea, y dicen cómo actualizar código escrito para la 3.3, por qué
+fiarse de la biblioteca, quién la mantiene y cómo apoyarla. Qué te aportan las
+normas, y cómo se comprueba cada una, está en
 [Por qué phonometry](/es/start/why-phonometry/).
 
-Siete páginas breves, pensadas para leerse una vez antes que nada. Cada una
+Las siete páginas están pensadas para leerse una vez antes que nada. Cada una
 responde a una pregunta, y están en el orden en que llegan las preguntas.
 
 **¿Puedo instalarla y sacar un número?**

@@ -54,6 +54,15 @@ import ScopeClaim from '../../../../../components/ScopeClaim.astro';
 import SeeAlso from '../../../../../components/SeeAlso.astro';
 import ThemeImage from '../../../../../components/ThemeImage.astro';
 
+## ¿Cómo calculo niveles por bandas de octava o de tercio de octava en Python?
+
+`result = filters.octave_filter(x, fs, fraction=3)` filtra una señal `x`
+muestreada a `fs` hercios en bandas de tercio de octava (`fraction=1` da
+octavas): `result.levels` guarda el nivel de cada banda en decibelios y
+`result.frequencies` la frecuencia central exacta de cada una. El
+[apartado 2](#2-que-devuelve-una-llamada) la llama sobre un tono de 1 kHz
+con ruido y dibuja el espectro que guarda el resultado.
+
 phonometry ofrece varios tipos de filtro, cada uno con su propia función de
 transferencia característica. Butterworth, Chebyshev II y Bessel sitúan sus
 **puntos de −3 dB en los bordes de banda de ANSI S1.11**, de modo que sus
@@ -72,15 +81,6 @@ arquitecturas es la
 [Galería de arquitecturas de filtro](/es/signals/filters/filter-gallery/),
 y qué significa «clase 1» para el resultado es
 [Verificación de clase de filtros](/es/signals/filters/filter-compliance/).
-
-## ¿Cómo calculo niveles por bandas de octava o de tercio de octava en Python?
-
-`result = filters.octave_filter(x, fs, fraction=3)` filtra una señal `x`
-muestreada a `fs` hercios en bandas de tercio de octava (`fraction=1` da
-octavas): `result.levels` guarda el nivel de cada banda en decibelios y
-`result.frequencies` la frecuencia central exacta de cada una. El
-[apartado 2](#2-que-devuelve-una-llamada) la llama sobre un tono de 1 kHz
-con ruido y dibuja el espectro que guarda el resultado.
 
 ## 1. Bandas de fracción de octava: las matemáticas
 

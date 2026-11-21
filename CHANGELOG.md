@@ -18,6 +18,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   beside the former package name. The base-path check allows the old address
   on those two lines only, so any other mention, and any link to the old host,
   still fails it.
+- **Four hub pages say in their first sentences what they hold, and the
+  filter-bank guide answers first.** Reference, the published catalogues,
+  Support the project and Start, in English and Spanish, open with a
+  paragraph that names what the page is for and what it gathers, where they
+  opened on a remark that left the page's purpose to the second or third
+  paragraph. The filter-bank guide opens on its answer to "How do I compute
+  octave or one-third-octave band levels in Python?", with the filter types
+  and the map of the page after it.
 - **The PyOctaveBand transition package moves to 2.2.2 and links the
   documentation at <https://phonometry.dev/>.** Its PyPI page, its project
   links and the `FutureWarning` that `import pyoctaveband` raises send

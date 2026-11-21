@@ -391,14 +391,15 @@ def test_the_index_names_the_former_address_once_in_plain_text() -> None:
     as a link, which would send a crawler to the old host.
     """
     index = (ROOT / "llms.txt").read_text(encoding="utf-8")
-    assert index.count("docs.jmrp.io") == 1, "the former address, once"
-    (paragraph,) = (block for block in index.split("\n\n") if "docs.jmrp.io" in block)
+    former = re.compile(r"docs\.jmrp\.io")
+    assert len(former.findall(index)) == 1, "the former address, once"
+    (paragraph,) = (block for block in index.split("\n\n") if former.search(block))
     assert "**PyOctaveBand**" in paragraph, "beside the former package name"
     assert re.search(r"(?<![/<(\[\w.])docs\.jmrp\.io/phonometry(?![\w/])", paragraph), (
         "in plain text: no scheme, link or autolink around it"
     )
     assert "](" not in paragraph
-    assert "://docs.jmrp.io" not in paragraph
+    assert not re.search(r"://docs\.jmrp\.io", paragraph)
 
 
 def test_a_shard_head_and_a_part_head_link_every_address_they_name() -> None:

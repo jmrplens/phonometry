@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Added
+
+- **The documentation build holds its software node to what jmrp.io states
+  about it.** jmrp.io publishes the same SoftwareApplication node as every
+  page of the documentation, under the same `@id`, and the two had come to
+  state different licences. The docs job now reads the record jmrp.io
+  publishes for the project and fails when the name, either description, the
+  licence, the language, the category, the systems or the repository differs
+  between the two, where both state it and jmrp.io does not list the
+  difference as one it accepts. It compares them by jmrp.io's own rules,
+  copied here and held to jmrp.io's on every run, so the two sites change
+  such a value together, jmrp.io first.
+
 ### Changed
 
 - **About says when 4.0.0 came out and where the documentation was before

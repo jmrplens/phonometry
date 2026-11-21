@@ -45,6 +45,9 @@ export const SECURITY_HEADERS = Object.freeze([
 export const TEXT_TYPES = Object.freeze([
 	['/*.md', 'text/markdown; charset=utf-8'],
 	['/*.txt', 'text/plain; charset=utf-8'],
+	// No extension to name it from: Chrome's prefetch proxy reads the body only
+	// under this type (https://github.com/buettner/private-prefetch-proxy/blob/main/traffic-advice.md).
+	['/.well-known/traffic-advice', 'application/trafficadvice+json'],
 ]);
 
 /**

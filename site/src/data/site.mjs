@@ -96,9 +96,9 @@ export function siteTarget(name) {
 }
 
 // globalThis.process, not process: the build and the scripts read this module
-// under Node, and the Worker bundle reaches it through
-// worker/lib/agent-paths.mjs. The Worker has no process, so the optional chain
-// is what lets the module load there and read the default target.
+// under Node, and a module the Worker bundle reaches may import it. The Worker
+// has no process, so the optional chain is what lets the module load there
+// and read the default target.
 const target = siteTarget(globalThis.process?.env?.PHONOMETRY_SITE);
 
 export const siteUrl = target.siteUrl;

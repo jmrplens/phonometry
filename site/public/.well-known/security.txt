@@ -1,0 +1,24 @@
+-----BEGIN PGP SIGNED MESSAGE-----
+Hash: SHA512
+
+# Security policy for phonometry.dev and the phonometry library
+# RFC 9116: https://www.rfc-editor.org/rfc/rfc9116.html
+
+Contact: https://github.com/jmrplens/phonometry/security/advisories/new
+Contact: mailto:mail@jmrp.io
+Encryption: openpgp4fpr:0A993B268654DBBA52B7E8D3FCF653391E2C91FC
+Encryption: https://keys.openpgp.org/vks/v1/by-fingerprint/0A993B268654DBBA52B7E8D3FCF653391E2C91FC
+Preferred-Languages: en, es
+Canonical: https://phonometry.dev/.well-known/security.txt
+Policy: https://github.com/jmrplens/phonometry/security/policy
+
+# Expires is renewed and the file signed again before it passes:
+# site/scripts/public-files.test.mjs fails 30 days ahead of the date.
+Expires: 2027-11-21T00:00:00.000Z
+-----BEGIN PGP SIGNATURE-----
+
+iHUEARYKAB0WIQQKmTsmhlTbulK36NP89lM5HiyR/AUCawFbGgAKCRD89lM5HiyR
+/OhCAQCsKUvIi0vhNb4u6z+6TSEri4k5IzfgFp6QqJ5Gg+D3fQD9Eh3PLXx2A+fY
+YTu6rwE3qXs16oqzOKHZ7aF7WGMXegU=
+=sBNs
+-----END PGP SIGNATURE-----

@@ -9,6 +9,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+- **The documentation says what it records about its readers.** A Privacy
+  page, in English and Spanish and linked from every footer, lists each field
+  the page-view report and the request records keep, where they are kept and
+  for how long, what the site stores in the browser (no cookies), the one
+  report a browser may send elsewhere (a blocked-content report to the
+  maintainer's server) and how to ask for one's own records or their deletion.
+- **phonometry.dev answers the files clients look for at fixed addresses.**
+  `/.well-known/security.txt` (RFC 9116, signed with the maintainer's key,
+  with the same contacts as SECURITY.md), `/.well-known/tdmrep.json`,
+  `/.well-known/gpc.json`, `/.well-known/traffic-advice` (served with the type
+  Chrome's prefetch proxy reads), `/ai.txt`, `/humans.txt`, `/ads.txt` and
+  `/apple-touch-icon-precomposed.png`, each of which crawlers, browsers or
+  security scanners had asked for and got a 404. The upload kept no file
+  under a folder whose name starts with a dot, so it now keeps
+  `/.well-known/`, and the deploy checks four of them live. A test holds
+  robots.txt, ai.txt and tdmrep.json to one AI policy, and fails 30 days
+  before security.txt expires.
 - **The documentation build holds its software node to what jmrp.io states
   about it.** jmrp.io publishes the same SoftwareApplication node as every
   page of the documentation, under the same `@id`, and the two had come to
@@ -22,6 +39,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Changed
 
+- **Only the beacon runs code on phonometry.dev.** The Markdown copies, the
+  llms files and the sitemaps are served as plain files, like every page, so a
+  fault in the Worker, a spent daily quota or a broken deploy of its code can
+  no longer answer them with anything but the file. The Worker now runs for
+  the page-view beacon alone; reads of those files are counted from the zone's
+  own request analytics instead of Worker records. A 404 page reports wherever
+  it stands, since no Worker logs a missing copy any more.
+- **robots.txt speaks the Content Signals vocabulary as it is defined, to
+  every crawler.** It declared `ai-retrieval`, a key neither contentsignals.org
+  nor the IETF draft defines, and declared the signal only under `*`, which a
+  crawler with a group of its own (GPTBot, ClaudeBot and the rest) never reads.
+  Every group now carries `search=yes, ai-input=yes, ai-train=yes`, and the
+  file names more search and AI crawlers.
 - **About says when 4.0.0 came out and where the documentation was before
   phonometry.dev.** The History of About, in English and Spanish, now dates
   4.0.0 (17 November 2026) and the move of the documentation to phonometry.dev

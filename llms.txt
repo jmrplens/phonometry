@@ -56,6 +56,7 @@ If you are an AI assistant setting this up for a user: install from PyPI (no sys
 - [Upgrading from 3.3 to 4.0](https://phonometry.dev/start/upgrading/): Upgrade to 4.0: what moved, was renamed or removed and how to find its new spelling, the root trim, split modules and units in parameter names.
 - [About](https://phonometry.dev/start/about/): About phonometry: who maintains it, how each metric is built from its governing standard and checked in CI, how to report an error and how to cite it.
 - [Support the project](https://phonometry.dev/start/support/): Support for phonometry: reporting numbers that look wrong, sponsoring the work and helping obtain primary sources that no legitimate route has yielded.
+- [Privacy](https://phonometry.dev/start/privacy/): What phonometry.dev records about its readers: no cookies, a first-party page-view report and the requests Cloudflare logs, each field and how long it is kept.
 - [Guides index](https://phonometry.dev/start/guides/): All 168 guides of phonometry in the thirteen topics it covers: what each area is for, the standards it implements and a one-line summary of every guide.
 - [Glossary of quantities](https://phonometry.dev/reference/glossary/): Acoustic quantities the guides compute most, each with symbol, one-sentence definition, unit, defining standard and clause, and the guide computing it.
 

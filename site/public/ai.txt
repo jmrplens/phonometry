@@ -1,0 +1,18 @@
+# phonometry documentation: ai.txt (https://site.spawning.ai/spawning-ai-txt)
+#
+# This site allows AI training, retrieval and grounding without restriction.
+# The authoritative statement is robots.txt, which carries the same intent in
+# the Content Signals vocabulary:
+#
+#     Content-Signal: search=yes, ai-input=yes, ai-train=yes
+#
+# The same intent is published as a TDM Reservation Protocol document at
+# /.well-known/tdmrep.json ("tdm-reservation": 0, no rights reserved over text
+# and data mining), the form crawlers working under EU law look for.
+#
+# This file exists because some agents look here first and read a 404 as
+# ambiguous. robots.txt, this file and tdmrep.json say one thing and change
+# together: site/scripts/public-files.test.mjs fails when they disagree.
+
+User-Agent: *
+Allow: /

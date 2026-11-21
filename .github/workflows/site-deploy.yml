@@ -244,8 +244,8 @@ jobs:
       - name: Read whether the quota guard has switched the code paths off
         # At 95 % of the day's Workers requests the guard blocks the beacon
         # and rolls the Worker to its assets-only half until 00:00 UTC. A
-        # deploy then has to keep them off, or the agent files would spend
-        # what the guard is keeping (site/worker/README.md, "Quota").
+        # deploy then has to keep it off, or the beacon would spend what the
+        # guard is keeping (site/worker/README.md, "Quota").
         id: guard
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CF_PHONOMETRY_DEPLOY_TOKEN }}
@@ -391,6 +391,13 @@ jobs:
           expect "a copy says it is UTF-8" "$base/signals/index.md" 200 '^content-type: text/markdown; charset=utf-8'
           expect "llms.txt says it is UTF-8" "$base/llms.txt" 200 '^content-type: text/plain; charset=utf-8'
           expect "robots.txt at the root says it is UTF-8" "$ORIGIN/robots.txt" 200 '^content-type: text/plain; charset=utf-8'
+          # The files a client looks for at a fixed address: .assetsignore keeps
+          # .well-known/ while it drops every other dot name, and traffic-advice
+          # has no extension to type it from (site/worker/lib/headers.mjs).
+          expect "security.txt answers at its RFC 9116 address" "$ORIGIN/.well-known/security.txt" 200 '^content-type: text/plain; charset=utf-8'
+          expect "tdmrep.json answers as JSON" "$ORIGIN/.well-known/tdmrep.json" 200 '^content-type: application/json'
+          expect "traffic-advice answers with its own type" "$ORIGIN/.well-known/traffic-advice" 200 '^content-type: application/trafficadvice\+json'
+          expect "ai.txt answers" "$ORIGIN/ai.txt" 200 '^content-type: text/plain; charset=utf-8'
           # 204 with full code live; while the code paths are held off, the
           # guard's WAF rule answers 403 before any Worker runs, or, while
           # that rule is not on yet, the assets-only half answers 404 (no

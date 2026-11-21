@@ -52,12 +52,20 @@ un filtro de bandas de octava y de fracción de octava para señales en el
 dominio del tiempo, y en julio de ese año lo renombré PyOctaveBand. Su
 primera publicación en PyPI, PyOctaveBand 1.0.1, llegó en enero de 2026. En
 julio de 2026, con la versión 3.0.0, la biblioteca pasó a llamarse
-phonometry. PyOctaveBand sigue en PyPI como envoltorio sobre phonometry, y
-acoustic-toolbox, el sucesor comunitario de python-acoustics, depende de él.
-Cada versión de la biblioteca desde la 2.0.0, publicada ese mismo julio,
-queda archivada en Zenodo bajo un único DOI de concepto, el que aparece más
-abajo en Cómo citar este software. Un artículo que describe la biblioteca
-está enviado al Journal of Open Source Software, donde sigue pendiente.
+phonometry. PyOctaveBand sigue en PyPI como envoltorio fijado a phonometry
+3.x (`phonometry>=3.0.0,<4`), y acoustic-toolbox, el sucesor comunitario de
+python-acoustics, depende de él; un proyecto que instala el envoltorio recibe
+la 3.x y no puede instalar la 4.x a su lado. Cada versión de la biblioteca
+desde la 2.0.0, publicada ese mismo julio, queda archivada en Zenodo bajo un
+único DOI de concepto, el que aparece más abajo en Cómo citar este software.
+Un artículo que describe la biblioteca está enviado al Journal of Open Source
+Software, donde sigue pendiente. phonometry 4.0.0, publicada el 17 de
+noviembre de 2026, rompe con la 3.x, y la
+[guía de actualización](/es/start/upgrading/) da el nombre nuevo de cada
+nombre antiguo. Desde el 20 de noviembre de 2026 esta documentación se sirve
+en phonometry.dev; hasta entonces se publicaba en docs.jmrp.io/phonometry, y
+cada dirección de allí responde ahora con una redirección permanente a la
+misma página de aquí.
 
 ## Cómo construyo la biblioteca
 

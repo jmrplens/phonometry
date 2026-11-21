@@ -1072,6 +1072,9 @@ def _summary(version: str) -> list[str]:
         ),
         "",
         (
+            "Until 20 November 2026 this documentation was published at "
+            "docs.jmrp.io/phonometry, and every address there now redirects to the "
+            "same page on phonometry.dev. "
             "The project was published as **PyOctaveBand** until version 3.0.0. "
             "Third-party references and dependency pins still using that name refer "
             "to this library."

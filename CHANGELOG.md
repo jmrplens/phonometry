@@ -9,6 +9,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Changed
 
+- **About says when 4.0.0 came out and where the documentation was before
+  phonometry.dev.** The History of About, in English and Spanish, now dates
+  4.0.0 (17 November 2026) and the move of the documentation to phonometry.dev
+  (20 November 2026), naming the address it was published at until then in
+  plain text, and says that the PyOctaveBand transition package is pinned to
+  phonometry 3.x (`phonometry>=3.0.0,<4`). `llms.txt` names the former address
+  beside the former package name. The base-path check allows the old address
+  on those two lines only, so any other mention, and any link to the old host,
+  still fails it.
 - **The PyOctaveBand transition package moves to 2.2.2 and links the
   documentation at <https://phonometry.dev/>.** Its PyPI page, its project
   links and the `FutureWarning` that `import pyoctaveband` raises send

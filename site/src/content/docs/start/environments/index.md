@@ -12,13 +12,14 @@ optional extras can follow them. The pages of this section take one place
 each, with commands that were run there.
 
 Checked on 17 November 2026 with phonometry 4.0.0 from PyPI, and the conda page
-again on 21 November from conda-forge: every page of this section says, under
-its opening paragraph, when and on which versions its commands ran.
+again on 21 November with phonometry 4.0.1 from conda-forge: every page of this
+section says, under its opening paragraph, when and on which versions its
+commands ran.
 
 | Where | How phonometry arrives | What runs | What does not |
 |---|---|---|---|
 | [pip and uv](/start/environments/pip-and-uv/) | `python -m pip install "phonometry[full]"` in a virtual environment, or `uv add "phonometry[full]"` | everything; `[torch]` adds the FDTD engines on PyTorch | `[perf]` and `[full]` on 32-bit Windows and 32-bit Linux, where `[plot,report,audio]` installs the other three extras |
-| [conda and mamba](/start/environments/conda/) | `conda install -c conda-forge phonometry`, with the extras under their conda-forge names | everything, pytorch from conda-forge included | nothing is left out |
+| [conda and mamba](/start/environments/conda/) | `conda install -c conda-forge phonometry`, with the extras under their conda-forge names | everything, pytorch from conda-forge included | 32-bit Windows and 32-bit Linux, where conda-forge has no Python 3.12 or newer and phonometry installs with pip, `[plot,report,audio]` in place of `[full]` |
 | [Jupyter and JupyterLab](/start/environments/jupyter/) | `python -m pip install jupyterlab "phonometry[full]"` | record tables, inline figures, fiches, videos once ffmpeg is installed | a kernel started with `PYTHONWARNINGS=error`; `[full]` on 32-bit Windows and 32-bit Linux, where `[plot,report,audio]` takes its place |
 | [JupyterLite and Pyodide](/start/environments/jupyterlite/) | `%pip install "phonometry[plot,report,audio]"` in the first cell | metrics, record tables, figures, fiches, WAV and FLAC, FDTD on NumPy | `[perf]`, `[torch]` and `[full]`, video, every compute device but `"cpu"` |
 | [Docker and servers](/start/environments/docker/) | a virtual environment inside a `python:3.13-slim` image | everything, under any user id and on a read-only root with a writable `/tmp`, from wheels on x86-64 and ARM64 | the wheels on the image's six other architectures, where pip builds NumPy, SciPy and most extras from source; `[perf]` and `[full]` on its three 32-bit ones, where `[plot,report,audio]` installs the other three extras; `[torch]` on all six |

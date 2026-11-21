@@ -69,6 +69,10 @@ _CODE = re.compile(r"`([^`]*)`")
 _WHEN = ("date", "phonometry")
 
 
+#: The page that sums the section up, and quotes every run of its pages.
+_OVERVIEW = "index"
+
+
 def _release(page: str) -> str:
     """The phonometry release the page's commands were run with."""
     return str(_RECORD["pages"][page].get("phonometry", _RECORD["phonometry"]))
@@ -82,12 +86,19 @@ def _day(page: str, language: str) -> str:
 
 
 def _values(page: str) -> list[str]:
-    """Every value of a page's record, lists flattened."""
+    """Every value of a page's record, lists flattened.
+
+    The overview (``index``) answers for the section, so it also names every
+    release a page of it was checked with on its own, beside its own.
+    """
     values: list[str] = []
     for key, value in _RECORD["pages"][page].items():
         if key in _WHEN:
             continue
         values.extend(value if isinstance(value, list) else [value])
+    if page == _OVERVIEW:
+        others = {_release(name) for name in _RECORD["pages"]} - {_release(page)}
+        values.extend(sorted(others))
     return values
 
 

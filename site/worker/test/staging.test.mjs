@@ -9,7 +9,7 @@ import { afterEach, describe, test } from 'node:test';
 import { twinExclusions } from '../lib/twins.mjs';
 import { beaconScript } from '../lib/beacon.mjs';
 import { DEFAULT_SITE, SITE_TARGETS, mediaOrigins } from '../../src/data/site.mjs';
-import { CANONICAL_ORIGIN, MAX_FILE_BYTES, MAX_FILES, SERVED_ORIGIN, agentPathProblems, beaconProblems, buildOrigin, indexableBuild, withBeacon, exclusionProblems, listTree, mediaPolicyProblems, noTwinPages, servedPages, stage, treeProblems } from '../lib/staging.mjs';
+import { CANONICAL_ORIGIN, MAX_FILE_BYTES, MAX_FILES, SERVED_ORIGIN, agentPathProblems, beaconProblems, slashRuleProblems, buildOrigin, indexableBuild, withBeacon, exclusionProblems, listTree, mediaPolicyProblems, noTwinPages, servedPages, stage, treeProblems } from '../lib/staging.mjs';
 
 // The site as it is served: at the root of phonometry.dev, its clips on the
 // clip host of site-targets.json.
@@ -304,6 +304,45 @@ describe('the paths that run the Worker', () => {
 		// folder whose name starts with llms.
 		assert.deepEqual(agentPathProblems([{ path: 'llms-notes/readme.txt' }, { path: 'guides/index.md.html' }], prefix), [
 			'/llms-notes/readme.txt would run the Worker, and it is no agent file (lib/agent-paths.mjs)',
+		]);
+	});
+});
+
+describe('what the trailing-slash rule needs of the build', () => {
+	test('every file has an extension and no page sits in a folder with a dot: nothing to report', () => {
+		assert.deepEqual(slashRuleProblems(listTree(tree(good())), prefix), []);
+		assert.deepEqual(slashRuleProblems([{ path: 'signals/index.html' }, { path: 'llms/llms-signals-2.txt' }, { path: '_astro/a.B1.css' }, { path: '.well-known/security.txt' }], ''), []);
+	});
+
+	test('a file without an extension under a folder whose name holds a dot is no address the rule reads: nothing to report', () => {
+		assert.deepEqual(slashRuleProblems([{ path: '.well-known/atproto-did' }, { path: '.well-known/apple-app-site-association' }, { path: 'v1.2/LICENSE' }], ''), []);
+		assert.deepEqual(slashRuleProblems([{ path: 'LICENSE' }], '/v1.2'), []);
+	});
+
+	test('a file whose address holds no dot would be sent to an address with a slash that answers 404', () => {
+		assert.deepEqual(slashRuleProblems([{ path: 'signals/index.html' }, { path: 'LICENSE' }, { path: 'media/clip' }], ''), [
+			'/LICENSE has no dot in its address: the trailing-slash rule (lib/rules.mjs) would send it to /LICENSE/, which answers 404',
+			'/media/clip has no dot in its address: the trailing-slash rule (lib/rules.mjs) would send it to /media/clip/, which answers 404',
+		]);
+		assert.deepEqual(slashRuleProblems([{ path: 'media/clip' }], '/phonometry'), [
+			'/phonometry/media/clip has no dot in its address: the trailing-slash rule (lib/rules.mjs) would send it to /phonometry/media/clip/, which answers 404',
+		]);
+	});
+
+	test('a page served flat would loop between the rule and the assets; the not-found page at the root is the one it leaves alone', () => {
+		assert.deepEqual(slashRuleProblems([{ path: '404.html' }, { path: 'signals/index.html' }], ''), []);
+		assert.deepEqual(slashRuleProblems([{ path: '404.html' }], '/phonometry'), []);
+		assert.deepEqual(slashRuleProblems([{ path: 'about.html' }, { path: 'es/404.html' }, { path: 'signals/legacy.html' }], ''), [
+			'/about.html is a page served flat, at /about: the trailing-slash rule (lib/rules.mjs) would send /about to /about/, which the asset server sends back, a loop',
+			'/es/404.html is a page served flat, at /es/404: the trailing-slash rule (lib/rules.mjs) would send /es/404 to /es/404/, which the asset server sends back, a loop',
+			'/signals/legacy.html is a page served flat, at /signals/legacy: the trailing-slash rule (lib/rules.mjs) would send /signals/legacy to /signals/legacy/, which the asset server sends back, a loop',
+		]);
+	});
+
+	test('a page under a folder whose name holds a dot keeps the 307 the rule exists to replace', () => {
+		assert.deepEqual(slashRuleProblems([{ path: 'reference/api/phonometry.filters/index.html' }, { path: 'v1.2/guide/index.html' }], '/phonometry'), [
+			'/phonometry/reference/api/phonometry.filters/ is a page under a folder whose name holds a dot: the trailing-slash rule (lib/rules.mjs) leaves /phonometry/reference/api/phonometry.filters to the asset server\'s 307',
+			'/phonometry/v1.2/guide/ is a page under a folder whose name holds a dot: the trailing-slash rule (lib/rules.mjs) leaves /phonometry/v1.2/guide to the asset server\'s 307',
 		]);
 	});
 });

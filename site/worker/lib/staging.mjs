@@ -19,6 +19,7 @@ import { agentPaths, runsWorker } from './agent-paths.mjs';
 import { beaconScript } from './beacon.mjs';
 import { headersFile, parseHeaders, HEADER_LINE_LIMIT, HEADER_RULE_LIMIT } from './headers.mjs';
 import { redirectProblems, redirectsFile } from './redirects.mjs';
+import { NOT_FOUND_PAGE } from './rules.mjs';
 import { isExcluded } from './twins.mjs';
 
 /** Workers Free: files per Worker version, and bytes per file. */
@@ -247,6 +248,46 @@ export function agentPathProblems(files, prefix, rootCopies = []) {
 	return served.filter((path) => runsWorker(path, patterns) && !AGENT_FILE.test(path)).map((path) => `${path} would run the Worker, and it is no agent file (lib/agent-paths.mjs)`);
 }
 
+/**
+ * What the trailing-slash rule (lib/rules.mjs) takes for granted of the
+ * build. It sends every GET of an address with no slash at its end and no dot
+ * anywhere to the same address with a slash, so it reads each file the way
+ * the rule does, by its whole served address: a file whose address holds no
+ * dot would be sent away from itself to an address that answers 404 (one
+ * without an extension under a folder with a dot, as `.well-known/` holds,
+ * is no address the rule reads), and a page whose address without its slash
+ * holds a dot would be left out of the rule and keep the asset server's 307.
+ * The files Static Assets reads and never serves (`_headers`, `_redirects`)
+ * are no addresses and pass. A page served flat, an `.html` file not named
+ * `index.html`, is answered by the asset server at its address without a
+ * slash, where the rule would send it on to the address with one, which the
+ * asset server sends back: a loop. The not-found page is the one the rule
+ * leaves alone, and the only one a build may hold.
+ *
+ * @param {{path: string}[]} files The build's files.
+ * @param {string} prefix The base path.
+ * @returns {string[]} One line per file.
+ */
+export function slashRuleProblems(files, prefix) {
+	const problems = [];
+	for (const { path } of files) {
+		const served = `${prefix}/${path}`;
+		if (!served.includes('.') && !CONTROL_FILES.has(path.split('/').at(-1))) {
+			problems.push(`${served} has no dot in its address: the trailing-slash rule (lib/rules.mjs) would send it to ${served}/, which answers 404`);
+		}
+		const name = path.split('/').at(-1);
+		if (name.endsWith('.html') && name !== 'index.html' && path !== `${NOT_FOUND_PAGE}.html`) {
+			const flat = served.slice(0, -'.html'.length);
+			problems.push(`${served} is a page served flat, at ${flat}: the trailing-slash rule (lib/rules.mjs) would send ${flat} to ${flat}/, which the asset server sends back, a loop`);
+		}
+		const page = pageOf(path, prefix);
+		if (page !== null && page.slice(0, -1).includes('.')) {
+			problems.push(`${page} is a page under a folder whose name holds a dot: the trailing-slash rule (lib/rules.mjs) leaves ${page.slice(0, -1)} to the asset server's 307`);
+		}
+	}
+	return problems;
+}
+
 /** A closing body tag, in any case. */
 const BODY_END = /<\/body>/gi;
 
@@ -325,6 +366,7 @@ export function stage({ from, out, prefix, origin, pairs, exclusions, indexable,
 	const rootCopies = prefix === '' ? [] : ['404.html', ...ROOT_COPIES].filter((name) => have.has(`${prefix}/${name}`));
 	const extra = rootCopies.length;
 	problems.push(...agentPathProblems(files, prefix, rootCopies));
+	problems.push(...slashRuleProblems(files, prefix));
 	if (files.length + extra > MAX_FILES) problems.push(`${files.length + extra} files once staged, over the ${MAX_FILES}`);
 	const pages = beacon ? files.filter(({ path }) => path.endsWith('.html')) : [];
 	const report = { problems, files: files.length + extra, redirects: pairs.length, headerRules: rules, beaconPages: pages.length };

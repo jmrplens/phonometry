@@ -431,6 +431,9 @@ jobs:
             check "a page under the old base path goes to the root" 301 "$ORIGIN/signals/\?q=1" "$ORIGIN$LEGACY_BASE/signals/?q=1"
             check "the old base path itself goes to the home page" 301 "$ORIGIN/[[:space:]]*$" "$ORIGIN$LEGACY_BASE"
           fi
+          # The asset server answers a page written without its slash with a
+          # 307; the trailing-slash rule answers first, with a 301.
+          check "a page without its slash goes to the page" 301 "$ORIGIN$BASE/signals/\?q=1" "$ORIGIN$BASE/signals?q=1"
           check "a Markdown request gets the copy" 302 "$BASE/signals/index.md" -H 'Accept: text/markdown' "$ORIGIN$BASE/signals/"
           check "a clip goes where ranges answer 206" 302 "$CLIP_BASE" "$ORIGIN$BASE/media/$(ls "site/worker/stage$BASE/media" | grep -m1 '\.webm$')"
           # _headers matches a path whatever the status; these three come

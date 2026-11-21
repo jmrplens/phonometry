@@ -53,11 +53,34 @@ What a script would have done lives elsewhere:
 | Validators and 304s | the asset server's own `ETag` |
 | Byte ranges for the clips | zone rule `clips-to-range-host`: a 302 to `clipBase` (`site/src/data/site-targets.json`), the clip host, which answers 206 (section "Where the clips are served from") |
 | Addresses under an old base path | zone rules `legacy-base-slash` and `legacy-base-bare`: `/phonometry/X` answers a 301 to `/X` and `/phonometry` to `/`, the query kept, generated because the site is served at the root and `site-targets.json` lists a legacy origin under that base |
+| A page written without its trailing slash, a 301 to the address with it (GitHub Pages' own answer) | zone Single Redirect rule `trailing-slash` (`lib/rules.mjs`): a GET or HEAD of a path with no slash at its end and no dot anywhere, `/_v`, `/cdn-cgi/`, `/404` and every `…/index` aside, answers a 301 to the path with its slash, the query kept, before the asset server's 307 |
 
 Zone rules run before any Worker and cost no invocation. `_headers` and
 `_redirects` are read by the asset server. Static Assets answers a `Range`
 request with a 200 and the whole file, which Safari cannot play, hence the clip
 rule.
+
+The trailing-slash rule reads a path with no dot as a page, which holds
+because the build has no file whose address holds no dot and no page under a
+folder whose name holds one: the staging step refuses either
+(`slashRuleProblems` in `lib/staging.mjs`, which reads each address as the rule
+does, whole), since such a file would be sent away from itself to an address
+that answers 404, and such a page would keep the 307. A file without an
+extension under a folder with a dot, as `.well-known/` may hold, is no address
+the rule reads and passes. The asset server answers two dotless addresses
+without a slash itself, and the rule leaves both to it, since its 301 to the
+slash form would come straight back as the asset server's 307, a loop: a
+folder's page at `<folder>/index`, which the asset server sends on to the
+folder, and the not-found page, `404.html`, which it serves at `/404`. The
+staging step refuses any other page served flat (an `.html` file not named
+`index.html`), which would loop the same way. The rule leaves `/cdn-cgi/` alone, where Cloudflare
+answers its own requests, a challenge's among them, as Cloudflare's guide to
+troubleshooting rules asks. An address that names nothing gets the 301 too,
+then the 404 at its slash form. A retired
+address written without its slash takes two hops where `_redirects` alone took
+one, the rule's 301 to the slash form and then the `_redirects` 301 to its
+page; the 440 retired addresses do not fit an exclusion in the expression,
+which takes 4 096 characters.
 
 A browser holds the address a clip is redirected to against the page's
 Content-Security-Policy, and every page carries two: the meta tag the build
@@ -195,7 +218,7 @@ answers 404, where docs.jmrp.io answered the 404 directly. Both 404s carry no
 | `stage.mjs` | Stages a build into `stage/` and runs every check first |
 | `lib/headers.mjs`, `lib/redirects.mjs`, `lib/twins.mjs` | What `_headers` and `_redirects` say, and which pages have no Markdown copy |
 | `lib/staging.mjs` | The checks: 20 000 files and 25 MiB a file (Workers Free), no `_headers` or `_redirects` in the build, the pages without a copy equal to the exclusions, every redirect target served |
-| `lib/rules.mjs`, `lib/rulesets.mjs`, `scripts/apply-rules.mjs` | The zone rules (redirects, response headers, and with `--phase waf` the beacon's WAF and rate rules), their drift check and the script that puts them |
+| `lib/rules.mjs`, `lib/rulesets.mjs`, `scripts/apply-rules.mjs` | The zone rules (redirects, response headers, and with `--phase waf` the beacon's WAF and rate rules), their drift check and the script that prints (`--print`), checks or puts them |
 | `lib/zone.mjs`, `scripts/apply-zone.mjs` | The DNS records and zone settings, and the script that applies them |
 | `lib/cloudflare.mjs` | The API calls, and the account and zone ids every script acts on |
 | `lib/clip-check.mjs`, `scripts/check-clip.mjs` | What a playing clip has to report, and the check that plays clips of the live site in Chrome |
@@ -340,6 +363,22 @@ and automatic HTTPS rewrites (both rewrite the bytes of the build) and turns on
 HTTPS everywhere with HSTS. A record already in the place of one of these is
 reported and left alone.
 
+The zone rules (`lib/rules.mjs`), from the maintainer's machine:
+
+```bash
+node scripts/apply-rules.mjs --print                                            # the JSON each entrypoint would hold, no credential, no request
+CLOUDFLARE_API_TOKEN=... node scripts/apply-rules.mjs --check                   # what differs on the zone; writes nothing
+CLOUDFLARE_API_TOKEN=... node scripts/apply-rules.mjs --apply --backup-dir ..   # puts the phases that differ, saving what was there
+```
+
+`--phase waf` does the same for the beacon's WAF and rate rules. The deploy
+of every build of main puts the redirect and response-header phases as
+`lib/rules.mjs` generates them (site-deploy.yml, `apply_rules` on), so a rule
+added there goes live with the deploy of the commit that adds it, and a rule
+put by hand that `lib/rules.mjs` does not generate is taken off by the next
+deploy. An apply by hand ahead of that deploy is held to the same code: run it
+from a checkout of the commit that will be deployed.
+
 wrangler prints "Read N files" counting folders as well as files; the limit
 counts files, and stage.mjs prints that number.
 
@@ -432,7 +471,8 @@ job `deploy-site` of every run, or revert the commit on main; clear it
 5. A clip with a byte range: 302, then 206 from the clip host; and
    `node scripts/check-clip.mjs` plays clips in Chrome with no policy violation
    (curl cannot see a blocked clip).
-6. `www.phonometry.dev/x?y` answers 301 to `phonometry.dev/x?y`.
+6. `www.phonometry.dev/x?y` answers 301 to `phonometry.dev/x?y`, and
+   `/signals?q=1` answers 301 to `/signals/?q=1`.
 7. A page's bytes equal the build's file except the beacon element (staging
    holds this: `test/staging.test.mjs`).
 9. A page view in a browser writes one `beacon` row; a Markdown copy fetched

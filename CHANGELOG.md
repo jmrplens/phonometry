@@ -96,6 +96,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   of the Spanish conformance copy to the English rows. The check of the
   build's copies and llms files fails on a bare address the punctuation after
   it would join.
+- **A page address written without its trailing slash answers a permanent
+  redirect.** `https://phonometry.dev/signals` answered a 307 Temporary
+  Redirect to `/signals/`, the asset server's own answer, which tells a search
+  engine the move may not last. A zone rule now answers first, with a 301 to
+  the address with its slash, the query string kept, for any address that ends
+  in no slash and holds no dot, Cloudflare's own `/cdn-cgi/` aside; files,
+  pages with their slash and the home page are left as they were.
+  `apply-rules.mjs --print` writes the exact rules the zone receives, with no
+  credential, and the staging of a build refuses a file whose address holds no
+  dot or a page under a folder whose name holds one, the two things the rule
+  takes for granted.
 - **robots.txt answers whatever the day's Worker count.** phonometry.dev ran
   its Worker for robots.txt, to log who read it, so on a day the free Workers
   quota ran out it would have answered 429 until midnight UTC, which Google

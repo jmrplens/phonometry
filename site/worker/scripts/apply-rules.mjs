@@ -1,8 +1,15 @@
 // Checks, or puts, the zone rules of phonometry.dev (lib/rules.mjs).
 //
 // Usage:
+//   node site/worker/scripts/apply-rules.mjs --print [--phase edge|waf] [--clip-base <url/>]
 //   CLOUDFLARE_API_TOKEN=... node site/worker/scripts/apply-rules.mjs
 //       [--check | --apply] [--phase edge|waf] [--backup-dir <dir>] [--clip-base <url/>]
+//
+// --print is the dry run: it writes, as JSON, the rules each phase
+// entrypoint would hold after an apply, `[{phase, rules}]`, with no
+// credential and no request, so a reviewer reads the exact body a PUT would
+// carry. It is what the code generates: the guard rule's `enabled`, which an
+// apply keeps as the zone holds it, prints as generated (off).
 //
 // --phase edge (the default) is the redirect and response-header phases, the
 // two the CI rules token can read and write. --phase waf is the beacon's WAF
@@ -151,20 +158,29 @@ export async function runApplyRules({ argv, env, fetchImpl = fetch, sink = null 
 	try {
 		args = parseArgs({
 			args: argv,
-			options: { check: { type: 'boolean' }, apply: { type: 'boolean' }, phase: { type: 'string' }, 'backup-dir': { type: 'string' }, 'clip-base': { type: 'string' } },
+			options: { print: { type: 'boolean' }, check: { type: 'boolean' }, apply: { type: 'boolean' }, phase: { type: 'string' }, 'backup-dir': { type: 'string' }, 'clip-base': { type: 'string' } },
 		}).values;
 	} catch (error) {
 		log(error.message);
 		return 2;
 	}
-	if (args.check && args.apply) {
-		log('pass at most one of --check and --apply');
+	if ([args.print, args.check, args.apply].filter(Boolean).length > 1) {
+		log('pass at most one of --print, --check and --apply');
 		return 2;
 	}
 	const which = args.phase ?? 'edge';
 	if (which !== 'edge' && which !== 'waf') {
 		log(`--phase is edge or waf, not ${which}`);
 		return 2;
+	}
+	if (args.print) {
+		try {
+			log(JSON.stringify(which === 'waf' ? wafPhases() : generatedPhases({ clipBase: args['clip-base'] ?? CLIP_BASE }), null, 2));
+		} catch (error) {
+			log(`error: ${error.message}`);
+			return 1;
+		}
+		return 0;
 	}
 	const zone = ZONE_ID;
 	for (const line of ignoredTargets(env)) log(line);

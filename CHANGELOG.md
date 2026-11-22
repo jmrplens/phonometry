@@ -141,6 +141,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Fixed
 
+- **Why phonometry describes pyfar's weighting filters as pyfar documents
+  them.** The page said pyfar's A and C weighting filters approximate
+  IEC 61672-1; since pyfar 0.8 its documentation states that, designed with
+  the default settings, they meet the class 1 limits at 48, 44.1 and 16 kHz
+  and at those rates multiplied or divided by 2, 4 or 8, and warn when a
+  design does not. The page says so in English and Spanish.
 - **The software node and the landing page state the licences the package
   declares.** The structured data of every page listed MIT and the EASA ANP
   terms from a literal that nothing held to `pyproject.toml`, and the landing

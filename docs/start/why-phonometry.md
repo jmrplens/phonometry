@@ -265,8 +265,10 @@ place them is by what each is built for rather than by racing them:
   functions to read, write, process, generate and plot audio signals; its
   documentation states that its fractional-octave filter bank meets
   IEC 61260-1:2014 from filter order 5 for octave bands and from order 6 for
-  one-third-octave bands, and that its A and C weighting filters approximate
-  IEC 61672-1. pyrato builds on pyfar for room acoustics: energy decay curves
+  one-third-octave bands, and that its A and C weighting filters, designed
+  with the default settings, meet the class 1 limits of IEC 61672-1 at 48,
+  44.1 and 16 kHz and at those rates multiplied or divided by 2, 4 or 8, with
+  a warning when a design falls outside them. pyrato builds on pyfar for room acoustics: energy decay curves
   by Schroeder backward integration with the Lundeby and Chu noise
   compensations, the ISO 3382 parameters (reverberation time, clarity,
   definition, centre time, strength and the lateral energy measures), the

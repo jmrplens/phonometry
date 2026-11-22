@@ -296,7 +296,10 @@ echando carreras entre ellos:
   generar y representar señales de audio; su documentación indica que su
   banco de filtros de fracción de octava cumple IEC 61260-1:2014 a partir del
   orden 5 en bandas de octava y del orden 6 en tercios de octava, y que sus
-  filtros de ponderación A y C aproximan los de IEC 61672-1. pyrato se apoya
+  filtros de ponderación A y C, diseñados con los ajustes por defecto, cumplen
+  los límites de clase 1 de IEC 61672-1 a 48, 44,1 y 16 kHz y a esas
+  frecuencias multiplicadas o divididas por 2, 4 u 8, con un aviso cuando un
+  diseño queda fuera de ellos. pyrato se apoya
   en pyfar para la acústica de salas: curvas de decaimiento por integración
   inversa de Schroeder con las compensaciones de ruido de Lundeby y de Chu,
   los parámetros de ISO 3382 (tiempo de reverberación, claridad, definición,

@@ -151,6 +151,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Fixed
 
+- **The coverage report reads every file it measured.** A test of the warning
+  attribution compiles a module named as a file inside the package so that its
+  frames count as the package's own, and coverage measured it: every test job
+  then warned that it could not parse `src/phonometry/_attribution_probe.py`,
+  which does not exist. Coverage now leaves that one name out.
 - **Why phonometry describes pyfar's weighting filters as pyfar documents
   them.** The page said pyfar's A and C weighting filters approximate
   IEC 61672-1; since pyfar 0.8 its documentation states that, designed with

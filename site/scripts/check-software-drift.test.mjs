@@ -8,7 +8,7 @@ import { join } from 'node:path';
 import { after, describe, test } from 'node:test';
 
 import { repositoryUrl } from '../src/data/site.mjs';
-import { DECISION_URL, PROJECTS_URL, SOFTWARE_ID, decisionBlocks, driftReport, feedRecord, jmrpValues, pageNodes, runCheck, siteValues, softwareNode } from './check-software-drift.mjs';
+import { DECISION_URL, FEED_LACKS, LOCALIZED, PROJECTS_URL, SOFTWARE_ID, decisionBlocks, driftReport, feedRecord, jmrpValues, pageNodes, runCheck, siteValues, softwareNode } from './check-software-drift.mjs';
 import { CONTRADICTABLE } from './shared/software-drift-decision.mjs';
 
 const MIT = 'https://opensource.org/license/MIT';
@@ -21,7 +21,9 @@ const node = () => ({
 	'@type': 'SoftwareApplication',
 	'@id': SOFTWARE_ID,
 	name: 'phonometry',
+	alternateName: 'PyOctaveBand',
 	applicationCategory: 'DeveloperApplication',
+	applicationSubCategory: 'Scientific/Engineering',
 	operatingSystem: ['Linux', 'macOS', 'Windows'],
 	programmingLanguage: 'Python',
 	url: repositoryUrl,
@@ -37,7 +39,9 @@ const node = () => ({
 const agreeing = () => ({
 	id: 'phonometry',
 	name: 'phonometry',
+	alternateName: ['PyOctaveBand'],
 	applicationCategory: 'DeveloperApplication',
+	applicationSubCategory: 'Scientific/Engineering',
 	language: 'Python',
 	license: 'MIT AND LicenseRef-EASA-ANP',
 	licenseUrl: [EASA, MIT],
@@ -96,7 +100,7 @@ describe('the comparison of the two nodes', () => {
 		const report = driftReport(node(), agreeing());
 		assert.deepEqual(report.contradicting, []);
 		assert.deepEqual(report.lines, []);
-		assert.deepEqual(report.compared, CONTRADICTABLE);
+		assert.deepEqual(report.compared, CONTRADICTABLE.filter((property) => !FEED_LACKS.includes(property)));
 	});
 
 	test('MIT alone contradicts the two licences the site states, and names the one jmrp.io lacks', () => {
@@ -128,8 +132,10 @@ describe('the comparison of the two nodes', () => {
 	test('every other property jmrp.io compares is held too', () => {
 		const cases = {
 			name: { name: 'PyOctaveBand' },
+			alternateName: { alternateName: 'Octave' },
 			programmingLanguage: { programmingLanguage: 'Rust' },
 			applicationCategory: { applicationCategory: 'Game' },
+			applicationSubCategory: { applicationSubCategory: 'Games/Entertainment' },
 			codeRepository: { codeRepository: 'https://example.org/fork' },
 			url: { url: 'https://example.org/fork' },
 		};
@@ -152,25 +158,60 @@ describe('the comparison of the two nodes', () => {
 		assert.deepEqual(Object.keys(jmrpValues(agreeing())), CONTRADICTABLE);
 	});
 
+	test('the properties the feed does not publish are the ones jmrpValues states nothing for, and are named', () => {
+		const record = { ...agreeing(), keywords: ['Acoustics'], disambiguatingDescription: 'x' };
+		const silent = Object.entries(jmrpValues(record)).filter(([, value]) => value === undefined).map(([property]) => property);
+		assert.deepEqual(silent, [...FEED_LACKS]);
+		assert.ok(FEED_LACKS.every((property) => CONTRADICTABLE.includes(property)));
+	});
+
+	test('each localized property is compared in English and in Spanish, as jmrp.io names them', () => {
+		for (const property of LOCALIZED) {
+			assert.ok(CONTRADICTABLE.includes(property), property);
+			assert.ok(CONTRADICTABLE.includes(`${property}@es`), `${property}@es`);
+		}
+		const values = siteValues({
+			...node(),
+			keywords: [{ '@value': 'acoustics', '@language': 'en' }, 'Python', { '@value': 'acústica', '@language': 'es' }],
+			disambiguatingDescription: 'Untagged text',
+		});
+		assert.equal(values.keywords, 'acoustics');
+		assert.equal(values['keywords@es'], 'acústica');
+		assert.equal(values.disambiguatingDescription, 'Untagged text');
+		assert.equal(values['disambiguatingDescription@es'], undefined);
+	});
+
 	test('the site is read as jmrp.io reads a docs site, and jmrp.io as its projectValues reads its entry', () => {
 		assert.deepEqual(siteValues(node()), {
 			name: 'phonometry',
+			alternateName: 'PyOctaveBand',
 			description: EN,
 			'description@es': ES,
+			disambiguatingDescription: undefined,
+			'disambiguatingDescription@es': undefined,
+			keywords: undefined,
+			'keywords@es': undefined,
 			license: [MIT, EASA],
 			programmingLanguage: 'Python',
 			applicationCategory: 'DeveloperApplication',
+			applicationSubCategory: 'Scientific/Engineering',
 			operatingSystem: ['Linux', 'macOS', 'Windows'],
 			codeRepository: repositoryUrl,
 			url: repositoryUrl,
 		});
 		assert.deepEqual(jmrpValues(mitAlone()), {
 			name: 'phonometry',
+			alternateName: ['PyOctaveBand'],
 			description: EN,
 			'description@es': ES,
+			disambiguatingDescription: undefined,
+			'disambiguatingDescription@es': undefined,
+			keywords: undefined,
+			'keywords@es': undefined,
 			license: MIT,
 			programmingLanguage: 'Python',
 			applicationCategory: 'DeveloperApplication',
+			applicationSubCategory: 'Scientific/Engineering',
 			operatingSystem: 'Linux, macOS, Windows',
 			codeRepository: repositoryUrl,
 			url: repositoryUrl,
@@ -206,7 +247,8 @@ describe('the check on a build', () => {
 	test('green on a feed that agrees and a decision that is the copy: each URL asked once, with a time limit', async () => {
 		const { code, out, asked } = await run(build(node()), feedOf(agreeing()));
 		assert.equal(code, 0, out);
-		assert.match(out, /^ok {3}https:\/\/github\.com\/jmrplens\/phonometry#software agrees with jmrp\.io on 9 properties/);
+		assert.match(out, /^ok {3}https:\/\/github\.com\/jmrplens\/phonometry#software agrees with jmrp\.io on 11 properties/);
+		assert.match(out, /\n {5}not compared, since jmrp\.io's feed does not publish them: disambiguatingDescription, disambiguatingDescription@es, keywords, keywords@es$/m);
 		assert.deepEqual(asked.map(({ url }) => url), [PROJECTS_URL, DECISION_URL]);
 		assert.ok(asked.every(({ signal }) => signal instanceof AbortSignal));
 	});

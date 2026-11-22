@@ -62,6 +62,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   jmrp.io publishes, which agrees on both. That record carries neither
   `disambiguatingDescription` nor the `keywords` jmrp.io compares, so the
   check names those four on every run instead of passing them as agreement.
+- **Every pull request installs the release's attestation verifier and
+  verifies the newest release with it.** A release checks the PEP 740
+  attestation of its wheel on PyPI with the verifier
+  `requirements-attestations.txt` pins, a step no rehearsal reaches. A
+  Dependabot update moved `sigstore-models` to 0.0.7 while `sigstore` 4.5.1
+  requires 0.0.6 exactly: every check of that pull request passed, and the
+  next release would have been the first run to find that the file cannot be
+  installed. Python CI now installs the file on the Python and the system the
+  release uses and verifies the newest release on PyPI with it, so such a
+  change fails on its own pull request.
 - **Only the beacon runs code on phonometry.dev.** The Markdown copies, the
   llms files and the sitemaps are served as plain files, like every page, so a
   fault in the Worker, a spent daily quota or a broken deploy of its code can

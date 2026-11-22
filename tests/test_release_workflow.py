@@ -445,10 +445,16 @@ def _job_runs(workflow: dict[str, Any], job: str) -> str:
 
 
 def _python_of(workflow: dict[str, Any], job: str) -> str:
+    """The Python a job's steps run: the one its setup puts on the path.
+
+    A setup with ``update-environment: false`` installs a Python that a step
+    calls by its path alone, and leaves the job's own where it was.
+    """
     versions = [
         step["with"]["python-version"]
         for step in workflow["jobs"][job]["steps"]
         if step.get("uses", "").startswith("actions/setup-python@")
+        and step["with"].get("update-environment", True) is not False
     ]
     assert len(versions) == 1, f"{job} sets up {len(versions)} Pythons"
     return str(versions[0])
@@ -879,3 +885,53 @@ def test_every_pull_request_builds_the_release_twice_and_on_macos() -> None:
         r'--check "\$RUNNER_TEMP/\S*phonometry-\$VERSION\.sha256"',
         re.sub(r"\\\n\s*", "", rebuilt[0]),
     )
+
+
+def test_every_pull_request_runs_the_release_verifier_on_the_newest_release() -> None:
+    """The verifier a release checks its wheel with runs on every pull request.
+
+    Dependabot moved ``sigstore-models`` to 0.0.7 in
+    ``requirements-attestations.txt`` while ``sigstore`` 4.5.1 requires 0.0.6
+    exactly: every job of Python CI passed, since none of them installed the
+    file, and the release would have been the first run to fail to install
+    its verifier. The job that builds the release on every pull request now
+    installs the file on the Python and the system the release verifies with,
+    and verifies the newest release already on PyPI.
+    """
+    confirm = _load("release.yml")["jobs"]["confirm"]
+    (released,) = [
+        step
+        for step in confirm["steps"]
+        if "pypi_attestations verify pypi" in step.get("run", "")
+    ]
+    system = re.search(r"matrix\.os == '([^']+)'", released["if"])
+    python = re.search(r"matrix\.python-version == '([^']+)'", released["if"])
+    assert system, released["if"]
+    assert python, released["if"]
+
+    build = _load("python-app.yml")["jobs"]["release-build"]
+    assert build["runs-on"] == system[1]
+    (setup,) = [step for step in build["steps"] if step.get("id") == "verifier-python"]
+    assert setup["uses"].startswith("actions/setup-python@")
+    assert setup["with"] == {"python-version": python[1], "update-environment": False}
+    (rehearsal,) = [
+        step
+        for step in build["steps"]
+        if "pypi_attestations verify pypi" in step.get("run", "")
+    ]
+    assert "if" not in setup
+    assert "if" not in rehearsal
+    assert rehearsal["env"] == {
+        "VERIFIER_PYTHON": "${{ steps.verifier-python.outputs.python-path }}"
+    }
+    run = re.sub(r"\\\n\s*", " ", rehearsal["run"])
+    assert '"$VERIFIER_PYTHON" -m venv' in run
+    assert "-m pip install --no-cache-dir -r requirements-attestations.txt" in run
+    assert "-m pip check" in run
+    assert "https://pypi.org/pypi/phonometry/json" in run
+    repository = re.search(
+        r"--repository (\S+)", re.sub(r"\\\n\s*", " ", released["run"])
+    )
+    assert repository
+    assert f"--repository {repository[1]}" in run
+    assert '"pypi:phonometry-$PUBLISHED-py3-none-any.whl"' in run

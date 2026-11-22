@@ -3,7 +3,8 @@
 # everything it installs, on the Python 3.14 and Linux of that step. No
 # rehearsal runs the step, so a release would otherwise be the first run to
 # meet a new pypi-attestations or sigstore; pinned, Dependabot moves them in a
-# pull request instead.
+# pull request instead, and Python CI installs this file on every pull request
+# and verifies the newest release on PyPI with it (the job release-build).
 pypi-attestations==0.0.31
 annotated-types==0.8.0
 certifi==2026.10.23

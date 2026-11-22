@@ -623,7 +623,8 @@ jobs:
 
       # The verifier comes from requirements-attestations.txt, the one file
       # this job reads from the commit: no rehearsal runs this step, so the
-      # version that verifies a release is the one a pull request moved to.
+      # version that verifies a release is the one a pull request moved to,
+      # and Python CI ran the same step with it on that pull request.
       - uses: actions/checkout@v7
         if: matrix.os == 'ubuntu-26.04' && matrix.python-version == '3.14'
         with:

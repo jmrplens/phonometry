@@ -920,7 +920,9 @@ Releases are fully automated from the repository-root `VERSION` file:
    records the build provenance of every one of them and attests the SBOM for
    the wheel, dispatches the GitLab mirror, installs the published version back
    from PyPI on every platform and verifies the PEP 740 attestation of the
-   wheel there with the verifier `requirements-attestations.txt` pins, and
+   wheel there with the verifier `requirements-attestations.txt` pins (Python
+   CI installs that file and verifies the newest release on PyPI with it on
+   every pull request, so a pin it cannot install shows there first), and
    clones the new tag on macOS, rebuilds it as `SECURITY.md` tells anyone to
    and compares the files with PyPI's. The rebuild runs after the upload, so a
    failure there does not stop the release: it says the release cannot be

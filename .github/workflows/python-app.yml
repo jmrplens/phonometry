@@ -1030,6 +1030,34 @@ jobs:
         path: ${{ runner.temp }}/extras/
         if-no-files-found: error
         retention-days: 7
+    # A release verifies the PEP 740 attestation of its wheel on PyPI with
+    # the verifier requirements-attestations.txt pins, on Python 3.14 and
+    # Linux (release.yml, the job that installs the release back), a step no
+    # rehearsal reaches. These two steps run it on every pull request with
+    # the pins of the commit, on the newest release already on PyPI: a pin
+    # the resolver cannot satisfy (one package moved past the exact version
+    # another requires) or a verifier that no longer reads PyPI's
+    # attestations shows on the pull request that moved it, not on the day
+    # of a release. The second Python leaves the job's own alone.
+    - name: Set up Python 3.14 for the attestation verifier
+      id: verifier-python
+      uses: actions/setup-python@v7
+      with:
+        python-version: "3.14"
+        update-environment: false
+    - name: The pinned verifier installs and verifies the newest release on PyPI
+      env:
+        VERIFIER_PYTHON: ${{ steps.verifier-python.outputs.python-path }}
+      run: |
+        "$VERIFIER_PYTHON" -m venv "$RUNNER_TEMP/verifier"
+        VERIFIER="$RUNNER_TEMP/verifier/bin/python"
+        "$VERIFIER" -m pip install --upgrade pip
+        "$VERIFIER" -m pip install --no-cache-dir -r requirements-attestations.txt
+        "$VERIFIER" -m pip check
+        PUBLISHED=$(curl -fsS --retry 3 https://pypi.org/pypi/phonometry/json \
+          | python -c 'import json, sys; print(json.load(sys.stdin)["info"]["version"])')
+        "$VERIFIER" -m pypi_attestations verify pypi --repository https://github.com/jmrplens/phonometry \
+          "pypi:phonometry-$PUBLISHED-py3-none-any.whl"
 
   release-rebuild-macos:
     name: Package / macOS rebuild

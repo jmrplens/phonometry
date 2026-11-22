@@ -479,6 +479,11 @@ relative_files = true
 # outside src/, report nothing more. On 3.12 and 3.13 it measures lines only,
 # and no branch coverage is configured.
 core = "sysmon"
+# tests/test_internal_warnings.py compiles a module under this name inside the
+# package directory, so that the warning attribution treats its frames as the
+# package's own. No such file exists on disk: measured, its lines left the
+# report a source it could not read ("couldnt-parse") on every test job.
+omit = ["*/phonometry/_attribution_probe.py"]
 
 [tool.pytest.ini_options]
 # faulthandler_exit_on_timeout, which the hang guard below rests on, came

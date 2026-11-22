@@ -102,21 +102,31 @@ export function softwareNode(nodes, id = SOFTWARE_ID) {
 }
 
 /**
+ * The properties jmrp.io states as an English and a Spanish literal, LOCALIZED
+ * in its decision module (beside its siteValues, between the two blocks this
+ * site copies). A localized property is read as `<property>`, its English
+ * literal or else its untagged value, and `<property>@es`, its Spanish
+ * literal; CONTRADICTABLE names both.
+ */
+export const LOCALIZED = Object.freeze(['description', 'disambiguatingDescription', 'keywords']);
+
+/**
  * What this site states for each property jmrp.io compares, read from its
- * software node the way jmrp.io's check reads a docs site: a bilingual
- * description is two language-tagged literals, the English one compared with
- * jmrp.io's English summary and the Spanish one with its Spanish summary.
+ * software node the way jmrp.io's check reads a docs site (siteValues there):
+ * a localized property gives the first literal tagged `en`, or its untagged
+ * value when none is, as `<property>`, and the first literal tagged `es` as
+ * `<property>@es`; every other property is read as written.
  *
  * @param {Record<string, unknown>} node The software node.
  * @returns {Record<string, unknown>} The values, by property.
  */
 export function siteValues(node) {
-	const descriptions = [node.description ?? []].flat();
-	const tagged = (language) => descriptions.find((literal) => literal?.['@language'] === language)?.['@value'];
+	const tagged = (value, language) => [value ?? []].flat().find((literal) => literal?.['@language'] === language)?.['@value'];
 	const value = (property) => {
-		if (property === 'description@es') return tagged('es');
-		if (property === 'description' && tagged('en') !== undefined) return tagged('en');
-		return node[property];
+		const [base, language] = property.split('@', 2);
+		if (!LOCALIZED.includes(base)) return node[property];
+		if (language) return tagged(node[base], language);
+		return tagged(node[base], 'en') ?? node[base];
 	};
 	return Object.fromEntries(CONTRADICTABLE.map((property) => [property, value(property)]));
 }
@@ -147,8 +157,12 @@ export function feedRecord(feed, id = SOFTWARE_ID) {
  * of URLs the record states (the identifier only when it states none), and
  * the repository as both `codeRepository` and `url`. The feed writes a
  * missing Spanish summary as an empty string, which states nothing. Every
- * property of CONTRADICTABLE has its source here, and the test holds the two
+ * property of CONTRADICTABLE has its entry here, and the test holds the two
  * lists equal: a compared property with no source would pass as agreement.
+ * The feed does not publish projects.yaml's `disambiguatingDescription` or its
+ * `keywords` (the feed's own `keywords` lists the project's topics, another
+ * value), so those four entries state nothing, are never compared, and the
+ * check names them on every run (FEED_LACKS).
  *
  * @param {Record<string, any>} record The feed record.
  * @returns {Record<string, unknown>} The values, by property.
@@ -156,16 +170,25 @@ export function feedRecord(feed, id = SOFTWARE_ID) {
 export function jmrpValues(record) {
 	return {
 		name: record.name,
+		alternateName: record.alternateName,
 		description: record.description,
 		'description@es': record.descriptionEs || undefined,
+		disambiguatingDescription: undefined,
+		'disambiguatingDescription@es': undefined,
+		keywords: undefined,
+		'keywords@es': undefined,
 		license: record.licenseUrl ?? record.license,
 		programmingLanguage: record.language,
 		applicationCategory: record.applicationCategory,
+		applicationSubCategory: record.applicationSubCategory,
 		operatingSystem: record.operatingSystem,
 		codeRepository: record.repo,
 		url: record.repo,
 	};
 }
+
+/** The properties jmrp.io compares that its feed does not publish (see jmrpValues). */
+export const FEED_LACKS = Object.freeze(['disambiguatingDescription', 'disambiguatingDescription@es', 'keywords', 'keywords@es']);
 
 /**
  * The comparison of this site's node with jmrp.io's record. jmrp.io's
@@ -261,6 +284,8 @@ export async function runCheck({ argv, fetchImpl = fetch, sink = null }) {
 	const dist = resolve(args.from ?? join(dirname(fileURLToPath(import.meta.url)), '..', 'dist'));
 	const source = args.feed ?? PROJECTS_URL;
 	const decision = args.decision ?? DECISION_URL;
+	// Named before anything can fail, so a red run says it too (F78).
+	log(`note jmrp.io compares ${FEED_LACKS.join(', ')}, which its feed does not publish: never compared here`);
 
 	let node;
 	try {

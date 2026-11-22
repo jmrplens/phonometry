@@ -29,6 +29,18 @@
  * its docs site measure different GitLab tiers, so both are true (author
  * decision, 2026-09-03; see `src/content/profile/projects.yaml`).
  *
+ * cs-routeros-bouncer: `summary` gained its final full stop on 2026-11-21
+ * (GEO audit #13), because the documentation hub's llms.txt printed the
+ * sentence running into the license note after it. Its docs site, another
+ * repository, still publishes the sentence without one. Delete the entry
+ * once that site carries the full stop.
+ *
+ * kleidos: kleidos.dev lists post 011's Spanish article with the headline "Un
+ * llavero con bloqueo ante fallos...", a title jmrp.io never published (the
+ * post is "Una bóveda con bloqueo ante fallos..."). The fix belongs in the
+ * Kleidos site's repository; this entry names that one article, so any other
+ * headline it misstates still fails the run (GEO audit #13).
+ *
  * @type {Readonly<Record<string, {properties: readonly string[], reason: string, decided: string}>>}
  */
 export const ACCEPTED_DIVERGENCES = Object.freeze({
@@ -37,6 +49,20 @@ export const ACCEPTED_DIVERGENCES = Object.freeze({
     reason:
       "the action count and the tool count measure different GitLab tiers",
     decided: "2026-09-03",
+  }),
+  "cs-routeros-bouncer": Object.freeze({
+    properties: Object.freeze(["description"]),
+    reason:
+      "jmrp.io added the final full stop its docs site has yet to publish",
+    decided: "2026-11-21",
+  }),
+  kleidos: Object.freeze({
+    properties: Object.freeze([
+      "subjectOf headline https://jmrp.io/es/blog/011-encrypt-then-mac-vault/#article",
+    ]),
+    reason:
+      "kleidos.dev states a Spanish headline for post 011 that jmrp.io never published; the fix is in the Kleidos repository",
+    decided: "2026-11-21",
   }),
 });
 
@@ -50,15 +76,28 @@ export const ACCEPTED_DIVERGENCES = Object.freeze({
  * string ("Windows, Linux, macOS"), and nothing compared the two, so a site
  * that named other systems shipped unnoticed.
  *
+ * `applicationSubCategory`, `alternateName`, `disambiguatingDescription` and
+ * `keywords` joined on 2026-11-21 (GEO audit #13). mikroscope's docs site
+ * said "Network monitoring" and /projects/ "Monitoring", and Kleidos's site
+ * spelled its board vendor "LILYGO" where projects.yaml wrote "LilyGO", on
+ * properties nothing compared. Each localized property is read as its English
+ * value and, under `<property>@es`, its Spanish one, as `description` is.
+ *
  * @type {readonly string[]}
  */
 export const CONTRADICTABLE = Object.freeze([
   "name",
+  "alternateName",
   "description",
   "description@es",
+  "disambiguatingDescription",
+  "disambiguatingDescription@es",
+  "keywords",
+  "keywords@es",
   "license",
   "programmingLanguage",
   "applicationCategory",
+  "applicationSubCategory",
   "operatingSystem",
   "codeRepository",
   "url",

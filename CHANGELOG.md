@@ -51,6 +51,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Changed
 
+- **The software node check follows the properties jmrp.io added on 21
+  November.** jmrp.io's decision added `alternateName`,
+  `applicationSubCategory`, `disambiguatingDescription` and `keywords` (the
+  last two in English and Spanish) and two accepted divergences of other
+  projects on 21 November, and the docs build failed on every pull request
+  until its copy of the decision was the same. The copy is jmrp.io's again;
+  the docs build reads the bilingual properties as jmrp.io reads a docs site
+  and compares `alternateName` and `applicationSubCategory` with the record
+  jmrp.io publishes, which agrees on both. That record carries neither
+  `disambiguatingDescription` nor the `keywords` jmrp.io compares, so the
+  check names those four on every run instead of passing them as agreement.
 - **Only the beacon runs code on phonometry.dev.** The Markdown copies, the
   llms files and the sitemaps are served as plain files, like every page, so a
   fault in the Worker, a spent daily quota or a broken deploy of its code can

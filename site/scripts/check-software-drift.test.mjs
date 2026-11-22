@@ -12,6 +12,7 @@ import { DECISION_URL, FEED_LACKS, LOCALIZED, PROJECTS_URL, SOFTWARE_ID, decisio
 import { CONTRADICTABLE } from './shared/software-drift-decision.mjs';
 
 const MIT = 'https://opensource.org/license/MIT';
+const FEED_LACKS_LINE = /^note jmrp\.io compares disambiguatingDescription, disambiguatingDescription@es, keywords, keywords@es, which its feed does not publish: never compared here$/m;
 const EASA = `${repositoryUrl}/blob/main/LICENSES/LicenseRef-EASA-ANP.txt`;
 const EN = 'Acoustic measurement for Python, with 1899 CI-enforced conformance checks.';
 const ES = 'Medición acústica para Python, con 1899 comprobaciones de conformidad en CI.';
@@ -247,8 +248,8 @@ describe('the check on a build', () => {
 	test('green on a feed that agrees and a decision that is the copy: each URL asked once, with a time limit', async () => {
 		const { code, out, asked } = await run(build(node()), feedOf(agreeing()));
 		assert.equal(code, 0, out);
-		assert.match(out, /^ok {3}https:\/\/github\.com\/jmrplens\/phonometry#software agrees with jmrp\.io on 11 properties/);
-		assert.match(out, /\n {5}not compared, since jmrp\.io's feed does not publish them: disambiguatingDescription, disambiguatingDescription@es, keywords, keywords@es$/m);
+		assert.match(out, /^ok {3}https:\/\/github\.com\/jmrplens\/phonometry#software agrees with jmrp\.io on 11 properties/m);
+		assert.match(out, FEED_LACKS_LINE);
 		assert.deepEqual(asked.map(({ url }) => url), [PROJECTS_URL, DECISION_URL]);
 		assert.ok(asked.every(({ signal }) => signal instanceof AbortSignal));
 	});
@@ -285,6 +286,15 @@ describe('the check on a build', () => {
 		assert.match(out, /::error::license: this site states "https:\/\/github\.com\/jmrplens\/phonometry\/blob\/main\/LICENSES\/LicenseRef-EASA-ANP\.txt" that jmrp\.io does not/);
 		assert.match(out, /::error::1 property of https:\/\/github\.com\/jmrplens\/phonometry#software contradicts what jmrp\.io states .*: license\./);
 		assert.match(out, /src\/content\/profile\/projects\.yaml first/);
+	});
+
+	test('the properties the feed does not publish are named on a red run too, before anything is read', async () => {
+		const red = await run(build(node()), feedOf(mitAlone()));
+		assert.equal(red.code, 1, red.out);
+		assert.match(red.out, FEED_LACKS_LINE);
+		const unread = await run(join(scratch, 'no-build-here'), feedOf(agreeing()));
+		assert.equal(unread.code, 1, unread.out);
+		assert.match(unread.out, FEED_LACKS_LINE);
 	});
 
 	test('red when the feed cannot be read: a network error, an HTTP error, a document that is not the feed', async () => {

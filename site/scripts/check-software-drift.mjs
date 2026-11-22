@@ -284,6 +284,8 @@ export async function runCheck({ argv, fetchImpl = fetch, sink = null }) {
 	const dist = resolve(args.from ?? join(dirname(fileURLToPath(import.meta.url)), '..', 'dist'));
 	const source = args.feed ?? PROJECTS_URL;
 	const decision = args.decision ?? DECISION_URL;
+	// Named before anything can fail, so a red run says it too (F78).
+	log(`note jmrp.io compares ${FEED_LACKS.join(', ')}, which its feed does not publish: never compared here`);
 
 	let node;
 	try {
@@ -332,7 +334,6 @@ export async function runCheck({ argv, fetchImpl = fetch, sink = null }) {
 	}
 	if (contradicting.length > 0 || drift.length > 0) return 1;
 	log(`ok   ${SOFTWARE_ID} agrees with jmrp.io on ${compared.length} properties (${compared.join(', ')})${accepted.length ? `, ${accepted.length} accepted` : ''}, from ${source}, by the decision ${decision} states`);
-	log(`     not compared, since jmrp.io's feed does not publish them: ${FEED_LACKS.join(', ')}`);
 	return 0;
 }
 

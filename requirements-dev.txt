@@ -9,7 +9,7 @@
 # reportlab and svglib than the committed fiches were rendered with, so a
 # developer running `make reports` saw drift in fiches nobody had touched.
 # The versions here are the versions there; bump them together.
-ruff==0.17.5
+ruff==0.17.6
 mypy==2.4.1
 pyright[nodejs]==1.1.414  # CI's type-completeness step: pyright --verifytypes on the built wheel, 100% or it fails; the extra brings the Node.js pyright runs on
 bandit==1.9.4
@@ -25,7 +25,7 @@ pytest-xdist==3.8.0  # parallel test execution (`pytest -n auto`); coverage is c
 matplotlib==3.11.2  # required by the result-object .plot() tests
 reportlab==5.1.0  # required by the result-object .report() tests (ISO 717 PDF fiche)
 svglib==2.4.0
-pypdf==7.1.0  # one-page assertion in the ISO 717 report tests
+pypdf==7.1.1  # one-page assertion in the ISO 717 report tests
 pypdfium2==5.15.2  # rasterizes the .report() PDFs to committed WebP previews (scripts/generate_reports.py); no system Poppler needed
 
 pystoi==0.4.1  # test-only external cross-check for STOI/ESTOI (reproduces the authors' MATLAB); the library reimplements from the papers and never imports it at runtime

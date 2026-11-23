@@ -626,14 +626,34 @@ export function referenceNode(ref, bibliographyUrl, { bodiesUrl = bibliographyUr
  * the page and the bibliography merges them into one node.
  *
  * A data set's licence is in the stub as well: a page that reads the data
- * says, on that page, under which licence it does.
+ * says, on that page, under which licence it does. So are its description
+ * and its creator: Google reads each page alone, and its Dataset rich results
+ * refuse a Dataset with no description and report one with no creator, so a
+ * stub of a data set that left them to the bibliography was, on the guide
+ * that reads the data, a Dataset with neither. The description is the page's
+ * own `note`, what the page reads of the data, which is why a data set a page
+ * cites must carry one; its creator is the same on every page, as every
+ * other field of the work is (`citedWorks`).
  */
 const STUB_FIELDS = ['@id', '@type', 'name', 'identifier', 'reportNumber', 'url', 'sameAs', 'license'];
+
+/** What a stub of a data set carries besides `STUB_FIELDS`. */
+const DATASET_STUB_FIELDS = ['description', 'creator'];
 
 /** The short node a page names a work with at its first reference. */
 export function referenceStub(ref, bibliographyUrl) {
   const full = referenceNode(ref, bibliographyUrl);
-  return Object.fromEntries(STUB_FIELDS.filter((key) => full[key] !== undefined).map((key) => [key, full[key]]));
+  const fields = full['@type'] === 'Dataset' ? [...STUB_FIELDS, ...DATASET_STUB_FIELDS] : STUB_FIELDS;
+  if (full['@type'] === 'Dataset') {
+    const missing = ['name', ...DATASET_STUB_FIELDS, 'license'].filter((key) => full[key] === undefined);
+    if (missing.length > 0) {
+      throw new Error(
+        `the data set ${full['@id']} is cited with no ${missing.join(', ')}: a page names a data set with what it ` +
+          'reads of it (its note), who made it (its authors or organization) and its license',
+      );
+    }
+  }
+  return Object.fromEntries(fields.filter((key) => full[key] !== undefined).map((key) => [key, full[key]]));
 }
 
 /**

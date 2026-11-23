@@ -43,10 +43,16 @@
  * expression, a formula, is not text a dataset can carry, and stops the
  * build where a name or a description holds it.
  *
- * And what it leaves out is decided: no `license`, because these rows are
- * transcribed from works that keep their own rights and the site can grant
- * none over them, and no `contentUrl` or `distribution`, because the site
- * serves the rows on the page and nowhere else.
+ * Its `license` is the MIT licence the library ships the same rows under:
+ * every catalogue is a table of the package, read by
+ * scripts/generate_catalogue_data.py from what `pip install phonometry`
+ * installs, so the transcription is the library's and travels with its
+ * licence. The works the values were printed in keep their own rights, and
+ * `isBasedOn` names them, as the conformance report's Dataset does for the
+ * standards its checks quote (src/lib/conformance-dataset.mjs). Google's
+ * Dataset rich results report a Dataset with no licence. What it leaves out
+ * is `contentUrl` and `distribution`: the site serves the rows on the page
+ * and nowhere else.
  *
  * Who made it is not left out: the catalogue is the maintainer's transcription,
  * table by table, so the site's Person is its `creator` and its `publisher`,
@@ -60,6 +66,7 @@
 import { inlineParts, leadingDefinitions, pageDefinitions, pageMarkup } from '../../scripts/shared/markdown-spans.mjs';
 import { referenceStub } from './citations.mjs';
 import { printedTables } from './catalogue-sources.mjs';
+import { SPDX_PAGES } from './pyproject.mjs';
 import { flowOf, MDX_TAG, NOT_INLINE_ROLES, pageLines, splitLines } from './markdown-fences.mjs';
 
 /** Where a `<Catalogues>` tag opens, in what a page renders of its source (`pageMarkup`). */
@@ -568,6 +575,12 @@ export function catalogueSources(references, catalogue) {
   return (references ?? []).filter((ref) => (ref.tables ?? []).some((table) => printed.has(table)));
 }
 
+/**
+ * The licence a catalogue's dataset is published under: the library's MIT,
+ * which the package ships its rows under (see the header of this module).
+ */
+export const CATALOGUE_LICENSE = SPDX_PAGES.MIT;
+
 /** The fragment a catalogue's dataset takes on its page. */
 const datasetFragment = (key) => `dataset-${key}`;
 
@@ -628,6 +641,7 @@ export function datasetNode({
     variableMeasured: variablesMeasured(catalogue.columns, lang),
     creator: { '@id': personId },
     publisher: { '@id': personId },
+    license: CATALOGUE_LICENSE,
     isAccessibleForFree: true,
     ...(sources.length > 0 ? { isBasedOn: sources.map((ref) => referenceStub(ref, bibliographyUrl)) } : {}),
     ...(dateModified ? { dateModified } : {}),
@@ -635,17 +649,32 @@ export function datasetNode({
 }
 
 /**
- * How the overview of the catalogues lists one: enough to name it and find it.
+ * How the overview of the catalogues lists one: its name, its description,
+ * who made it and under which licence, as its own page says them.
  *
- * @param {{key: string, name: string}} dataset
+ * Google reads each page alone, and a Dataset the overview lists by name and
+ * address only was, for its Dataset rich results, a Dataset with no
+ * description, no creator and no licence: 24 of them on one page. The
+ * listing carries the four fields its page's node does, with the same values,
+ * so the two say the same of one `@id` wherever a reader meets it.
+ *
+ * @param {{key: string, name: string, description: string}} dataset
+ *   Its name and description (`catalogueDatasets`).
  * @param {string} pageUrl The canonical URL of the page that renders it.
+ * @param {string} personId The `@id` of the site's Person, its creator.
  * @returns {object}
  */
-export function datasetStub(dataset, pageUrl) {
+export function datasetStub(dataset, pageUrl, personId) {
+  if (typeof personId !== 'string' || personId === '') {
+    throw new Error(`the listing of ${dataset.key} needs the @id of the Person who transcribed it, not ${JSON.stringify(personId)}`);
+  }
   return {
     '@type': 'Dataset',
     '@id': `${pageUrl}#${datasetFragment(dataset.key)}`,
     name: dataset.name,
+    description: dataset.description,
     url: `${pageUrl}#${tableFragment(dataset.key)}`,
+    creator: { '@id': personId },
+    license: CATALOGUE_LICENSE,
   };
 }

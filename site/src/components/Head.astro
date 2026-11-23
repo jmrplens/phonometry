@@ -203,8 +203,8 @@ const articleType = isApiPage
 
 // Every published catalogue is a Dataset of the page that renders it, and
 // the overview of the catalogues is the DataCatalog that lists them
-// (src/lib/catalogue-datasets.mjs says what a dataset carries and why it
-// claims no licence). A catalogue page's article names its datasets as its
+// (src/lib/catalogue-datasets.mjs says what a dataset carries and under
+// which licence). A catalogue page's article names its datasets as its
 // `mainEntity`; the datasets themselves are nodes of the page's graph, each
 // dated as the page is.
 const catalogueCatalog =
@@ -238,7 +238,7 @@ const datasets =
     : [];
 const catalogueListing = isCatalogueOverview
   ? (await cataloguePages(lang)).flatMap((page) =>
-      page.datasets.map((dataset) => datasetStub(dataset, new URL(page.href, SITE).href)),
+      page.datasets.map((dataset) => datasetStub(dataset, new URL(page.href, SITE).href, PERSON_ID)),
     )
   : undefined;
 const datasetIds = datasets.map((dataset) => ({ '@id': dataset['@id'] }));

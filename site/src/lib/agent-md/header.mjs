@@ -59,8 +59,6 @@ import { line } from './markdown-table.mjs';
  *   What the page's "Verified by" line states: how many conformance checks
  *   verify it, against which documents, and the section of the conformance
  *   report that lists them.
- * @property {boolean} [license]  `false` on a page that carries no licence of
- *   its own (a catalogue transcribing published tables).
  * @property {string} [summary]  The page's description.
  */
 
@@ -170,7 +168,7 @@ export function header(fields) {
     ['Updated', fields.updated],
     ['Standards', fields.standards?.length ? fields.standards.join(LIST_SEPARATOR) : undefined],
     ['Verified', fields.verified ? verifiedValue(fields.verified, fields.lang) : undefined],
-    ['License', fields.license === false ? undefined : LICENSE],
+    ['License', LICENSE],
     ['Summary', fields.summary],
   ];
   const block = lines

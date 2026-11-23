@@ -151,6 +151,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Fixed
 
+- **Every Dataset the documentation publishes carries a description, a
+  creator and a licence.** Search Console reported Dataset structured data on
+  phonometry.dev without a description, which keeps a page out of Dataset
+  results, and without a creator or a licence. The overview of the catalogues
+  listed its 24 datasets by name and address alone, a guide named the data set
+  it reads with a short node that left both to the bibliography, and each
+  catalogue claimed no licence. The overview now lists each catalogue as its
+  page describes it, a cited data set carries the page's note and its
+  creators, and a catalogue is published under the library's MIT, the licence
+  the package ships the same rows under, with the printed works its values
+  come from still named as its sources. The build fails on any Dataset of any
+  page without the four fields.
 - **The coverage report reads every file it measured.** A test of the warning
   attribution compiles a module named as a file inside the package so that its
   frames count as the package's own, and coverage measured it: every test job

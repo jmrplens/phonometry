@@ -129,6 +129,7 @@ const dataset = (url) => ({
 	'@type': 'Dataset',
 	name: 'A year of levels',
 	url: 'https://data.example.org/dataset/a-year-of-levels',
+	description: 'The year of five-minute levels the worked case reads.',
 	creator: { '@type': 'Organization', name: 'A Council' },
 	publisher: { '@type': 'Organization', name: 'An open data portal' },
 	license: 'https://creativecommons.org/licenses/by/4.0/',
@@ -144,10 +145,23 @@ const law = (url) => ({
 	publisher: { '@id': SPAIN['@id'] },
 });
 
-/** What a page says of a work at its first reference (citations.mjs, `STUB_FIELDS`). */
+/**
+ * What a page says of a work at its first reference (citations.mjs,
+ * `STUB_FIELDS`), and of a data set its description and creator as well.
+ */
 const stub = (node) =>
 	Object.fromEntries(
-		['@id', '@type', 'name', 'identifier', 'reportNumber', 'url', 'sameAs', 'license']
+		[
+			'@id',
+			'@type',
+			'name',
+			'identifier',
+			'reportNumber',
+			'url',
+			'sameAs',
+			'license',
+			...(node['@type'] === 'Dataset' ? ['description', 'creator'] : []),
+		]
 			.filter((key) => node[key] !== undefined)
 			.map((key) => [key, node[key]]),
 	);
@@ -860,7 +874,7 @@ test("a work described in a catalogue page's words about its own rows fails, in 
 	for (const route of ['/reference/bibliography/', '/es/reference/bibliography/']) {
 		assert.match(
 			ran.err,
-			new RegExp(`FAIL ${route}: 1 of the 1 works it describes take the words of a catalogue page about its own rows: #doi-10-1000-book`),
+			new RegExp(`FAIL ${route}: 1 of the 2 works it describes take the words of a catalogue page about its own rows: #doi-10-1000-book`),
 		);
 	}
 
@@ -870,7 +884,7 @@ test("a work described in a catalogue page's words about its own rows fails, in 
 	nodeAt(named, 'es/bibliography', id(ES)).description = 'Tabla 4.1: fuente de las filas del catálogo de sólidos que la citan.';
 	const passed = check(t, named);
 	assert.equal(passed.status, 0, passed.err);
-	assert.match(passed.out, /ok {3}\/es\/reference\/bibliography\/: none of the 1 works it describes is described as one catalogue page's rows/);
+	assert.match(passed.out, /ok {3}\/es\/reference\/bibliography\/: none of the 2 works it describes is described as one catalogue page's rows/);
 });
 
 test('a guide that cites a data set names it as a work, under the licence the bibliography gives it', (t) => {
@@ -1091,6 +1105,7 @@ function catalogueBuild({ pageSlug = CATALOGUE_PAGE, overviewSlug = 'reference/c
 			variableMeasured: variablesMeasured(catalogues[key].columns, lang),
 			creator: { '@id': SITE.person },
 			publisher: { '@id': SITE.person },
+			license: 'https://opensource.org/license/MIT',
 			isAccessibleForFree: true,
 			isBasedOn: [stub(book(url))],
 			// The day page() says the page was last edited.
@@ -1117,7 +1132,15 @@ function catalogueBuild({ pageSlug = CATALOGUE_PAGE, overviewSlug = 'reference/c
 		built[`${lang}/overview`] = page(overviewSlug, lang, {
 			'@type': ['TechArticle', 'DataCatalog'],
 			name: 'Catalogues',
-			dataset: datasets.map((node) => ({ '@type': 'Dataset', '@id': node['@id'], name: node.name, url: node.url })),
+			dataset: datasets.map((node) => ({
+				'@type': 'Dataset',
+				'@id': node['@id'],
+				name: node.name,
+				description: node.description,
+				url: node.url,
+				creator: node.creator,
+				license: node.license,
+			})),
 		});
 	}
 	return built;
@@ -1126,6 +1149,13 @@ function catalogueBuild({ pageSlug = CATALOGUE_PAGE, overviewSlug = 'reference/c
 /** The dataset of `key` on the catalogue page of `lang`. */
 const datasetOf = (built, lang, key) =>
 	built[`${lang}/catalogue`].nodes.find((node) => node['@id']?.endsWith(`#dataset-${key}`));
+
+/** Describes the dataset of `key` in `lang` anew, on its page and in the overview's listing alike. */
+function describeDataset(built, lang, key, description) {
+	datasetOf(built, lang, key).description = description;
+	built[`${lang}/overview`].article.dataset.find((item) => item['@id'].endsWith(`#dataset-${key}`)).description =
+		description;
+}
 
 test('a build whose every catalogue is a dataset of its page, listed by the overview, passes', (t) => {
 	const ran = check(t, catalogueBuild());
@@ -1155,14 +1185,20 @@ test('a catalogue page that publishes no Dataset fails, and so does the count', 
 	assert.match(ran.err, /FAIL the es catalogue pages publish 0 of the 24 catalogues as a Dataset; none is solids/);
 });
 
-test('a dataset that claims a licence or a download over the rows fails', (t) => {
+test("a dataset under another licence than the library's, or with none, or offering a download, fails", (t) => {
 	const built = catalogueBuild();
 	datasetOf(built, 'en', 'carpets').license = 'https://creativecommons.org/licenses/by/4.0/';
+	delete datasetOf(built, 'en', 'gases').license;
 	datasetOf(built, 'es', 'solids').contentUrl = 'https://example.org/solids.json';
 	const ran = check(t, built);
 	assert.equal(ran.status, 1);
-	assert.match(ran.err, /solids\/ carpets: the dataset claims license over rows other works printed/);
-	assert.match(ran.err, /solids\/ solids: the dataset claims contentUrl over rows other works printed/);
+	assert.match(
+		ran.err,
+		/solids\/ carpets: the dataset's license is "https:\/\/creativecommons\.org\/licenses\/by\/4\.0\/", not the library's https:\/\/opensource\.org\/license\/MIT/,
+	);
+	assert.match(ran.err, /solids\/ gases: the dataset's license is undefined, not the library's/);
+	assert.match(ran.err, /solids\/#dataset-gases has no license/);
+	assert.match(ran.err, /solids\/ solids: the dataset claims contentUrl, and the site serves its rows on the page alone/);
 });
 
 test('a dataset that names no creator, another publisher or no free access fails', (t) => {
@@ -1251,7 +1287,34 @@ test('an overview that is not a DataCatalog, or lists other datasets than the pa
 	assert.equal(ran.status, 1);
 	assert.match(ran.err, /\/reference\/catalogues\/: the overview of the catalogues is typed "TechArticle", not a DataCatalog/);
 	assert.match(ran.err, /\/reference\/catalogues\/: the DataCatalog leaves out 1, lists 0 no catalogue page publishes/);
-	assert.match(ran.err, /\/es\/reference\/catalogues\/: the DataCatalog leaves out 0, lists 0 no catalogue page publishes and names 1/);
+	assert.match(
+		ran.err,
+		/\/es\/reference\/catalogues\/: the DataCatalog leaves out 0, lists 0 no catalogue page publishes and says 1 otherwise than its page in name, description, creator, license/,
+	);
+});
+
+test('an overview that lists a dataset with no description, creator or licence fails, as Google reads the page alone', (t) => {
+	const built = catalogueBuild();
+	const [first, second] = built['en/overview'].article.dataset;
+	delete first.description;
+	delete second.creator;
+	delete second.license;
+	const ran = check(t, built);
+	assert.equal(ran.status, 1);
+	assert.match(ran.err, new RegExp(`FAIL /reference/catalogues/: the Dataset ${RegExp.escape(first['@id'])} has no description`));
+	assert.match(
+		ran.err,
+		new RegExp(`FAIL /reference/catalogues/: the Dataset ${RegExp.escape(second['@id'])} has no creator, no license`),
+	);
+	assert.match(ran.err, /the DataCatalog leaves out 0, lists 0 no catalogue page publishes and says 2 otherwise than its page/);
+});
+
+test("a creator given by an @id the page does not define with a name names no one", (t) => {
+	const built = catalogueBuild();
+	datasetOf(built, 'en', 'carpets').creator = { '@id': 'https://example.org/#someone' };
+	const ran = check(t, built);
+	assert.equal(ran.status, 1);
+	assert.match(ran.err, /#dataset-carpets has a creator "https:\/\/example\.org\/#someone" the page does not name/);
 });
 
 test("an article whose mainEntity is not its page's datasets fails", (t) => {
@@ -1316,7 +1379,7 @@ test("a dataset described by the paragraph an aside holds passes: keeping it out
 	);
 	// What a reader makes of `<Aside title="...">`, its paragraph and
 	// `</Aside>`: the component's tags are markup it drops.
-	datasetOf(built, 'en', 'gases').description = 'The book prints them in three parts.';
+	describeDataset(built, 'en', 'gases', 'The book prints them in three parts.');
 	const ran = check(t, built);
 	assert.equal(ran.status, 0, ran.err);
 	assert.match(ran.out, /datasets is named by a heading of its page and described by a paragraph of it/);
@@ -1324,7 +1387,7 @@ test("a dataset described by the paragraph an aside holds passes: keeping it out
 
 test("a dataset's text is what its page shows, with the typographer's quotes and the page's character references read back", (t) => {
 	const built = catalogueBuild();
-	datasetOf(built, 'en', 'gases').description = 'The book\'s rows of gases & "air", in three parts...';
+	describeDataset(built, 'en', 'gases', 'The book\'s rows of gases & "air", in three parts...');
 	const catalogue = built['en/catalogue'];
 	catalogue.text = catalogue.text.replace(
 		'<p>The rows of gases.</p>',

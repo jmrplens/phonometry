@@ -18,10 +18,10 @@ idna==3.20
 markdown-it-py==4.3.0
 mdurl==0.1.2
 packaging==26.3
-platformdirs==4.14.5
+platformdirs==4.14.7
 pycparser==3.12
-pydantic==2.14.3
-pydantic-core==2.50.4
+pydantic==2.14.4
+pydantic-core==2.50.5
 pygments==2.21.0
 pyjwt==2.15.1
 requests==2.34.2
@@ -31,7 +31,7 @@ rfc8785==0.1.4
 rich==15.0.0
 securesystemslib==1.6.0
 sigstore==4.5.1
-sigstore-models==0.0.6
+sigstore-models==0.0.8
 sigstore-rekor-types==0.0.18
 tuf==7.0.1
 typing-extensions==4.16.0

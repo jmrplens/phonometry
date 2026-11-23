@@ -31,7 +31,7 @@ setuptools==84.2.1
 trove-classifiers==2026.9.21.13
 twine==7.0.0
 check-wheel-contents==0.6.3
-cyclonedx-bom==8.0.1
+cyclonedx-bom==9.0.0
 # What cyclonedx-bom installs, with cyclonedx-python-lib[validation], on the
 # Python 3.13 the release runs.
 arrow==1.4.0

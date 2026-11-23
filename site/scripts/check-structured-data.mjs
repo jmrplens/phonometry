@@ -106,6 +106,7 @@ import { bodyNamedIn, isBodyName, referenceId } from '../src/lib/citations.mjs';
 import { SAME_WORKS, conformanceEvidence, governingDocuments } from '../src/lib/conformance-evidence.mjs';
 import { DATA_COMPONENTS } from '../src/lib/page-markdown.mjs';
 import { readPageReferences } from '../src/lib/page-references.mjs';
+import { SPDX_PAGES } from '../src/lib/pyproject.mjs';
 import { pageMarkup } from './shared/markdown-spans.mjs';
 import { requirementDefects } from './shared/requirement-defects.mjs';
 
@@ -818,11 +819,12 @@ const isNamed = (item) =>
 /**
  * The fields a page's stub shares with the bibliography's node for the same
  * work (src/lib/citations.mjs, `STUB_FIELDS`), compared value for value: a
- * data set's licence among them. `sameAs` is compared apart: the Spanish
+ * data set's licence and creator among them. Its description is the page's
+ * own note, what that page reads of the data, and is not compared. `sameAs` is compared apart: the Spanish
  * bibliography adds the English node to it, which a page's stub does not
  * carry.
  */
-const STUB_FIELDS = ['@type', 'name', 'identifier', 'reportNumber', 'url', 'license'];
+const STUB_FIELDS = ['@type', 'name', 'identifier', 'reportNumber', 'url', 'license', 'creator'];
 
 /** A value as JSON with its keys in order, so two equal nodes compare equal. */
 const canonical = (value) =>
@@ -994,11 +996,74 @@ function datasetMakerDefects(dataset, person) {
 }
 
 /**
- * Fields a dataset of transcribed tables must not carry. The rows are read
- * off works that keep their own rights, so the site grants no licence over
- * them, and it serves them on the page and nowhere else.
+ * Fields a dataset of transcribed tables must not carry: the site serves its
+ * rows on the page and nowhere else.
  */
-const DATASET_CLAIMS = ['license', 'contentUrl', 'distribution', 'encoding'];
+const DATASET_CLAIMS = ['contentUrl', 'distribution', 'encoding'];
+
+/**
+ * The licence of a catalogue's dataset: the library's MIT, which the package
+ * ships the same rows under (src/lib/catalogue-datasets.mjs). The works the
+ * values were printed in keep theirs, named through `isBasedOn`.
+ */
+const CATALOGUE_LICENSE = SPDX_PAGES.MIT;
+
+/**
+ * The fields Google's Dataset rich results ask of every Dataset a page
+ * publishes: without a description it is not eligible, and without a creator
+ * or a licence Search Console reports it. Google reads each page alone, so a
+ * Dataset a page names in passing, a catalogue the overview lists or a data
+ * set a guide reads, carries them on that page.
+ */
+const DATASET_REQUIRED = ['name', 'description', 'creator', 'license'];
+
+/** What the overview of the catalogues says of each dataset, as its page does. */
+const LISTED_FIELDS = DATASET_REQUIRED;
+
+/**
+ * Every node typed Dataset anywhere in a page's graph, nested ones included:
+ * the datasets a DataCatalog lists, a work a page cites, one a dataset is
+ * based on.
+ *
+ * @param {unknown} value A node, or any value under one.
+ * @param {object[]} [found]
+ * @returns {object[]}
+ */
+function nestedDatasets(value, found = []) {
+	if (Array.isArray(value)) {
+		for (const item of value) nestedDatasets(item, found);
+	} else if (value && typeof value === 'object') {
+		if (typesOf(value).includes('Dataset')) found.push(value);
+		for (const item of Object.values(value)) nestedDatasets(item, found);
+	}
+	return found;
+}
+
+/**
+ * What a Dataset leaves out of what Google asks of it (`DATASET_REQUIRED`),
+ * and a creator that names no one: one given by `@id` alone must be a node of
+ * the same page that carries a name, since Google does not follow an `@id` to
+ * another page.
+ *
+ * @param {object} dataset
+ * @param {object[]} nodes The page's top-level nodes.
+ * @returns {string[]}
+ */
+function datasetFieldDefects(dataset, nodes) {
+	const blank = (value) =>
+		value === undefined || value === null || (typeof value === 'string' && value.trim() === '') ||
+		(Array.isArray(value) && value.length === 0);
+	const defects = DATASET_REQUIRED.filter((field) => blank(dataset[field])).map((field) => `no ${field}`);
+	for (const maker of blank(dataset.creator) ? [] : [dataset.creator].flat()) {
+		const named = (node) => typeof node?.name === 'string' && node.name.trim() !== '';
+		if (named(maker)) continue;
+		const id = maker?.['@id'];
+		if (!(typeof id === 'string' && nodes.some((node) => node['@id'] === id && named(node)))) {
+			defects.push(`a creator ${JSON.stringify(id ?? maker)} the page does not name`);
+		}
+	}
+	return defects;
+}
 
 /**
  * Text with what the site's typographer sets undone, its blanks one space:
@@ -1210,6 +1275,8 @@ const seen = {
 	datasetUnmade: 0,
 	datasetShown: 0,
 	datasetUnshown: 0,
+	datasetsComplete: 0,
+	datasetsIncomplete: 0,
 	corrected: 0,
 	history: 0,
 	languages: 0,
@@ -1758,6 +1825,20 @@ for (const file of files) {
 	}
 	if (broken) continue;
 
+	// Every Dataset the page publishes, at any depth, carries what Google's
+	// Dataset rich results ask of one (DATASET_REQUIRED). Each is reported
+	// under the page that publishes it, so the bibliography's complete node
+	// for a data set does not excuse the guide's short one.
+	for (const dataset of nestedDatasets(nodes)) {
+		const defects = datasetFieldDefects(dataset, nodes);
+		if (defects.length > 0) {
+			fail(`${route}: the Dataset ${dataset['@id'] ?? JSON.stringify(dataset.name)} has ${defects.join(', ')}`);
+			seen.datasetsIncomplete += 1;
+		} else {
+			seen.datasetsComplete += 1;
+		}
+	}
+
 	for (const type of SITE_NODES) {
 		if (!nodeOfType(nodes, type)) fail(`${route}: no ${type} node`);
 	}
@@ -1944,8 +2025,8 @@ for (const file of files) {
 	// (src/lib/catalogue-datasets.mjs). Read here off what was built: each
 	// dataset is the article's main entity, points at its table on the page,
 	// names the variables its columns hold and the works its rows were read
-	// from, is dated as its page, and claims no licence over rows other works
-	// printed. The count across the pages, every catalogue the generator
+	// from, is dated as its page, and is published under the library's
+	// licence, the one the package ships its rows under. The count across the pages, every catalogue the generator
 	// writes once in each language, is checked after the loop.
 	if (CATALOGUE_PAGES.has(slug)) {
 		cataloguePagesSeen[lang] += 1;
@@ -2026,7 +2107,13 @@ for (const file of files) {
 			}
 			const claims = DATASET_CLAIMS.filter((field) => dataset[field] !== undefined);
 			if (claims.length > 0) {
-				fail(`${at}: the dataset claims ${claims.join(', ')} over rows other works printed`);
+				fail(`${at}: the dataset claims ${claims.join(', ')}, and the site serves its rows on the page alone`);
+			}
+			if (dataset.license !== CATALOGUE_LICENSE) {
+				fail(
+					`${at}: the dataset's license is ${JSON.stringify(dataset.license)}, not the library's ` +
+						`${CATALOGUE_LICENSE}, which the package ships its rows under`,
+				);
 			}
 			const overview = `${ORIGIN}${lang === 'es' ? '/es' : ''}/${CATALOGUE_OVERVIEW}/#article`;
 			if (dataset.includedInDataCatalog?.['@id'] !== overview) {
@@ -2575,7 +2662,7 @@ for (const lang of ['en', 'es']) {
 				`none is ${missing.join(', ')}`,
 		);
 	} else {
-		ok(`each of the ${CATALOGUE_KEYS.length} catalogues is a Dataset of one ${lang} catalogue page, claiming no licence`);
+		ok(`each of the ${CATALOGUE_KEYS.length} catalogues is a Dataset of one ${lang} catalogue page`);
 	}
 	const overview = listedDatasets[lang];
 	if (!overview) {
@@ -2585,17 +2672,25 @@ for (const lang of ['en', 'es']) {
 	const ids = new Set([...found.values()].map(({ node }) => node['@id']));
 	const unlisted = [...ids].filter((id) => !overview.listed.has(id));
 	const stray = [...overview.listed.keys()].filter((id) => !ids.has(id));
+	// The overview says of each dataset what its page says: the same name,
+	// description, creator and licence, the fields Google asks of a Dataset
+	// on the page it reads it on.
 	const misnamed = [...found.values()].filter(
-		({ node }) => overview.listed.has(node['@id']) && overview.listed.get(node['@id']).name !== node.name,
+		({ node }) =>
+			overview.listed.has(node['@id']) &&
+			LISTED_FIELDS.some((field) => canonical(overview.listed.get(node['@id'])[field]) !== canonical(node[field])),
 	);
 	if (unlisted.length > 0 || stray.length > 0 || misnamed.length > 0) {
 		fail(
 			`${overview.route}: the DataCatalog leaves out ${unlisted.length}, lists ${stray.length} no catalogue page ` +
-				`publishes and names ${misnamed.length} otherwise than its page (first: ` +
+				`publishes and says ${misnamed.length} otherwise than its page in ${LISTED_FIELDS.join(', ')} (first: ` +
 				`${[...unlisted, ...stray, ...misnamed.map(({ node }) => node['@id'])].slice(0, 3).join(', ')})`,
 		);
 	} else {
-		ok(`${overview.route}: the DataCatalog lists the ${ids.size} datasets of its language, each by its own name`);
+		ok(
+			`${overview.route}: the DataCatalog lists the ${ids.size} datasets of its language, each with the ` +
+				`${LISTED_FIELDS.join(', ')} of its page`,
+		);
 	}
 }
 {
@@ -2613,6 +2708,9 @@ for (const lang of ['en', 'es']) {
 	}
 	if (seen.datasetDated > 0 && seen.datasetUndated === 0) {
 		ok(`each of the ${seen.datasetDated} datasets is dated as the page that renders it`);
+	}
+	if (seen.datasetsComplete > 0 && seen.datasetsIncomplete === 0) {
+		ok(`each of the ${seen.datasetsComplete} Datasets the pages publish has a ${DATASET_REQUIRED.join(', ')}`);
 	}
 	if (seen.datasetMade > 0 && seen.datasetUnmade === 0) {
 		ok(`each of the ${seen.datasetMade} datasets names the site's Person as its creator and publisher, free to read`);

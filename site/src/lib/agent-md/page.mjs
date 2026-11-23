@@ -26,7 +26,6 @@ import { readFileSync } from 'node:fs';
 import { join, relative, sep } from 'node:path';
 
 import { author, siteTitle } from '../../data/site.mjs';
-import { catalogueSlugs } from '../../data/topics.mjs';
 import { installCommand, preRelease, version } from '../../data/repo-stats.mjs';
 import { implementedStandards } from '../reference-chips.ts';
 import { isoInstant } from '../date-rules.mjs';
@@ -135,17 +134,6 @@ export function otherLanguage(route) {
   return route.startsWith('es/') ? route.slice(3) : `es/${route}`;
 }
 
-/** The catalogue pages, which transcribe published tables and carry no licence of their own. */
-const CATALOGUES = new Set(catalogueSlugs);
-
-/**
- * Whether a route is one of the published catalogues, in either language.
- *
- * @param {string} route
- * @returns {boolean}
- */
-export const isCatalogueRoute = (route) => CATALOGUES.has(route.replace(/^es\//u, ''));
-
 /** The address of a route's page. */
 const pageUrl = (route) => SITE.url(`${SITE.base}/${route ? `${route}/` : ''}`);
 
@@ -197,7 +185,6 @@ export async function pageMarkdown(file, { registry, dates, flavour = 'agent', c
         updated: dates ? isoInstant(dates.dateOf(file)) : undefined,
         standards: implementedStandards(references),
         verified: verified?.(route),
-        license: !isCatalogueRoute(route),
         summary: typeof frontmatter.description === 'string' ? frontmatter.description : undefined,
       }),
     );

@@ -12,7 +12,7 @@ import { printed } from '../../../../scripts/shared/markdown-reader.mjs';
 import { releaseHeaderKeys } from '../../page-markdown.mjs';
 import { author } from '../../../data/site.mjs';
 import { INDEX_URL, LICENSE, header } from '../header.mjs';
-import { isCatalogueRoute, otherLanguage, pageMarkdown, referencesMarkdown, titleOf } from '../page.mjs';
+import { otherLanguage, pageMarkdown, referencesMarkdown, titleOf } from '../page.mjs';
 import { titleMarkdown } from '../markdown-table.mjs';
 import { Box, registryOf } from './helpers.mjs';
 import { basePath as SITE_BASE, siteUrl as SITE_ORIGIN } from '../../../data/site.mjs';
@@ -81,10 +81,6 @@ describe('the header', () => {
       ['Canonical', 'Language', 'Version', 'Install', 'License'],
     );
     assert.doesNotMatch(text, /: $/mu);
-  });
-
-  test('a catalogue carries no licence of its own', () => {
-    assert.doesNotMatch(header({ ...FULL, license: false }), /^License:/mu);
   });
 
   test('lists its documents with "; " between them, since a designation can hold a comma of its own', () => {
@@ -255,13 +251,6 @@ describe('a page', () => {
     assert.equal(otherLanguage('es/signals/levels/levels'), 'signals/levels/levels');
   });
 
-  test('is a catalogue only on the pages of the published catalogues', () => {
-    assert.equal(isCatalogueRoute('reference/catalogues/solids'), true);
-    assert.equal(isCatalogueRoute('es/reference/catalogues/solids'), true);
-    assert.equal(isCatalogueRoute('reference/catalogues'), false);
-    assert.equal(isCatalogueRoute('reference/catalogues/not-a-catalogue'), false);
-  });
-
   /**
    * Writes a content directory and returns the copy of one of its pages.
    *
@@ -348,9 +337,9 @@ describe('a page', () => {
     assert.ok(markdown.split('\n').includes(`Alternate: ${SITE}/es/index.md`));
   });
 
-  test('a catalogue page carries no licence line', async (t) => {
+  test('a catalogue page carries the licence line, the library shipping its rows under MIT', async (t) => {
     const { markdown } = await copyOf(t, { 'reference/catalogues/solids.mdx': GUIDE }, 'reference/catalogues/solids.mdx');
-    assert.doesNotMatch(markdown, /^License:/mu);
+    assert.match(markdown, /^License: MIT </mu);
   });
 
   test('the GitHub flavour has no header block', async (t) => {

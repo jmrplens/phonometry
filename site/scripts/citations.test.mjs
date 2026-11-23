@@ -133,6 +133,34 @@ test('a data set is a Dataset under its own licence, by its creators and its rep
   assert.deepEqual(seriesNode.creator, { '@type': 'Organization', name: 'Dublin City Council' });
 });
 
+test('a page names a data set with its note as description, its creator and its licence, and stops on one it cannot', () => {
+  // Google reads each page alone: a guide that cites a data set by name and
+  // address only publishes a Dataset its rich results refuse.
+  const deposit = {
+    type: 'dataset',
+    authors: ['Zerwas, M.'],
+    year: 2026,
+    title: 'Room acoustic data',
+    publisher: 'Zenodo',
+    doi: '10.5281/zenodo.20428705',
+    license: 'https://creativecommons.org/licenses/by/4.0/',
+    note: 'The impulse response of the worked case.',
+  };
+  const stub = referenceStub(deposit, EN);
+  assert.equal(stub.description, 'The impulse response of the worked case.');
+  assert.deepEqual(stub.creator, [{ '@type': 'Person', name: 'Zerwas, M.' }]);
+  assert.equal(stub.license, 'https://creativecommons.org/licenses/by/4.0/');
+  assert.equal(stub.publisher, undefined);
+  // Any other work keeps its stub short: its description is the bibliography's.
+  assert.equal(referenceStub(paper, EN).description, undefined);
+  const { note: _note, ...unnoted } = deposit;
+  assert.throws(() => referenceStub(unnoted, EN), /is cited with no description/);
+  const { authors: _authors, ...anonymous } = deposit;
+  assert.throws(() => referenceStub(anonymous, EN), /is cited with no creator/);
+  const { license: _license, ...unlicensed } = deposit;
+  assert.throws(() => referenceStub(unlicensed, EN), /is cited with no license/);
+});
+
 test('a page that cites nothing publishes no citation properties', () => {
   assert.deepEqual(citationsFor({ references: undefined, bibliographyUrl: EN }), {});
   assert.deepEqual(citationsFor({ references: [], bibliographyUrl: EN }), {});

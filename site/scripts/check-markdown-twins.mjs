@@ -1035,11 +1035,9 @@ function checkPage(page, pageClass, { dist, copies, dates, add }) {
           : `${copy} has a "Verified:" line, and ${route} states no conformance check`,
       );
     }
-    // A catalogue transcribes published tables and carries no licence of its own.
-    const licensed = pageClass.id !== 'catalogue';
-    if (fields.has('License') !== licensed) {
-      add('header', licensed ? `${copy} has no "License:" line` : `${copy} has a "License:" line, and a catalogue carries no licence of its own`);
-    }
+    // Every copy states the library's licence, a catalogue's too: the package
+    // ships its rows under it (src/lib/catalogue-datasets.mjs).
+    if (!fields.has('License')) add('header', `${copy} has no "License:" line`);
     const description = tags(html, 'meta').find((meta) => meta.name === 'description')?.content;
     if (fields.get('Summary') !== description) {
       add('header', `${copy} ${said('Summary')}, and the page's description is ${description === undefined ? 'none' : JSON.stringify(description)}`);

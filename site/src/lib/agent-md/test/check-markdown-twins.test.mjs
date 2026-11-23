@@ -156,7 +156,7 @@ function site() {
       canonical: '/reference/api/m/',
     }),
     'reference/catalogues/solids/index.html': page('/reference/catalogues/solids/', { body: CATALOGUE_TABLE }),
-    'reference/catalogues/solids/index.md': copy('/reference/catalogues/solids/', { license: false, body: CATALOGUE_ROWS.join('\n') }),
+    'reference/catalogues/solids/index.md': copy('/reference/catalogues/solids/', { body: CATALOGUE_ROWS.join('\n') }),
     'reference/errata/iso/index.html': page('/reference/errata/iso/'),
     'reference/errata/iso/index.md': copy('/reference/errata/iso/'),
     'old/index.html': STUB,
@@ -368,7 +368,6 @@ describe('the copies the old cut-and-paste left short', () => {
   test('a catalogue copy short of a row the page shows', (t) => {
     const { found } = check(t, (files) => {
       files['reference/catalogues/solids/index.md'] = copy('/reference/catalogues/solids/', {
-        license: false,
         body: CATALOGUE_ROWS.slice(0, -1).join('\n'),
       });
     });
@@ -640,14 +639,17 @@ describe('the header and the page', () => {
     assert.deepEqual(found, ['header: /a/index.md says "Summary: A page &amp; its copy.", and the page\'s description is "A page & its copy."']);
   });
 
-  test('a licence line on every page but a catalogue', (t) => {
+  test('a licence line on every page, a catalogue included', (t) => {
     const { found } = check(t, (files) => {
       files['a/index.md'] = copy('/a/', { other: '/es/a/', license: false });
-      files['reference/catalogues/solids/index.md'] = copy('/reference/catalogues/solids/', { body: CATALOGUE_ROWS.join('\n') });
+      files['reference/catalogues/solids/index.md'] = copy('/reference/catalogues/solids/', {
+        license: false,
+        body: CATALOGUE_ROWS.join('\n'),
+      });
     });
     assert.deepEqual(found, [
       'header: /a/index.md has no "License:" line',
-      'header: /reference/catalogues/solids/index.md has a "License:" line, and a catalogue carries no licence of its own',
+      'header: /reference/catalogues/solids/index.md has no "License:" line',
     ]);
   });
 
@@ -868,7 +870,7 @@ describe('the llms files, which carry the copies as they read', () => {
 
   test('pass a catalogue cut between the rows of its table, each part after the first repeating the table header', (t) => {
     const rows = ['| Material | E (GPa) |', '| --- | --- |', '| Steel | 210 |', '| Lead | 16 |'];
-    const text = asPage(copy('/reference/catalogues/solids/', { license: false, body: rows.join('\n') }));
+    const text = asPage(copy('/reference/catalogues/solids/', { body: rows.join('\n') }));
     const page = headAndRest(text);
     assert.ok(page);
     const parts = [`${page.head}\n\n${rows.slice(0, 3).join('\n')}`, `${page.head}\n\n${[rows[0], rows[1], rows[3]].join('\n')}`];

@@ -19,6 +19,7 @@ import { fileURLToPath } from 'node:url';
 import { catalogueSlugs } from '../src/data/topics.mjs';
 import { catalogues } from '../src/generated/catalogues.mjs';
 import {
+  CATALOGUE_LICENSE,
   catalogueDatasets,
   catalogueSections,
   catalogueSources,
@@ -696,7 +697,7 @@ test("a catalogue's sources are the entries whose tables it prints, in the page'
   );
 });
 
-test('a dataset names its sources, its catalogue and its twin, and claims no licence and no download', () => {
+test("a dataset names its sources, its catalogue and its twin, carries the library's licence and offers no download", () => {
   const node = datasetNode({
     dataset: { key: 'absorptionAreas', name: 'Absorption areas of people and air', description: 'Rows.' },
     catalogue: {
@@ -722,7 +723,11 @@ test('a dataset names its sources, its catalogue and its twin, and claims no lic
   assert.equal(node.isBasedOn[0]['@type'], 'Book');
   assert.equal(node.isBasedOn[0].name, 'A book by Bies');
   assert.match(node.isBasedOn[0]['@id'], /^https:\/\/docs\.example\/phonometry\/reference\/bibliography\/#book-bies-2017-/);
-  for (const field of ['license', 'contentUrl', 'distribution', 'encoding']) {
+  // The rows ship in the MIT package; the works they were printed in keep
+  // their own rights, named through isBasedOn.
+  assert.equal(node.license, 'https://opensource.org/license/MIT');
+  assert.equal(node.license, CATALOGUE_LICENSE);
+  for (const field of ['contentUrl', 'distribution', 'encoding']) {
     assert.equal(node[field], undefined, `a dataset carries ${field}`);
   }
   const spanish = datasetNode({
@@ -760,7 +765,7 @@ test('a dataset names the Person who transcribed it as its creator and publisher
   assert.deepEqual(node.publisher, { '@id': PERSON });
   assert.equal(node.isAccessibleForFree, true);
   assert.equal(node.isBasedOn[0].name, 'A book by Bies');
-  assert.equal(node.license, undefined);
+  assert.equal(node.license, CATALOGUE_LICENSE);
   // Without the Person there is no one to name, and the build stops.
   assert.throws(() => datasetNode({ ...options, personId: undefined }), /needs the @id of the Person who transcribed it/);
 });
@@ -781,13 +786,35 @@ test("a dataset is dated as its page is, and says no date its page does not give
   assert.equal('dateModified' in datasetNode(options), false);
 });
 
-test('the overview lists a dataset by its type, address, name and table', () => {
-  assert.deepEqual(datasetStub({ key: 'solids', name: 'Catalogue of solids' }, PAGE), {
+test('the overview lists a dataset with the name, description, creator and licence its page gives it', () => {
+  // Google reads the overview alone, and a Dataset there with no description
+  // is not eligible for its Dataset rich results.
+  const dataset = { key: 'solids', name: 'Catalogue of solids', description: 'The elastic constants of solids.' };
+  const stub = datasetStub(dataset, PAGE, PERSON);
+  assert.deepEqual(stub, {
     '@type': 'Dataset',
     '@id': `${PAGE}#dataset-solids`,
     name: 'Catalogue of solids',
+    description: 'The elastic constants of solids.',
     url: `${PAGE}#catalogue-solids`,
+    creator: { '@id': PERSON },
+    license: CATALOGUE_LICENSE,
   });
+  const node = datasetNode({
+    dataset,
+    catalogue: { columns: [], rows: [] },
+    references: [],
+    lang: 'en',
+    pageUrl: PAGE,
+    twinUrl: TWIN,
+    bibliographyUrl: BIBLIOGRAPHY,
+    dataCatalog: CATALOG,
+    personId: PERSON,
+  });
+  for (const field of ['@id', 'name', 'description', 'url', 'creator', 'license']) {
+    assert.deepEqual(stub[field], node[field], field);
+  }
+  assert.throws(() => datasetStub(dataset, PAGE, undefined), /needs the @id of the Person who transcribed it/);
 });
 
 // ---------------------------------------------------------------------------

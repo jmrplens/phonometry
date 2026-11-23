@@ -34,6 +34,8 @@
  * it is a `translationOfWork` of.
  */
 
+import { SPDX_PAGES } from './pyproject.mjs';
+
 /** What the Dataset says in each language; the counts are filled in from the report. */
 const TEXT = {
   en: {
@@ -137,7 +139,7 @@ export function conformanceDataset({
     [lang === 'en' ? 'workTranslation' : 'translationOfWork']: { '@id': `${twinCanonical}#dataset` },
     version: report.library,
     dateModified: modified,
-    license: 'https://opensource.org/license/MIT',
+    license: SPDX_PAGES.MIT,
     isAccessibleForFree: true,
     creator: { '@id': personId },
     publisher: { '@id': personId },
